@@ -1122,6 +1122,26 @@
     <div class="sr-desc">Prevents injection of carriage return (CR, \r) and line feed (LF, \n) characters into structured text formats where newlines serve as record or field ...</div>
   </li>
   
+  <li data-search="cme-1314 input canonicalization before security decision normalize and canonicalize all user-supplied structured input (urls, ip addresses, domain names, file paths, type identifiers, protocol schemes) to a standard form before applying any security decision such as allowlist matching, denylist checking, or policy evaluation. decoding, case folding, unicode normalization, ip address format unification (dotted-decimal, hex, octal, ipv4-mapped ipv6), and scheme normalization must occur before the security check — not after. this prevents attackers from using encoding variants, aliasing, or alternate representations to bypass list-based security controls. the canonicalization order must be: decode all layers → normalize → validate against security policy → sanitize. application input validation harden application cwe-184 cwe-183 cwe-20 cwe-180">
+    <div>
+      <a href="entries/CME-1314.html" class="sr-id">CME-1314</a>
+      <a href="entries/CME-1314.html">Input Canonicalization Before Security Decision</a>
+      <span class="badge badge-tactic-harden">Harden</span>
+      <span class="badge badge-layer-application">Application</span>
+    </div>
+    <div class="sr-desc">Normalize and canonicalize all user-supplied structured input (URLs, IP addresses, domain names, file paths, type identifiers, protocol schemes) to a ...</div>
+  </li>
+  
+  <li data-search="cme-1315 allowlist-preferred input validation (deny-by-default filtering) structure all security-sensitive input validation as allowlists (explicit permit lists with default-deny) rather than denylists (explicit block lists with default-permit). denylists are inherently incomplete — every new input format, encoding variant, or aliasing technique the denylist does not cover becomes a bypass vector. allowlists reject unknown or unexpected inputs by default, requiring the attacker to find an input that both matches the allowlist pattern and achieves the malicious objective. when allowlists are impractical (e.g., html sanitization where the set of safe elements is large but finite), combine a denylist with input canonicalization (cme-1314) and output encoding to create defense in depth. this control applies to ssrf destination validation, deserialization type validation, sandbox capability restrictions, application security policies, and any context where a list determines whether an input is permitted. application input validation harden application cwe-184 cwe-183 cwe-693 cwe-20">
+    <div>
+      <a href="entries/CME-1315.html" class="sr-id">CME-1315</a>
+      <a href="entries/CME-1315.html">Allowlist-Preferred Input Validation (Deny-by-Default Filtering)</a>
+      <span class="badge badge-tactic-harden">Harden</span>
+      <span class="badge badge-layer-application">Application</span>
+    </div>
+    <div class="sr-desc">Structure all security-sensitive input validation as allowlists (explicit permit lists with default-deny) rather than denylists (explicit block lists ...</div>
+  </li>
+  
 </ul>
 
 <script>
@@ -1148,7 +1168,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-06-29 03:13 UTC &middot; 109 entries &middot;
+    Generated 2026-06-30 18:54 UTC &middot; 111 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>
