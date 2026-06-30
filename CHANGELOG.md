@@ -2,6 +2,40 @@
 
 All notable changes to the CME (Common Mitigation Enumeration) project are documented here.
 
+## 2026-06-30
+
+### CWE-184 Gap Coverage: CME-1314, CME-1315 (`1754372`)
+
+Gap analysis of CWE-184 (Incomplete List of Disallowed Inputs) identified 26 OSIDB flaws in 6 months (7 CRITICAL, max CVSS 9.9) with no root-cause CME coverage. Existing entries covered specific instances (SSRF, deserialization, XSS, sandbox, path traversal) but the cross-cutting validation design principles were missing. Two new entries close this gap:
+
+- **CME-1314: Input Canonicalization Before Security Decision** — Requires all structured input (URLs, IP addresses, domain names, file paths, type identifiers) to be decoded, normalized, and canonicalized to a standard form *before* any security decision (allowlist/denylist check, policy evaluation). Prevents encoding-variant bypasses (URL-encoding, Unicode homoglyphs, octal IP notation, IPv4-mapped IPv6). CVSS impact: AC:L→H. CWEs: CWE-184, CWE-183, CWE-20, CWE-180.
+- **CME-1315: Allowlist-Preferred Input Validation (Deny-by-Default Filtering)** — Prescribes allowlist-first design (explicit permit with default-deny) over denylists (explicit block with default-permit) for all security-sensitive input validation. Denylists are inherently incomplete; allowlists reject unknown inputs by default. CVSS impact: AC:L→H, I:H→L. CWEs: CWE-184, CWE-183, CWE-693, CWE-20.
+
+Both entries are in the Application Input Validation category and cover all 6 CWE-184 sub-patterns: incomplete sanitization, policy bypass, SSRF denylist bypass, sandbox bypass, path validation bypass, and type validation bypass. Full gap analysis report at `docs/gap-analysis/CWE-184.md`.
+
+### CVE-to-CME Mappings (`682fe1e`, `51e2899`)
+
+- **CVE-2026-49980** (rclone RCE, CVSS 9.8 CRITICAL) — 10 High confidence controls, 9 Medium. No single control below HIGH; layered defense (CME-205+909+301+601) reaches MEDIUM 4.5. Report: `docs/cve-mappings/CVE-2026-49980.md`.
+- **CVE-2026-54513** (Jackson-databind deserialization bypass, CVSS 8.1 IMPORTANT) — 2 High confidence (CME-1302, CME-909), 7 Medium. Layered defense reaches MEDIUM 4.5. Flagged CWE-184 coverage gap that triggered the discovery work above. Report: `docs/cve-mappings/CVE-2026-54513.md`.
+
+### Application Controls and Detection Entries (`8cfa4e5`)
+
+Added 9 new CME entries spanning Application Controls and Runtime/Integrity Detection:
+
+- **CME-907:** OIDC/OAuth Token Validation
+- **CME-908:** IDOR Prevention (Indirect Object References)
+- **CME-909:** Default-Deny API Authorization Policy
+- **CME-910:** Admin Interface Network Scoping
+- **CME-911:** Admin Action Scope Limitation
+- **CME-1006:** Network Intrusion Detection (Snort/Suricata)
+- **CME-1007:** Anomaly-Based Network Detection
+- **CME-1008:** Container Image Scanning
+- **CME-1009:** Container Runtime Security Monitoring
+
+### Script Engine Restriction (`51e2899`)
+
+- **CME-1309:** Script Engine Restriction (Sandbox / Disable) — controls Java/Python/JS script engine access to prevent gadget-chain RCE in deserialization attacks.
+
 ## 2026-06-28
 
 ### Category Registry (`e9de02c`)
