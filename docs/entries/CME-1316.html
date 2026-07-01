@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CME-1316: Algorithmic Complexity Safeguards (Pattern/Regex Execution Limits) — Common Mitigation Enumeration</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="../index.html" class="logo">CME <span>Common Mitigation Enumeration</span></a>
+      <nav>
+        <a href="../index.html" >Home</a>
+        <a href="../by-tactic.html" >By Tactic</a>
+        <a href="../by-cwe.html" >By CWE</a>
+        <a href="../search.html" >Search</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    
+<div class="entry-header">
+  <div class="entry-id">CME-1316</div>
+  <h1>Algorithmic Complexity Safeguards (Pattern/Regex Execution Limits)</h1>
+  <div class="entry-meta">
+    <span class="badge badge-tactic-harden">Harden</span>
+    <span class="badge badge-layer-application">Application</span>
+    
+    <span class="badge badge-confidence-high">High Confidence</span>
+    
+  </div>
+</div>
+
+<div class="entry-body">
+  <div class="entry-main">
+
+    <section>
+      <h2>Description</h2>
+      <p class="entry-description">Enforces computational budgets on pattern matching, regular expression evaluation, and recursive parsing operations to prevent algorithmic complexity denial-of-service attacks. Encompasses three complementary techniques: (1) execution limits — regex step counts, match timeouts, and recursion depth caps that terminate runaway computations before they exhaust CPU or block event loops; (2) safe engine selection — mandating linear-time regex engines (RE2, Rust regex crate, .NET NonBacktracking mode) or equivalent guaranteed-polynomial parsers instead of backtracking NFA engines susceptible to catastrophic backtracking; (3) pattern compilation guards — never compiling user-controlled input directly into regex or pattern language without escaping metacharacters or using literal-match APIs, and pre-screening pattern structure for known dangerous constructs (nested quantifiers, overlapping alternations, unbounded repetition groups). Complements CME-114 (OS-level process resource limits) by providing application-level, per-operation granularity — a regex timeout kills the match attempt while keeping the service alive, whereas ulimit kills the entire process.</p>
+    </section>
+
+    <section>
+      <h2>CVSS Vector Impacts</h2>
+      <table class="cvss-table">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Transition</th>
+            <th>Rationale</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td><strong>Availability</strong> (A)</td>
+            <td>
+              <span class="cvss-from">H</span>
+              <span class="cvss-arrow">&rarr;</span>
+              <span class="cvss-to">L</span>
+            </td>
+            <td class="cvss-rationale">Computational budgets (step limits, timeouts) and safe engine guarantees cap the worst-case execution time of any single pattern operation. The attacker can still trigger the vulnerable code path, but the operation is terminated or completes in bounded time, preventing sustained resource exhaustion and event-loop blocking</td>
+          </tr>
+          
+        </tbody>
+      </table>
+    </section>
+
+    
+    <section>
+      <h2>CWE Relationships</h2>
+      <div class="cwe-list">
+        
+        <a href="https://cwe.mitre.org/data/definitions/1333.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-1333</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/407.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-407</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/405.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-405</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/834.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-834</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/730.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-730</a>
+        
+      </div>
+    </section>
+    
+
+    
+    <section>
+      <h2>Verification</h2>
+      
+      <p class="verification-method">Verify that the application uses linear-time regex engines or enforces execution budgets on pattern operations. Check for RE2 bindings, regex timeout configuration, recursion depth limits, and that user-controlled input is never compiled directly into regex patterns without escaping.</p>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> node -e &#34;try { require(&#39;re2&#39;); console.log(&#39;RE2 available&#39;) } catch(e) { console.log(&#39;RE2 NOT installed — using backtracking engine&#39;) }&#34;
+        
+        <br><span class="cmd-expected"># Expected: RE2 available</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> python3 -c &#34;import google.re2; print(&#39;google-re2 available&#39;)&#34; 2&gt;/dev/null || python3 -c &#34;import re; print(&#39;WARNING: using backtracking re module — consider google-re2 or regex with timeout&#39;)&#34;
+        
+        <br><span class="cmd-expected"># Expected: google-re2 available</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -rn &#39;RegexOptions\.NonBacktracking\|RegexOptions\.MatchTimeout\|Regex\.IsMatch.*TimeSpan&#39; &lt;app_source&gt;/ | head -10
+        
+        <br><span class="cmd-expected"># Expected: Regex operations use NonBacktracking mode (.NET 7+) or explicit MatchTimeout</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -rn &#39;new RegExp(\|RegExp(.*\buser\|RegExp(.*\breq\.&#39; &lt;app_source&gt;/ | head -10
+        
+        <br><span class="cmd-expected"># Expected: No instances of user-controlled input compiled into RegExp without escaping</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+    </section>
+    
+
+    
+
+    
+
+    <div class="entry-nav">
+      
+      <a href="CME-1315.html">&larr; CME-1315: Allowlist-Preferred Input Validation (Deny-by-Default Filtering)</a>
+      
+      <span></span>
+    </div>
+  </div>
+
+  <aside class="entry-sidebar">
+    <section>
+      <h3>Category</h3>
+      <p>Application Input Validation</p>
+    </section>
+
+    
+
+    
+    <section>
+      <h3>Platforms</h3>
+      <ul class="sidebar-list">
+        
+        <li>Any</li>
+        
+      </ul>
+    </section>
+    
+
+    <section>
+      <h3>Quick Reference</h3>
+      <ul class="sidebar-list">
+        <li><strong>ID:</strong> CME-1316</li>
+        <li><strong>Tactic:</strong> Harden</li>
+        <li><strong>Layer:</strong> Application</li>
+        <li><strong>CWEs:</strong> 5</li>
+        <li><strong>CVSS Mods:</strong> 1</li>
+      </ul>
+    </section>
+  </aside>
+</div>
+
+  </main>
+
+  <footer class="site-footer">
+    Generated 2026-07-01 02:43 UTC &middot; 112 entries &middot;
+    Common Mitigation Enumeration (CME)
+  </footer>
+</body>
+</html>
