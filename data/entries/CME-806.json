@@ -16,7 +16,8 @@
   ],
   "cwe_relationships": [
     "CWE-319",
-    "CWE-287"
+    "CWE-287",
+    "CWE-303"
   ],
   "verification": {
     "method": "Check Kerberos authentication is configured",

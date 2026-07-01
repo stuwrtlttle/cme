@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CME-1317: XML External Entity Prevention (Secure XML Parser Configuration) — Common Mitigation Enumeration</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="../index.html" class="logo">CME <span>Common Mitigation Enumeration</span></a>
+      <nav>
+        <a href="../index.html" >Home</a>
+        <a href="../by-tactic.html" >By Tactic</a>
+        <a href="../by-cwe.html" >By CWE</a>
+        <a href="../search.html" >Search</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    
+<div class="entry-header">
+  <div class="entry-id">CME-1317</div>
+  <h1>XML External Entity Prevention (Secure XML Parser Configuration)</h1>
+  <div class="entry-meta">
+    <span class="badge badge-tactic-harden">Harden</span>
+    <span class="badge badge-layer-application">Application</span>
+    
+    <span class="badge badge-confidence-high">High Confidence</span>
+    
+  </div>
+</div>
+
+<div class="entry-body">
+  <div class="entry-main">
+
+    <section>
+      <h2>Description</h2>
+      <p class="entry-description">Configures XML parsers to disable external entity resolution, DTD processing, and XInclude expansion, preventing XXE attacks that exploit default-permissive XML parser behavior to read local files, perform SSRF, or cause denial of service via entity expansion (billion laughs). Covers all major XML parsing APIs: Java (DocumentBuilderFactory, SAXParserFactory, XMLInputFactory with FEATURE_SECURE_PROCESSING and disallow-doctype-decl), Python (defusedxml, lxml with resolve_entities=False), .NET (XmlReaderSettings with DtdProcessing.Prohibit), PHP (libxml_disable_entity_loader), C/C++ (libxml2 without XML_PARSE_NOENT), and Go (xml.Decoder with strict mode). The control must be applied at parser instantiation — not as post-parse validation — because entity resolution occurs during parsing. When XML input is required but DTDs are needed for schema validation, use catalog-based resolution with a local-only catalog that rejects network fetches.</p>
+    </section>
+
+    <section>
+      <h2>CVSS Vector Impacts</h2>
+      <table class="cvss-table">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Transition</th>
+            <th>Rationale</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td><strong>Confidentiality</strong> (C)</td>
+            <td>
+              <span class="cvss-from">H</span>
+              <span class="cvss-arrow">&rarr;</span>
+              <span class="cvss-to">N</span>
+            </td>
+            <td class="cvss-rationale">External entity resolution is disabled at the parser level; the attacker cannot use file:// or http:// entity references to read local files or probe internal services because the parser rejects all external entity declarations before resolution occurs</td>
+          </tr>
+          
+          <tr>
+            <td><strong>Availability</strong> (A)</td>
+            <td>
+              <span class="cvss-from">H</span>
+              <span class="cvss-arrow">&rarr;</span>
+              <span class="cvss-to">N</span>
+            </td>
+            <td class="cvss-rationale">DTD processing is disabled, preventing entity expansion bombs (billion laughs) that cause exponential memory consumption; the parser rejects DOCTYPE declarations before recursive entity expansion begins</td>
+          </tr>
+          
+        </tbody>
+      </table>
+    </section>
+
+    
+    <section>
+      <h2>CWE Relationships</h2>
+      <div class="cwe-list">
+        
+        <a href="https://cwe.mitre.org/data/definitions/611.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-611</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/776.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-776</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/827.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-827</a>
+        
+      </div>
+    </section>
+    
+
+    
+    <section>
+      <h2>Verification</h2>
+      
+      <p class="verification-method">Verify that XML parsers are configured to disable external entities and DTD processing across all application languages in use</p>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -rn &#39;FEATURE_SECURE_PROCESSING\|disallow-doctype-decl\|XMLConstants\|setFeature.*external&#39; &lt;app_source&gt;/
+        
+        <br><span class="cmd-expected"># Expected: Secure XML parsing features enabled in Java XML parser configuration</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -rn &#39;defusedxml\|resolve_entities.*False\|no_network.*True\|etree.XMLParser.*resolve_entities&#39; &lt;app_source&gt;/
+        
+        <br><span class="cmd-expected"># Expected: Python XML parsing uses defusedxml or explicitly disables entity resolution</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -rn &#39;DtdProcessing.Prohibit\|ProhibitDtd.*true\|XmlReaderSettings&#39; &lt;app_source&gt;/
+        
+        <br><span class="cmd-expected"># Expected: .NET XML parsing prohibits DTD processing</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -rn &#39;libxml_disable_entity_loader\|LIBXML_NOENT\|XML_PARSE_NOENT&#39; &lt;app_source&gt;/
+        
+        <br><span class="cmd-expected"># Expected: PHP/C XML parsing has external entity loading disabled</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+    </section>
+    
+
+    
+
+    
+
+    <div class="entry-nav">
+      
+      <a href="CME-1316.html">&larr; CME-1316: Algorithmic Complexity Safeguards (Pattern/Regex Execution Limits)</a>
+      
+      <span></span>
+    </div>
+  </div>
+
+  <aside class="entry-sidebar">
+    <section>
+      <h3>Category</h3>
+      <p>Application Input Validation</p>
+    </section>
+
+    
+
+    
+    <section>
+      <h3>Platforms</h3>
+      <ul class="sidebar-list">
+        
+        <li>Any</li>
+        
+        <li>Windows Server 2019</li>
+        
+        <li>Windows Server 2022</li>
+        
+      </ul>
+    </section>
+    
+
+    <section>
+      <h3>Quick Reference</h3>
+      <ul class="sidebar-list">
+        <li><strong>ID:</strong> CME-1317</li>
+        <li><strong>Tactic:</strong> Harden</li>
+        <li><strong>Layer:</strong> Application</li>
+        <li><strong>CWEs:</strong> 3</li>
+        <li><strong>CVSS Mods:</strong> 2</li>
+      </ul>
+    </section>
+  </aside>
+</div>
+
+  </main>
+
+  <footer class="site-footer">
+    Generated 2026-07-01 03:19 UTC &middot; 118 entries &middot;
+    Common Mitigation Enumeration (CME)
+  </footer>
+</body>
+</html>

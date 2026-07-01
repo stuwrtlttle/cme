@@ -23,7 +23,9 @@
   "cwe_relationships": [
     "CWE-287",
     "CWE-306",
-    "CWE-521"
+    "CWE-521",
+    "CWE-303",
+    "CWE-305"
   ],
   "verification": {
     "method": "Verify MFA enforcement in PAM or IdP",

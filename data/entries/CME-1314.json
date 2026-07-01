@@ -1,7 +1,7 @@
 {
   "cme_id": "CME-1314",
   "control_name": "Input Canonicalization Before Security Decision",
-  "description": "Normalize and canonicalize all user-supplied structured input (URLs, IP addresses, domain names, file paths, type identifiers, protocol schemes) to a standard form before applying any security decision such as allowlist matching, denylist checking, or policy evaluation. Decoding, case folding, Unicode normalization, IP address format unification (dotted-decimal, hex, octal, IPv4-mapped IPv6), and scheme normalization must occur before the security check — not after. This prevents attackers from using encoding variants, aliasing, or alternate representations to bypass list-based security controls. The canonicalization order must be: decode all layers → normalize → validate against security policy → sanitize.",
+  "description": "Normalize and canonicalize all user-supplied structured input (URLs, IP addresses, domain names, file paths, type identifiers, protocol schemes) to a standard form before applying any security decision such as allowlist matching, denylist checking, or policy evaluation. Decoding, case folding, Unicode normalization, IP address format unification (dotted-decimal, hex, octal, IPv4-mapped IPv6), and scheme normalization must occur before the security check \u2014 not after. This prevents attackers from using encoding variants, aliasing, or alternate representations to bypass list-based security controls. The canonicalization order must be: decode all layers \u2192 normalize \u2192 validate against security policy \u2192 sanitize.",
   "tactic": "Harden",
   "category": "Application Input Validation",
   "category_id": "application-input-validation",
@@ -11,17 +11,18 @@
       "metric": "AC",
       "from": "L",
       "to": "H",
-      "rationale": "The attacker must find an input representation that survives full canonicalization while still bypassing the security check — encoding tricks (URL-encoding, Unicode homoglyphs, octal IP notation, mixed-case evasion) are neutralized before the security decision is made, requiring the attacker to discover a novel bypass that operates at the semantic level rather than the syntactic level"
+      "rationale": "The attacker must find an input representation that survives full canonicalization while still bypassing the security check \u2014 encoding tricks (URL-encoding, Unicode homoglyphs, octal IP notation, mixed-case evasion) are neutralized before the security decision is made, requiring the attacker to discover a novel bypass that operates at the semantic level rather than the syntactic level"
     }
   ],
   "cwe_relationships": [
     "CWE-184",
     "CWE-183",
     "CWE-20",
-    "CWE-180"
+    "CWE-180",
+    "CWE-1289"
   ],
   "verification": {
-    "method": "Review application source code for canonicalization/normalization calls that execute before security-relevant comparisons (allowlist checks, denylist checks, policy evaluations). Verify that the canonicalized form — not the raw input — is used in all subsequent security decisions.",
+    "method": "Review application source code for canonicalization/normalization calls that execute before security-relevant comparisons (allowlist checks, denylist checks, policy evaluations). Verify that the canonicalized form \u2014 not the raw input \u2014 is used in all subsequent security decisions.",
     "commands": [
       {
         "command": "grep -rn 'urllib.parse\\|urlparse\\|URL.parse\\|new URL\\|InetAddress.getByName\\|normalize\\|canonicalize\\|realpath\\|resolve' <app_source>/",

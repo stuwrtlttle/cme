@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CME-508: Quoted Service Path Enforcement (Windows) — Common Mitigation Enumeration</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="../index.html" class="logo">CME <span>Common Mitigation Enumeration</span></a>
+      <nav>
+        <a href="../index.html" >Home</a>
+        <a href="../by-tactic.html" >By Tactic</a>
+        <a href="../by-cwe.html" >By CWE</a>
+        <a href="../search.html" >Search</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    
+<div class="entry-header">
+  <div class="entry-id">CME-508</div>
+  <h1>Quoted Service Path Enforcement (Windows)</h1>
+  <div class="entry-meta">
+    <span class="badge badge-tactic-harden">Harden</span>
+    <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+    
+    <span class="badge badge-confidence-high">High Confidence</span>
+    
+  </div>
+</div>
+
+<div class="entry-body">
+  <div class="entry-main">
+
+    <section>
+      <h2>Description</h2>
+      <p class="entry-description">Ensures all Windows service executable paths and scheduled task binaries are enclosed in double quotes when they contain spaces, preventing unquoted search path interception attacks. When a service binary path like C:\Program Files\My App\service.exe is registered without quotes, Windows tries to execute C:\Program.exe, then C:\Program Files\My.exe, then C:\Program Files\My App\service.exe in order. An attacker who can write to C:\ or C:\Program Files\ can place a malicious executable that runs as SYSTEM before the intended service binary. Remediation requires auditing all service paths and scheduled task paths, enclosing them in double quotes, and enforcing filesystem ACLs preventing non-admin writes to path prefix directories. Complements CME-507 (Secure Dynamic Linker Configuration) which addresses the analogous Linux attack surface (LD_PRELOAD, RPATH injection).</p>
+    </section>
+
+    <section>
+      <h2>CVSS Vector Impacts</h2>
+      <table class="cvss-table">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Transition</th>
+            <th>Rationale</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td><strong>Attack Complexity</strong> (AC)</td>
+            <td>
+              <span class="cvss-from">L</span>
+              <span class="cvss-arrow">&rarr;</span>
+              <span class="cvss-to">H</span>
+            </td>
+            <td class="cvss-rationale">Service paths are properly quoted so Windows does not attempt intermediate path resolution; the attacker must find a different privilege escalation vector since the unquoted path interception technique is eliminated</td>
+          </tr>
+          
+          <tr>
+            <td><strong>Privileges Required</strong> (PR)</td>
+            <td>
+              <span class="cvss-from">L</span>
+              <span class="cvss-arrow">&rarr;</span>
+              <span class="cvss-to">H</span>
+            </td>
+            <td class="cvss-rationale">With filesystem ACLs preventing writes to path prefix directories (C:\, C:\Program Files\), low-privileged users cannot place interception binaries even if an unquoted path remains</td>
+          </tr>
+          
+        </tbody>
+      </table>
+    </section>
+
+    
+    <section>
+      <h2>CWE Relationships</h2>
+      <div class="cwe-list">
+        
+        <a href="https://cwe.mitre.org/data/definitions/428.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-428</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/426.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-426</a>
+        
+      </div>
+    </section>
+    
+
+    
+    <section>
+      <h2>Verification</h2>
+      
+      <p class="verification-method">Enumerate all Windows services and scheduled tasks with unquoted paths containing spaces, and verify filesystem ACLs on path prefix directories</p>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> Get-WmiObject win32_service | Where-Object { $_.PathName -notlike &#39;&#34;*&#39; -and $_.PathName -match &#39;\s&#39; } | Select-Object Name, PathName
+        
+        <br><span class="cmd-expected"># Expected: No services returned (all paths properly quoted or space-free)</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: windows</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> wmic service get name,pathname | findstr /i /v &#34;\&#34;&#34; | findstr /i &#34; &#34;
+        
+        <br><span class="cmd-expected"># Expected: No output (no unquoted paths with spaces)</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: windows</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> icacls &#34;C:\Program Files&#34; | findstr /i &#34;BUILTIN\\Users.*W&#34;
+        
+        <br><span class="cmd-expected"># Expected: No write permissions for BUILTIN\Users on path prefix directories</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: windows</div>
+      
+      
+    </section>
+    
+
+    
+
+    
+
+    <div class="entry-nav">
+      
+      <a href="CME-507.html">&larr; CME-507: Secure Dynamic Linker Configuration (LD_PRELOAD/PATH Hardening)</a>
+      
+      
+      <a href="CME-601.html">CME-601: Kernel-Level Syscall Filtering (seccomp) &rarr;</a>
+      
+    </div>
+  </div>
+
+  <aside class="entry-sidebar">
+    <section>
+      <h3>Category</h3>
+      <p>Software Integrity</p>
+    </section>
+
+    
+
+    
+    <section>
+      <h3>Platforms</h3>
+      <ul class="sidebar-list">
+        
+        <li>Windows 10</li>
+        
+        <li>Windows 11</li>
+        
+        <li>Windows Server 2019</li>
+        
+        <li>Windows Server 2022</li>
+        
+      </ul>
+    </section>
+    
+
+    <section>
+      <h3>Quick Reference</h3>
+      <ul class="sidebar-list">
+        <li><strong>ID:</strong> CME-508</li>
+        <li><strong>Tactic:</strong> Harden</li>
+        <li><strong>Layer:</strong> OS/Kernel</li>
+        <li><strong>CWEs:</strong> 2</li>
+        <li><strong>CVSS Mods:</strong> 2</li>
+      </ul>
+    </section>
+  </aside>
+</div>
+
+  </main>
+
+  <footer class="site-footer">
+    Generated 2026-07-01 03:19 UTC &middot; 118 entries &middot;
+    Common Mitigation Enumeration (CME)
+  </footer>
+</body>
+</html>

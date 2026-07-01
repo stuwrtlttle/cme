@@ -28,7 +28,9 @@
   ],
   "cwe_relationships": [
     "CWE-269",
-    "CWE-284"
+    "CWE-284",
+    "CWE-367",
+    "CWE-362"
   ],
   "verification": {
     "method": "Check systemd unit for sandbox directives",

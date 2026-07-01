@@ -23,10 +23,11 @@
   "cwe_relationships": [
     "CWE-502",
     "CWE-915",
-    "CWE-1321"
+    "CWE-1321",
+    "CWE-1188"
   ],
   "verification": {
-    "method": "Verify deserialization uses safe loading or allowlist enforcement",
+    "method": "Verify deserialization uses safe loading or allowlist enforcement across all application languages",
     "commands": [
       {
         "command": "grep -rn 'yaml.safe_load\\|SafeLoader\\|json.loads' <app_source>/",
@@ -36,6 +37,16 @@
       {
         "command": "grep -rn 'yaml.load\\|pickle.load\\|marshal.load' <app_source>/ | grep -v safe_load",
         "expected": "No unsafe deserialization calls",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'jdk.serialFilter\\|ObjectInputFilter\\|serialFilter' /etc/java/ /usr/lib/jvm/*/conf/ 2>/dev/null || java -XshowSettings 2>&1 | grep serialFilter",
+        "expected": "JVM serialization filter configured with allowlist pattern (JEP 290)",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'TypeNameHandling\\.None\\|TypeNameHandling\\.Auto\\|BinaryFormatter' <app_source>/ | grep -v None",
+        "expected": "No unsafe TypeNameHandling settings (Auto/All/Objects/Arrays) or BinaryFormatter usage",
         "platform": "any"
       }
     ]

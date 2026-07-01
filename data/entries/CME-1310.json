@@ -24,7 +24,8 @@
     "CWE-434",
     "CWE-20",
     "CWE-641",
-    "CWE-646"
+    "CWE-646",
+    "CWE-1286"
   ],
   "confidence": "High",
   "platforms": [

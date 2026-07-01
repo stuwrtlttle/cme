@@ -29,7 +29,8 @@
   "cwe_relationships": [
     "CWE-269",
     "CWE-284",
-    "CWE-732"
+    "CWE-732",
+    "CWE-653"
   ],
   "verification": {
     "method": "Verify SELinux is in enforcing mode",

@@ -1,7 +1,7 @@
 {
   "cme_id": "CME-1315",
   "control_name": "Allowlist-Preferred Input Validation (Deny-by-Default Filtering)",
-  "description": "Structure all security-sensitive input validation as allowlists (explicit permit lists with default-deny) rather than denylists (explicit block lists with default-permit). Denylists are inherently incomplete — every new input format, encoding variant, or aliasing technique the denylist does not cover becomes a bypass vector. Allowlists reject unknown or unexpected inputs by default, requiring the attacker to find an input that both matches the allowlist pattern and achieves the malicious objective. When allowlists are impractical (e.g., HTML sanitization where the set of safe elements is large but finite), combine a denylist with input canonicalization (CME-1314) and output encoding to create defense in depth. This control applies to SSRF destination validation, deserialization type validation, sandbox capability restrictions, application security policies, and any context where a list determines whether an input is permitted.",
+  "description": "Structure all security-sensitive input validation as allowlists (explicit permit lists with default-deny) rather than denylists (explicit block lists with default-permit). Denylists are inherently incomplete \u2014 every new input format, encoding variant, or aliasing technique the denylist does not cover becomes a bypass vector. Allowlists reject unknown or unexpected inputs by default, requiring the attacker to find an input that both matches the allowlist pattern and achieves the malicious objective. When allowlists are impractical (e.g., HTML sanitization where the set of safe elements is large but finite), combine a denylist with input canonicalization (CME-1314) and output encoding to create defense in depth. This control applies to SSRF destination validation, deserialization type validation, sandbox capability restrictions, application security policies, and any context where a list determines whether an input is permitted.",
   "tactic": "Harden",
   "category": "Application Input Validation",
   "category_id": "application-input-validation",
@@ -11,7 +11,7 @@
       "metric": "AC",
       "from": "L",
       "to": "H",
-      "rationale": "The attacker must find an input that satisfies the explicit allowlist criteria while still achieving the malicious objective — this is fundamentally harder than finding an input that evades a denylist, because novel or unexpected input formats are rejected by default rather than implicitly permitted"
+      "rationale": "The attacker must find an input that satisfies the explicit allowlist criteria while still achieving the malicious objective \u2014 this is fundamentally harder than finding an input that evades a denylist, because novel or unexpected input formats are rejected by default rather than implicitly permitted"
     },
     {
       "metric": "I",
@@ -24,7 +24,9 @@
     "CWE-184",
     "CWE-183",
     "CWE-693",
-    "CWE-20"
+    "CWE-20",
+    "CWE-1286",
+    "CWE-601"
   ],
   "verification": {
     "method": "Review application source code and configuration to verify that security-sensitive input validation uses explicit allowlists with default-deny semantics rather than denylists with default-permit. Check SSRF filters, deserialization type validators, sandbox capability lists, and application security policy files.",

@@ -23,7 +23,8 @@
   "cwe_relationships": [
     "CWE-345",
     "CWE-494",
-    "CWE-269"
+    "CWE-269",
+    "CWE-347"
   ],
   "verification": {
     "method": "Check UEFI Secure Boot state",

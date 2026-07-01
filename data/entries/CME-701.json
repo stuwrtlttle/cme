@@ -16,7 +16,8 @@
   ],
   "cwe_relationships": [
     "CWE-269",
-    "CWE-119"
+    "CWE-119",
+    "CWE-653"
   ],
   "verification": {
     "method": "Check container runtime class",

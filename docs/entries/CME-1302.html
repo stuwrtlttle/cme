@@ -91,6 +91,9 @@
         <a href="https://cwe.mitre.org/data/definitions/1321.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-1321</a>
         
+        <a href="https://cwe.mitre.org/data/definitions/1188.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-1188</a>
+        
       </div>
     </section>
     
@@ -99,7 +102,7 @@
     <section>
       <h2>Verification</h2>
       
-      <p class="verification-method">Verify deserialization uses safe loading or allowlist enforcement</p>
+      <p class="verification-method">Verify deserialization uses safe loading or allowlist enforcement across all application languages</p>
       
       
       <div class="verification-cmd">
@@ -116,6 +119,26 @@
         <span class="cmd-prompt">$</span> grep -rn &#39;yaml.load\|pickle.load\|marshal.load&#39; &lt;app_source&gt;/ | grep -v safe_load
         
         <br><span class="cmd-expected"># Expected: No unsafe deserialization calls</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -rn &#39;jdk.serialFilter\|ObjectInputFilter\|serialFilter&#39; /etc/java/ /usr/lib/jvm/*/conf/ 2&gt;/dev/null || java -XshowSettings 2&gt;&amp;1 | grep serialFilter
+        
+        <br><span class="cmd-expected"># Expected: JVM serialization filter configured with allowlist pattern (JEP 290)</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -rn &#39;TypeNameHandling\.None\|TypeNameHandling\.Auto\|BinaryFormatter&#39; &lt;app_source&gt;/ | grep -v None
+        
+        <br><span class="cmd-expected"># Expected: No unsafe TypeNameHandling settings (Auto/All/Objects/Arrays) or BinaryFormatter usage</span>
         
       </div>
       
@@ -168,7 +191,7 @@
         <li><strong>ID:</strong> CME-1302</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Application</li>
-        <li><strong>CWEs:</strong> 3</li>
+        <li><strong>CWEs:</strong> 4</li>
         <li><strong>CVSS Mods:</strong> 2</li>
       </ul>
     </section>
@@ -178,7 +201,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-07-01 02:52 UTC &middot; 112 entries &middot;
+    Generated 2026-07-01 03:19 UTC &middot; 118 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

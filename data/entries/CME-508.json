@@ -1,0 +1,54 @@
+{
+  "cme_id": "CME-508",
+  "control_name": "Quoted Service Path Enforcement (Windows)",
+  "description": "Ensures all Windows service executable paths and scheduled task binaries are enclosed in double quotes when they contain spaces, preventing unquoted search path interception attacks. When a service binary path like C:\\Program Files\\My App\\service.exe is registered without quotes, Windows tries to execute C:\\Program.exe, then C:\\Program Files\\My.exe, then C:\\Program Files\\My App\\service.exe in order. An attacker who can write to C:\\ or C:\\Program Files\\ can place a malicious executable that runs as SYSTEM before the intended service binary. Remediation requires auditing all service paths and scheduled task paths, enclosing them in double quotes, and enforcing filesystem ACLs preventing non-admin writes to path prefix directories. Complements CME-507 (Secure Dynamic Linker Configuration) which addresses the analogous Linux attack surface (LD_PRELOAD, RPATH injection).",
+  "tactic": "Harden",
+  "category": "Software Integrity",
+  "category_id": "software-integrity",
+  "control_layer": "OS/Kernel",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Service paths are properly quoted so Windows does not attempt intermediate path resolution; the attacker must find a different privilege escalation vector since the unquoted path interception technique is eliminated"
+    },
+    {
+      "metric": "PR",
+      "from": "L",
+      "to": "H",
+      "rationale": "With filesystem ACLs preventing writes to path prefix directories (C:\\, C:\\Program Files\\), low-privileged users cannot place interception binaries even if an unquoted path remains"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-428",
+    "CWE-426"
+  ],
+  "verification": {
+    "method": "Enumerate all Windows services and scheduled tasks with unquoted paths containing spaces, and verify filesystem ACLs on path prefix directories",
+    "commands": [
+      {
+        "command": "Get-WmiObject win32_service | Where-Object { $_.PathName -notlike '\"*' -and $_.PathName -match '\\s' } | Select-Object Name, PathName",
+        "expected": "No services returned (all paths properly quoted or space-free)",
+        "platform": "windows"
+      },
+      {
+        "command": "wmic service get name,pathname | findstr /i /v \"\\\"\" | findstr /i \" \"",
+        "expected": "No output (no unquoted paths with spaces)",
+        "platform": "windows"
+      },
+      {
+        "command": "icacls \"C:\\Program Files\" | findstr /i \"BUILTIN\\\\Users.*W\"",
+        "expected": "No write permissions for BUILTIN\\Users on path prefix directories",
+        "platform": "windows"
+      }
+    ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "Windows 10",
+    "Windows 11",
+    "Windows Server 2019",
+    "Windows Server 2022"
+  ]
+}

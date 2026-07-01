@@ -29,17 +29,17 @@
 
 <div class="stats-bar">
   <div class="stat-card">
-    <div class="stat-value">112</div>
+    <div class="stat-value">118</div>
     <div class="stat-label">Total Entries</div>
   </div>
   
   <div class="stat-card">
-    <div class="stat-value">74</div>
+    <div class="stat-value">79</div>
     <div class="stat-label">Harden</div>
   </div>
   
   <div class="stat-card">
-    <div class="stat-value">21</div>
+    <div class="stat-value">22</div>
     <div class="stat-label">Isolate</div>
   </div>
   
@@ -66,7 +66,7 @@
   <div class="tactic-header" style="background: var(--bg-alt);">
     <span class="badge badge-tactic-harden">Harden</span>
     <span>Harden</span>
-    <span style="margin-left: auto; font-size: 14px; color: var(--text-muted);">74 entries</span>
+    <span style="margin-left: auto; font-size: 14px; color: var(--text-muted);">79 entries</span>
   </div>
   
   <div class="category-section">
@@ -142,6 +142,18 @@
       <li>
         <a href="entries/CME-917.html" class="cme-id">CME-917</a>
         <a href="entries/CME-917.html" class="entry-name">Worker Process Recycling (MaxConnectionsPerChild / max_requests)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+      
+      <li>
+        <a href="entries/CME-918.html" class="cme-id">CME-918</a>
+        <a href="entries/CME-918.html" class="entry-name">URL Path Authorization Enforcement (Forced Browsing Prevention)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+      
+      <li>
+        <a href="entries/CME-919.html" class="cme-id">CME-919</a>
+        <a href="entries/CME-919.html" class="entry-name">JIT Compiler Hardening (JIT Restriction / V8 Sandbox)</a>
         <span class="badge badge-layer-application">Application</span>
       </li>
       
@@ -242,6 +254,12 @@
         <span class="badge badge-layer-application">Application</span>
       </li>
       
+      <li>
+        <a href="entries/CME-1317.html" class="cme-id">CME-1317</a>
+        <a href="entries/CME-1317.html" class="entry-name">XML External Entity Prevention (Secure XML Parser Configuration)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+      
     </ul>
   </div>
   
@@ -282,6 +300,12 @@
       <li>
         <a href="entries/CME-806.html" class="cme-id">CME-806</a>
         <a href="entries/CME-806.html" class="entry-name">Kerberos Authentication (GSSAPI)</a>
+        <span class="badge badge-layer-identity">Identity</span>
+      </li>
+      
+      <li>
+        <a href="entries/CME-807.html" class="cme-id">CME-807</a>
+        <a href="entries/CME-807.html" class="entry-name">Session Lifetime and Idle Timeout Enforcement</a>
         <span class="badge badge-layer-identity">Identity</span>
       </li>
       
@@ -553,6 +577,19 @@
   </div>
   
   <div class="category-section">
+    <div class="category-header">Software Integrity</div>
+    <ul class="entry-list">
+      
+      <li>
+        <a href="entries/CME-508.html" class="cme-id">CME-508</a>
+        <a href="entries/CME-508.html" class="entry-name">Quoted Service Path Enforcement (Windows)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+      
+    </ul>
+  </div>
+  
+  <div class="category-section">
     <div class="category-header">Syscall &amp; BPF Controls</div>
     <ul class="entry-list">
       
@@ -591,7 +628,7 @@
   <div class="tactic-header" style="background: var(--bg-alt);">
     <span class="badge badge-tactic-isolate">Isolate</span>
     <span>Isolate</span>
-    <span style="margin-left: auto; font-size: 14px; color: var(--text-muted);">21 entries</span>
+    <span style="margin-left: auto; font-size: 14px; color: var(--text-muted);">22 entries</span>
   </div>
   
   <div class="category-section">
@@ -725,6 +762,12 @@
       <li>
         <a href="entries/CME-206.html" class="cme-id">CME-206</a>
         <a href="entries/CME-206.html" class="entry-name">Network Policy (Kubernetes)</a>
+        <span class="badge badge-layer-network">Network</span>
+      </li>
+      
+      <li>
+        <a href="entries/CME-208.html" class="cme-id">CME-208</a>
+        <a href="entries/CME-208.html" class="entry-name">Outbound Network Egress Restriction (SSRF Blast Radius Containment)</a>
         <span class="badge badge-layer-network">Network</span>
       </li>
       
@@ -932,7 +975,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-07-01 02:52 UTC &middot; 112 entries &middot;
+    Generated 2026-07-01 03:19 UTC &middot; 118 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

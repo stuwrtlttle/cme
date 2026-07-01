@@ -23,7 +23,8 @@
   "cwe_relationships": [
     "CWE-306",
     "CWE-862",
-    "CWE-1220"
+    "CWE-1220",
+    "CWE-551"
   ],
   "confidence": "High",
   "platforms": [

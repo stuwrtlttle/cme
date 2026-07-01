@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CME-918: URL Path Authorization Enforcement (Forced Browsing Prevention) — Common Mitigation Enumeration</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="../index.html" class="logo">CME <span>Common Mitigation Enumeration</span></a>
+      <nav>
+        <a href="../index.html" >Home</a>
+        <a href="../by-tactic.html" >By Tactic</a>
+        <a href="../by-cwe.html" >By CWE</a>
+        <a href="../search.html" >Search</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    
+<div class="entry-header">
+  <div class="entry-id">CME-918</div>
+  <h1>URL Path Authorization Enforcement (Forced Browsing Prevention)</h1>
+  <div class="entry-meta">
+    <span class="badge badge-tactic-harden">Harden</span>
+    <span class="badge badge-layer-application">Application</span>
+    
+    <span class="badge badge-confidence-high">High Confidence</span>
+    
+  </div>
+</div>
+
+<div class="entry-body">
+  <div class="entry-main">
+
+    <section>
+      <h2>Description</h2>
+      <p class="entry-description">Enforce URL-pattern-based authorization at the web server or reverse proxy layer so that restricted paths (administrative consoles, debug endpoints, configuration panels, internal APIs, backup files, and deployment artifacts) are denied to unauthorized requesters before the request reaches application code. The control operates as a default-deny URL filter: only explicitly permitted URL patterns are accessible to each authenticated role, and any request to an undefined or restricted path returns 403 Forbidden. This complements application-layer authorization (CME-907, CME-909) by providing infrastructure-level defense-in-depth against forced browsing, where an attacker discovers and directly requests URLs that bypass application navigation and menu-driven access control. Configuration is enforced via web server directives (Apache httpd Location/Directory with Require, nginx location blocks with deny/allow, IIS URL Authorization rules) or Java EE security-constraint elements in web.xml with deny-uncovered-http-methods enabled.</p>
+    </section>
+
+    <section>
+      <h2>CVSS Vector Impacts</h2>
+      <table class="cvss-table">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Transition</th>
+            <th>Rationale</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td><strong>Privileges Required</strong> (PR)</td>
+            <td>
+              <span class="cvss-from">N</span>
+              <span class="cvss-arrow">&rarr;</span>
+              <span class="cvss-to">L</span>
+            </td>
+            <td class="cvss-rationale">Forced browsing to administrative or internal endpoints fails because the web server rejects unauthenticated requests to restricted URL patterns before the application processes them; the attacker must first obtain valid credentials to reach any protected path</td>
+          </tr>
+          
+          <tr>
+            <td><strong>Attack Complexity</strong> (AC)</td>
+            <td>
+              <span class="cvss-from">L</span>
+              <span class="cvss-arrow">&rarr;</span>
+              <span class="cvss-to">H</span>
+            </td>
+            <td class="cvss-rationale">Discovering and accessing a restricted endpoint requires bypassing both the web server URL authorization rules and the application-layer authorization checks; simply guessing or enumerating URLs is insufficient because the infrastructure layer denies access to any path not explicitly permitted for the caller&#39;s role</td>
+          </tr>
+          
+        </tbody>
+      </table>
+    </section>
+
+    
+    <section>
+      <h2>CWE Relationships</h2>
+      <div class="cwe-list">
+        
+        <a href="https://cwe.mitre.org/data/definitions/425.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-425</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/862.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-862</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/306.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-306</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/284.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-284</a>
+        
+      </div>
+    </section>
+    
+
+    
+    <section>
+      <h2>Verification</h2>
+      
+      <p class="verification-method">Verify that the web server or reverse proxy enforces URL-pattern-based authorization on restricted paths, and that unauthenticated requests to administrative or internal endpoints are denied</p>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -rn &#39;&lt;Location\|&lt;Directory\|Require valid-user\|Require group\|AuthType&#39; /etc/httpd/conf.d/ /etc/httpd/conf/httpd.conf
+        
+        <br><span class="cmd-expected"># Expected: Authorization directives present on administrative and restricted URL paths (e.g., /admin, /console, /debug)</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -rn &#39;location.*/admin\|location.*/console\|deny all\|auth_basic\|auth_request&#39; /etc/nginx/conf.d/ /etc/nginx/nginx.conf
+        
+        <br><span class="cmd-expected"># Expected: Restricted location blocks with authentication or deny directives for administrative paths</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> curl -s -o /dev/null -w &#39;%{http_code}&#39; http://localhost:8080/admin/
+        
+        <br><span class="cmd-expected"># Expected: 401 or 403 (access denied without valid credentials)</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> Get-WebConfigurationProperty -Filter &#39;/system.webServer/security/authorization&#39; -PSPath &#39;IIS:\Sites\Default Web Site\admin&#39; -Name &#39;collection&#39; | Format-Table
+        
+        <br><span class="cmd-expected"># Expected: URL Authorization rules restricting access to administrative paths to specific roles</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: windows</div>
+      
+      
+    </section>
+    
+
+    
+
+    
+
+    <div class="entry-nav">
+      
+      <a href="CME-917.html">&larr; CME-917: Worker Process Recycling (MaxConnectionsPerChild / max_requests)</a>
+      
+      
+      <a href="CME-919.html">CME-919: JIT Compiler Hardening (JIT Restriction / V8 Sandbox) &rarr;</a>
+      
+    </div>
+  </div>
+
+  <aside class="entry-sidebar">
+    <section>
+      <h3>Category</h3>
+      <p>Application Controls</p>
+    </section>
+
+    
+
+    
+    <section>
+      <h3>Platforms</h3>
+      <ul class="sidebar-list">
+        
+        <li>Any</li>
+        
+        <li>Windows Server 2019</li>
+        
+        <li>Windows Server 2022</li>
+        
+      </ul>
+    </section>
+    
+
+    <section>
+      <h3>Quick Reference</h3>
+      <ul class="sidebar-list">
+        <li><strong>ID:</strong> CME-918</li>
+        <li><strong>Tactic:</strong> Harden</li>
+        <li><strong>Layer:</strong> Application</li>
+        <li><strong>CWEs:</strong> 4</li>
+        <li><strong>CVSS Mods:</strong> 2</li>
+      </ul>
+    </section>
+  </aside>
+</div>
+
+  </main>
+
+  <footer class="site-footer">
+    Generated 2026-07-01 03:19 UTC &middot; 118 entries &middot;
+    Common Mitigation Enumeration (CME)
+  </footer>
+</body>
+</html>

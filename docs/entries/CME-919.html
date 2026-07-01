@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CME-919: JIT Compiler Hardening (JIT Restriction / V8 Sandbox) — Common Mitigation Enumeration</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="../index.html" class="logo">CME <span>Common Mitigation Enumeration</span></a>
+      <nav>
+        <a href="../index.html" >Home</a>
+        <a href="../by-tactic.html" >By Tactic</a>
+        <a href="../by-cwe.html" >By CWE</a>
+        <a href="../search.html" >Search</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    
+<div class="entry-header">
+  <div class="entry-id">CME-919</div>
+  <h1>JIT Compiler Hardening (JIT Restriction / V8 Sandbox)</h1>
+  <div class="entry-meta">
+    <span class="badge badge-tactic-harden">Harden</span>
+    <span class="badge badge-layer-application">Application</span>
+    
+    <span class="badge badge-confidence-high">High Confidence</span>
+    
+  </div>
+</div>
+
+<div class="entry-body">
+  <div class="entry-main">
+
+    <section>
+      <h2>Description</h2>
+      <p class="entry-description">Restricts or hardens Just-In-Time compilation in language runtimes and browser engines to prevent type confusion exploitation. Encompasses three postures: (1) JIT disabling — turning off JIT compilation entirely via flags (--jitless in V8, javascript.options.ion in Firefox) which eliminates JIT-spraying and JIT-based type confusion at the cost of performance; (2) V8 Sandbox enforcement — a hardware-backed memory cage that isolates JIT-compiled code and V8 heap objects from the rest of the process address space, requiring an additional sandbox escape even after achieving type confusion; (3) JIT tiering restrictions — limiting optimization tiers to reduce the surface of speculative type assumptions that can be violated. Applicable to Chromium-based browsers, Node.js, Electron applications, and SpiderMonkey-based runtimes. Complements CME-113 (CFI/Shadow Call Stack) which prevents type-confused pointers from redirecting control flow in native code.</p>
+    </section>
+
+    <section>
+      <h2>CVSS Vector Impacts</h2>
+      <table class="cvss-table">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Transition</th>
+            <th>Rationale</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td><strong>Attack Complexity</strong> (AC)</td>
+            <td>
+              <span class="cvss-from">L</span>
+              <span class="cvss-arrow">&rarr;</span>
+              <span class="cvss-to">H</span>
+            </td>
+            <td class="cvss-rationale">JIT disabling eliminates the type speculation attack surface entirely; V8 Sandbox requires the attacker to chain a sandbox escape after the type confusion, converting a single-step exploit into a multi-step chain that must defeat both the type system and the memory cage</td>
+          </tr>
+          
+          <tr>
+            <td><strong>Scope</strong> (S)</td>
+            <td>
+              <span class="cvss-from">C</span>
+              <span class="cvss-arrow">&rarr;</span>
+              <span class="cvss-to">U</span>
+            </td>
+            <td class="cvss-rationale">V8 Sandbox confines the impact of type confusion to the sandbox boundary; the attacker cannot directly reach renderer process memory or OS resources without an additional escape primitive</td>
+          </tr>
+          
+        </tbody>
+      </table>
+    </section>
+
+    
+    <section>
+      <h2>CWE Relationships</h2>
+      <div class="cwe-list">
+        
+        <a href="https://cwe.mitre.org/data/definitions/843.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-843</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/119.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-119</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/787.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-787</a>
+        
+      </div>
+    </section>
+    
+
+    
+    <section>
+      <h2>Verification</h2>
+      
+      <p class="verification-method">Verify JIT hardening is enabled in browser or runtime configuration. Check for jitless mode, V8 Sandbox flags, or JIT disabling in Firefox preferences.</p>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -r &#39;jitless\|--js-flags.*--jitless&#39; /etc/chromium/ /opt/google/chrome/ ~/.config/chromium/ 2&gt;/dev/null
+        
+        <br><span class="cmd-expected"># Expected: --jitless flag present in Chromium launch configuration</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -r &#39;javascript.options.ion&#39; /usr/lib64/firefox/defaults/pref/ ~/.mozilla/firefox/*/prefs.js 2&gt;/dev/null
+        
+        <br><span class="cmd-expected"># Expected: javascript.options.ion set to false for JIT-disabled mode</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> node --v8-flags=--help 2&gt;&amp;1 | grep -i sandbox
+        
+        <br><span class="cmd-expected"># Expected: V8 sandbox flags available in the Node.js runtime</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> reg query &#34;HKLM\SOFTWARE\Policies\Google\Chrome&#34; /v CommandLineFlagSecurityWarningsEnabled 2&gt;nul
+        
+        <br><span class="cmd-expected"># Expected: Chrome policy flags configured for JIT restriction</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: windows</div>
+      
+      
+    </section>
+    
+
+    
+
+    
+
+    <div class="entry-nav">
+      
+      <a href="CME-918.html">&larr; CME-918: URL Path Authorization Enforcement (Forced Browsing Prevention)</a>
+      
+      
+      <a href="CME-1001.html">CME-1001: EDR Agent (Endpoint Detection &amp; Response) &rarr;</a>
+      
+    </div>
+  </div>
+
+  <aside class="entry-sidebar">
+    <section>
+      <h3>Category</h3>
+      <p>Application Controls</p>
+    </section>
+
+    
+
+    
+    <section>
+      <h3>Platforms</h3>
+      <ul class="sidebar-list">
+        
+        <li>Any</li>
+        
+        <li>Windows Server 2019</li>
+        
+        <li>Windows Server 2022</li>
+        
+      </ul>
+    </section>
+    
+
+    <section>
+      <h3>Quick Reference</h3>
+      <ul class="sidebar-list">
+        <li><strong>ID:</strong> CME-919</li>
+        <li><strong>Tactic:</strong> Harden</li>
+        <li><strong>Layer:</strong> Application</li>
+        <li><strong>CWEs:</strong> 3</li>
+        <li><strong>CVSS Mods:</strong> 2</li>
+      </ul>
+    </section>
+  </aside>
+</div>
+
+  </main>
+
+  <footer class="site-footer">
+    Generated 2026-07-01 03:19 UTC &middot; 118 entries &middot;
+    Common Mitigation Enumeration (CME)
+  </footer>
+</body>
+</html>

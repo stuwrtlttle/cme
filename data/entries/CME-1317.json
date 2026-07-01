@@ -1,0 +1,59 @@
+{
+  "cme_id": "CME-1317",
+  "control_name": "XML External Entity Prevention (Secure XML Parser Configuration)",
+  "description": "Configures XML parsers to disable external entity resolution, DTD processing, and XInclude expansion, preventing XXE attacks that exploit default-permissive XML parser behavior to read local files, perform SSRF, or cause denial of service via entity expansion (billion laughs). Covers all major XML parsing APIs: Java (DocumentBuilderFactory, SAXParserFactory, XMLInputFactory with FEATURE_SECURE_PROCESSING and disallow-doctype-decl), Python (defusedxml, lxml with resolve_entities=False), .NET (XmlReaderSettings with DtdProcessing.Prohibit), PHP (libxml_disable_entity_loader), C/C++ (libxml2 without XML_PARSE_NOENT), and Go (xml.Decoder with strict mode). The control must be applied at parser instantiation — not as post-parse validation — because entity resolution occurs during parsing. When XML input is required but DTDs are needed for schema validation, use catalog-based resolution with a local-only catalog that rejects network fetches.",
+  "tactic": "Harden",
+  "category": "Application Input Validation",
+  "category_id": "application-input-validation",
+  "control_layer": "Application",
+  "cvss_vector_impacts": [
+    {
+      "metric": "C",
+      "from": "H",
+      "to": "N",
+      "rationale": "External entity resolution is disabled at the parser level; the attacker cannot use file:// or http:// entity references to read local files or probe internal services because the parser rejects all external entity declarations before resolution occurs"
+    },
+    {
+      "metric": "A",
+      "from": "H",
+      "to": "N",
+      "rationale": "DTD processing is disabled, preventing entity expansion bombs (billion laughs) that cause exponential memory consumption; the parser rejects DOCTYPE declarations before recursive entity expansion begins"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-611",
+    "CWE-776",
+    "CWE-827"
+  ],
+  "verification": {
+    "method": "Verify that XML parsers are configured to disable external entities and DTD processing across all application languages in use",
+    "commands": [
+      {
+        "command": "grep -rn 'FEATURE_SECURE_PROCESSING\\|disallow-doctype-decl\\|XMLConstants\\|setFeature.*external' <app_source>/",
+        "expected": "Secure XML parsing features enabled in Java XML parser configuration",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'defusedxml\\|resolve_entities.*False\\|no_network.*True\\|etree.XMLParser.*resolve_entities' <app_source>/",
+        "expected": "Python XML parsing uses defusedxml or explicitly disables entity resolution",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'DtdProcessing.Prohibit\\|ProhibitDtd.*true\\|XmlReaderSettings' <app_source>/",
+        "expected": ".NET XML parsing prohibits DTD processing",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'libxml_disable_entity_loader\\|LIBXML_NOENT\\|XML_PARSE_NOENT' <app_source>/",
+        "expected": "PHP/C XML parsing has external entity loading disabled",
+        "platform": "any"
+      }
+    ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "Any",
+    "Windows Server 2019",
+    "Windows Server 2022"
+  ]
+}

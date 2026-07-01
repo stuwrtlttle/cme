@@ -16,7 +16,8 @@
   ],
   "cwe_relationships": [
     "CWE-345",
-    "CWE-494"
+    "CWE-494",
+    "CWE-347"
   ],
   "verification": {
     "method": "Verify gpgcheck enabled for all repos",

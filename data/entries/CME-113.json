@@ -18,7 +18,8 @@
     "CWE-119",
     "CWE-120",
     "CWE-787",
-    "CWE-416"
+    "CWE-416",
+    "CWE-843"
   ],
   "verification": {
     "method": "Check kernel config for CFI or Shadow Call Stack",
