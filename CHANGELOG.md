@@ -4,6 +4,60 @@ All notable changes to the CME (Common Mitigation Enumeration) project are docum
 
 ## 2026-06-30
 
+### CWE Coverage Gap Analysis: 6 New Entries + 18 Enrichments (`4856352`)
+
+Systematic gap analysis of 9,265 Critical/Important OSIDB flaws from the past 90 days against the full CME taxonomy. Cross-referenced CWE distributions across 800 sampled flaws against the 101 covered CWEs, identifying 9 true coverage gaps, 8 parent-covered child CWEs, and 6 thin-coverage areas. Taxonomy grew from 112 → 118 entries covering 101 → 121 CWEs.
+
+**New entries:**
+
+- **CME-208: Outbound Network Egress Restriction (SSRF Blast Radius Containment)** — Network-layer egress filtering (firewalld/nftables, Kubernetes NetworkPolicy, cloud security groups) blocking application workloads from reaching RFC1918 ranges, cloud metadata (169.254.169.254), and localhost. Defense-in-depth complement to CME-1304's application-level SSRF URL validation — blocks SSRF even when URL validation is bypassed via DNS rebinding, IPv6-mapped addresses, or redirect chains. Tactic: Isolate. CVSS: C:H→L, S:C→U. CWEs: CWE-918, CWE-441.
+
+- **CME-508: Quoted Service Path Enforcement (Windows)** — Ensures all Windows service executable paths and scheduled task binaries are quoted when containing spaces, preventing unquoted search path interception where an attacker places a malicious binary at a path prefix (e.g., `C:\Program.exe` intercepting `C:\Program Files\My App\service.exe`). Includes filesystem ACL verification on path prefix directories. Complements CME-507 (Secure Dynamic Linker Configuration) for the Windows attack surface. CVSS: AC:L→H, PR:L→H. CWEs: CWE-428, CWE-426.
+
+- **CME-807: Session Lifetime and Idle Timeout Enforcement** — Enforces absolute session duration limits, idle inactivity timeouts, server-side session invalidation on logout, and session invalidation on security-relevant account changes. Covers Java web.xml session-timeout, Django SESSION_COOKIE_AGE, Rails expire_after, Keycloak/RHSSO token lifetime, and Windows InactivityTimeoutSecs policy. CVSS: AC:L→H, PR:N→L. CWEs: CWE-613, CWE-384, CWE-539.
+
+- **CME-918: URL Path Authorization Enforcement (Forced Browsing Prevention)** — Infrastructure-level default-deny URL filtering at the web server or reverse proxy layer (Apache Location/Require, nginx location blocks, IIS URL Authorization) preventing direct access to admin consoles, debug endpoints, and internal APIs. Complements CME-907/CME-909 application-layer authorization. CVSS: PR:N→L, AC:L→H. CWEs: CWE-425, CWE-862, CWE-306, CWE-284.
+
+- **CME-919: JIT Compiler Hardening (JIT Restriction / V8 Sandbox)** — Three postures for hardening JIT compilation in browser engines and runtimes: JIT disabling (V8 --jitless, Firefox javascript.options.ion), V8 Sandbox enforcement (hardware-backed memory cage isolating JIT code), and JIT tiering restrictions. Targets Chromium, Node.js, Electron, and SpiderMonkey. Complements CME-113 (CFI) for native code. CVSS: AC:L→H, S:C→U. CWEs: CWE-843, CWE-119, CWE-787.
+
+- **CME-1317: XML External Entity Prevention (Secure XML Parser Configuration)** — Disables external entity resolution, DTD processing, and XInclude expansion across all major XML APIs: Java (FEATURE_SECURE_PROCESSING, disallow-doctype-decl), Python (defusedxml), .NET (DtdProcessing.Prohibit), PHP (libxml_disable_entity_loader), C/C++ (libxml2). Prevents XXE file read, SSRF, and billion-laughs DoS. CVSS: C:H→N, A:H→N. CWEs: CWE-611, CWE-776, CWE-827.
+
+**Enrichments (child CWE mappings added to existing entries):**
+
+| Existing Entry | Added CWE(s) | Rationale |
+|---|---|---|
+| CME-111, CME-406, CME-504, CME-505 | CWE-347 | Parent CWE-345 entries directly verify cryptographic signatures |
+| CME-801 | CWE-303, CWE-305 | MFA compensates for broken/bypassed primary auth |
+| CME-806 | CWE-303 | Kerberos replaces custom auth with proven protocol |
+| CME-113 | CWE-843 | CFI prevents type-confused control flow redirection |
+| CME-116, CME-1311 | CWE-130 | FORTIFY_SOURCE and bounds enforcement catch length mismatches |
+| CME-301, CME-601, CME-701 | CWE-653 | SELinux, seccomp, and gVisor provide compartmentalization |
+| CME-709 | CWE-367, CWE-362 | PrivateTmp eliminates shared-directory TOCTOU attack surface |
+| CME-909 | CWE-551 | Default-deny covers authorization bypass via uncovered code paths |
+| CME-1310, CME-1315 | CWE-1286 | Upload validation and allowlists enforce syntactic correctness |
+| CME-1314 | CWE-1289 | Canonicalization prevents unsafe equivalence bypass |
+| CME-1315 | CWE-601 | Allowlist validation covers redirect destination filtering |
+| CME-1302 | CWE-1188 | + Java `jdk.serialFilter` and .NET `TypeNameHandling` verification commands |
+
+**Assessed and skipped (no action needed):**
+
+- CWE-807 (Untrusted Inputs in Security Decision) — too abstract; concrete vectors covered by CME-1314/1315
+- CWE-1395 (Vulnerable Third-Party Component) — supply chain process weakness; patching covered by CME-1101
+- CWE-280 (Improper Handling of Insufficient Permissions) — code-quality issue, not mitigable by deployable control
+- CWE-434 (Unrestricted Upload) — CME-1310 already comprehensive
+- CWE-639 (IDOR) — strong layered coverage via CME-907 + CME-908 + CME-909 + CME-906
+- CWE-917 (Expression Language Injection) — CME-1309 covers all three defensive postures
+
+### CWE-1333 Gap Coverage: CME-1316 (`a8f1ee3`)
+
+Gap analysis of CWE-1333 (Inefficient Regular Expression Complexity) identified 54 IMPORTANT OSIDB flaws (max CVSS 7.5) with zero CME coverage. Related CWE-407 (3 flaws) and CWE-405 also uncovered. Parent CWE-400 covered by 5 generic entries but none addressed the regex/pattern-specific attack surface.
+
+- **CME-1316: Algorithmic Complexity Safeguards (Pattern/Regex Execution Limits)** — Three complementary techniques: (1) execution limits (regex step counts, match timeouts, recursion depth caps), (2) safe engine selection (RE2, Rust regex crate, .NET NonBacktracking), (3) pattern compilation guards (never compiling user-controlled input into regex without escaping). Verification commands for Node.js RE2, Python google-re2, .NET NonBacktracking, and source code pattern scanning. CVSS: A:H→L. CWEs: CWE-1333, CWE-407, CWE-405, CWE-834, CWE-730.
+
+### Windows Platform Coverage for New Entries (`5bd7938`)
+
+Added "Windows Server 2019" and "Windows Server 2022" to the `platforms` array for CME-1314, CME-1315, and CME-1316 to match the established pattern for Tier 2 application-layer entries. Fixed CME-1316's Node.js and Python verification commands from `platform: "linux"` to `platform: "any"` (these runtimes are cross-platform).
+
 ### CWE-184 Gap Coverage: CME-1314, CME-1315 (`1754372`)
 
 Gap analysis of CWE-184 (Incomplete List of Disallowed Inputs) identified 26 OSIDB flaws in 6 months (7 CRITICAL, max CVSS 9.9) with no root-cause CME coverage. Existing entries covered specific instances (SSRF, deserialization, XSS, sandbox, path traversal) but the cross-cutting validation design principles were missing. Two new entries close this gap:
