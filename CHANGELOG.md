@@ -2,6 +2,12 @@
 
 All notable changes to the CME (Common Mitigation Enumeration) project are documented here.
 
+## 2026-07-01
+
+### Auto-generated changelog
+
+- `c11ee2f` Add GitHub Actions workflow to auto-update CHANGELOG on push to main
+
 ## 2026-06-30
 
 ### CWE Coverage Gap Analysis: 6 New Entries + 18 Enrichments (`4856352`)
