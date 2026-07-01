@@ -462,7 +462,7 @@
     <div class="sr-desc">Harden the dynamic linker search path and execution environment to prevent library injection and PATH manipulation attacks. Verify that /etc/ld.so.con...</div>
   </li>
   
-  <li data-search="cme-508 quoted service path enforcement (windows) ensures all windows service executable paths and scheduled task binaries are enclosed in double quotes when they contain spaces, preventing unquoted search path interception attacks. when a service binary path like c:\program files\my app\service.exe is registered without quotes, windows tries to execute c:\program.exe, then c:\program files\my.exe, then c:\program files\my app\service.exe in order. an attacker who can write to c:\ or c:\program files\ can place a malicious executable that runs as system before the intended service binary. remediation requires auditing all service paths and scheduled task paths, enclosing them in double quotes, and enforcing filesystem acls preventing non-admin writes to path prefix directories. complements cme-507 (secure dynamic linker configuration) which addresses the analogous linux attack surface (ld_preload, rpath injection). software integrity harden os/kernel cwe-428 cwe-426">
+  <li data-search="cme-508 quoted service path enforcement (windows) ensures all windows service executable paths and scheduled task binaries are enclosed in double quotes when they contain spaces, preventing unquoted search path interception attacks. when a service binary path like c:\program files\my app\service.exe is registered without quotes, windows tries to execute c:\program.exe, then c:\program files\my.exe, then c:\program files\my app\service.exe in order. an attacker who can write to c:\ or c:\program files\ can place a malicious executable that runs as system before the intended service binary. remediation requires auditing all service paths and scheduled task paths, enclosing them in double quotes, and enforcing filesystem acls preventing non-admin writes to path prefix directories. complements cme-507 (secure dynamic linker configuration) which addresses the analogous linux attack surface (ld_preload, rpath injection). filesystem hardening harden os/kernel cwe-428 cwe-426">
     <div>
       <a href="entries/CME-508.html" class="sr-id">CME-508</a>
       <a href="entries/CME-508.html">Quoted Service Path Enforcement (Windows)</a>
@@ -1238,7 +1238,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-07-01 03:19 UTC &middot; 118 entries &middot;
+    Generated 2026-07-01 03:37 UTC &middot; 118 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>
