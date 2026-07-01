@@ -8,6 +8,11 @@ All notable changes to the CME (Common Mitigation Enumeration) project are docum
 
 - `c11ee2f` Add GitHub Actions workflow to auto-update CHANGELOG on push to main
 
+
+### Auto-generated changelog
+
+- `f49e080` Fix CME-508 category_id: software-integrity → filesystem-hardening
+
 ## 2026-06-30
 
 ### CWE Coverage Gap Analysis: 6 New Entries + 18 Enrichments (`4856352`)
