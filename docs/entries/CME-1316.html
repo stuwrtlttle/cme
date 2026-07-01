@@ -105,7 +105,7 @@
         
       </div>
       
-      <div class="cmd-platform">Platform: linux</div>
+      <div class="cmd-platform">Platform: any</div>
       
       
       <div class="verification-cmd">
@@ -115,7 +115,17 @@
         
       </div>
       
-      <div class="cmd-platform">Platform: linux</div>
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> powershell -Command &#34;try { [System.Text.RegularExpressions.RegexOptions]::NonBacktracking; Write-Host &#39;NonBacktracking mode available (.NET 7+)&#39; } catch { Write-Host &#39;WARNING: NonBacktracking not available — requires .NET 7+&#39; }&#34;
+        
+        <br><span class="cmd-expected"># Expected: NonBacktracking mode available (.NET 7+)</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: windows</div>
       
       
       <div class="verification-cmd">
@@ -168,6 +178,10 @@
         
         <li>Any</li>
         
+        <li>Windows Server 2019</li>
+        
+        <li>Windows Server 2022</li>
+        
       </ul>
     </section>
     
@@ -188,7 +202,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-07-01 02:43 UTC &middot; 112 entries &middot;
+    Generated 2026-07-01 02:52 UTC &middot; 112 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

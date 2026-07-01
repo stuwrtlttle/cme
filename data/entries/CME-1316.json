@@ -27,12 +27,17 @@
       {
         "command": "node -e \"try { require('re2'); console.log('RE2 available') } catch(e) { console.log('RE2 NOT installed — using backtracking engine') }\"",
         "expected": "RE2 available",
-        "platform": "linux"
+        "platform": "any"
       },
       {
         "command": "python3 -c \"import google.re2; print('google-re2 available')\" 2>/dev/null || python3 -c \"import re; print('WARNING: using backtracking re module — consider google-re2 or regex with timeout')\"",
         "expected": "google-re2 available",
-        "platform": "linux"
+        "platform": "any"
+      },
+      {
+        "command": "powershell -Command \"try { [System.Text.RegularExpressions.RegexOptions]::NonBacktracking; Write-Host 'NonBacktracking mode available (.NET 7+)' } catch { Write-Host 'WARNING: NonBacktracking not available — requires .NET 7+' }\"",
+        "expected": "NonBacktracking mode available (.NET 7+)",
+        "platform": "windows"
       },
       {
         "command": "grep -rn 'RegexOptions\\.NonBacktracking\\|RegexOptions\\.MatchTimeout\\|Regex\\.IsMatch.*TimeSpan' <app_source>/ | head -10",
@@ -48,6 +53,8 @@
   },
   "confidence": "High",
   "platforms": [
-    "Any"
+    "Any",
+    "Windows Server 2019",
+    "Windows Server 2022"
   ]
 }
