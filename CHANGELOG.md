@@ -13,6 +13,11 @@ All notable changes to the CME (Common Mitigation Enumeration) project are docum
 
 - `f49e080` Fix CME-508 category_id: software-integrity → filesystem-hardening
 
+
+### Auto-generated changelog
+
+- `2009813` Upgrade GitHub Actions to Node.js 24-compatible versions
+
 ## 2026-06-30
 
 ### CWE Coverage Gap Analysis: 6 New Entries + 18 Enrichments (`4856352`)
