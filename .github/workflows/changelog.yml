@@ -1,0 +1,116 @@
+name: Update Changelog
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  changelog:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate changelog entries
+        id: changelog
+        run: |
+          BEFORE="${{ github.event.before }}"
+          AFTER="${{ github.event.after }}"
+
+          # Handle first push (no before SHA)
+          if [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Get commits in this push, excluding merges and changelog updates
+          ENTRIES=$(git log --no-merges --pretty=format:'- `%h` %s' "$BEFORE".."$AFTER" \
+            | grep -v '^- `[a-f0-9]*` Update CHANGELOG' \
+            | grep -v '\[skip changelog\]' \
+            | grep -v '\[skip ci\]' \
+            || true)
+
+          if [ -z "$ENTRIES" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+
+          # Write entries to a temp file for the next step
+          echo "$ENTRIES" > /tmp/changelog_entries.txt
+
+      - name: Update CHANGELOG.md
+        if: steps.changelog.outputs.skip != 'true'
+        run: |
+          TODAY=$(date -u +%Y-%m-%d)
+          ENTRIES=$(cat /tmp/changelog_entries.txt)
+
+          # Count new CME entries and enrichments from the commit messages
+          NEW_CMES=$(echo "$ENTRIES" | grep -oP 'CME-\d+' | sort -u | tr '\n' ', ' | sed 's/,$//')
+
+          if grep -q "^## $TODAY" CHANGELOG.md; then
+            # Today's header exists — append auto-generated section before the next date header
+            python3 -c "
+          import re, sys
+
+          today = '$TODAY'
+          entries = open('/tmp/changelog_entries.txt').read().strip()
+
+          with open('CHANGELOG.md') as f:
+              content = f.read()
+
+          header = f'## {today}'
+          header_pos = content.find(header)
+          after_header = content[header_pos + len(header):]
+
+          # Find the next date header (## YYYY-MM-DD)
+          next_header = re.search(r'\n## \d{4}-\d{2}-\d{2}', after_header)
+          if next_header:
+              insert_pos = header_pos + len(header) + next_header.start()
+          else:
+              insert_pos = len(content)
+
+          section = f'\n\n### Auto-generated changelog\n\n{entries}\n'
+          new_content = content[:insert_pos] + section + content[insert_pos:]
+
+          with open('CHANGELOG.md', 'w') as f:
+              f.write(new_content)
+          "
+          else
+            # No header for today — prepend new date section after the first line
+            python3 -c "
+          import sys
+
+          today = '$TODAY'
+          entries = open('/tmp/changelog_entries.txt').read().strip()
+
+          with open('CHANGELOG.md') as f:
+              content = f.read()
+
+          # Insert after the preamble (first ## header or after the title lines)
+          first_section = content.find('\n## ')
+          if first_section == -1:
+              first_section = len(content)
+
+          section = f'\n## {today}\n\n### Auto-generated changelog\n\n{entries}\n'
+          new_content = content[:first_section] + section + content[first_section:]
+
+          with open('CHANGELOG.md', 'w') as f:
+              f.write(new_content)
+          "
+          fi
+
+      - name: Commit and push
+        if: steps.changelog.outputs.skip != 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git diff --cached --quiet && exit 0
+          git commit -m "Update CHANGELOG for $(date -u +%Y-%m-%d) [skip ci]"
+          git push
