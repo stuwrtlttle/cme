@@ -8,6 +8,11 @@ All notable changes to the CME (Common Mitigation Enumeration) project are docum
 
 - `5479fa7` Fix MCP server timeouts: async tools, connection pool, batch hydration
 
+
+### Auto-generated changelog
+
+- `6d3f239` Add CME-119: Compiler Integer Overflow and Conversion Safety (-ftrapv / UBSan)
+
 ## 2026-07-01
 
 ### Auto-generated changelog
