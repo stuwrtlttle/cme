@@ -15,10 +15,9 @@ def main():
     if config.DB_BACKEND == "postgres":
         from . import db_postgres as db
         conn = db.get_connection()
-        db.init_db(conn)
+        db.reset_db(conn)
     else:
         from . import db
-        # Remove existing DB to rebuild fresh
         if db.DEFAULT_DB_PATH.exists():
             db.DEFAULT_DB_PATH.unlink()
         conn = db.get_connection()

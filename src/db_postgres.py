@@ -1,102 +1,125 @@
 """CME Database layer — PostgreSQL backend for multi-user deployments."""
 
 import json
+from collections import defaultdict
 
 import psycopg
 from psycopg.rows import dict_row
+from psycopg_pool import ConnectionPool
 
 from . import config
 
-_conn = None
+_pool: ConnectionPool | None = None
+
+
+def get_pool() -> ConnectionPool:
+    global _pool
+    if _pool is None:
+        conninfo = (
+            f"host={config.PG_HOST} port={config.PG_PORT} "
+            f"user={config.PG_USER} password={config.PG_PASSWORD} "
+            f"dbname={config.PG_DATABASE}"
+        )
+        _pool = ConnectionPool(
+            conninfo,
+            min_size=2,
+            max_size=10,
+            kwargs={"row_factory": dict_row, "autocommit": True},
+        )
+    return _pool
 
 
 def get_connection() -> psycopg.Connection:
-    global _conn
-    if _conn is None or _conn.closed:
-        _conn = psycopg.connect(
-            host=config.PG_HOST,
-            port=config.PG_PORT,
-            user=config.PG_USER,
-            password=config.PG_PASSWORD,
-            dbname=config.PG_DATABASE,
-            row_factory=dict_row,
-            autocommit=False,
-        )
-    return _conn
+    """Direct connection for seed/migration scripts (not pooled)."""
+    return psycopg.connect(
+        host=config.PG_HOST,
+        port=config.PG_PORT,
+        user=config.PG_USER,
+        password=config.PG_PASSWORD,
+        dbname=config.PG_DATABASE,
+        row_factory=dict_row,
+        autocommit=False,
+    )
+
+
+_CREATE_TABLES = """
+    CREATE TABLE IF NOT EXISTS cme_entries (
+        cme_id          TEXT PRIMARY KEY,
+        control_name    TEXT NOT NULL,
+        description     TEXT NOT NULL,
+        tactic          TEXT NOT NULL CHECK(tactic IN ('Harden','Isolate','Detect','Evict','Restore')),
+        category        TEXT NOT NULL,
+        category_id     TEXT NOT NULL,
+        control_layer   TEXT NOT NULL CHECK(control_layer IN ('Network','OS/Kernel','Application','Data','Identity')),
+        confidence      TEXT CHECK(confidence IN ('High','Medium','Low')),
+        platforms_json  TEXT,
+        d3fend_technique_id   TEXT,
+        d3fend_technique_name TEXT,
+        cve_schema_version    TEXT,
+        cve_affected_json     TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS cvss_vector_impacts (
+        id          SERIAL PRIMARY KEY,
+        cme_id      TEXT NOT NULL REFERENCES cme_entries(cme_id) ON DELETE CASCADE,
+        metric      TEXT NOT NULL CHECK(metric IN ('AV','AC','PR','UI','S','C','I','A')),
+        from_value  TEXT NOT NULL,
+        to_value    TEXT NOT NULL,
+        rationale   TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS cwe_relationships (
+        id      SERIAL PRIMARY KEY,
+        cme_id  TEXT NOT NULL REFERENCES cme_entries(cme_id) ON DELETE CASCADE,
+        cwe_id  TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS verification_commands (
+        id          SERIAL PRIMARY KEY,
+        cme_id      TEXT NOT NULL REFERENCES cme_entries(cme_id) ON DELETE CASCADE,
+        method      TEXT,
+        command     TEXT NOT NULL,
+        expected    TEXT NOT NULL,
+        platform    TEXT DEFAULT 'linux'
+    );
+
+    CREATE TABLE IF NOT EXISTS references_ (
+        id      SERIAL PRIMARY KEY,
+        cme_id  TEXT NOT NULL REFERENCES cme_entries(cme_id) ON DELETE CASCADE,
+        source  TEXT NOT NULL,
+        url     TEXT,
+        section TEXT
+    );
+"""
+
+_CREATE_INDEXES = [
+    "CREATE INDEX IF NOT EXISTS idx_entries_tactic ON cme_entries(tactic)",
+    "CREATE INDEX IF NOT EXISTS idx_entries_layer ON cme_entries(control_layer)",
+    "CREATE INDEX IF NOT EXISTS idx_entries_category ON cme_entries(category)",
+    "CREATE INDEX IF NOT EXISTS idx_entries_category_id ON cme_entries(category_id)",
+    "CREATE INDEX IF NOT EXISTS idx_cvss_cme ON cvss_vector_impacts(cme_id)",
+    "CREATE INDEX IF NOT EXISTS idx_cwe_cme ON cwe_relationships(cme_id)",
+    "CREATE INDEX IF NOT EXISTS idx_cwe_id ON cwe_relationships(cwe_id)",
+]
 
 
 def init_db(conn: psycopg.Connection) -> None:
+    """Create tables and indexes if they don't exist (non-destructive)."""
+    for statement in _CREATE_TABLES.split(";"):
+        statement = statement.strip()
+        if statement:
+            conn.execute(statement)
+    for stmt in _CREATE_INDEXES:
+        conn.execute(stmt)
+    conn.commit()
+
+
+def reset_db(conn: psycopg.Connection) -> None:
+    """Drop all tables and recreate — used only by the seed script."""
     for table in ["references_", "verification_commands", "cwe_relationships",
                   "cvss_vector_impacts", "cme_entries"]:
         conn.execute(f"DROP TABLE IF EXISTS {table} CASCADE")
-
-    conn.execute("""
-        CREATE TABLE cme_entries (
-            cme_id          TEXT PRIMARY KEY,
-            control_name    TEXT NOT NULL,
-            description     TEXT NOT NULL,
-            tactic          TEXT NOT NULL CHECK(tactic IN ('Harden','Isolate','Detect','Evict','Restore')),
-            category        TEXT NOT NULL,
-            category_id     TEXT NOT NULL,
-            control_layer   TEXT NOT NULL CHECK(control_layer IN ('Network','OS/Kernel','Application','Data','Identity')),
-            confidence      TEXT CHECK(confidence IN ('High','Medium','Low')),
-            platforms_json  TEXT,
-            d3fend_technique_id   TEXT,
-            d3fend_technique_name TEXT,
-            cve_schema_version    TEXT,
-            cve_affected_json     TEXT
-        )
-    """)
-    conn.execute("""
-        CREATE TABLE cvss_vector_impacts (
-            id          SERIAL PRIMARY KEY,
-            cme_id      TEXT NOT NULL REFERENCES cme_entries(cme_id) ON DELETE CASCADE,
-            metric      TEXT NOT NULL CHECK(metric IN ('AV','AC','PR','UI','S','C','I','A')),
-            from_value  TEXT NOT NULL,
-            to_value    TEXT NOT NULL,
-            rationale   TEXT
-        )
-    """)
-    conn.execute("""
-        CREATE TABLE cwe_relationships (
-            id      SERIAL PRIMARY KEY,
-            cme_id  TEXT NOT NULL REFERENCES cme_entries(cme_id) ON DELETE CASCADE,
-            cwe_id  TEXT NOT NULL
-        )
-    """)
-    conn.execute("""
-        CREATE TABLE verification_commands (
-            id          SERIAL PRIMARY KEY,
-            cme_id      TEXT NOT NULL REFERENCES cme_entries(cme_id) ON DELETE CASCADE,
-            method      TEXT,
-            command     TEXT NOT NULL,
-            expected    TEXT NOT NULL,
-            platform    TEXT DEFAULT 'linux'
-        )
-    """)
-    conn.execute("""
-        CREATE TABLE references_ (
-            id      SERIAL PRIMARY KEY,
-            cme_id  TEXT NOT NULL REFERENCES cme_entries(cme_id) ON DELETE CASCADE,
-            source  TEXT NOT NULL,
-            url     TEXT,
-            section TEXT
-        )
-    """)
-
-    # Create indexes (IF NOT EXISTS works for indexes in PostgreSQL)
-    for stmt in [
-        "CREATE INDEX IF NOT EXISTS idx_entries_tactic ON cme_entries(tactic)",
-        "CREATE INDEX IF NOT EXISTS idx_entries_layer ON cme_entries(control_layer)",
-        "CREATE INDEX IF NOT EXISTS idx_entries_category ON cme_entries(category)",
-        "CREATE INDEX IF NOT EXISTS idx_entries_category_id ON cme_entries(category_id)",
-        "CREATE INDEX IF NOT EXISTS idx_cvss_cme ON cvss_vector_impacts(cme_id)",
-        "CREATE INDEX IF NOT EXISTS idx_cwe_cme ON cwe_relationships(cme_id)",
-        "CREATE INDEX IF NOT EXISTS idx_cwe_id ON cwe_relationships(cwe_id)",
-    ]:
-        conn.execute(stmt)
-
-    conn.commit()
+    init_db(conn)
 
 
 def insert_entry(conn: psycopg.Connection, entry: dict) -> None:
@@ -139,7 +162,6 @@ def insert_entry(conn: psycopg.Connection, entry: dict) -> None:
         },
     )
 
-    # Clear child rows for upsert
     for table in ("cvss_vector_impacts", "cwe_relationships", "verification_commands", "references_"):
         conn.execute(f"DELETE FROM {table} WHERE cme_id = %(cme_id)s", {"cme_id": entry["cme_id"]})
 
@@ -181,7 +203,7 @@ def get_entry(conn: psycopg.Connection, cme_id: str) -> dict | None:
     row = conn.execute("SELECT * FROM cme_entries WHERE cme_id = %(cme_id)s", {"cme_id": cme_id}).fetchone()
     if not row:
         return None
-    return _hydrate(conn, dict(row))
+    return _hydrate_batch(conn, [dict(row)])[0]
 
 
 def search_entries(
@@ -211,7 +233,7 @@ def search_entries(
     rows = conn.execute(
         f"SELECT * FROM cme_entries WHERE {where} ORDER BY cme_id", params
     ).fetchall()
-    return [_hydrate(conn, dict(r)) for r in rows]
+    return _hydrate_batch(conn, [dict(r) for r in rows])
 
 
 def get_mitigations_for_cwe(conn: psycopg.Connection, cwe_id: str) -> list[dict]:
@@ -222,13 +244,12 @@ def get_mitigations_for_cwe(conn: psycopg.Connection, cwe_id: str) -> list[dict]
            ORDER BY e.cme_id""",
         {"cwe_id": cwe_id},
     ).fetchall()
-    return [_hydrate(conn, dict(r)) for r in rows]
+    return _hydrate_batch(conn, [dict(r) for r in rows])
 
 
 def get_attenuation_for_cve(conn: psycopg.Connection, active_cme_ids: list[str]) -> list[dict]:
     if not active_cme_ids:
         return []
-    # Use ANY for array-based IN clause
     rows = conn.execute(
         """SELECT e.cme_id, e.control_name, v.metric, v.from_value, v.to_value, v.rationale
            FROM cme_entries e
@@ -310,57 +331,81 @@ def get_entries_with_cve_affected(conn: psycopg.Connection) -> list[dict]:
            WHERE cve_affected_json IS NOT NULL
            ORDER BY cme_id"""
     ).fetchall()
-    return [_hydrate(conn, dict(r)) for r in rows]
+    return _hydrate_batch(conn, [dict(r) for r in rows])
 
 
-def _hydrate(conn: psycopg.Connection, entry: dict) -> dict:
-    cme_id = entry["cme_id"]
-    entry["platforms"] = json.loads(entry.pop("platforms_json") or "[]")
+def _hydrate_batch(conn: psycopg.Connection, entries: list[dict]) -> list[dict]:
+    """Hydrate a list of entries with child rows in 4 bulk queries instead of 4*N."""
+    if not entries:
+        return []
 
-    cve_affected_raw = entry.pop("cve_affected_json", None)
-    if cve_affected_raw:
-        entry["cve_affected"] = json.loads(cve_affected_raw)
-    schema_version = entry.pop("cve_schema_version", None)
-    if schema_version:
-        entry["cve_schema_version"] = schema_version
+    cme_ids = [e["cme_id"] for e in entries]
 
-    if entry.get("d3fend_technique_id"):
-        entry["d3fend_mapping"] = {
-            "technique_id": entry.pop("d3fend_technique_id"),
-            "technique_name": entry.pop("d3fend_technique_name"),
-        }
-    else:
-        entry.pop("d3fend_technique_id", None)
-        entry.pop("d3fend_technique_name", None)
+    impacts_by_id: dict[str, list] = defaultdict(list)
+    for r in conn.execute(
+        "SELECT cme_id, metric, from_value, to_value, rationale FROM cvss_vector_impacts WHERE cme_id = ANY(%(ids)s)",
+        {"ids": cme_ids},
+    ).fetchall():
+        impacts_by_id[r["cme_id"]].append(
+            {"metric": r["metric"], "from": r["from_value"], "to": r["to_value"], "rationale": r["rationale"]}
+        )
 
-    impacts = conn.execute(
-        "SELECT metric, from_value, to_value, rationale FROM cvss_vector_impacts WHERE cme_id = %(id)s",
-        {"id": cme_id},
-    ).fetchall()
-    entry["cvss_vector_impacts"] = [
-        {"metric": r["metric"], "from": r["from_value"], "to": r["to_value"], "rationale": r["rationale"]}
-        for r in impacts
-    ]
+    cwes_by_id: dict[str, list] = defaultdict(list)
+    for r in conn.execute(
+        "SELECT cme_id, cwe_id FROM cwe_relationships WHERE cme_id = ANY(%(ids)s)",
+        {"ids": cme_ids},
+    ).fetchall():
+        cwes_by_id[r["cme_id"]].append(r["cwe_id"])
 
-    cwes = conn.execute(
-        "SELECT cwe_id FROM cwe_relationships WHERE cme_id = %(id)s", {"id": cme_id}
-    ).fetchall()
-    entry["cwe_relationships"] = [r["cwe_id"] for r in cwes]
+    vcmds_by_id: dict[str, list] = defaultdict(list)
+    methods_by_id: dict[str, str | None] = {}
+    for r in conn.execute(
+        "SELECT cme_id, method, command, expected, platform FROM verification_commands WHERE cme_id = ANY(%(ids)s)",
+        {"ids": cme_ids},
+    ).fetchall():
+        vcmds_by_id[r["cme_id"]].append(
+            {"command": r["command"], "expected": r["expected"], "platform": r["platform"]}
+        )
+        if r["cme_id"] not in methods_by_id:
+            methods_by_id[r["cme_id"]] = r["method"]
 
-    vcmds = conn.execute(
-        "SELECT method, command, expected, platform FROM verification_commands WHERE cme_id = %(id)s",
-        {"id": cme_id},
-    ).fetchall()
-    if vcmds:
-        entry["verification"] = {
-            "method": vcmds[0]["method"],
-            "commands": [{"command": r["command"], "expected": r["expected"], "platform": r["platform"]} for r in vcmds],
-        }
+    refs_by_id: dict[str, list] = defaultdict(list)
+    for r in conn.execute(
+        "SELECT cme_id, source, url, section FROM references_ WHERE cme_id = ANY(%(ids)s)",
+        {"ids": cme_ids},
+    ).fetchall():
+        refs_by_id[r["cme_id"]].append({"source": r["source"], "url": r["url"], "section": r["section"]})
 
-    refs = conn.execute(
-        "SELECT source, url, section FROM references_ WHERE cme_id = %(id)s", {"id": cme_id}
-    ).fetchall()
-    if refs:
-        entry["references"] = [dict(r) for r in refs]
+    for entry in entries:
+        cme_id = entry["cme_id"]
+        entry["platforms"] = json.loads(entry.pop("platforms_json") or "[]")
 
-    return entry
+        cve_affected_raw = entry.pop("cve_affected_json", None)
+        if cve_affected_raw:
+            entry["cve_affected"] = json.loads(cve_affected_raw)
+        schema_version = entry.pop("cve_schema_version", None)
+        if schema_version:
+            entry["cve_schema_version"] = schema_version
+
+        if entry.get("d3fend_technique_id"):
+            entry["d3fend_mapping"] = {
+                "technique_id": entry.pop("d3fend_technique_id"),
+                "technique_name": entry.pop("d3fend_technique_name"),
+            }
+        else:
+            entry.pop("d3fend_technique_id", None)
+            entry.pop("d3fend_technique_name", None)
+
+        entry["cvss_vector_impacts"] = impacts_by_id.get(cme_id, [])
+        entry["cwe_relationships"] = cwes_by_id.get(cme_id, [])
+
+        if cme_id in vcmds_by_id:
+            entry["verification"] = {
+                "method": methods_by_id.get(cme_id),
+                "commands": vcmds_by_id[cme_id],
+            }
+
+        if cme_id in refs_by_id:
+            entry["references"] = refs_by_id[cme_id]
+
+    return entries

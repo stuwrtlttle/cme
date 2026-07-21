@@ -3,12 +3,12 @@
 import json
 from pathlib import Path
 
+import anyio
 from jsonschema import Draft202012Validator
 from mcp.server.fastmcp import FastMCP
 
 from . import config
 
-# Select database backend based on configuration
 if config.DB_BACKEND == "postgres":
     from . import db_postgres as db
 else:
@@ -31,35 +31,53 @@ mcp = FastMCP(
     port=config.HTTP_PORT,
 )
 
-_conn = None
+
+def _db_op(fn):
+    """Run a sync DB operation in a thread, with a pooled connection for postgres."""
+    if config.DB_BACKEND == "postgres":
+        pool = db.get_pool()
+        with pool.connection() as conn:
+            return fn(conn)
+    else:
+        conn = _get_sqlite_conn()
+        return fn(conn)
 
 
-def _get_db():
-    global _conn
-    if _conn is None:
-        _conn = db.get_connection()
-        db.init_db(_conn)
-    return _conn
+_sqlite_conn = None
+
+
+def _get_sqlite_conn():
+    global _sqlite_conn
+    if _sqlite_conn is None:
+        _sqlite_conn = db.get_connection()
+        db.init_db(_sqlite_conn)
+    return _sqlite_conn
+
+
+async def _run_db(fn):
+    """Run a sync DB callable off the event loop."""
+    return await anyio.to_thread.run_sync(lambda: _db_op(fn))
 
 
 # --- Query Tools ---
 
 
 @mcp.tool()
-def get_cme_entry(cme_id: str) -> str:
+async def get_cme_entry(cme_id: str) -> str:
     """Look up a specific CME entry by its ID (e.g., CME-101, CME-602).
 
     Returns the full entry including description, CVSS vector impacts,
     CWE relationships, verification commands, and references.
     """
-    entry = db.get_entry(_get_db(), cme_id.upper())
+    cme_id_upper = cme_id.upper()
+    entry = await _run_db(lambda conn: db.get_entry(conn, cme_id_upper))
     if not entry:
         return json.dumps({"error": f"No entry found for {cme_id}"})
     return json.dumps(entry, indent=2)
 
 
 @mcp.tool()
-def search_cme(
+async def search_cme(
     tactic: str = "",
     category: str = "",
     category_id: str = "",
@@ -83,18 +101,18 @@ def search_cme(
         if category_id in cats:
             resolved_category = cats[category_id]["name"]
 
-    results = db.search_entries(
-        _get_db(),
+    results = await _run_db(lambda conn: db.search_entries(
+        conn,
         tactic=tactic or None,
         category=resolved_category,
         control_layer=control_layer or None,
         keyword=keyword or None,
-    )
+    ))
     return json.dumps(results, indent=2)
 
 
 @mcp.tool()
-def get_mitigations_for_weakness(cwe_id: str) -> str:
+async def get_mitigations_for_weakness(cwe_id: str) -> str:
     """Find all CME mitigations that address a specific CWE weakness.
 
     Args:
@@ -106,14 +124,14 @@ def get_mitigations_for_weakness(cwe_id: str) -> str:
     cwe = cwe_id.upper()
     if not cwe.startswith("CWE-"):
         cwe = f"CWE-{cwe}"
-    results = db.get_mitigations_for_cwe(_get_db(), cwe)
+    results = await _run_db(lambda conn: db.get_mitigations_for_cwe(conn, cwe))
     if not results:
         return json.dumps({"message": f"No mitigations found for {cwe}", "cwe_id": cwe})
     return json.dumps(results, indent=2)
 
 
 @mcp.tool()
-def calculate_attenuation(active_cme_ids: list[str]) -> str:
+async def calculate_attenuation(active_cme_ids: list[str]) -> str:
     """Calculate CVSS risk attenuation for a set of active CME controls.
 
     Given a list of CME-IDs that are verified active on a target system,
@@ -133,11 +151,10 @@ def calculate_attenuation(active_cme_ids: list[str]) -> str:
         4. Apply modifications to CVSS base score for environmental score
     """
     ids = [i.upper() for i in active_cme_ids]
-    impacts = db.get_attenuation_for_cve(_get_db(), ids)
+    impacts = await _run_db(lambda conn: db.get_attenuation_for_cve(conn, ids))
     if not impacts:
         return json.dumps({"message": "No impacts found for provided CME-IDs", "provided": ids})
 
-    # Aggregate by metric — take the most restrictive (best defense) for each metric
     aggregated: dict[str, dict] = {}
     details = []
     for impact in impacts:
@@ -151,7 +168,6 @@ def calculate_attenuation(active_cme_ids: list[str]) -> str:
             }
         else:
             aggregated[metric]["contributing_controls"].append(impact["cme_id"])
-            # Keep the more restrictive value
             severity_order = {"N": 0, "L": 1, "A": 2, "P": 3, "U": 4, "H": 5, "C": 6}
             current = severity_order.get(aggregated[metric]["modified_to"], 99)
             new = severity_order.get(impact["to_value"], 99)
@@ -166,14 +182,16 @@ def calculate_attenuation(active_cme_ids: list[str]) -> str:
 
 
 @mcp.tool()
-def list_cme_taxonomy() -> str:
+async def list_cme_taxonomy() -> str:
     """List the full CME taxonomy structure — all tactics and categories with entry counts.
 
     Returns a hierarchical view of the taxonomy including category registry metadata
     (descriptions, expected coverage scope) for navigation, discovery, and gap analysis.
     """
-    tactics = db.list_tactics(_get_db())
-    categories = db.list_categories(_get_db())
+    def _query(conn):
+        return db.list_tactics(conn), db.list_categories(conn)
+
+    tactics, categories = await _run_db(_query)
     category_registry = _load_categories()
     return json.dumps({
         "tactics": tactics,
@@ -183,7 +201,7 @@ def list_cme_taxonomy() -> str:
 
 
 @mcp.tool()
-def get_verification_commands(cme_id: str) -> str:
+async def get_verification_commands(cme_id: str) -> str:
     """Get the machine-executable verification commands for a specific CME control.
 
     Returns shell commands that a scanner or agent can run to verify
@@ -192,7 +210,8 @@ def get_verification_commands(cme_id: str) -> str:
     Args:
         cme_id: CME identifier (e.g., "CME-101")
     """
-    entry = db.get_entry(_get_db(), cme_id.upper())
+    cme_id_upper = cme_id.upper()
+    entry = await _run_db(lambda conn: db.get_entry(conn, cme_id_upper))
     if not entry:
         return json.dumps({"error": f"No entry found for {cme_id}"})
     verification = entry.get("verification", {})
@@ -204,7 +223,7 @@ def get_verification_commands(cme_id: str) -> str:
 
 
 @mcp.tool()
-def simulate_cve_risk(
+async def simulate_cve_risk(
     base_score: float,
     base_vector: str,
     active_cme_ids: list[str],
@@ -223,9 +242,8 @@ def simulate_cve_risk(
     Returns the original vs modified vector with estimated attenuation.
     """
     ids = [i.upper() for i in active_cme_ids]
-    impacts = db.get_attenuation_for_cve(_get_db(), ids)
+    impacts = await _run_db(lambda conn: db.get_attenuation_for_cve(conn, ids))
 
-    # Parse the base vector
     metrics: dict[str, str] = {}
     for part in base_vector.split("/"):
         if ":" in part and not part.startswith("CVSS"):
@@ -247,7 +265,6 @@ def simulate_cve_risk(
                 "rationale": impact["rationale"],
             })
 
-    # Reconstruct modified vector
     prefix = base_vector.split("/")[0] if "/" in base_vector else "CVSS:4.0"
     modified_vector = prefix + "/" + "/".join(f"{k}:{v}" for k, v in modified_metrics.items())
 
@@ -265,7 +282,7 @@ def simulate_cve_risk(
 
 
 @mcp.tool()
-def get_mitigations_for_cvss_vector(cvss_vector: str) -> str:
+async def get_mitigations_for_cvss_vector(cvss_vector: str) -> str:
     """Find CME mitigations that attenuate metrics present in a CVSS vector string.
 
     Parses the vector to extract metric/value pairs (e.g., AV:N, AC:L, S:C),
@@ -288,7 +305,7 @@ def get_mitigations_for_cvss_vector(cvss_vector: str) -> str:
     if not metric_pairs:
         return json.dumps({"error": "No valid CVSS metrics found in vector string"})
 
-    rows = db.get_mitigations_for_vector(_get_db(), metric_pairs)
+    rows = await _run_db(lambda conn: db.get_mitigations_for_vector(conn, metric_pairs))
     if not rows:
         return json.dumps({
             "message": "No CME entries attenuate the metrics in this vector",
@@ -314,7 +331,7 @@ def get_mitigations_for_cvss_vector(cvss_vector: str) -> str:
 
 
 @mcp.tool()
-def get_mitigations_for_product(
+async def get_mitigations_for_product(
     cpe: str = "",
     purl: str = "",
     vendor: str = "",
@@ -340,7 +357,7 @@ def get_mitigations_for_product(
     if not any([cpe, purl, vendor, product, platform]):
         return json.dumps({"error": "At least one filter parameter is required"})
 
-    entries = db.get_entries_with_cve_affected(_get_db())
+    entries = await _run_db(lambda conn: db.get_entries_with_cve_affected(conn))
     if not entries:
         return json.dumps({"message": "No entries have cve_affected data yet"})
 
@@ -401,7 +418,7 @@ def get_mitigations_for_product(
 
 
 @mcp.tool()
-def get_cme_coverage_summary() -> str:
+async def get_cme_coverage_summary() -> str:
     """Get a summary of what the CME database currently covers.
 
     Returns CWE weakness coverage (which CWEs have CME mitigations),
@@ -411,17 +428,20 @@ def get_cme_coverage_summary() -> str:
     Useful for identifying gaps in the CME taxonomy — weakness classes
     or attack vectors that lack mitigation entries.
     """
-    summary = db.get_coverage_summary(_get_db())
-    tactics = db.list_tactics(_get_db())
-    categories = db.list_categories(_get_db())
-    summary["tactics"] = tactics
-    summary["categories"] = categories
+    def _query(conn):
+        summary = db.get_coverage_summary(conn)
+        summary["tactics"] = db.list_tactics(conn)
+        summary["categories"] = db.list_categories(conn)
+        return summary
+
+    summary = await _run_db(_query)
     return json.dumps(summary, indent=2)
 
 
 # --- Curation Tools ---
 
 _categories_cache = None
+_schema_cache = None
 
 
 def _load_categories() -> dict:
@@ -433,13 +453,15 @@ def _load_categories() -> dict:
 
 
 def _load_schema() -> dict:
-    with open(SCHEMA_PATH) as f:
-        return json.load(f)
+    global _schema_cache
+    if _schema_cache is None:
+        with open(SCHEMA_PATH) as f:
+            _schema_cache = json.load(f)
+    return _schema_cache
 
 
-def _next_cme_id(category_prefix: int) -> str:
+def _next_cme_id(conn, category_prefix: int) -> str:
     """Find the next available CME-ID in a given number range."""
-    conn = _get_db()
     cats = _load_categories()
     all_starts = sorted({c["id_range_start"] for c in cats.values()})
     idx = all_starts.index(category_prefix)
@@ -460,7 +482,6 @@ def _next_cme_id(category_prefix: int) -> str:
 
     used = {int(r["cme_id"].split("-")[1]) for r in rows}
 
-    # Also check pending proposals to avoid collisions within a session
     PROPOSALS_DIR.mkdir(parents=True, exist_ok=True)
     for path in PROPOSALS_DIR.glob("CME-*.json"):
         num = int(path.stem.split("-")[1])
@@ -479,7 +500,7 @@ def _next_cme_id(category_prefix: int) -> str:
 
 
 @mcp.tool()
-def propose_cme_entry(
+async def propose_cme_entry(
     control_name: str,
     description: str,
     tactic: str,
@@ -534,7 +555,7 @@ def propose_cme_entry(
         return json.dumps({"error": "Either category or category_id is required"})
 
     prefix = cats[resolved_category_id]["id_range_start"]
-    suggested_id = _next_cme_id(prefix)
+    suggested_id = await _run_db(lambda conn: _next_cme_id(conn, prefix))
 
     try:
         cvss_impacts = json.loads(cvss_impacts_json)
@@ -566,7 +587,6 @@ def propose_cme_entry(
             "commands": verification_commands,
         }
 
-    # Validate against schema
     schema = _load_schema()
     validator = Draft202012Validator(schema)
     errors = [e.message for e in validator.iter_errors(entry)]
@@ -577,7 +597,6 @@ def propose_cme_entry(
             "entry": entry,
         }, indent=2)
 
-    # Write to proposals directory
     PROPOSALS_DIR.mkdir(parents=True, exist_ok=True)
     proposal_path = PROPOSALS_DIR / f"{suggested_id}.json"
     with open(proposal_path, "w") as f:
@@ -594,7 +613,7 @@ def propose_cme_entry(
 
 
 @mcp.tool()
-def approve_cme_proposal(cme_id: str) -> str:
+async def approve_cme_proposal(cme_id: str) -> str:
     """Approve a proposed CME entry — move it from proposals to entries and load into the database.
 
     Args:
@@ -608,24 +627,23 @@ def approve_cme_proposal(cme_id: str) -> str:
     with open(proposal_path) as f:
         entry = json.load(f)
 
-    # Validate again
     schema = _load_schema()
     validator = Draft202012Validator(schema)
     errors = [e.message for e in validator.iter_errors(entry)]
     if errors:
         return json.dumps({"error": "Entry fails validation", "details": errors})
 
-    # Move to entries
     entry_path = ENTRIES_DIR / f"{cme_id}.json"
     with open(entry_path, "w") as f:
         json.dump(entry, f, indent=2)
         f.write("\n")
     proposal_path.unlink()
 
-    # Insert into live database
-    conn = _get_db()
-    db.insert_entry(conn, entry)
-    conn.commit()
+    def _insert(conn):
+        with conn.transaction():
+            db.insert_entry(conn, entry)
+
+    await _run_db(_insert)
 
     return json.dumps({
         "status": "approved",
@@ -636,7 +654,7 @@ def approve_cme_proposal(cme_id: str) -> str:
 
 
 @mcp.tool()
-def list_proposals() -> str:
+async def list_proposals() -> str:
     """List all pending CME entry proposals awaiting review."""
     PROPOSALS_DIR.mkdir(parents=True, exist_ok=True)
     proposals = []
@@ -658,15 +676,15 @@ def list_proposals() -> str:
 # --- Resources ---
 
 @mcp.resource("cme://taxonomy")
-def taxonomy_resource() -> str:
+async def taxonomy_resource() -> str:
     """The full CME taxonomy structure."""
-    return list_cme_taxonomy()
+    return await list_cme_taxonomy()
 
 
 @mcp.resource("cme://entry/{cme_id}")
-def entry_resource(cme_id: str) -> str:
+async def entry_resource(cme_id: str) -> str:
     """A specific CME entry by ID."""
-    return get_cme_entry(cme_id)
+    return await get_cme_entry(cme_id)
 
 
 @mcp.resource("cme://schema")

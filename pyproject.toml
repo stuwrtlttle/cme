@@ -6,6 +6,7 @@ requires-python = ">=3.11"
 dependencies = [
     "mcp[cli]",
     "psycopg[binary]",
+    "psycopg-pool",
     "jinja2",
 ]
 
