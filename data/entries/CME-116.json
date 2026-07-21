@@ -20,7 +20,8 @@
     "CWE-122",
     "CWE-787",
     "CWE-190",
-    "CWE-130"
+    "CWE-130",
+    "CWE-681"
   ],
   "confidence": "High",
   "platforms": [
