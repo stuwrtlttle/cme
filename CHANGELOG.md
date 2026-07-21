@@ -2,6 +2,12 @@
 
 All notable changes to the CME (Common Mitigation Enumeration) project are documented here.
 
+## 2026-07-21
+
+### Auto-generated changelog
+
+- `5479fa7` Fix MCP server timeouts: async tools, connection pool, batch hydration
+
 ## 2026-07-01
 
 ### Auto-generated changelog
