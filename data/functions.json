@@ -1,0 +1,128 @@
+{
+  "selinux": {
+    "name": "SELinux",
+    "description": "Kernel-enforced mandatory access control via LSM policy domains. Confines processes to least-privilege security contexts regardless of DAC permissions.",
+    "category_id": "mandatory-access-control",
+    "control_layer": "OS/Kernel",
+    "d3fend_mapping": {
+      "technique_id": "D3-MAC",
+      "technique_name": "Mandatory Access Control"
+    }
+  },
+  "apparmor": {
+    "name": "AppArmor",
+    "description": "Path-based mandatory access control using per-application profiles.",
+    "category_id": "mandatory-access-control",
+    "control_layer": "OS/Kernel",
+    "d3fend_mapping": {
+      "technique_id": "D3-MAC",
+      "technique_name": "Mandatory Access Control"
+    }
+  },
+  "seccomp": {
+    "name": "Seccomp",
+    "description": "Kernel syscall filtering that restricts the system calls a process can invoke, reducing kernel attack surface.",
+    "category_id": "syscall-bpf-controls",
+    "control_layer": "OS/Kernel",
+    "d3fend_mapping": {
+      "technique_id": "D3-SYEF",
+      "technique_name": "System Call Filtering"
+    }
+  },
+  "container-runtime": {
+    "name": "Container Runtime Security",
+    "description": "Container runtime controls including namespace isolation, rootless execution, and sandbox runtimes that strengthen container boundaries.",
+    "category_id": "container-isolation",
+    "control_layer": "OS/Kernel",
+    "d3fend_mapping": {
+      "technique_id": "D3-EI",
+      "technique_name": "Execution Isolation"
+    }
+  },
+  "pod-security": {
+    "name": "Pod Security",
+    "description": "Kubernetes-level controls that enforce security policies on pod specifications, restricting container capabilities and privileges.",
+    "category_id": "container-isolation",
+    "control_layer": "Application",
+    "d3fend_mapping": {
+      "technique_id": "D3-EI",
+      "technique_name": "Execution Isolation"
+    }
+  },
+  "systemd-sandboxing": {
+    "name": "systemd Service Sandboxing",
+    "description": "Process-level isolation using systemd service directives that restrict filesystem access, device access, and privilege escalation paths.",
+    "category_id": "privilege-isolation",
+    "control_layer": "OS/Kernel",
+    "d3fend_mapping": {
+      "technique_id": "D3-EI",
+      "technique_name": "Execution Isolation"
+    }
+  },
+  "authentication-methods": {
+    "name": "Authentication Methods",
+    "description": "Controls that enforce strong authentication mechanisms including multi-factor, key-based, and protocol-level authentication.",
+    "category_id": "credential-hardening",
+    "control_layer": "Identity",
+    "d3fend_mapping": {
+      "technique_id": "D3-MFA",
+      "technique_name": "Multi-factor Authentication"
+    }
+  },
+  "password-policy": {
+    "name": "Password Policy",
+    "description": "Controls that enforce password quality, rotation, and lockout policies to strengthen credential resilience.",
+    "category_id": "credential-hardening",
+    "control_layer": "Identity",
+    "d3fend_mapping": {
+      "technique_id": "D3-SPP",
+      "technique_name": "Strong Password Policy"
+    }
+  },
+  "session-management": {
+    "name": "Session Management",
+    "description": "Controls that manage credential lifecycle including session timeouts, token rotation, and idle session termination.",
+    "category_id": "credential-hardening",
+    "control_layer": "Identity"
+  },
+  "authorization-controls": {
+    "name": "Authorization Controls",
+    "description": "Application-layer controls that enforce role-based access, object-level permissions, and least-privilege authorization policies.",
+    "category_id": "application-controls",
+    "control_layer": "Application",
+    "d3fend_mapping": {
+      "technique_id": "D3-ACL",
+      "technique_name": "Access Control List"
+    }
+  },
+  "origin-cors": {
+    "name": "Origin and CORS Controls",
+    "description": "Browser-enforced controls that restrict cross-origin requests, cookie scope, and CSRF attack vectors.",
+    "category_id": "application-controls",
+    "control_layer": "Application"
+  },
+  "injection-prevention": {
+    "name": "Injection Prevention",
+    "description": "Controls that prevent injection attacks across SQL, command, LDAP, template, and other interpreter-based injection vectors.",
+    "category_id": "application-input-validation",
+    "control_layer": "Application"
+  },
+  "input-validation": {
+    "name": "Input Validation",
+    "description": "Controls that validate, sanitize, and constrain application inputs to prevent traversal, SSRF, file upload abuse, and other input-driven vulnerabilities.",
+    "category_id": "application-input-validation",
+    "control_layer": "Application"
+  },
+  "transport-crypto": {
+    "name": "Transport Cryptography",
+    "description": "Controls that protect data in transit through TLS configuration, SSH hardening, and encrypted tunnel enforcement.",
+    "category_id": "cryptographic-controls",
+    "control_layer": "Network"
+  },
+  "mount-options": {
+    "name": "Mount Option Hardening",
+    "description": "Filesystem mount options that restrict execution, setuid, and device access on mounted filesystems.",
+    "category_id": "filesystem-hardening",
+    "control_layer": "OS/Kernel"
+  }
+}

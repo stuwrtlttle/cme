@@ -19,6 +19,14 @@ def load_categories() -> dict:
         return json.load(f)
 
 
+def load_functions() -> dict:
+    functions_path = Path(__file__).parent.parent / "data" / "functions.json"
+    if not functions_path.exists():
+        return {}
+    with open(functions_path) as f:
+        return json.load(f)
+
+
 def validate_entry(entry: dict, validator: Draft202012Validator) -> list[str]:
     return [e.message for e in validator.iter_errors(entry)]
 
@@ -55,10 +63,13 @@ def validate_dir(
     files: list[Path],
     validator: Draft202012Validator,
     categories: dict,
+    functions: dict | None = None,
 ) -> tuple[bool, dict[str, str]]:
     """Validate a set of CME JSON files against the schema and category registry."""
     errors_found = False
     seen_ids: dict[str, str] = {}
+    if functions is None:
+        functions = {}
 
     for path in files:
         with open(path) as f:
@@ -81,6 +92,15 @@ def validate_dir(
             for e in errs:
                 print(f"FAIL {path.name}: {e}")
             continue
+
+        fid = entry.get("function_id")
+        if fid and fid not in functions:
+            print(f"FAIL {path.name}: function_id '{fid}' not found in functions.json")
+            errors_found = True
+
+        if not fid and not entry.get("control_layer"):
+            print(f"FAIL {path.name}: control_layer is required when function_id is absent")
+            errors_found = True
 
         cat_id = entry.get("category_id", "")
         category = entry.get("category", "")
@@ -112,6 +132,7 @@ def main():
     schema = load_schema()
     validator = Draft202012Validator(schema)
     categories = load_categories()
+    functions = load_functions()
 
     data_dir = Path(__file__).parent.parent / "data"
     entry_files = sorted((data_dir / "entries").glob("CME-*.json"))
@@ -129,13 +150,16 @@ def main():
     if not cat_errors:
         print(f"  OK {len(categories)} categories")
 
+    if functions:
+        print(f"  OK {len(functions)} functions")
+
     print(f"\nValidating {len(entry_files)} entries in data/entries/ ...")
-    entry_errors, entry_ids = validate_dir(entry_files, validator, categories)
+    entry_errors, entry_ids = validate_dir(entry_files, validator, categories, functions)
     errors_found |= entry_errors
 
     if proposal_files:
         print(f"\nValidating {len(proposal_files)} proposals in data/proposals/ ...")
-        proposal_errors, proposal_ids = validate_dir(proposal_files, validator, categories)
+        proposal_errors, proposal_ids = validate_dir(proposal_files, validator, categories, functions)
         errors_found |= proposal_errors
 
         for cme_id, fname in proposal_ids.items():

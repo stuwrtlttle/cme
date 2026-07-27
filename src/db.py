@@ -18,6 +18,16 @@ def get_connection(db_path: Path | None = None) -> sqlite3.Connection:
 
 def init_db(conn: sqlite3.Connection) -> None:
     conn.executescript("""
+        CREATE TABLE IF NOT EXISTS functions (
+            function_id     TEXT PRIMARY KEY,
+            name            TEXT NOT NULL,
+            description     TEXT NOT NULL,
+            category_id     TEXT NOT NULL,
+            control_layer   TEXT NOT NULL CHECK(control_layer IN ('Network','OS/Kernel','Application','Data','Identity')),
+            d3fend_technique_id   TEXT,
+            d3fend_technique_name TEXT
+        );
+
         CREATE TABLE IF NOT EXISTS cme_entries (
             cme_id          TEXT PRIMARY KEY,
             control_name    TEXT NOT NULL,
@@ -25,7 +35,9 @@ def init_db(conn: sqlite3.Connection) -> None:
             tactic          TEXT NOT NULL CHECK(tactic IN ('Harden','Isolate','Detect','Evict','Restore')),
             category        TEXT NOT NULL,
             category_id     TEXT NOT NULL,
-            control_layer   TEXT NOT NULL CHECK(control_layer IN ('Network','OS/Kernel','Application','Data','Identity')),
+            function_id     TEXT REFERENCES functions(function_id),
+            control_layer   TEXT CHECK(control_layer IN ('Network','OS/Kernel','Application','Data','Identity')),
+            attenuation_type TEXT DEFAULT 'deterministic' CHECK(attenuation_type IN ('deterministic','probabilistic')),
             confidence      TEXT CHECK(confidence IN ('High','Medium','Low')),
             platforms_json  TEXT,   -- JSON array
             d3fend_technique_id   TEXT,
@@ -40,7 +52,10 @@ def init_db(conn: sqlite3.Connection) -> None:
             metric      TEXT NOT NULL CHECK(metric IN ('AV','AC','PR','UI','S','C','I','A')),
             from_value  TEXT NOT NULL,
             to_value    TEXT NOT NULL,
-            rationale   TEXT
+            rationale   TEXT,
+            probability     REAL,
+            evidence_basis  TEXT,
+            conditions_json TEXT    -- JSON array of strings
         );
 
         CREATE TABLE IF NOT EXISTS cwe_relationships (
@@ -70,19 +85,40 @@ def init_db(conn: sqlite3.Connection) -> None:
         CREATE INDEX IF NOT EXISTS idx_entries_layer ON cme_entries(control_layer);
         CREATE INDEX IF NOT EXISTS idx_entries_category ON cme_entries(category);
         CREATE INDEX IF NOT EXISTS idx_entries_category_id ON cme_entries(category_id);
+        CREATE INDEX IF NOT EXISTS idx_entries_function ON cme_entries(function_id);
+        CREATE INDEX IF NOT EXISTS idx_entries_attenuation ON cme_entries(attenuation_type);
         CREATE INDEX IF NOT EXISTS idx_cvss_cme ON cvss_vector_impacts(cme_id);
         CREATE INDEX IF NOT EXISTS idx_cwe_cme ON cwe_relationships(cme_id);
         CREATE INDEX IF NOT EXISTS idx_cwe_id ON cwe_relationships(cwe_id);
     """)
 
 
+def insert_function(conn: sqlite3.Connection, function_id: str, func: dict) -> None:
+    conn.execute(
+        """INSERT OR REPLACE INTO functions
+           (function_id, name, description, category_id, control_layer,
+            d3fend_technique_id, d3fend_technique_name)
+           VALUES (?, ?, ?, ?, ?, ?, ?)""",
+        (
+            function_id,
+            func["name"],
+            func["description"],
+            func["category_id"],
+            func["control_layer"],
+            func.get("d3fend_mapping", {}).get("technique_id"),
+            func.get("d3fend_mapping", {}).get("technique_name"),
+        ),
+    )
+
+
 def insert_entry(conn: sqlite3.Connection, entry: dict) -> None:
     conn.execute(
         """INSERT OR REPLACE INTO cme_entries
-           (cme_id, control_name, description, tactic, category, category_id, control_layer,
+           (cme_id, control_name, description, tactic, category, category_id,
+            function_id, control_layer, attenuation_type,
             confidence, platforms_json, d3fend_technique_id, d3fend_technique_name,
             cve_schema_version, cve_affected_json)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (
             entry["cme_id"],
             entry["control_name"],
@@ -90,7 +126,9 @@ def insert_entry(conn: sqlite3.Connection, entry: dict) -> None:
             entry["tactic"],
             entry["category"],
             entry["category_id"],
-            entry["control_layer"],
+            entry.get("function_id"),
+            entry.get("control_layer"),
+            entry.get("attenuation_type", "deterministic"),
             entry.get("confidence"),
             json.dumps(entry.get("platforms", [])),
             entry.get("d3fend_mapping", {}).get("technique_id"),
@@ -106,9 +144,15 @@ def insert_entry(conn: sqlite3.Connection, entry: dict) -> None:
 
     for impact in entry.get("cvss_vector_impacts", []):
         conn.execute(
-            """INSERT INTO cvss_vector_impacts (cme_id, metric, from_value, to_value, rationale)
-               VALUES (?, ?, ?, ?, ?)""",
-            (entry["cme_id"], impact["metric"], impact["from"], impact["to"], impact.get("rationale")),
+            """INSERT INTO cvss_vector_impacts
+               (cme_id, metric, from_value, to_value, rationale, probability, evidence_basis, conditions_json)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                entry["cme_id"], impact["metric"], impact["from"], impact["to"],
+                impact.get("rationale"), impact.get("probability"),
+                impact.get("evidence_basis"),
+                json.dumps(impact["conditions"]) if impact.get("conditions") else None,
+            ),
         )
 
     for cwe in entry.get("cwe_relationships", []):
@@ -131,6 +175,17 @@ def insert_entry(conn: sqlite3.Connection, entry: dict) -> None:
             "INSERT INTO references_ (cme_id, source, url, section) VALUES (?, ?, ?, ?)",
             (entry["cme_id"], ref["source"], ref.get("url"), ref.get("section")),
         )
+
+
+def _hydrate_impact(r) -> dict:
+    impact = {"metric": r["metric"], "from": r["from_value"], "to": r["to_value"], "rationale": r["rationale"]}
+    if r["probability"] is not None:
+        impact["probability"] = r["probability"]
+    if r["evidence_basis"]:
+        impact["evidence_basis"] = r["evidence_basis"]
+    if r["conditions_json"]:
+        impact["conditions"] = json.loads(r["conditions_json"])
+    return impact
 
 
 # --- Query helpers ---
@@ -190,14 +245,24 @@ def get_attenuation_for_cve(
         return []
     placeholders = ",".join("?" for _ in active_cme_ids)
     rows = conn.execute(
-        f"""SELECT e.cme_id, e.control_name, v.metric, v.from_value, v.to_value, v.rationale
+        f"""SELECT e.cme_id, e.control_name, e.attenuation_type,
+                   v.metric, v.from_value, v.to_value, v.rationale,
+                   v.probability, v.evidence_basis, v.conditions_json
             FROM cme_entries e
             JOIN cvss_vector_impacts v ON e.cme_id = v.cme_id
             WHERE e.cme_id IN ({placeholders})
             ORDER BY e.cme_id, v.metric""",
         active_cme_ids,
     ).fetchall()
-    return [dict(r) for r in rows]
+    results = []
+    for r in rows:
+        row = dict(r)
+        if row.get("conditions_json"):
+            row["conditions"] = json.loads(row.pop("conditions_json"))
+        else:
+            row.pop("conditions_json", None)
+        results.append(row)
+    return results
 
 
 def list_tactics(conn: sqlite3.Connection) -> list[dict]:
@@ -263,6 +328,39 @@ def get_coverage_summary(conn: sqlite3.Connection) -> dict:
     }
 
 
+def get_function(conn: sqlite3.Connection, function_id: str) -> dict | None:
+    row = conn.execute("SELECT * FROM functions WHERE function_id = ?", (function_id,)).fetchone()
+    if not row:
+        return None
+    func = dict(row)
+    if func.get("d3fend_technique_id"):
+        func["d3fend_mapping"] = {
+            "technique_id": func.pop("d3fend_technique_id"),
+            "technique_name": func.pop("d3fend_technique_name"),
+        }
+    else:
+        func.pop("d3fend_technique_id", None)
+        func.pop("d3fend_technique_name", None)
+    return func
+
+
+def list_functions(conn: sqlite3.Connection) -> list[dict]:
+    rows = conn.execute("SELECT * FROM functions ORDER BY function_id").fetchall()
+    result = []
+    for row in rows:
+        func = dict(row)
+        if func.get("d3fend_technique_id"):
+            func["d3fend_mapping"] = {
+                "technique_id": func.pop("d3fend_technique_id"),
+                "technique_name": func.pop("d3fend_technique_name"),
+            }
+        else:
+            func.pop("d3fend_technique_id", None)
+            func.pop("d3fend_technique_name", None)
+        result.append(func)
+    return result
+
+
 def get_entries_with_cve_affected(conn: sqlite3.Connection) -> list[dict]:
     rows = conn.execute(
         """SELECT * FROM cme_entries
@@ -293,13 +391,11 @@ def _hydrate(conn: sqlite3.Connection, entry: dict) -> dict:
         entry.pop("d3fend_technique_name", None)
 
     impacts = conn.execute(
-        "SELECT metric, from_value, to_value, rationale FROM cvss_vector_impacts WHERE cme_id = ?",
+        """SELECT metric, from_value, to_value, rationale, probability, evidence_basis, conditions_json
+           FROM cvss_vector_impacts WHERE cme_id = ?""",
         (cme_id,),
     ).fetchall()
-    entry["cvss_vector_impacts"] = [
-        {"metric": r["metric"], "from": r["from_value"], "to": r["to_value"], "rationale": r["rationale"]}
-        for r in impacts
-    ]
+    entry["cvss_vector_impacts"] = [_hydrate_impact(r) for r in impacts]
 
     cwes = conn.execute("SELECT cwe_id FROM cwe_relationships WHERE cme_id = ?", (cme_id,)).fetchall()
     entry["cwe_relationships"] = [r["cwe_id"] for r in cwes]

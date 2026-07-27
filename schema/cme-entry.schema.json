@@ -4,7 +4,13 @@
   "title": "Common Mitigation Enumeration (CME) Entry",
   "description": "A structured defensive control entry in the CME taxonomy, designed to complement CVE/CWE by identifying mitigations and mapping their deterministic impact on CVSS environmental scoring.",
   "type": "object",
-  "required": ["cme_id", "control_name", "description", "tactic", "category", "category_id", "control_layer", "cvss_vector_impacts"],
+  "required": ["cme_id", "control_name", "description", "tactic", "category", "category_id", "cvss_vector_impacts"],
+  "if": {
+    "not": { "required": ["function_id"] }
+  },
+  "then": {
+    "required": ["control_layer"]
+  },
   "dependentRequired": {
     "cve_affected": ["cve_schema_version"]
   },
@@ -36,10 +42,21 @@
       "pattern": "^[a-z][a-z0-9-]*$",
       "description": "Kebab-case identifier linking to the category registry in data/categories.json"
     },
+    "function_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "description": "Links to a function in data/functions.json. Omit for standalone controls."
+    },
     "control_layer": {
       "type": "string",
       "enum": ["Network", "OS/Kernel", "Application", "Data", "Identity"],
-      "description": "Technology stack layer where the control resides"
+      "description": "Technology stack layer where the control resides. Required when function_id is absent; inherited from function when present."
+    },
+    "attenuation_type": {
+      "type": "string",
+      "enum": ["deterministic", "probabilistic"],
+      "default": "deterministic",
+      "description": "Whether this control provides guaranteed (deterministic) or evidence-based (probabilistic) CVSS attenuation"
     },
     "cvss_vector_impacts": {
       "type": "array",
@@ -164,6 +181,21 @@
         "rationale": {
           "type": "string",
           "description": "Technical justification for this specific attenuation"
+        },
+        "probability": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Estimated likelihood that this metric shift applies when the control is active. Only meaningful for probabilistic controls."
+        },
+        "evidence_basis": {
+          "type": "string",
+          "description": "Citation or source for the probability estimate (vendor benchmark, published study, testing methodology)"
+        },
+        "conditions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Prerequisites for the probability estimate to hold (specific rule set versions, configuration requirements, etc.)"
         }
       }
     },

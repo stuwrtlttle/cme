@@ -19,6 +19,7 @@ ENTRIES_DIR = PROJECT_ROOT / "data" / "entries"
 PROPOSALS_DIR = PROJECT_ROOT / "data" / "proposals"
 SCHEMA_PATH = PROJECT_ROOT / "schema" / "cme-entry.schema.json"
 CATEGORIES_PATH = PROJECT_ROOT / "data" / "categories.json"
+FUNCTIONS_PATH = PROJECT_ROOT / "data" / "functions.json"
 
 mcp = FastMCP(
     "CME — Common Mitigation Enumeration",
@@ -43,15 +44,18 @@ def _db_op(fn):
         return fn(conn)
 
 
-_sqlite_conn = None
+import threading
+
+_sqlite_local = threading.local()
 
 
 def _get_sqlite_conn():
-    global _sqlite_conn
-    if _sqlite_conn is None:
-        _sqlite_conn = db.get_connection()
-        db.init_db(_sqlite_conn)
-    return _sqlite_conn
+    conn = getattr(_sqlite_local, "conn", None)
+    if conn is None:
+        conn = db.get_connection()
+        db.init_db(conn)
+        _sqlite_local.conn = conn
+    return conn
 
 
 async def _run_db(fn):
@@ -155,28 +159,56 @@ async def calculate_attenuation(active_cme_ids: list[str]) -> str:
     if not impacts:
         return json.dumps({"message": "No impacts found for provided CME-IDs", "provided": ids})
 
-    aggregated: dict[str, dict] = {}
+    severity_order = {"N": 0, "L": 1, "A": 2, "P": 3, "U": 4, "H": 5, "C": 6}
+    deterministic: dict[str, dict] = {}
+    probabilistic: dict[str, list] = {}
     details = []
+
     for impact in impacts:
         details.append(impact)
         metric = impact["metric"]
-        if metric not in aggregated:
-            aggregated[metric] = {
-                "metric": metric,
-                "modified_to": impact["to_value"],
-                "contributing_controls": [impact["cme_id"]],
-            }
+        atype = impact.get("attenuation_type", "deterministic")
+
+        if atype == "probabilistic":
+            probabilistic.setdefault(metric, []).append(impact)
         else:
-            aggregated[metric]["contributing_controls"].append(impact["cme_id"])
-            severity_order = {"N": 0, "L": 1, "A": 2, "P": 3, "U": 4, "H": 5, "C": 6}
-            current = severity_order.get(aggregated[metric]["modified_to"], 99)
-            new = severity_order.get(impact["to_value"], 99)
-            if new < current:
-                aggregated[metric]["modified_to"] = impact["to_value"]
+            if metric not in deterministic:
+                deterministic[metric] = {
+                    "metric": metric,
+                    "modified_to": impact["to_value"],
+                    "contributing_controls": [impact["cme_id"]],
+                }
+            else:
+                deterministic[metric]["contributing_controls"].append(impact["cme_id"])
+                current = severity_order.get(deterministic[metric]["modified_to"], 99)
+                new = severity_order.get(impact["to_value"], 99)
+                if new < current:
+                    deterministic[metric]["modified_to"] = impact["to_value"]
+
+    prob_adjustments = []
+    for metric, prob_impacts in probabilistic.items():
+        if metric in deterministic:
+            continue
+        probs = [p.get("probability", 0.5) for p in prob_impacts]
+        combined = 1.0 - 1.0
+        for p in probs:
+            combined *= (1.0 - p)
+        combined = 1.0 - combined
+        best_to = min(
+            (p["to_value"] for p in prob_impacts),
+            key=lambda v: severity_order.get(v, 99),
+        )
+        prob_adjustments.append({
+            "metric": metric,
+            "conditional_to": best_to,
+            "combined_probability": round(combined, 3),
+            "contributing_controls": [p["cme_id"] for p in prob_impacts],
+        })
 
     return json.dumps({
         "active_controls": len(ids),
-        "aggregated_attenuation": list(aggregated.values()),
+        "deterministic_attenuation": list(deterministic.values()),
+        "probabilistic_adjustments": prob_adjustments,
         "detail": details,
     }, indent=2)
 
@@ -193,10 +225,12 @@ async def list_cme_taxonomy() -> str:
 
     tactics, categories = await _run_db(_query)
     category_registry = _load_categories()
+    function_registry = _load_functions()
     return json.dumps({
         "tactics": tactics,
         "categories": categories,
         "category_registry": category_registry,
+        "function_registry": function_registry,
     }, indent=2)
 
 
@@ -250,35 +284,88 @@ async def simulate_cve_risk(
             k, v = part.split(":", 1)
             metrics[k] = v
 
-    modifications = []
-    modified_metrics = dict(metrics)
+    severity_order = {"N": 0, "L": 1, "A": 2, "P": 3, "U": 4, "H": 5, "C": 6}
+    det_modifications = []
+    det_metrics = dict(metrics)
+    prob_modifications = []
+    prob_by_metric: dict[str, list] = {}
+
     for impact in impacts:
         metric = impact["metric"]
-        if metric in metrics and metrics[metric] == impact["from_value"]:
-            modified_metrics[metric] = impact["to_value"]
-            modifications.append({
-                "cme_id": impact["cme_id"],
-                "control_name": impact["control_name"],
-                "metric": metric,
-                "from": impact["from_value"],
-                "to": impact["to_value"],
-                "rationale": impact["rationale"],
-            })
+        atype = impact.get("attenuation_type", "deterministic")
+        if metric not in metrics or metrics[metric] != impact["from_value"]:
+            continue
+
+        mod = {
+            "cme_id": impact["cme_id"],
+            "control_name": impact["control_name"],
+            "metric": metric,
+            "from": impact["from_value"],
+            "to": impact["to_value"],
+            "rationale": impact["rationale"],
+            "attenuation_type": atype,
+        }
+
+        if atype == "probabilistic":
+            mod["probability"] = impact.get("probability", 0.5)
+            if impact.get("evidence_basis"):
+                mod["evidence_basis"] = impact["evidence_basis"]
+            if impact.get("conditions"):
+                mod["conditions"] = impact["conditions"]
+            prob_modifications.append(mod)
+            prob_by_metric.setdefault(metric, []).append(mod)
+        else:
+            det_metrics[metric] = impact["to_value"]
+            det_modifications.append(mod)
+
+    prob_adjustments = []
+    for metric, mods in prob_by_metric.items():
+        if det_metrics.get(metric) != metrics.get(metric):
+            continue
+        probs = [m.get("probability", 0.5) for m in mods]
+        combined = 1.0
+        for p in probs:
+            combined *= (1.0 - p)
+        combined = 1.0 - combined
+        best_to = min(
+            (m["to"] for m in mods),
+            key=lambda v: severity_order.get(v, 99),
+        )
+        prob_adjustments.append({
+            "metric": metric,
+            "from": metrics[metric],
+            "conditional_to": best_to,
+            "combined_probability": round(combined, 3),
+            "contributing_controls": [m["cme_id"] for m in mods],
+        })
 
     prefix = base_vector.split("/")[0] if "/" in base_vector else "CVSS:4.0"
-    modified_vector = prefix + "/" + "/".join(f"{k}:{v}" for k, v in modified_metrics.items())
+    det_vector = prefix + "/" + "/".join(f"{k}:{v}" for k, v in det_metrics.items())
 
-    return json.dumps({
+    result = {
         "original": {
             "score": base_score,
             "vector": base_vector,
         },
         "active_controls": len(ids),
-        "modifications_applied": len(modifications),
-        "modifications": modifications,
-        "modified_vector": modified_vector,
-        "note": "Estimated attenuated score requires full CVSS calculator. The modified vector can be fed into any CVSS v4.0 calculator to get the environmental score.",
-    }, indent=2)
+        "deterministic_modifications": det_modifications,
+        "deterministic_vector": det_vector,
+    }
+
+    if prob_adjustments:
+        result["probabilistic_adjustments"] = prob_adjustments
+        best_case = dict(det_metrics)
+        for adj in prob_adjustments:
+            best_case[adj["metric"]] = adj["conditional_to"]
+        result["best_case_vector"] = prefix + "/" + "/".join(f"{k}:{v}" for k, v in best_case.items())
+
+    result["note"] = (
+        "Deterministic vector reflects guaranteed metric shifts. "
+        "Probabilistic adjustments show conditional shifts with combined probability. "
+        "Best-case vector assumes all probabilistic controls are effective."
+    )
+
+    return json.dumps(result, indent=2)
 
 
 @mcp.tool()
@@ -442,6 +529,7 @@ async def get_cme_coverage_summary() -> str:
 
 _categories_cache = None
 _schema_cache = None
+_functions_cache = None
 
 
 def _load_categories() -> dict:
@@ -450,6 +538,17 @@ def _load_categories() -> dict:
         with open(CATEGORIES_PATH) as f:
             _categories_cache = json.load(f)
     return _categories_cache
+
+
+def _load_functions() -> dict:
+    global _functions_cache
+    if _functions_cache is None:
+        if FUNCTIONS_PATH.exists():
+            with open(FUNCTIONS_PATH) as f:
+                _functions_cache = json.load(f)
+        else:
+            _functions_cache = {}
+    return _functions_cache
 
 
 def _load_schema() -> dict:

@@ -43,6 +43,16 @@ def get_connection() -> psycopg.Connection:
 
 
 _CREATE_TABLES = """
+    CREATE TABLE IF NOT EXISTS functions (
+        function_id     TEXT PRIMARY KEY,
+        name            TEXT NOT NULL,
+        description     TEXT NOT NULL,
+        category_id     TEXT NOT NULL,
+        control_layer   TEXT NOT NULL CHECK(control_layer IN ('Network','OS/Kernel','Application','Data','Identity')),
+        d3fend_technique_id   TEXT,
+        d3fend_technique_name TEXT
+    );
+
     CREATE TABLE IF NOT EXISTS cme_entries (
         cme_id          TEXT PRIMARY KEY,
         control_name    TEXT NOT NULL,
@@ -50,7 +60,9 @@ _CREATE_TABLES = """
         tactic          TEXT NOT NULL CHECK(tactic IN ('Harden','Isolate','Detect','Evict','Restore')),
         category        TEXT NOT NULL,
         category_id     TEXT NOT NULL,
-        control_layer   TEXT NOT NULL CHECK(control_layer IN ('Network','OS/Kernel','Application','Data','Identity')),
+        function_id     TEXT REFERENCES functions(function_id),
+        control_layer   TEXT CHECK(control_layer IN ('Network','OS/Kernel','Application','Data','Identity')),
+        attenuation_type TEXT DEFAULT 'deterministic' CHECK(attenuation_type IN ('deterministic','probabilistic')),
         confidence      TEXT CHECK(confidence IN ('High','Medium','Low')),
         platforms_json  TEXT,
         d3fend_technique_id   TEXT,
@@ -65,7 +77,10 @@ _CREATE_TABLES = """
         metric      TEXT NOT NULL CHECK(metric IN ('AV','AC','PR','UI','S','C','I','A')),
         from_value  TEXT NOT NULL,
         to_value    TEXT NOT NULL,
-        rationale   TEXT
+        rationale   TEXT,
+        probability     REAL,
+        evidence_basis  TEXT,
+        conditions_json TEXT
     );
 
     CREATE TABLE IF NOT EXISTS cwe_relationships (
@@ -97,6 +112,8 @@ _CREATE_INDEXES = [
     "CREATE INDEX IF NOT EXISTS idx_entries_layer ON cme_entries(control_layer)",
     "CREATE INDEX IF NOT EXISTS idx_entries_category ON cme_entries(category)",
     "CREATE INDEX IF NOT EXISTS idx_entries_category_id ON cme_entries(category_id)",
+    "CREATE INDEX IF NOT EXISTS idx_entries_function ON cme_entries(function_id)",
+    "CREATE INDEX IF NOT EXISTS idx_entries_attenuation ON cme_entries(attenuation_type)",
     "CREATE INDEX IF NOT EXISTS idx_cvss_cme ON cvss_vector_impacts(cme_id)",
     "CREATE INDEX IF NOT EXISTS idx_cwe_cme ON cwe_relationships(cme_id)",
     "CREATE INDEX IF NOT EXISTS idx_cwe_id ON cwe_relationships(cwe_id)",
@@ -117,19 +134,47 @@ def init_db(conn: psycopg.Connection) -> None:
 def reset_db(conn: psycopg.Connection) -> None:
     """Drop all tables and recreate — used only by the seed script."""
     for table in ["references_", "verification_commands", "cwe_relationships",
-                  "cvss_vector_impacts", "cme_entries"]:
+                  "cvss_vector_impacts", "cme_entries", "functions"]:
         conn.execute(f"DROP TABLE IF EXISTS {table} CASCADE")
     init_db(conn)
+
+
+def insert_function(conn: psycopg.Connection, function_id: str, func: dict) -> None:
+    conn.execute(
+        """INSERT INTO functions
+           (function_id, name, description, category_id, control_layer,
+            d3fend_technique_id, d3fend_technique_name)
+           VALUES (%(function_id)s, %(name)s, %(description)s, %(category_id)s, %(control_layer)s,
+                   %(d3fend_technique_id)s, %(d3fend_technique_name)s)
+           ON CONFLICT (function_id) DO UPDATE SET
+               name = EXCLUDED.name,
+               description = EXCLUDED.description,
+               category_id = EXCLUDED.category_id,
+               control_layer = EXCLUDED.control_layer,
+               d3fend_technique_id = EXCLUDED.d3fend_technique_id,
+               d3fend_technique_name = EXCLUDED.d3fend_technique_name""",
+        {
+            "function_id": function_id,
+            "name": func["name"],
+            "description": func["description"],
+            "category_id": func["category_id"],
+            "control_layer": func["control_layer"],
+            "d3fend_technique_id": func.get("d3fend_mapping", {}).get("technique_id"),
+            "d3fend_technique_name": func.get("d3fend_mapping", {}).get("technique_name"),
+        },
+    )
 
 
 def insert_entry(conn: psycopg.Connection, entry: dict) -> None:
     conn.execute(
         """INSERT INTO cme_entries
-           (cme_id, control_name, description, tactic, category, category_id, control_layer,
+           (cme_id, control_name, description, tactic, category, category_id,
+            function_id, control_layer, attenuation_type,
             confidence, platforms_json, d3fend_technique_id, d3fend_technique_name,
             cve_schema_version, cve_affected_json)
            VALUES (%(cme_id)s, %(control_name)s, %(description)s, %(tactic)s, %(category)s,
-                   %(category_id)s, %(control_layer)s, %(confidence)s, %(platforms_json)s,
+                   %(category_id)s, %(function_id)s, %(control_layer)s, %(attenuation_type)s,
+                   %(confidence)s, %(platforms_json)s,
                    %(d3fend_technique_id)s, %(d3fend_technique_name)s,
                    %(cve_schema_version)s, %(cve_affected_json)s)
            ON CONFLICT (cme_id) DO UPDATE SET
@@ -138,7 +183,9 @@ def insert_entry(conn: psycopg.Connection, entry: dict) -> None:
                tactic = EXCLUDED.tactic,
                category = EXCLUDED.category,
                category_id = EXCLUDED.category_id,
+               function_id = EXCLUDED.function_id,
                control_layer = EXCLUDED.control_layer,
+               attenuation_type = EXCLUDED.attenuation_type,
                confidence = EXCLUDED.confidence,
                platforms_json = EXCLUDED.platforms_json,
                d3fend_technique_id = EXCLUDED.d3fend_technique_id,
@@ -152,7 +199,9 @@ def insert_entry(conn: psycopg.Connection, entry: dict) -> None:
             "tactic": entry["tactic"],
             "category": entry["category"],
             "category_id": entry["category_id"],
-            "control_layer": entry["control_layer"],
+            "function_id": entry.get("function_id"),
+            "control_layer": entry.get("control_layer"),
+            "attenuation_type": entry.get("attenuation_type", "deterministic"),
             "confidence": entry.get("confidence"),
             "platforms_json": json.dumps(entry.get("platforms", [])),
             "d3fend_technique_id": entry.get("d3fend_mapping", {}).get("technique_id"),
@@ -167,10 +216,17 @@ def insert_entry(conn: psycopg.Connection, entry: dict) -> None:
 
     for impact in entry.get("cvss_vector_impacts", []):
         conn.execute(
-            """INSERT INTO cvss_vector_impacts (cme_id, metric, from_value, to_value, rationale)
-               VALUES (%(cme_id)s, %(metric)s, %(from)s, %(to)s, %(rationale)s)""",
-            {"cme_id": entry["cme_id"], "metric": impact["metric"],
-             "from": impact["from"], "to": impact["to"], "rationale": impact.get("rationale")},
+            """INSERT INTO cvss_vector_impacts
+               (cme_id, metric, from_value, to_value, rationale, probability, evidence_basis, conditions_json)
+               VALUES (%(cme_id)s, %(metric)s, %(from)s, %(to)s, %(rationale)s,
+                       %(probability)s, %(evidence_basis)s, %(conditions_json)s)""",
+            {
+                "cme_id": entry["cme_id"], "metric": impact["metric"],
+                "from": impact["from"], "to": impact["to"], "rationale": impact.get("rationale"),
+                "probability": impact.get("probability"),
+                "evidence_basis": impact.get("evidence_basis"),
+                "conditions_json": json.dumps(impact["conditions"]) if impact.get("conditions") else None,
+            },
         )
 
     for cwe in entry.get("cwe_relationships", []):
@@ -251,14 +307,24 @@ def get_attenuation_for_cve(conn: psycopg.Connection, active_cme_ids: list[str])
     if not active_cme_ids:
         return []
     rows = conn.execute(
-        """SELECT e.cme_id, e.control_name, v.metric, v.from_value, v.to_value, v.rationale
+        """SELECT e.cme_id, e.control_name, e.attenuation_type,
+                  v.metric, v.from_value, v.to_value, v.rationale,
+                  v.probability, v.evidence_basis, v.conditions_json
            FROM cme_entries e
            JOIN cvss_vector_impacts v ON e.cme_id = v.cme_id
            WHERE e.cme_id = ANY(%(ids)s)
            ORDER BY e.cme_id, v.metric""",
         {"ids": active_cme_ids},
     ).fetchall()
-    return [dict(r) for r in rows]
+    results = []
+    for r in rows:
+        row = dict(r)
+        if row.get("conditions_json"):
+            row["conditions"] = json.loads(row.pop("conditions_json"))
+        else:
+            row.pop("conditions_json", None)
+        results.append(row)
+    return results
 
 
 def list_tactics(conn: psycopg.Connection) -> list[dict]:
@@ -325,6 +391,41 @@ def get_coverage_summary(conn: psycopg.Connection) -> dict:
     }
 
 
+def get_function(conn: psycopg.Connection, function_id: str) -> dict | None:
+    row = conn.execute(
+        "SELECT * FROM functions WHERE function_id = %(fid)s", {"fid": function_id}
+    ).fetchone()
+    if not row:
+        return None
+    func = dict(row)
+    if func.get("d3fend_technique_id"):
+        func["d3fend_mapping"] = {
+            "technique_id": func.pop("d3fend_technique_id"),
+            "technique_name": func.pop("d3fend_technique_name"),
+        }
+    else:
+        func.pop("d3fend_technique_id", None)
+        func.pop("d3fend_technique_name", None)
+    return func
+
+
+def list_functions(conn: psycopg.Connection) -> list[dict]:
+    rows = conn.execute("SELECT * FROM functions ORDER BY function_id").fetchall()
+    result = []
+    for row in rows:
+        func = dict(row)
+        if func.get("d3fend_technique_id"):
+            func["d3fend_mapping"] = {
+                "technique_id": func.pop("d3fend_technique_id"),
+                "technique_name": func.pop("d3fend_technique_name"),
+            }
+        else:
+            func.pop("d3fend_technique_id", None)
+            func.pop("d3fend_technique_name", None)
+        result.append(func)
+    return result
+
+
 def get_entries_with_cve_affected(conn: psycopg.Connection) -> list[dict]:
     rows = conn.execute(
         """SELECT * FROM cme_entries
@@ -343,12 +444,19 @@ def _hydrate_batch(conn: psycopg.Connection, entries: list[dict]) -> list[dict]:
 
     impacts_by_id: dict[str, list] = defaultdict(list)
     for r in conn.execute(
-        "SELECT cme_id, metric, from_value, to_value, rationale FROM cvss_vector_impacts WHERE cme_id = ANY(%(ids)s)",
+        """SELECT cme_id, metric, from_value, to_value, rationale,
+                  probability, evidence_basis, conditions_json
+           FROM cvss_vector_impacts WHERE cme_id = ANY(%(ids)s)""",
         {"ids": cme_ids},
     ).fetchall():
-        impacts_by_id[r["cme_id"]].append(
-            {"metric": r["metric"], "from": r["from_value"], "to": r["to_value"], "rationale": r["rationale"]}
-        )
+        impact = {"metric": r["metric"], "from": r["from_value"], "to": r["to_value"], "rationale": r["rationale"]}
+        if r["probability"] is not None:
+            impact["probability"] = r["probability"]
+        if r["evidence_basis"]:
+            impact["evidence_basis"] = r["evidence_basis"]
+        if r["conditions_json"]:
+            impact["conditions"] = json.loads(r["conditions_json"])
+        impacts_by_id[r["cme_id"]].append(impact)
 
     cwes_by_id: dict[str, list] = defaultdict(list)
     for r in conn.execute(

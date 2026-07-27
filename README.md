@@ -1,6 +1,6 @@
 # CME — Common Mitigation Enumeration
 
-A structured taxonomy of defensive security controls mapped to deterministic CVSS vector attenuation, served via an MCP (Model Context Protocol) server backed by SQLite (single-user) or PostgreSQL (multi-user).
+A structured taxonomy of defensive security controls mapped to CVSS vector attenuation, served via an MCP (Model Context Protocol) server backed by SQLite (single-user) or PostgreSQL (multi-user). Controls are organized in a hierarchical Function/Control structure and support both deterministic (guaranteed metric shifts) and probabilistic (evidence-based, conditional) attenuation.
 
 ---
 
@@ -55,8 +55,10 @@ While **CVE** identifies specific vulnerabilities and **CWE** identifies classes
 
 - A unique identifier (e.g., `CME-601`)
 - The D3FEND-aligned tactic it belongs to (Harden, Isolate, Detect, Evict, Restore)
-- The technology layer it operates at (Network, OS/Kernel, Application, Data, Identity)
-- Specific CVSS base metrics it modifies (e.g., `S:C → S:U`, `AC:L → AC:H`)
+- An optional **function grouping** (e.g., `selinux`, `seccomp`) linking related controls under a broad capability
+- The technology layer it operates at (Network, OS/Kernel, Application, Data, Identity) — inherited from the function when grouped
+- An **attenuation type**: `deterministic` (default — guaranteed metric shifts) or `probabilistic` (evidence-based, conditional attenuation with quantified confidence)
+- Specific CVSS base metrics it modifies (e.g., `S:C → S:U`, `AC:L → AC:H`), with optional probability, evidence basis, and conditions for probabilistic controls
 - CWE weakness classes it mitigates (e.g., CWE-119, CWE-78)
 - Machine-executable verification commands a scanner or agent can run to confirm the control is active
 - Confidence level, platform applicability, and external references
@@ -182,7 +184,7 @@ To reset: `docker compose down -v && docker compose up -d`.
 
 The CME taxonomy is publicly available at **https://cmetaxonomy.org**:
 
-- **Static site** — Browse all 109 entries, search by tactic/category/CWE, view CVSS attenuation details
+- **Static site** — Browse all 119 entries, search by tactic/category/CWE, view CVSS attenuation details
 - **MCP server** — Connect AI agents and tools to the live CME database at `https://cmetaxonomy.org/mcp`
 
 The site is generated from entry JSON files by `build_site.py` and served via nginx. The MCP server runs as a Docker Compose stack (PostgreSQL + FastMCP) behind an nginx reverse proxy with TLS.
@@ -311,6 +313,21 @@ This launches a web UI at `localhost:6274` where you can call all 13 tools and b
 
 ## Taxonomy Structure
 
+### Hierarchy
+
+The taxonomy uses a four-level hierarchy inspired by NIST CSF 2.0:
+
+```
+Tactic (D3FEND)
+  → Category
+       → Function           (broad capability / technology, e.g., SELinux, Seccomp)
+            → Control (CME-xxx)  (specific configuration or scenario)
+```
+
+**Functions** group related controls under a shared technology. For example, SELinux has three controls (Enforcing Mode, Confined User Mapping, Booleans) that share a `function_id: "selinux"`. Functions define a default `control_layer` and `d3fend_mapping` that controls inherit (controls can override). Standalone controls that are already 1:1 (e.g., ASLR) omit `function_id` — they implicitly *are* their own function.
+
+The function registry lives in `data/functions.json`. There are currently 15 functions covering SELinux, AppArmor, Seccomp, container runtime, pod security, systemd sandboxing, authentication methods, password policy, session management, authorization controls, origin/CORS, injection prevention, input validation, transport cryptography, and mount option hardening.
+
 ### Tactics
 
 The taxonomy uses 5 D3FEND-aligned tactics:
@@ -325,7 +342,7 @@ The taxonomy uses 5 D3FEND-aligned tactics:
 
 ### Categories and Entry Counts
 
-109 entries in total, broken down by tactic and category:
+119 entries in total, broken down by tactic and category:
 
 ```
 Harden (71 entries)
@@ -409,21 +426,48 @@ How CME entries modify CVSS v4.0 Environmental metrics:
 | Reduce Integrity Impact | MI: H → L/N | CME-504 (dm-verity), CME-601 (seccomp) |
 | Reduce Availability Impact | MA: H → L | CME-704 (cgroups), CME-1201 (Immutable Infra) |
 
+### Two-Tier Attenuation Model
+
+CME supports two types of CVSS attenuation:
+
+**Deterministic core** (default) — Binary verification, guaranteed effect. If a scanner confirms the control is active, the CVSS metric shift is unconditional. Examples: ASLR enabled (`AC:L→H`), SELinux enforcing (`S:C→U`), noexec mount.
+
+**Probabilistic ring** — Evidence-based, conditional effectiveness. The control is verified as *deployed*, but its attenuation depends on configuration quality, rule coverage, or detection capability. These carry additional fields:
+
+| Field | Type | Description |
+|---|---|---|
+| `probability` | number (0-1) | Estimated likelihood the metric shift applies |
+| `evidence_basis` | string | Citation for the probability (vendor benchmark, study, test methodology) |
+| `conditions` | string[] | Prerequisites for the probability to hold (rule set versions, thresholds) |
+
+The `simulate_cve_risk` and `calculate_attenuation` tools use **two-pass scoring**:
+
+1. **Deterministic pass** — apply all guaranteed metric shifts (same as before)
+2. **Probabilistic adjustment** — for metrics not already shifted by deterministic controls, compute combined probability from independent probabilistic controls: `P(effective) = 1 - Π(1 - Pᵢ)`
+
+Output separates the two tiers: a hard deterministic score plus a conditional range.
+
 ---
 
 ## Database
 
 ### Database Schema
 
-The SQLite database uses a normalized schema with 5 tables:
+The SQLite database uses a normalized schema with 6 tables:
 
 ```
+functions (function registry)
+├── function_id (PK), name, description, category_id,
+│   control_layer, d3fend_technique_id/name
+│
 cme_entries (main)
 ├── cme_id (PK), control_name, description, tactic, category,
-│   control_layer, confidence, platforms_json, d3fend_technique_id/name
+│   function_id (FK → functions), control_layer, attenuation_type,
+│   confidence, platforms_json, d3fend_technique_id/name
 │
 ├── cvss_vector_impacts (1:many)
-│   └── metric, from_value, to_value, rationale
+│   └── metric, from_value, to_value, rationale,
+│       probability, evidence_basis, conditions_json
 │
 ├── cwe_relationships (1:many)
 │   └── cwe_id
@@ -435,7 +479,7 @@ cme_entries (main)
     └── source, url, section
 ```
 
-Indexes on `tactic`, `control_layer`, `category`, `cwe_id` for fast lookups.
+Indexes on `tactic`, `control_layer`, `category`, `function_id`, `attenuation_type`, `cwe_id` for fast lookups.
 
 ### Seeding
 
@@ -446,7 +490,7 @@ The database is generated from individual JSON entry files:
 uv run python -m src.seed
 ```
 
-Output: `data/cme.db` (SQLite, generated from 109 entries)
+Output: `data/cme.db` (SQLite, generated from 15 functions and 119 entries)
 
 ### Querying Directly
 
@@ -487,7 +531,10 @@ Each CME entry follows the schema at `schema/cme-entry.schema.json`. The core st
   "description": "Restricts system calls a process can make...",
   "tactic": "Harden",
   "category": "Syscall & BPF Controls",
+  "category_id": "syscall-bpf-controls",
+  "function_id": "seccomp",
   "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
   "cvss_vector_impacts": [
     {
       "metric": "S",
@@ -519,6 +566,28 @@ Each CME entry follows the schema at `schema/cme-entry.schema.json`. The core st
       "section": "Seccomp profiles"
     }
   ]
+}
+```
+
+**New fields:**
+
+| Field | Required | Default | Description |
+|---|---|---|---|
+| `function_id` | No | — | Links to function registry (`data/functions.json`). Omit for standalone controls. |
+| `attenuation_type` | No | `deterministic` | `deterministic` (guaranteed shift) or `probabilistic` (evidence-based, conditional). |
+| `control_layer` | Conditional | — | Required when `function_id` is absent. When `function_id` is present, inherited from the function (can override). |
+
+**Probabilistic impact example:**
+
+```json
+{
+  "metric": "AC",
+  "from": "L",
+  "to": "H",
+  "probability": 0.85,
+  "evidence_basis": "OWASP CRS v4 blocks 85% of SQLi payloads in ModSecurity audit (2024)",
+  "conditions": ["Rule set is OWASP CRS v4+", "Anomaly scoring threshold <= 5"],
+  "rationale": "WAF intercepts most but not all injection variants"
 }
 ```
 
@@ -618,6 +687,8 @@ uv run python -m src.validate
 This checks both `data/entries/` and `data/proposals/`:
 - Every file passes the JSON schema
 - Filenames match their `cme_id` field
+- `function_id` (if present) references a valid entry in `data/functions.json`
+- `control_layer` is present when `function_id` is absent
 - No duplicate CME-IDs exist within a directory
 - No proposal reuses an ID that already exists as a live entry (a leftover from a
   hand-approved entry — `approve_cme_proposal` removes the proposal automatically)
@@ -862,8 +933,10 @@ cme/
 │   ├── search.html
 │   └── style.css
 ├── data/
-│   ├── entries/                    # Source of truth: one JSON file per CME entry (109 files)
+│   ├── entries/                    # Source of truth: one JSON file per CME entry (119 files)
 │   ├── proposals/                  # Pending proposals awaiting review
+│   ├── categories.json             # Category registry (16 categories with ID ranges)
+│   ├── functions.json              # Function registry (15 functions grouping related controls)
 │   └── cme.db                     # SQLite database (generated, gitignored)
 └── src/
     ├── __init__.py
