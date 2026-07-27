@@ -8,6 +8,11 @@ All notable changes to the CME (Common Mitigation Enumeration) project are docum
 
 - `da4fef0` Add function/control hierarchy, probabilistic attenuation model, and fix MCP threading
 
+
+### Auto-generated changelog
+
+- `7986aa2` Update README.md for new definition
+
 ## 2026-07-21
 
 ### Auto-generated changelog
