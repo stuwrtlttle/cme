@@ -51,7 +51,11 @@ A structured taxonomy of defensive security controls mapped to CVSS vector atten
 
 ## Overview
 
-While **CVE** identifies specific vulnerabilities and **CWE** identifies classes of weaknesses, **CME** identifies the **defensive controls** that mitigate them. Each CME entry carries:
+While **CVE** identifies specific vulnerabilities and **CWE** identifies classes of weaknesses, **CME** identifies the **defensive controls** that mitigate them. 
+
+A CME entry names a security control (a safeguard protecting confidentiality, integrity, or availability — the NIST sense) and declares, for an identified class of weaknesses on an identified set of products: (1) its effect mode — Preventive / Detective / Corrective; (2) the magnitude of the effect — a deterministic CVSS-vector shift where the mode supports one, a probabilistic/time-based effect where it doesn't — and its confidence/efficacy (first-class but optional: expected where the effect is probabilistic, omittable where deterministic); (3) the conditions under which it holds; (4) a machine-checkable verification that it's active; and (5) its composition with other controls (enables / requires / strengthens).
+
+Each CME entry carries:
 
 - A unique identifier (e.g., `CME-601`)
 - The D3FEND-aligned tactic it belongs to (Harden, Isolate, Detect, Evict, Restore)
