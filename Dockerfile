@@ -9,6 +9,7 @@ RUN uv sync --frozen --no-dev
 
 COPY schema/ schema/
 COPY data/entries/ data/entries/
+COPY data/functions.json data/functions.json
 COPY src/ src/
 
 # Default: PostgreSQL backend, streamable-http transport
