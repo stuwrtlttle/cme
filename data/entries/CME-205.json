@@ -1,35 +1,37 @@
 {
-  "cme_id": "CME-205",
-  "control_name": "Service Binding to Localhost",
-  "description": "Configures services to listen only on 127.0.0.1/::1, eliminating remote network attack vector entirely. Remote access must go through a reverse proxy or tunnel.",
-  "tactic": "Isolate",
-  "category": "Network Isolation",
-  "category_id": "network-isolation",
-  "control_layer": "Network",
-  "cvss_vector_impacts": [
-    {
-      "metric": "AV",
-      "from": "N",
-      "to": "L",
-      "rationale": "Service not reachable from network; requires local access"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-284",
-    "CWE-668"
-  ],
-  "verification": {
-    "method": "Check service listen address is localhost only",
-    "commands": [
-      {
-        "command": "ss -tlnp | grep ':8080'",
-        "expected": "127.0.0.1:8080",
-        "platform": "linux"
-      }
+    "cme_id": "CME-205",
+    "control_name": "Service Binding to Localhost",
+    "description": "Configures services to listen only on 127.0.0.1/::1, eliminating remote network attack vector entirely. Remote access must go through a reverse proxy or tunnel.",
+    "tactic": "Isolate",
+    "category": "Network Isolation",
+    "category_id": "network-isolation",
+    "function_id": "network-filtering",
+    "control_layer": "Network",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "AV",
+            "from": "N",
+            "to": "L",
+            "rationale": "Service not reachable from network; requires local access"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-284",
+        "CWE-668"
+    ],
+    "verification": {
+        "method": "Check service listen address is localhost only",
+        "commands": [
+            {
+                "command": "ss -tlnp | grep ':8080'",
+                "expected": "127.0.0.1:8080",
+                "platform": "linux"
+            }
+        ]
+    },
+    "confidence": "High",
+    "platforms": [
+        "Any"
     ]
-  },
-  "confidence": "High",
-  "platforms": [
-    "Any"
-  ]
 }

@@ -1,37 +1,39 @@
 {
-  "cme_id": "CME-1008",
-  "control_name": "Application Admin Event Logging (SIEM Integration)",
-  "description": "Record every administrative action performed through the application management interface into a structured, tamper-evident audit log, and forward events in real time to a centralized SIEM for correlation and alerting. Each log entry captures the authenticated actor, the operation performed, the target resource, a before/after state diff, the source IP, and a timestamp. The SIEM ingests these events and evaluates them against detection rules tuned to the application threat model \u2014 for example, alerting when an identity provider mapper of type hardcoded-role-mapper is created targeting a high-privilege role, or when an OAuth client redirect URI is modified. Distinct from OS-level audit logging (auditd, Falco) which operates below the application and cannot interpret application-domain semantics such as role names, policy changes, or resource ownership. Prevents attackers from making undetected administrative changes by ensuring that every privileged operation is recorded with sufficient context for security analysts to distinguish legitimate administration from exploitation.",
-  "tactic": "Detect",
-  "category": "Runtime Detection",
-  "category_id": "runtime-detection",
-  "control_layer": "Application",
-  "cvss_vector_impacts": [
-    {
-      "metric": "AC",
-      "from": "L",
-      "to": "H",
-      "rationale": "Compensating control: administrative actions are logged with application-domain context and forwarded to a SIEM in real time; the attacker must evade application-level audit logging or accept near-immediate detection, significantly increasing attack complexity."
+    "cme_id": "CME-1008",
+    "control_name": "Application Admin Event Logging (SIEM Integration)",
+    "description": "Record every administrative action performed through the application management interface into a structured, tamper-evident audit log, and forward events in real time to a centralized SIEM for correlation and alerting. Each log entry captures the authenticated actor, the operation performed, the target resource, a before/after state diff, the source IP, and a timestamp. The SIEM ingests these events and evaluates them against detection rules tuned to the application threat model \u2014 for example, alerting when an identity provider mapper of type hardcoded-role-mapper is created targeting a high-privilege role, or when an OAuth client redirect URI is modified. Distinct from OS-level audit logging (auditd, Falco) which operates below the application and cannot interpret application-domain semantics such as role names, policy changes, or resource ownership. Prevents attackers from making undetected administrative changes by ensuring that every privileged operation is recorded with sufficient context for security analysts to distinguish legitimate administration from exploitation.",
+    "tactic": "Detect",
+    "category": "Runtime Detection",
+    "category_id": "runtime-detection",
+    "function_id": "application-monitoring",
+    "control_layer": "Application",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "AC",
+            "from": "L",
+            "to": "H",
+            "rationale": "Compensating control: administrative actions are logged with application-domain context and forwarded to a SIEM in real time; the attacker must evade application-level audit logging or accept near-immediate detection, significantly increasing attack complexity."
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-266",
+        "CWE-269",
+        "CWE-284",
+        "CWE-778"
+    ],
+    "confidence": "High",
+    "platforms": [
+        "any"
+    ],
+    "verification": {
+        "method": "Verify that application admin event logging is enabled and events are forwarded to the SIEM. Perform a sensitive administrative action and confirm the event appears in the SIEM within the expected latency.",
+        "commands": [
+            {
+                "command": "kcadm.sh get events/config -r master --fields eventsEnabled,adminEventsEnabled,adminEventsDetailsIncluded",
+                "expected": "adminEventsEnabled: true, adminEventsDetailsIncluded: true",
+                "platform": "any"
+            }
+        ]
     }
-  ],
-  "cwe_relationships": [
-    "CWE-266",
-    "CWE-269",
-    "CWE-284",
-    "CWE-778"
-  ],
-  "confidence": "High",
-  "platforms": [
-    "any"
-  ],
-  "verification": {
-    "method": "Verify that application admin event logging is enabled and events are forwarded to the SIEM. Perform a sensitive administrative action and confirm the event appears in the SIEM within the expected latency.",
-    "commands": [
-      {
-        "command": "kcadm.sh get events/config -r master --fields eventsEnabled,adminEventsEnabled,adminEventsDetailsIncluded",
-        "expected": "adminEventsEnabled: true, adminEventsDetailsIncluded: true",
-        "platform": "any"
-      }
-    ]
-  }
 }

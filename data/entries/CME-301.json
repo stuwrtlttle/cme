@@ -1,92 +1,94 @@
 {
-  "cme_id": "CME-301",
-  "control_name": "SELinux (Enforcing Mode)",
-  "description": "Mandatory access control system that confines processes to least-privilege security domains. Even if a process is compromised, it cannot access files, ports, or other processes outside its policy-defined domain.",
-  "tactic": "Harden",
-  "category": "Mandatory Access Control",
-  "category_id": "mandatory-access-control",
-  "control_layer": "OS/Kernel",
-  "cvss_vector_impacts": [
-    {
-      "metric": "S",
-      "from": "C",
-      "to": "U",
-      "rationale": "Compromised process cannot escape its SELinux domain to affect other services"
+    "cme_id": "CME-301",
+    "control_name": "SELinux (Enforcing Mode)",
+    "description": "Mandatory access control system that confines processes to least-privilege security domains. Even if a process is compromised, it cannot access files, ports, or other processes outside its policy-defined domain.",
+    "tactic": "Harden",
+    "category": "Mandatory Access Control",
+    "category_id": "mandatory-access-control",
+    "function_id": "selinux",
+    "control_layer": "OS/Kernel",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "S",
+            "from": "C",
+            "to": "U",
+            "rationale": "Compromised process cannot escape its SELinux domain to affect other services"
+        },
+        {
+            "metric": "C",
+            "from": "H",
+            "to": "L",
+            "rationale": "Process cannot read files outside its policy-allowed set"
+        },
+        {
+            "metric": "I",
+            "from": "H",
+            "to": "L",
+            "rationale": "Process cannot modify files or resources outside its domain"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-269",
+        "CWE-284",
+        "CWE-732",
+        "CWE-653"
+    ],
+    "verification": {
+        "method": "Verify SELinux is in enforcing mode",
+        "commands": [
+            {
+                "command": "getenforce",
+                "expected": "Enforcing",
+                "platform": "rhel"
+            },
+            {
+                "command": "sestatus | grep 'Current mode'",
+                "expected": "Current mode:                   enforcing",
+                "platform": "rhel"
+            }
+        ]
     },
-    {
-      "metric": "C",
-      "from": "H",
-      "to": "L",
-      "rationale": "Process cannot read files outside its policy-allowed set"
+    "d3fend_mapping": {
+        "technique_id": "D3-MAC",
+        "technique_name": "Mandatory Access Control"
     },
-    {
-      "metric": "I",
-      "from": "H",
-      "to": "L",
-      "rationale": "Process cannot modify files or resources outside its domain"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-269",
-    "CWE-284",
-    "CWE-732",
-    "CWE-653"
-  ],
-  "verification": {
-    "method": "Verify SELinux is in enforcing mode",
-    "commands": [
-      {
-        "command": "getenforce",
-        "expected": "Enforcing",
-        "platform": "rhel"
-      },
-      {
-        "command": "sestatus | grep 'Current mode'",
-        "expected": "Current mode:                   enforcing",
-        "platform": "rhel"
-      }
+    "confidence": "High",
+    "platforms": [
+        "RHEL 9",
+        "RHEL 8",
+        "Fedora",
+        "CentOS Stream"
+    ],
+    "cve_schema_version": "5.2.0",
+    "cve_affected": [
+        {
+            "vendor": "redhat",
+            "product": "enterprise_linux",
+            "cpes": [
+                "cpe:2.3:o:redhat:enterprise_linux:9:*:*:*:*:*:*:*",
+                "cpe:2.3:o:redhat:enterprise_linux:8:*:*:*:*:*:*:*"
+            ],
+            "platforms": [
+                "x86_64",
+                "aarch64",
+                "s390x",
+                "ppc64le"
+            ],
+            "defaultStatus": "applicable"
+        },
+        {
+            "vendor": "fedoraproject",
+            "product": "fedora",
+            "cpes": [
+                "cpe:2.3:o:fedoraproject:fedora:*:*:*:*:*:*:*:*"
+            ],
+            "defaultStatus": "applicable"
+        },
+        {
+            "vendor": "centos",
+            "product": "centos_stream",
+            "defaultStatus": "applicable"
+        }
     ]
-  },
-  "d3fend_mapping": {
-    "technique_id": "D3-MAC",
-    "technique_name": "Mandatory Access Control"
-  },
-  "confidence": "High",
-  "platforms": [
-    "RHEL 9",
-    "RHEL 8",
-    "Fedora",
-    "CentOS Stream"
-  ],
-  "cve_schema_version": "5.2.0",
-  "cve_affected": [
-    {
-      "vendor": "redhat",
-      "product": "enterprise_linux",
-      "cpes": [
-        "cpe:2.3:o:redhat:enterprise_linux:9:*:*:*:*:*:*:*",
-        "cpe:2.3:o:redhat:enterprise_linux:8:*:*:*:*:*:*:*"
-      ],
-      "platforms": [
-        "x86_64",
-        "aarch64",
-        "s390x",
-        "ppc64le"
-      ],
-      "defaultStatus": "applicable"
-    },
-    {
-      "vendor": "fedoraproject",
-      "product": "fedora",
-      "cpes": [
-        "cpe:2.3:o:fedoraproject:fedora:*:*:*:*:*:*:*:*"
-      ],
-      "defaultStatus": "applicable"
-    },
-    {
-      "vendor": "centos",
-      "product": "centos_stream",
-      "defaultStatus": "applicable"
-    }
-  ]
 }

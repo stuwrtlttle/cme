@@ -1,45 +1,47 @@
 {
-  "cme_id": "CME-704",
-  "control_name": "cgroups v2 Resource Limits",
-  "description": "Constrains CPU, memory, I/O, and PIDs for process groups using cgroups v2 unified hierarchy. Prevents resource exhaustion attacks and limits blast radius of runaway or malicious processes.",
-  "tactic": "Isolate",
-  "category": "Container Isolation",
-  "category_id": "container-isolation",
-  "control_layer": "OS/Kernel",
-  "cvss_vector_impacts": [
-    {
-      "metric": "A",
-      "from": "H",
-      "to": "L",
-      "rationale": "Process cannot exhaust host resources; OOM killer scoped to cgroup"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-400",
-    "CWE-770",
-    "CWE-772",
-    "CWE-401"
-  ],
-  "verification": {
-    "method": "Check cgroup v2 is mounted and limits are set",
-    "commands": [
-      {
-        "command": "mount | grep cgroup2",
-        "expected": "cgroup2",
-        "platform": "linux"
-      },
-      {
-        "command": "cat /sys/fs/cgroup/<slice>/memory.max",
-        "expected": "numeric limit",
-        "platform": "linux"
-      }
+    "cme_id": "CME-704",
+    "control_name": "cgroups v2 Resource Limits",
+    "description": "Constrains CPU, memory, I/O, and PIDs for process groups using cgroups v2 unified hierarchy. Prevents resource exhaustion attacks and limits blast radius of runaway or malicious processes.",
+    "tactic": "Isolate",
+    "category": "Container Isolation",
+    "category_id": "container-isolation",
+    "function_id": "container-runtime",
+    "control_layer": "OS/Kernel",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "A",
+            "from": "H",
+            "to": "L",
+            "rationale": "Process cannot exhaust host resources; OOM killer scoped to cgroup"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-400",
+        "CWE-770",
+        "CWE-772",
+        "CWE-401"
+    ],
+    "verification": {
+        "method": "Check cgroup v2 is mounted and limits are set",
+        "commands": [
+            {
+                "command": "mount | grep cgroup2",
+                "expected": "cgroup2",
+                "platform": "linux"
+            },
+            {
+                "command": "cat /sys/fs/cgroup/<slice>/memory.max",
+                "expected": "numeric limit",
+                "platform": "linux"
+            }
+        ]
+    },
+    "confidence": "High",
+    "platforms": [
+        "RHEL 9",
+        "RHEL 8",
+        "Ubuntu 24.04",
+        "Kubernetes"
     ]
-  },
-  "confidence": "High",
-  "platforms": [
-    "RHEL 9",
-    "RHEL 8",
-    "Ubuntu 24.04",
-    "Kubernetes"
-  ]
 }

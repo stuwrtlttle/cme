@@ -1,45 +1,47 @@
 {
-  "cme_id": "CME-401",
-  "control_name": "System-wide Crypto Policy (FUTURE)",
-  "description": "Centrally enforces minimum cryptographic standards across all system components (OpenSSL, GnuTLS, NSS, OpenSSH, Kerberos). FUTURE policy disables TLS <1.2, SHA-1, RSA <3072, all CBC ciphers, and RC4.",
-  "tactic": "Harden",
-  "category": "Cryptographic Controls",
-  "category_id": "cryptographic-controls",
-  "control_layer": "Application",
-  "cvss_vector_impacts": [
-    {
-      "metric": "AC",
-      "from": "L",
-      "to": "H",
-      "rationale": "Weak cipher downgrade attacks are impossible; only strong algorithms available"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-327",
-    "CWE-326",
-    "CWE-757"
-  ],
-  "verification": {
-    "method": "Check system crypto policy level",
-    "commands": [
-      {
-        "command": "update-crypto-policies --show",
-        "expected": "FUTURE",
-        "platform": "rhel"
-      }
+    "cme_id": "CME-401",
+    "control_name": "System-wide Crypto Policy (FUTURE)",
+    "description": "Centrally enforces minimum cryptographic standards across all system components (OpenSSL, GnuTLS, NSS, OpenSSH, Kerberos). FUTURE policy disables TLS <1.2, SHA-1, RSA <3072, all CBC ciphers, and RC4.",
+    "tactic": "Harden",
+    "category": "Cryptographic Controls",
+    "category_id": "cryptographic-controls",
+    "function_id": "crypto-policy",
+    "control_layer": "Application",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "AC",
+            "from": "L",
+            "to": "H",
+            "rationale": "Weak cipher downgrade attacks are impossible; only strong algorithms available"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-327",
+        "CWE-326",
+        "CWE-757"
+    ],
+    "verification": {
+        "method": "Check system crypto policy level",
+        "commands": [
+            {
+                "command": "update-crypto-policies --show",
+                "expected": "FUTURE",
+                "platform": "rhel"
+            }
+        ]
+    },
+    "references": [
+        {
+            "source": "Red Hat Security Hardening Guide",
+            "section": "Using system-wide cryptographic policies"
+        }
+    ],
+    "confidence": "High",
+    "platforms": [
+        "RHEL 9",
+        "RHEL 8",
+        "Fedora",
+        "CentOS Stream"
     ]
-  },
-  "references": [
-    {
-      "source": "Red Hat Security Hardening Guide",
-      "section": "Using system-wide cryptographic policies"
-    }
-  ],
-  "confidence": "High",
-  "platforms": [
-    "RHEL 9",
-    "RHEL 8",
-    "Fedora",
-    "CentOS Stream"
-  ]
 }

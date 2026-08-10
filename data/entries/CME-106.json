@@ -1,38 +1,40 @@
 {
-  "cme_id": "CME-106",
-  "control_name": "SMAP (Supervisor Mode Access Prevention)",
-  "description": "CPU feature preventing the kernel from reading/writing userspace memory except through designated copy functions. Hardens kernel against data-only attacks using userspace-controlled structures.",
-  "tactic": "Harden",
-  "category": "Kernel Hardening",
-  "category_id": "kernel-hardening",
-  "control_layer": "OS/Kernel",
-  "cvss_vector_impacts": [
-    {
-      "metric": "AC",
-      "from": "L",
-      "to": "H",
-      "rationale": "Kernel exploit cannot trivially read/write userspace-controlled data"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-119",
-    "CWE-269",
-    "CWE-200"
-  ],
-  "verification": {
-    "method": "Check CPU flags for smap support",
-    "commands": [
-      {
-        "command": "grep -o smap /proc/cpuinfo | head -1",
-        "expected": "smap",
-        "platform": "linux"
-      }
+    "cme_id": "CME-106",
+    "control_name": "SMAP (Supervisor Mode Access Prevention)",
+    "description": "CPU feature preventing the kernel from reading/writing userspace memory except through designated copy functions. Hardens kernel against data-only attacks using userspace-controlled structures.",
+    "tactic": "Harden",
+    "category": "Kernel Hardening",
+    "category_id": "kernel-hardening",
+    "function_id": "kernel-attack-surface",
+    "control_layer": "OS/Kernel",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "AC",
+            "from": "L",
+            "to": "H",
+            "rationale": "Kernel exploit cannot trivially read/write userspace-controlled data"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-119",
+        "CWE-269",
+        "CWE-200"
+    ],
+    "verification": {
+        "method": "Check CPU flags for smap support",
+        "commands": [
+            {
+                "command": "grep -o smap /proc/cpuinfo | head -1",
+                "expected": "smap",
+                "platform": "linux"
+            }
+        ]
+    },
+    "confidence": "High",
+    "platforms": [
+        "RHEL 9",
+        "RHEL 8",
+        "Ubuntu 24.04"
     ]
-  },
-  "confidence": "High",
-  "platforms": [
-    "RHEL 9",
-    "RHEL 8",
-    "Ubuntu 24.04"
-  ]
 }

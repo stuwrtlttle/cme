@@ -1,43 +1,45 @@
 {
-  "cme_id": "CME-304",
-  "control_name": "AppArmor (Enforcing Profile)",
-  "description": "Path-based mandatory access control that restricts per-application file, network, and capability access. Each application runs under a profile defining allowed operations.",
-  "tactic": "Harden",
-  "category": "Mandatory Access Control",
-  "category_id": "mandatory-access-control",
-  "control_layer": "OS/Kernel",
-  "cvss_vector_impacts": [
-    {
-      "metric": "S",
-      "from": "C",
-      "to": "U",
-      "rationale": "Process confined to profile-defined resources"
+    "cme_id": "CME-304",
+    "control_name": "AppArmor (Enforcing Profile)",
+    "description": "Path-based mandatory access control that restricts per-application file, network, and capability access. Each application runs under a profile defining allowed operations.",
+    "tactic": "Harden",
+    "category": "Mandatory Access Control",
+    "category_id": "mandatory-access-control",
+    "function_id": "apparmor",
+    "control_layer": "OS/Kernel",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "S",
+            "from": "C",
+            "to": "U",
+            "rationale": "Process confined to profile-defined resources"
+        },
+        {
+            "metric": "C",
+            "from": "H",
+            "to": "L",
+            "rationale": "Cannot read files outside profile allowlist"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-269",
+        "CWE-284"
+    ],
+    "verification": {
+        "method": "Check AppArmor status and profile enforcement",
+        "commands": [
+            {
+                "command": "aa-status --enforced 2>/dev/null | head -5",
+                "expected": "profiles are in enforce mode",
+                "platform": "debian"
+            }
+        ]
     },
-    {
-      "metric": "C",
-      "from": "H",
-      "to": "L",
-      "rationale": "Cannot read files outside profile allowlist"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-269",
-    "CWE-284"
-  ],
-  "verification": {
-    "method": "Check AppArmor status and profile enforcement",
-    "commands": [
-      {
-        "command": "aa-status --enforced 2>/dev/null | head -5",
-        "expected": "profiles are in enforce mode",
-        "platform": "debian"
-      }
+    "confidence": "High",
+    "platforms": [
+        "Ubuntu 24.04",
+        "SLES 15",
+        "Debian 12"
     ]
-  },
-  "confidence": "High",
-  "platforms": [
-    "Ubuntu 24.04",
-    "SLES 15",
-    "Debian 12"
-  ]
 }

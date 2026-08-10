@@ -1,52 +1,54 @@
 {
-  "cme_id": "CME-709",
-  "control_name": "systemd Service Sandboxing (PrivateDevices, PrivateTmp, ProtectSystem)",
-  "description": "systemd unit directives that sandbox services: PrivateDevices removes device access, PrivateTmp isolates /tmp, ProtectSystem=strict makes / read-only, ProtectHome=true hides /home.",
-  "tactic": "Isolate",
-  "category": "Privilege Isolation",
-  "category_id": "privilege-isolation",
-  "control_layer": "OS/Kernel",
-  "cvss_vector_impacts": [
-    {
-      "metric": "S",
-      "from": "C",
-      "to": "U",
-      "rationale": "Service isolated from host filesystem, devices, and user data"
+    "cme_id": "CME-709",
+    "control_name": "systemd Service Sandboxing (PrivateDevices, PrivateTmp, ProtectSystem)",
+    "description": "systemd unit directives that sandbox services: PrivateDevices removes device access, PrivateTmp isolates /tmp, ProtectSystem=strict makes / read-only, ProtectHome=true hides /home.",
+    "tactic": "Isolate",
+    "category": "Privilege Isolation",
+    "category_id": "privilege-isolation",
+    "function_id": "systemd-sandboxing",
+    "control_layer": "OS/Kernel",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "S",
+            "from": "C",
+            "to": "U",
+            "rationale": "Service isolated from host filesystem, devices, and user data"
+        },
+        {
+            "metric": "C",
+            "from": "H",
+            "to": "L",
+            "rationale": "Cannot access user home directories or arbitrary devices"
+        },
+        {
+            "metric": "I",
+            "from": "H",
+            "to": "L",
+            "rationale": "Cannot modify system files outside designated directories"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-269",
+        "CWE-284",
+        "CWE-367",
+        "CWE-362"
+    ],
+    "verification": {
+        "method": "Check systemd unit for sandbox directives",
+        "commands": [
+            {
+                "command": "systemctl show <service> -p ProtectSystem,PrivateTmp,PrivateDevices,ProtectHome",
+                "expected": "ProtectSystem=strict",
+                "platform": "linux"
+            }
+        ]
     },
-    {
-      "metric": "C",
-      "from": "H",
-      "to": "L",
-      "rationale": "Cannot access user home directories or arbitrary devices"
-    },
-    {
-      "metric": "I",
-      "from": "H",
-      "to": "L",
-      "rationale": "Cannot modify system files outside designated directories"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-269",
-    "CWE-284",
-    "CWE-367",
-    "CWE-362"
-  ],
-  "verification": {
-    "method": "Check systemd unit for sandbox directives",
-    "commands": [
-      {
-        "command": "systemctl show <service> -p ProtectSystem,PrivateTmp,PrivateDevices,ProtectHome",
-        "expected": "ProtectSystem=strict",
-        "platform": "linux"
-      }
+    "confidence": "High",
+    "platforms": [
+        "RHEL 9",
+        "RHEL 8",
+        "Ubuntu 24.04",
+        "Fedora"
     ]
-  },
-  "confidence": "High",
-  "platforms": [
-    "RHEL 9",
-    "RHEL 8",
-    "Ubuntu 24.04",
-    "Fedora"
-  ]
 }

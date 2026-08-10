@@ -1,45 +1,47 @@
 {
-  "cme_id": "CME-1101",
-  "control_name": "Automated Patch Management (dnf-automatic)",
-  "description": "Automatically downloads and applies security updates on schedule. Reduces the window between vulnerability disclosure and patch application from days/weeks to hours.",
-  "tactic": "Evict",
-  "category": "Patch Management",
-  "category_id": "patch-management",
-  "control_layer": "OS/Kernel",
-  "cvss_vector_impacts": [
-    {
-      "metric": "AC",
-      "from": "L",
-      "to": "H",
-      "rationale": "Temporal: vulnerability window shortened; exploits against patched code fail"
-    }
-  ],
-  "cwe_relationships": [],
-  "verification": {
-    "method": "Verify automatic updates are enabled",
-    "commands": [
-      {
-        "command": "systemctl is-active dnf-automatic-install.timer",
-        "expected": "active",
-        "platform": "rhel"
-      },
-      {
-        "command": "grep apply_updates /etc/dnf/automatic.conf",
-        "expected": "apply_updates = yes",
-        "platform": "rhel"
-      }
+    "cme_id": "CME-1101",
+    "control_name": "Automated Patch Management (dnf-automatic)",
+    "description": "Automatically downloads and applies security updates on schedule. Reduces the window between vulnerability disclosure and patch application from days/weeks to hours.",
+    "tactic": "Evict",
+    "category": "Patch Management",
+    "category_id": "patch-management",
+    "function_id": "automated-updates",
+    "control_layer": "OS/Kernel",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "AC",
+            "from": "L",
+            "to": "H",
+            "rationale": "Temporal: vulnerability window shortened; exploits against patched code fail"
+        }
+    ],
+    "cwe_relationships": [],
+    "verification": {
+        "method": "Verify automatic updates are enabled",
+        "commands": [
+            {
+                "command": "systemctl is-active dnf-automatic-install.timer",
+                "expected": "active",
+                "platform": "rhel"
+            },
+            {
+                "command": "grep apply_updates /etc/dnf/automatic.conf",
+                "expected": "apply_updates = yes",
+                "platform": "rhel"
+            }
+        ]
+    },
+    "references": [
+        {
+            "source": "Red Hat System Administration Guide",
+            "section": "Automatic updates"
+        }
+    ],
+    "confidence": "High",
+    "platforms": [
+        "RHEL 9",
+        "RHEL 8",
+        "Fedora"
     ]
-  },
-  "references": [
-    {
-      "source": "Red Hat System Administration Guide",
-      "section": "Automatic updates"
-    }
-  ],
-  "confidence": "High",
-  "platforms": [
-    "RHEL 9",
-    "RHEL 8",
-    "Fedora"
-  ]
 }

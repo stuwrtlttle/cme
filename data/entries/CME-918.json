@@ -1,60 +1,62 @@
 {
-  "cme_id": "CME-918",
-  "control_name": "URL Path Authorization Enforcement (Forced Browsing Prevention)",
-  "description": "Enforce URL-pattern-based authorization at the web server or reverse proxy layer so that restricted paths (administrative consoles, debug endpoints, configuration panels, internal APIs, backup files, and deployment artifacts) are denied to unauthorized requesters before the request reaches application code. The control operates as a default-deny URL filter: only explicitly permitted URL patterns are accessible to each authenticated role, and any request to an undefined or restricted path returns 403 Forbidden. This complements application-layer authorization (CME-907, CME-909) by providing infrastructure-level defense-in-depth against forced browsing, where an attacker discovers and directly requests URLs that bypass application navigation and menu-driven access control. Configuration is enforced via web server directives (Apache httpd Location/Directory with Require, nginx location blocks with deny/allow, IIS URL Authorization rules) or Java EE security-constraint elements in web.xml with deny-uncovered-http-methods enabled.",
-  "tactic": "Harden",
-  "category": "Application Controls",
-  "category_id": "application-controls",
-  "control_layer": "Application",
-  "cvss_vector_impacts": [
-    {
-      "metric": "PR",
-      "from": "N",
-      "to": "L",
-      "rationale": "Forced browsing to administrative or internal endpoints fails because the web server rejects unauthenticated requests to restricted URL patterns before the application processes them; the attacker must first obtain valid credentials to reach any protected path"
+    "cme_id": "CME-918",
+    "control_name": "URL Path Authorization Enforcement (Forced Browsing Prevention)",
+    "description": "Enforce URL-pattern-based authorization at the web server or reverse proxy layer so that restricted paths (administrative consoles, debug endpoints, configuration panels, internal APIs, backup files, and deployment artifacts) are denied to unauthorized requesters before the request reaches application code. The control operates as a default-deny URL filter: only explicitly permitted URL patterns are accessible to each authenticated role, and any request to an undefined or restricted path returns 403 Forbidden. This complements application-layer authorization (CME-907, CME-909) by providing infrastructure-level defense-in-depth against forced browsing, where an attacker discovers and directly requests URLs that bypass application navigation and menu-driven access control. Configuration is enforced via web server directives (Apache httpd Location/Directory with Require, nginx location blocks with deny/allow, IIS URL Authorization rules) or Java EE security-constraint elements in web.xml with deny-uncovered-http-methods enabled.",
+    "tactic": "Harden",
+    "category": "Application Controls",
+    "category_id": "application-controls",
+    "function_id": "authorization-controls",
+    "control_layer": "Application",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "PR",
+            "from": "N",
+            "to": "L",
+            "rationale": "Forced browsing to administrative or internal endpoints fails because the web server rejects unauthenticated requests to restricted URL patterns before the application processes them; the attacker must first obtain valid credentials to reach any protected path"
+        },
+        {
+            "metric": "AC",
+            "from": "L",
+            "to": "H",
+            "rationale": "Discovering and accessing a restricted endpoint requires bypassing both the web server URL authorization rules and the application-layer authorization checks; simply guessing or enumerating URLs is insufficient because the infrastructure layer denies access to any path not explicitly permitted for the caller's role"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-425",
+        "CWE-862",
+        "CWE-306",
+        "CWE-284"
+    ],
+    "verification": {
+        "method": "Verify that the web server or reverse proxy enforces URL-pattern-based authorization on restricted paths, and that unauthenticated requests to administrative or internal endpoints are denied",
+        "commands": [
+            {
+                "command": "grep -rn '<Location\\|<Directory\\|Require valid-user\\|Require group\\|AuthType' /etc/httpd/conf.d/ /etc/httpd/conf/httpd.conf",
+                "expected": "Authorization directives present on administrative and restricted URL paths (e.g., /admin, /console, /debug)",
+                "platform": "linux"
+            },
+            {
+                "command": "grep -rn 'location.*/admin\\|location.*/console\\|deny all\\|auth_basic\\|auth_request' /etc/nginx/conf.d/ /etc/nginx/nginx.conf",
+                "expected": "Restricted location blocks with authentication or deny directives for administrative paths",
+                "platform": "linux"
+            },
+            {
+                "command": "curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/admin/",
+                "expected": "401 or 403 (access denied without valid credentials)",
+                "platform": "any"
+            },
+            {
+                "command": "Get-WebConfigurationProperty -Filter '/system.webServer/security/authorization' -PSPath 'IIS:\\Sites\\Default Web Site\\admin' -Name 'collection' | Format-Table",
+                "expected": "URL Authorization rules restricting access to administrative paths to specific roles",
+                "platform": "windows"
+            }
+        ]
     },
-    {
-      "metric": "AC",
-      "from": "L",
-      "to": "H",
-      "rationale": "Discovering and accessing a restricted endpoint requires bypassing both the web server URL authorization rules and the application-layer authorization checks; simply guessing or enumerating URLs is insufficient because the infrastructure layer denies access to any path not explicitly permitted for the caller's role"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-425",
-    "CWE-862",
-    "CWE-306",
-    "CWE-284"
-  ],
-  "verification": {
-    "method": "Verify that the web server or reverse proxy enforces URL-pattern-based authorization on restricted paths, and that unauthenticated requests to administrative or internal endpoints are denied",
-    "commands": [
-      {
-        "command": "grep -rn '<Location\\|<Directory\\|Require valid-user\\|Require group\\|AuthType' /etc/httpd/conf.d/ /etc/httpd/conf/httpd.conf",
-        "expected": "Authorization directives present on administrative and restricted URL paths (e.g., /admin, /console, /debug)",
-        "platform": "linux"
-      },
-      {
-        "command": "grep -rn 'location.*/admin\\|location.*/console\\|deny all\\|auth_basic\\|auth_request' /etc/nginx/conf.d/ /etc/nginx/nginx.conf",
-        "expected": "Restricted location blocks with authentication or deny directives for administrative paths",
-        "platform": "linux"
-      },
-      {
-        "command": "curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/admin/",
-        "expected": "401 or 403 (access denied without valid credentials)",
-        "platform": "any"
-      },
-      {
-        "command": "Get-WebConfigurationProperty -Filter '/system.webServer/security/authorization' -PSPath 'IIS:\\Sites\\Default Web Site\\admin' -Name 'collection' | Format-Table",
-        "expected": "URL Authorization rules restricting access to administrative paths to specific roles",
-        "platform": "windows"
-      }
+    "confidence": "High",
+    "platforms": [
+        "Any",
+        "Windows Server 2019",
+        "Windows Server 2022"
     ]
-  },
-  "confidence": "High",
-  "platforms": [
-    "Any",
-    "Windows Server 2019",
-    "Windows Server 2022"
-  ]
 }

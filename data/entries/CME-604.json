@@ -1,48 +1,50 @@
 {
-  "cme_id": "CME-604",
-  "control_name": "Unprivileged User Namespaces Disabled",
-  "description": "Prevents unprivileged users from creating user namespaces. User namespaces expose kernel attack surface (mount, network, PID operations) to unprivileged users and have been a frequent LPE vector.",
-  "tactic": "Harden",
-  "category": "Syscall & BPF Controls",
-  "category_id": "syscall-bpf-controls",
-  "control_layer": "OS/Kernel",
-  "cvss_vector_impacts": [
-    {
-      "metric": "PR",
-      "from": "L",
-      "to": "H",
-      "rationale": "Unprivileged user cannot create namespaces to reach privileged kernel paths"
+    "cme_id": "CME-604",
+    "control_name": "Unprivileged User Namespaces Disabled",
+    "description": "Prevents unprivileged users from creating user namespaces. User namespaces expose kernel attack surface (mount, network, PID operations) to unprivileged users and have been a frequent LPE vector.",
+    "tactic": "Harden",
+    "category": "Syscall & BPF Controls",
+    "category_id": "syscall-bpf-controls",
+    "function_id": "seccomp",
+    "control_layer": "OS/Kernel",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "PR",
+            "from": "L",
+            "to": "H",
+            "rationale": "Unprivileged user cannot create namespaces to reach privileged kernel paths"
+        },
+        {
+            "metric": "AC",
+            "from": "L",
+            "to": "H",
+            "rationale": "Many kernel LPE exploits require user namespaces as a prerequisite"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-269",
+        "CWE-119"
+    ],
+    "verification": {
+        "method": "Check user.max_user_namespaces sysctl",
+        "commands": [
+            {
+                "command": "cat /proc/sys/user/max_user_namespaces",
+                "expected": "0",
+                "platform": "linux"
+            },
+            {
+                "command": "sysctl kernel.unprivileged_userns_clone 2>/dev/null",
+                "expected": "kernel.unprivileged_userns_clone = 0",
+                "platform": "debian"
+            }
+        ]
     },
-    {
-      "metric": "AC",
-      "from": "L",
-      "to": "H",
-      "rationale": "Many kernel LPE exploits require user namespaces as a prerequisite"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-269",
-    "CWE-119"
-  ],
-  "verification": {
-    "method": "Check user.max_user_namespaces sysctl",
-    "commands": [
-      {
-        "command": "cat /proc/sys/user/max_user_namespaces",
-        "expected": "0",
-        "platform": "linux"
-      },
-      {
-        "command": "sysctl kernel.unprivileged_userns_clone 2>/dev/null",
-        "expected": "kernel.unprivileged_userns_clone = 0",
-        "platform": "debian"
-      }
+    "confidence": "High",
+    "platforms": [
+        "RHEL 9",
+        "RHEL 8",
+        "Ubuntu 24.04"
     ]
-  },
-  "confidence": "High",
-  "platforms": [
-    "RHEL 9",
-    "RHEL 8",
-    "Ubuntu 24.04"
-  ]
 }

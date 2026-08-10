@@ -1,42 +1,44 @@
 {
-  "cme_id": "CME-806",
-  "control_name": "Kerberos Authentication (GSSAPI)",
-  "description": "Centralized ticket-based authentication using Kerberos. Passwords never transmitted over the network; mutual authentication prevents impersonation of either party.",
-  "tactic": "Harden",
-  "category": "Credential Hardening",
-  "category_id": "credential-hardening",
-  "control_layer": "Identity",
-  "cvss_vector_impacts": [
-    {
-      "metric": "AC",
-      "from": "L",
-      "to": "H",
-      "rationale": "Credential interception useless; tickets are time-limited and host-bound"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-319",
-    "CWE-287",
-    "CWE-303"
-  ],
-  "verification": {
-    "method": "Check Kerberos authentication is configured",
-    "commands": [
-      {
-        "command": "klist -k /etc/krb5.keytab 2>/dev/null | head -3",
-        "expected": "keytab entries",
-        "platform": "linux"
-      },
-      {
-        "command": "sshd -T | grep gssapiauthentication",
-        "expected": "gssapiauthentication yes",
-        "platform": "linux"
-      }
+    "cme_id": "CME-806",
+    "control_name": "Kerberos Authentication (GSSAPI)",
+    "description": "Centralized ticket-based authentication using Kerberos. Passwords never transmitted over the network; mutual authentication prevents impersonation of either party.",
+    "tactic": "Harden",
+    "category": "Credential Hardening",
+    "category_id": "credential-hardening",
+    "function_id": "authentication-methods",
+    "control_layer": "Identity",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "AC",
+            "from": "L",
+            "to": "H",
+            "rationale": "Credential interception useless; tickets are time-limited and host-bound"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-319",
+        "CWE-287",
+        "CWE-303"
+    ],
+    "verification": {
+        "method": "Check Kerberos authentication is configured",
+        "commands": [
+            {
+                "command": "klist -k /etc/krb5.keytab 2>/dev/null | head -3",
+                "expected": "keytab entries",
+                "platform": "linux"
+            },
+            {
+                "command": "sshd -T | grep gssapiauthentication",
+                "expected": "gssapiauthentication yes",
+                "platform": "linux"
+            }
+        ]
+    },
+    "confidence": "High",
+    "platforms": [
+        "RHEL 9",
+        "RHEL 8"
     ]
-  },
-  "confidence": "High",
-  "platforms": [
-    "RHEL 9",
-    "RHEL 8"
-  ]
 }

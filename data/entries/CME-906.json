@@ -1,43 +1,45 @@
 {
-  "cme_id": "CME-906",
-  "control_name": "Rate Limiting / Connection Throttling",
-  "description": "Limits request rate per client IP or authenticated identity. Mitigates brute force attacks, credential stuffing, and application-level denial of service.",
-  "tactic": "Harden",
-  "category": "Application Controls",
-  "category_id": "application-controls",
-  "control_layer": "Network",
-  "cvss_vector_impacts": [
-    {
-      "metric": "A",
-      "from": "H",
-      "to": "L",
-      "rationale": "Single client cannot exhaust application resources"
+    "cme_id": "CME-906",
+    "control_name": "Rate Limiting / Connection Throttling",
+    "description": "Limits request rate per client IP or authenticated identity. Mitigates brute force attacks, credential stuffing, and application-level denial of service.",
+    "tactic": "Harden",
+    "category": "Application Controls",
+    "category_id": "application-controls",
+    "function_id": "request-filtering",
+    "control_layer": "Network",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "A",
+            "from": "H",
+            "to": "L",
+            "rationale": "Single client cannot exhaust application resources"
+        },
+        {
+            "metric": "AC",
+            "from": "L",
+            "to": "H",
+            "rationale": "Brute force attacks throttled to impractical speeds"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-307",
+        "CWE-400"
+    ],
+    "verification": {
+        "method": "Verify rate limiting is configured",
+        "commands": [
+            {
+                "command": "grep -r 'limit_req_zone\\|rate-limit' /etc/nginx/ 2>/dev/null",
+                "expected": "limit_req_zone",
+                "platform": "any"
+            }
+        ]
     },
-    {
-      "metric": "AC",
-      "from": "L",
-      "to": "H",
-      "rationale": "Brute force attacks throttled to impractical speeds"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-307",
-    "CWE-400"
-  ],
-  "verification": {
-    "method": "Verify rate limiting is configured",
-    "commands": [
-      {
-        "command": "grep -r 'limit_req_zone\\|rate-limit' /etc/nginx/ 2>/dev/null",
-        "expected": "limit_req_zone",
-        "platform": "any"
-      }
+    "confidence": "Medium",
+    "platforms": [
+        "Any",
+        "Windows Server 2019",
+        "Windows Server 2022"
     ]
-  },
-  "confidence": "Medium",
-  "platforms": [
-    "Any",
-    "Windows Server 2019",
-    "Windows Server 2022"
-  ]
 }

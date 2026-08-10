@@ -1,57 +1,59 @@
 {
-  "cme_id": "CME-915",
-  "control_name": "Cross-Origin Request Restriction (Reverse Proxy Origin Enforcement)",
-  "description": "Configure the reverse proxy or load balancer (nginx, Apache httpd, HAProxy) to validate the Origin and Referer headers on state-changing requests (POST, PUT, DELETE, PATCH, and WebSocket Upgrade) against an explicit allowlist of trusted origins. Requests with an Origin that does not match the allowlist are rejected with 403 before reaching the backend application. This provides defense-in-depth for applications that fail to validate cross-origin requests internally \u2014 the proxy enforces the same-origin boundary at the infrastructure layer.",
-  "tactic": "Harden",
-  "category": "Application Controls",
-  "category_id": "application-controls",
-  "control_layer": "Application",
-  "cvss_vector_impacts": [
-    {
-      "metric": "AC",
-      "from": "L",
-      "to": "H",
-      "rationale": "The attacker must achieve a same-origin position (e.g., XSS on the allowed domain or social engineering to access a same-origin page) to bypass the proxy-level origin restriction. A simple cross-origin request from an attacker-controlled domain is rejected by the proxy before reaching the application, significantly increasing the complexity required for successful exploitation."
+    "cme_id": "CME-915",
+    "control_name": "Cross-Origin Request Restriction (Reverse Proxy Origin Enforcement)",
+    "description": "Configure the reverse proxy or load balancer (nginx, Apache httpd, HAProxy) to validate the Origin and Referer headers on state-changing requests (POST, PUT, DELETE, PATCH, and WebSocket Upgrade) against an explicit allowlist of trusted origins. Requests with an Origin that does not match the allowlist are rejected with 403 before reaching the backend application. This provides defense-in-depth for applications that fail to validate cross-origin requests internally \u2014 the proxy enforces the same-origin boundary at the infrastructure layer.",
+    "tactic": "Harden",
+    "category": "Application Controls",
+    "category_id": "application-controls",
+    "function_id": "origin-cors",
+    "control_layer": "Application",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "AC",
+            "from": "L",
+            "to": "H",
+            "rationale": "The attacker must achieve a same-origin position (e.g., XSS on the allowed domain or social engineering to access a same-origin page) to bypass the proxy-level origin restriction. A simple cross-origin request from an attacker-controlled domain is rejected by the proxy before reaching the application, significantly increasing the complexity required for successful exploitation."
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-346",
+        "CWE-352",
+        "CWE-940",
+        "CWE-942"
+    ],
+    "confidence": "High",
+    "platforms": [
+        "RHEL 8",
+        "RHEL 9",
+        "RHEL 10",
+        "OpenShift 4",
+        "Windows Server 2019",
+        "Windows Server 2022"
+    ],
+    "verification": {
+        "method": "Check reverse proxy configuration for Origin/Referer header validation on state-changing requests. The proxy should reject requests with an Origin not in the trusted allowlist.",
+        "commands": [
+            {
+                "command": "grep -rE \"valid_referers|map.*\\$http_origin\" /etc/nginx/",
+                "expected": "Origin validation directives present",
+                "platform": "rhel"
+            },
+            {
+                "command": "grep -rE \"Require expr.*HTTP_ORIGIN|SetEnvIf Origin\" /etc/httpd/conf.d/",
+                "expected": "Origin validation rules present",
+                "platform": "rhel"
+            },
+            {
+                "command": "grep -rE \"hdr\\(Origin\\)|req\\.hdr\\(Origin\\)\" /etc/haproxy/",
+                "expected": "Origin ACL rules present",
+                "platform": "rhel"
+            },
+            {
+                "command": "curl -s -o /dev/null -w \"%{http_code}\" -X POST -H \"Origin: https://evil.example.com\" https://your-app/api/endpoint",
+                "expected": "403",
+                "platform": "any"
+            }
+        ]
     }
-  ],
-  "cwe_relationships": [
-    "CWE-346",
-    "CWE-352",
-    "CWE-940",
-    "CWE-942"
-  ],
-  "confidence": "High",
-  "platforms": [
-    "RHEL 8",
-    "RHEL 9",
-    "RHEL 10",
-    "OpenShift 4",
-    "Windows Server 2019",
-    "Windows Server 2022"
-  ],
-  "verification": {
-    "method": "Check reverse proxy configuration for Origin/Referer header validation on state-changing requests. The proxy should reject requests with an Origin not in the trusted allowlist.",
-    "commands": [
-      {
-        "command": "grep -rE \"valid_referers|map.*\\$http_origin\" /etc/nginx/",
-        "expected": "Origin validation directives present",
-        "platform": "rhel"
-      },
-      {
-        "command": "grep -rE \"Require expr.*HTTP_ORIGIN|SetEnvIf Origin\" /etc/httpd/conf.d/",
-        "expected": "Origin validation rules present",
-        "platform": "rhel"
-      },
-      {
-        "command": "grep -rE \"hdr\\(Origin\\)|req\\.hdr\\(Origin\\)\" /etc/haproxy/",
-        "expected": "Origin ACL rules present",
-        "platform": "rhel"
-      },
-      {
-        "command": "curl -s -o /dev/null -w \"%{http_code}\" -X POST -H \"Origin: https://evil.example.com\" https://your-app/api/endpoint",
-        "expected": "403",
-        "platform": "any"
-      }
-    ]
-  }
 }

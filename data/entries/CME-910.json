@@ -1,43 +1,45 @@
 {
-  "cme_id": "CME-910",
-  "control_name": "Role Separation / Duty Segregation",
-  "description": "Structure application roles around single-responsibility privilege domains, ensuring that capabilities in one domain cannot be leveraged to gain privileges in an unrelated domain. Each role governs a bounded set of operations (e.g., user management, deployment, financial operations) and cannot modify its own scope, create tokens with elevated scope, or grant itself additional roles. Token and session scopes are minted to the specific capability required for each operation rather than the user's maximum privilege set. Role definitions enforce mutual exclusion where domain separation requires it (e.g., the role that configures authentication policies cannot also be the role that manages user accounts). Prevents privilege chaining attacks where compromising one admin capability bootstraps into full system compromise.",
-  "tactic": "Isolate",
-  "category": "Application Controls",
-  "category_id": "application-controls",
-  "control_layer": "Application",
-  "cvss_vector_impacts": [
-    {
-      "metric": "S",
-      "from": "C",
-      "to": "U",
-      "rationale": "Compromise of one admin capability is confined to that capability's privilege domain; the attacker cannot leverage it to affect resources in unrelated domains (e.g., compromising container management cannot yield host filesystem access, compromising profile editing cannot yield role assignment). Each role's blast radius is bounded by its single-responsibility scope."
+    "cme_id": "CME-910",
+    "control_name": "Role Separation / Duty Segregation",
+    "description": "Structure application roles around single-responsibility privilege domains, ensuring that capabilities in one domain cannot be leveraged to gain privileges in an unrelated domain. Each role governs a bounded set of operations (e.g., user management, deployment, financial operations) and cannot modify its own scope, create tokens with elevated scope, or grant itself additional roles. Token and session scopes are minted to the specific capability required for each operation rather than the user's maximum privilege set. Role definitions enforce mutual exclusion where domain separation requires it (e.g., the role that configures authentication policies cannot also be the role that manages user accounts). Prevents privilege chaining attacks where compromising one admin capability bootstraps into full system compromise.",
+    "tactic": "Isolate",
+    "category": "Application Controls",
+    "category_id": "application-controls",
+    "function_id": "authorization-controls",
+    "control_layer": "Application",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "S",
+            "from": "C",
+            "to": "U",
+            "rationale": "Compromise of one admin capability is confined to that capability's privilege domain; the attacker cannot leverage it to affect resources in unrelated domains (e.g., compromising container management cannot yield host filesystem access, compromising profile editing cannot yield role assignment). Each role's blast radius is bounded by its single-responsibility scope."
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-268",
+        "CWE-266",
+        "CWE-269"
+    ],
+    "confidence": "High",
+    "platforms": [
+        "Any",
+        "Windows Server 2019",
+        "Windows Server 2022"
+    ],
+    "verification": {
+        "method": "Inspect application role definitions for single-responsibility scoping; verify that no role can modify its own permission grants; test that token scopes are operation-bounded",
+        "commands": [
+            {
+                "command": "grep -rn 'role.*scope\\|mutual_exclu\\|incompatible_roles\\|role_separation\\|segregat' <app_source>/",
+                "expected": "Role definitions with explicit scope boundaries or mutual exclusion constraints",
+                "platform": "any"
+            },
+            {
+                "command": "grep -rn 'self.*role\\|own.*permission\\|grant.*self\\|assign.*self' <app_source>/",
+                "expected": "No code paths allowing a role to modify its own scope or grant itself new roles",
+                "platform": "any"
+            }
+        ]
     }
-  ],
-  "cwe_relationships": [
-    "CWE-268",
-    "CWE-266",
-    "CWE-269"
-  ],
-  "confidence": "High",
-  "platforms": [
-    "Any",
-    "Windows Server 2019",
-    "Windows Server 2022"
-  ],
-  "verification": {
-    "method": "Inspect application role definitions for single-responsibility scoping; verify that no role can modify its own permission grants; test that token scopes are operation-bounded",
-    "commands": [
-      {
-        "command": "grep -rn 'role.*scope\\|mutual_exclu\\|incompatible_roles\\|role_separation\\|segregat' <app_source>/",
-        "expected": "Role definitions with explicit scope boundaries or mutual exclusion constraints",
-        "platform": "any"
-      },
-      {
-        "command": "grep -rn 'self.*role\\|own.*permission\\|grant.*self\\|assign.*self' <app_source>/",
-        "expected": "No code paths allowing a role to modify its own scope or grant itself new roles",
-        "platform": "any"
-      }
-    ]
-  }
 }

@@ -1,53 +1,55 @@
 {
-  "cme_id": "CME-1310",
-  "control_name": "File Upload Validation (Content Inspection and Extension Allowlist)",
-  "description": "Server-side validation of uploaded files using content inspection (magic byte verification), extension allowlisting, and size limits before the file is written to storage or processed. Rejects uploads whose actual content type does not match the declared MIME type, whose extension is not on the allowlist, or whose size exceeds configured limits. Files are stored outside the web root with randomized names to prevent direct execution. This prevents attackers from uploading executable payloads (web shells, scripts, malicious binaries) disguised as benign file types.",
-  "tactic": "Harden",
-  "category": "Application Input Validation",
-  "category_id": "application-input-validation",
-  "control_layer": "Application",
-  "cvss_vector_impacts": [
-    {
-      "metric": "AC",
-      "from": "L",
-      "to": "H",
-      "rationale": "Attacker must bypass content-type inspection, extension allowlist, and storage isolation to execute an uploaded payload; simple extension renaming or MIME spoofing is insufficient"
-    },
-    {
-      "metric": "I",
-      "from": "H",
-      "to": "L",
-      "rationale": "Uploaded files are confined to a non-executable storage directory with randomized names; the attacker cannot overwrite existing application files or place executable content in the web root"
+    "cme_id": "CME-1310",
+    "control_name": "File Upload Validation (Content Inspection and Extension Allowlist)",
+    "description": "Server-side validation of uploaded files using content inspection (magic byte verification), extension allowlisting, and size limits before the file is written to storage or processed. Rejects uploads whose actual content type does not match the declared MIME type, whose extension is not on the allowlist, or whose size exceeds configured limits. Files are stored outside the web root with randomized names to prevent direct execution. This prevents attackers from uploading executable payloads (web shells, scripts, malicious binaries) disguised as benign file types.",
+    "tactic": "Harden",
+    "category": "Application Input Validation",
+    "category_id": "application-input-validation",
+    "function_id": "input-validation",
+    "control_layer": "Application",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "AC",
+            "from": "L",
+            "to": "H",
+            "rationale": "Attacker must bypass content-type inspection, extension allowlist, and storage isolation to execute an uploaded payload; simple extension renaming or MIME spoofing is insufficient"
+        },
+        {
+            "metric": "I",
+            "from": "H",
+            "to": "L",
+            "rationale": "Uploaded files are confined to a non-executable storage directory with randomized names; the attacker cannot overwrite existing application files or place executable content in the web root"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-434",
+        "CWE-20",
+        "CWE-641",
+        "CWE-646",
+        "CWE-1286"
+    ],
+    "confidence": "High",
+    "platforms": [
+        "RHEL 9",
+        "RHEL 10",
+        "Ubuntu 24.04",
+        "Windows Server 2019",
+        "Windows Server 2022"
+    ],
+    "verification": {
+        "method": "Verify that the application rejects uploads with disallowed extensions and mismatched content types, and that upload storage is outside the document root",
+        "commands": [
+            {
+                "command": "curl -s -o /dev/null -w \"%{http_code}\" -F \"file=@/tmp/test.php\" https://app/upload",
+                "expected": "400 or 403 (rejected)",
+                "platform": "linux"
+            },
+            {
+                "command": "ls -la /var/www/html/uploads/ 2>/dev/null || echo \"no uploads in web root\"",
+                "expected": "directory should not exist inside web root",
+                "platform": "linux"
+            }
+        ]
     }
-  ],
-  "cwe_relationships": [
-    "CWE-434",
-    "CWE-20",
-    "CWE-641",
-    "CWE-646",
-    "CWE-1286"
-  ],
-  "confidence": "High",
-  "platforms": [
-    "RHEL 9",
-    "RHEL 10",
-    "Ubuntu 24.04",
-    "Windows Server 2019",
-    "Windows Server 2022"
-  ],
-  "verification": {
-    "method": "Verify that the application rejects uploads with disallowed extensions and mismatched content types, and that upload storage is outside the document root",
-    "commands": [
-      {
-        "command": "curl -s -o /dev/null -w \"%{http_code}\" -F \"file=@/tmp/test.php\" https://app/upload",
-        "expected": "400 or 403 (rejected)",
-        "platform": "linux"
-      },
-      {
-        "command": "ls -la /var/www/html/uploads/ 2>/dev/null || echo \"no uploads in web root\"",
-        "expected": "directory should not exist inside web root",
-        "platform": "linux"
-      }
-    ]
-  }
 }

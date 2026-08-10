@@ -1,50 +1,52 @@
 {
-  "cme_id": "CME-917",
-  "control_name": "Worker Process Recycling (MaxConnectionsPerChild / max_requests)",
-  "description": "Configures application servers to periodically recycle worker processes after handling a fixed number of requests, bounding the cumulative impact of per-request memory leaks. When a worker reaches its request limit, it is gracefully terminated and replaced with a fresh process, releasing all leaked memory. Applicable to Apache HTTP Server (MaxConnectionsPerChild), PHP-FPM (pm.max_requests), Gunicorn (--max-requests with --max-requests-jitter for staggered recycling), Puma (worker_timeout), and Unicorn (after_fork with request counting). The recycling threshold should be set low enough to prevent OOM conditions but high enough to avoid excessive process churn \u2014 typical values range from 500 to 10000 requests per worker depending on application memory profile.",
-  "tactic": "Harden",
-  "category": "Application Controls",
-  "category_id": "application-controls",
-  "control_layer": "Application",
-  "cvss_vector_impacts": [
-    {
-      "metric": "A",
-      "from": "H",
-      "to": "L",
-      "rationale": "Per-request memory leaks are bounded by the worker lifecycle; each worker is recycled after a fixed number of requests, releasing accumulated leaked memory before it can cause resource exhaustion. The application experiences brief per-worker restart latency rather than system-wide memory starvation."
+    "cme_id": "CME-917",
+    "control_name": "Worker Process Recycling (MaxConnectionsPerChild / max_requests)",
+    "description": "Configures application servers to periodically recycle worker processes after handling a fixed number of requests, bounding the cumulative impact of per-request memory leaks. When a worker reaches its request limit, it is gracefully terminated and replaced with a fresh process, releasing all leaked memory. Applicable to Apache HTTP Server (MaxConnectionsPerChild), PHP-FPM (pm.max_requests), Gunicorn (--max-requests with --max-requests-jitter for staggered recycling), Puma (worker_timeout), and Unicorn (after_fork with request counting). The recycling threshold should be set low enough to prevent OOM conditions but high enough to avoid excessive process churn \u2014 typical values range from 500 to 10000 requests per worker depending on application memory profile.",
+    "tactic": "Harden",
+    "category": "Application Controls",
+    "category_id": "application-controls",
+    "function_id": "runtime-hardening",
+    "control_layer": "Application",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "A",
+            "from": "H",
+            "to": "L",
+            "rationale": "Per-request memory leaks are bounded by the worker lifecycle; each worker is recycled after a fixed number of requests, releasing accumulated leaked memory before it can cause resource exhaustion. The application experiences brief per-worker restart latency rather than system-wide memory starvation."
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-772",
+        "CWE-401"
+    ],
+    "confidence": "High",
+    "platforms": [
+        "RHEL 9",
+        "RHEL 10",
+        "Ubuntu 24.04",
+        "Fedora",
+        "Windows Server 2019",
+        "Windows Server 2022"
+    ],
+    "verification": {
+        "method": "Check that application server worker recycling is configured with a finite request limit",
+        "commands": [
+            {
+                "command": "grep -i MaxConnectionsPerChild /etc/httpd/conf/*.conf /etc/httpd/conf.d/*.conf 2>/dev/null",
+                "expected": "A positive integer value (not 0, which means unlimited)",
+                "platform": "linux"
+            },
+            {
+                "command": "grep pm.max_requests /etc/php-fpm.d/*.conf /etc/php/*/fpm/pool.d/*.conf 2>/dev/null",
+                "expected": "A positive integer value (not 0)",
+                "platform": "linux"
+            },
+            {
+                "command": "grep -E 'max.requests|max-requests' /etc/gunicorn/*.py /etc/gunicorn/*.conf 2>/dev/null",
+                "expected": "A positive integer value",
+                "platform": "linux"
+            }
+        ]
     }
-  ],
-  "cwe_relationships": [
-    "CWE-772",
-    "CWE-401"
-  ],
-  "confidence": "High",
-  "platforms": [
-    "RHEL 9",
-    "RHEL 10",
-    "Ubuntu 24.04",
-    "Fedora",
-    "Windows Server 2019",
-    "Windows Server 2022"
-  ],
-  "verification": {
-    "method": "Check that application server worker recycling is configured with a finite request limit",
-    "commands": [
-      {
-        "command": "grep -i MaxConnectionsPerChild /etc/httpd/conf/*.conf /etc/httpd/conf.d/*.conf 2>/dev/null",
-        "expected": "A positive integer value (not 0, which means unlimited)",
-        "platform": "linux"
-      },
-      {
-        "command": "grep pm.max_requests /etc/php-fpm.d/*.conf /etc/php/*/fpm/pool.d/*.conf 2>/dev/null",
-        "expected": "A positive integer value (not 0)",
-        "platform": "linux"
-      },
-      {
-        "command": "grep -E 'max.requests|max-requests' /etc/gunicorn/*.py /etc/gunicorn/*.conf 2>/dev/null",
-        "expected": "A positive integer value",
-        "platform": "linux"
-      }
-    ]
-  }
 }

@@ -1,65 +1,67 @@
 {
-  "cme_id": "CME-902",
-  "control_name": "Disable Unused Network Services",
-  "description": "Disables and masks unnecessary listening services (rpcbind, avahi-daemon, cups, postfix on non-mail servers). Each removed service eliminates an attack surface.",
-  "tactic": "Harden",
-  "category": "Protocol Hardening",
-  "category_id": "protocol-hardening",
-  "control_layer": "Network",
-  "cvss_vector_impacts": [
-    {
-      "metric": "AV",
-      "from": "N",
-      "to": "L",
-      "rationale": "Fewer network-accessible services means fewer remote attack vectors"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-284",
-    "CWE-668"
-  ],
-  "verification": {
-    "method": "List listening services and verify only necessary ones are active",
-    "commands": [
-      {
-        "command": "ss -tlnp | grep -v '127.0.0.1\\|::1'",
-        "expected": "Only expected services",
-        "platform": "linux"
-      },
-      {
-        "command": "Get-NetTCPConnection -State Listen | Where-Object { $_.LocalAddress -ne '127.0.0.1' -and $_.LocalAddress -ne '::1' } | Measure-Object | Select-Object -ExpandProperty Count",
-        "expected": "Only expected services",
-        "platform": "windows"
-      }
+    "cme_id": "CME-902",
+    "control_name": "Disable Unused Network Services",
+    "description": "Disables and masks unnecessary listening services (rpcbind, avahi-daemon, cups, postfix on non-mail servers). Each removed service eliminates an attack surface.",
+    "tactic": "Harden",
+    "category": "Protocol Hardening",
+    "category_id": "protocol-hardening",
+    "function_id": "protocol-config",
+    "control_layer": "Network",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "AV",
+            "from": "N",
+            "to": "L",
+            "rationale": "Fewer network-accessible services means fewer remote attack vectors"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-284",
+        "CWE-668"
+    ],
+    "verification": {
+        "method": "List listening services and verify only necessary ones are active",
+        "commands": [
+            {
+                "command": "ss -tlnp | grep -v '127.0.0.1\\|::1'",
+                "expected": "Only expected services",
+                "platform": "linux"
+            },
+            {
+                "command": "Get-NetTCPConnection -State Listen | Where-Object { $_.LocalAddress -ne '127.0.0.1' -and $_.LocalAddress -ne '::1' } | Measure-Object | Select-Object -ExpandProperty Count",
+                "expected": "Only expected services",
+                "platform": "windows"
+            }
+        ]
+    },
+    "references": [
+        {
+            "source": "CIS RHEL 9 Benchmark",
+            "section": "2. Services"
+        }
+    ],
+    "confidence": "High",
+    "platforms": [
+        "RHEL 9",
+        "RHEL 8",
+        "Ubuntu 24.04",
+        "Windows 10",
+        "Windows 11",
+        "Windows Server 2022"
+    ],
+    "cve_schema_version": "5.2.0",
+    "cve_affected": [
+        {
+            "vendor": "microsoft",
+            "product": "windows",
+            "cpes": [
+                "cpe:2.3:o:microsoft:windows_10:*:*:*:*:*:*:*:*",
+                "cpe:2.3:o:microsoft:windows_11:*:*:*:*:*:*:*:*",
+                "cpe:2.3:o:microsoft:windows_server_2019:*:*:*:*:*:*:*",
+                "cpe:2.3:o:microsoft:windows_server_2022:*:*:*:*:*:*:*"
+            ],
+            "defaultStatus": "applicable"
+        }
     ]
-  },
-  "references": [
-    {
-      "source": "CIS RHEL 9 Benchmark",
-      "section": "2. Services"
-    }
-  ],
-  "confidence": "High",
-  "platforms": [
-    "RHEL 9",
-    "RHEL 8",
-    "Ubuntu 24.04",
-    "Windows 10",
-    "Windows 11",
-    "Windows Server 2022"
-  ],
-  "cve_schema_version": "5.2.0",
-  "cve_affected": [
-    {
-      "vendor": "microsoft",
-      "product": "windows",
-      "cpes": [
-        "cpe:2.3:o:microsoft:windows_10:*:*:*:*:*:*:*:*",
-        "cpe:2.3:o:microsoft:windows_11:*:*:*:*:*:*:*:*",
-        "cpe:2.3:o:microsoft:windows_server_2019:*:*:*:*:*:*:*",
-        "cpe:2.3:o:microsoft:windows_server_2022:*:*:*:*:*:*:*"
-      ],
-      "defaultStatus": "applicable"
-    }
-  ]
 }

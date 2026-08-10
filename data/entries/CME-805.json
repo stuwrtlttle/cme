@@ -1,57 +1,59 @@
 {
-  "cme_id": "CME-805",
-  "control_name": "Credential Rotation Policy",
-  "description": "Automated rotation of secrets, API keys, and passwords on schedule. Limits the window during which compromised credentials remain valid.",
-  "tactic": "Harden",
-  "category": "Credential Hardening",
-  "category_id": "credential-hardening",
-  "control_layer": "Identity",
-  "cvss_vector_impacts": [
-    {
-      "metric": "AC",
-      "from": "L",
-      "to": "H",
-      "rationale": "Compromised credentials expire before attacker can use them"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-798",
-    "CWE-521"
-  ],
-  "verification": {
-    "method": "Check password aging and secret rotation policies",
-    "commands": [
-      {
-        "command": "chage -l <user> | grep 'Maximum'",
-        "expected": "Maximum number of days between password change : 90",
-        "platform": "linux"
-      },
-      {
-        "command": "net accounts | Select-String 'Maximum password age'",
-        "expected": "Maximum password age (days)              90",
-        "platform": "windows"
-      }
+    "cme_id": "CME-805",
+    "control_name": "Credential Rotation Policy",
+    "description": "Automated rotation of secrets, API keys, and passwords on schedule. Limits the window during which compromised credentials remain valid.",
+    "tactic": "Harden",
+    "category": "Credential Hardening",
+    "category_id": "credential-hardening",
+    "function_id": "password-policy",
+    "control_layer": "Identity",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "AC",
+            "from": "L",
+            "to": "H",
+            "rationale": "Compromised credentials expire before attacker can use them"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-798",
+        "CWE-521"
+    ],
+    "verification": {
+        "method": "Check password aging and secret rotation policies",
+        "commands": [
+            {
+                "command": "chage -l <user> | grep 'Maximum'",
+                "expected": "Maximum number of days between password change : 90",
+                "platform": "linux"
+            },
+            {
+                "command": "net accounts | Select-String 'Maximum password age'",
+                "expected": "Maximum password age (days)              90",
+                "platform": "windows"
+            }
+        ]
+    },
+    "confidence": "Medium",
+    "platforms": [
+        "Any",
+        "Windows 10",
+        "Windows 11",
+        "Windows Server 2022"
+    ],
+    "cve_schema_version": "5.2.0",
+    "cve_affected": [
+        {
+            "vendor": "microsoft",
+            "product": "windows",
+            "cpes": [
+                "cpe:2.3:o:microsoft:windows_10:*:*:*:*:*:*:*:*",
+                "cpe:2.3:o:microsoft:windows_11:*:*:*:*:*:*:*:*",
+                "cpe:2.3:o:microsoft:windows_server_2019:*:*:*:*:*:*:*",
+                "cpe:2.3:o:microsoft:windows_server_2022:*:*:*:*:*:*:*"
+            ],
+            "defaultStatus": "applicable"
+        }
     ]
-  },
-  "confidence": "Medium",
-  "platforms": [
-    "Any",
-    "Windows 10",
-    "Windows 11",
-    "Windows Server 2022"
-  ],
-  "cve_schema_version": "5.2.0",
-  "cve_affected": [
-    {
-      "vendor": "microsoft",
-      "product": "windows",
-      "cpes": [
-        "cpe:2.3:o:microsoft:windows_10:*:*:*:*:*:*:*:*",
-        "cpe:2.3:o:microsoft:windows_11:*:*:*:*:*:*:*:*",
-        "cpe:2.3:o:microsoft:windows_server_2019:*:*:*:*:*:*:*",
-        "cpe:2.3:o:microsoft:windows_server_2022:*:*:*:*:*:*:*"
-      ],
-      "defaultStatus": "applicable"
-    }
-  ]
 }

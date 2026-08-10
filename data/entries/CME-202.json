@@ -1,53 +1,55 @@
 {
-  "cme_id": "CME-202",
-  "control_name": "Host-Based Firewall (firewalld/nftables)",
-  "description": "Per-host network access control using firewalld zones or nftables rules. Restricts which network sources can reach specific services, reducing attack surface.",
-  "tactic": "Isolate",
-  "category": "Network Isolation",
-  "category_id": "network-isolation",
-  "control_layer": "Network",
-  "cvss_vector_impacts": [
-    {
-      "metric": "AV",
-      "from": "N",
-      "to": "A",
-      "rationale": "Service only reachable from adjacent/authorized networks"
+    "cme_id": "CME-202",
+    "control_name": "Host-Based Firewall (firewalld/nftables)",
+    "description": "Per-host network access control using firewalld zones or nftables rules. Restricts which network sources can reach specific services, reducing attack surface.",
+    "tactic": "Isolate",
+    "category": "Network Isolation",
+    "category_id": "network-isolation",
+    "function_id": "network-filtering",
+    "control_layer": "Network",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "AV",
+            "from": "N",
+            "to": "A",
+            "rationale": "Service only reachable from adjacent/authorized networks"
+        },
+        {
+            "metric": "S",
+            "from": "C",
+            "to": "U",
+            "rationale": "Firewall prevents lateral movement to other services"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-284"
+    ],
+    "verification": {
+        "method": "Verify firewalld is running with restrictive zone",
+        "commands": [
+            {
+                "command": "firewall-cmd --state",
+                "expected": "running",
+                "platform": "rhel"
+            },
+            {
+                "command": "firewall-cmd --get-active-zones",
+                "expected": "public",
+                "platform": "rhel"
+            },
+            {
+                "command": "nft list ruleset | head -20",
+                "expected": "table",
+                "platform": "linux"
+            }
+        ]
     },
-    {
-      "metric": "S",
-      "from": "C",
-      "to": "U",
-      "rationale": "Firewall prevents lateral movement to other services"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-284"
-  ],
-  "verification": {
-    "method": "Verify firewalld is running with restrictive zone",
-    "commands": [
-      {
-        "command": "firewall-cmd --state",
-        "expected": "running",
-        "platform": "rhel"
-      },
-      {
-        "command": "firewall-cmd --get-active-zones",
-        "expected": "public",
-        "platform": "rhel"
-      },
-      {
-        "command": "nft list ruleset | head -20",
-        "expected": "table",
-        "platform": "linux"
-      }
+    "confidence": "High",
+    "platforms": [
+        "RHEL 9",
+        "RHEL 8",
+        "Fedora",
+        "SLES 15"
     ]
-  },
-  "confidence": "High",
-  "platforms": [
-    "RHEL 9",
-    "RHEL 8",
-    "Fedora",
-    "SLES 15"
-  ]
 }

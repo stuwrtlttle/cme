@@ -1,33 +1,35 @@
 {
-  "cme_id": "CME-1103",
-  "control_name": "Automated Container Image Rebuilds",
-  "description": "CI/CD pipeline automatically rebuilds and redeploys container images when base image CVEs are published. Running containers are replaced with patched versions without manual intervention.",
-  "tactic": "Evict",
-  "category": "Patch Management",
-  "category_id": "patch-management",
-  "control_layer": "Application",
-  "cvss_vector_impacts": [
-    {
-      "metric": "AC",
-      "from": "L",
-      "to": "H",
-      "rationale": "Temporal: vulnerable container images replaced within pipeline cycle time"
-    }
-  ],
-  "cwe_relationships": [],
-  "verification": {
-    "method": "Verify image age and rebuild pipeline",
-    "commands": [
-      {
-        "command": "podman image inspect <image> | grep Created",
-        "expected": "Recent date",
-        "platform": "linux"
-      }
+    "cme_id": "CME-1103",
+    "control_name": "Automated Container Image Rebuilds",
+    "description": "CI/CD pipeline automatically rebuilds and redeploys container images when base image CVEs are published. Running containers are replaced with patched versions without manual intervention.",
+    "tactic": "Evict",
+    "category": "Patch Management",
+    "category_id": "patch-management",
+    "function_id": "automated-updates",
+    "control_layer": "Application",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "AC",
+            "from": "L",
+            "to": "H",
+            "rationale": "Temporal: vulnerable container images replaced within pipeline cycle time"
+        }
+    ],
+    "cwe_relationships": [],
+    "verification": {
+        "method": "Verify image age and rebuild pipeline",
+        "commands": [
+            {
+                "command": "podman image inspect <image> | grep Created",
+                "expected": "Recent date",
+                "platform": "linux"
+            }
+        ]
+    },
+    "confidence": "Medium",
+    "platforms": [
+        "Kubernetes",
+        "OpenShift"
     ]
-  },
-  "confidence": "Medium",
-  "platforms": [
-    "Kubernetes",
-    "OpenShift"
-  ]
 }

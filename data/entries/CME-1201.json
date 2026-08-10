@@ -1,32 +1,34 @@
 {
-  "cme_id": "CME-1201",
-  "control_name": "Immutable Infrastructure",
-  "description": "Servers are replaced rather than patched in place. Golden images are built in CI/CD, deployed fresh, and destroyed on replacement. Compromised instances are terminated and redeployed from known-good state.",
-  "tactic": "Restore",
-  "category": "Recovery Controls",
-  "category_id": "recovery-controls",
-  "control_layer": "Application",
-  "cvss_vector_impacts": [
-    {
-      "metric": "A",
-      "from": "H",
-      "to": "L",
-      "rationale": "Compromised instance replaced from known-good image; minimal downtime"
+    "cme_id": "CME-1201",
+    "control_name": "Immutable Infrastructure",
+    "description": "Servers are replaced rather than patched in place. Golden images are built in CI/CD, deployed fresh, and destroyed on replacement. Compromised instances are terminated and redeployed from known-good state.",
+    "tactic": "Restore",
+    "category": "Recovery Controls",
+    "category_id": "recovery-controls",
+    "function_id": "system-recovery",
+    "control_layer": "Application",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "A",
+            "from": "H",
+            "to": "L",
+            "rationale": "Compromised instance replaced from known-good image; minimal downtime"
+        },
+        {
+            "metric": "I",
+            "from": "H",
+            "to": "L",
+            "rationale": "Persistent modifications eliminated on next deployment cycle"
+        }
+    ],
+    "cwe_relationships": [],
+    "verification": {
+        "method": "Verify deployment pipeline builds from golden images",
+        "commands": []
     },
-    {
-      "metric": "I",
-      "from": "H",
-      "to": "L",
-      "rationale": "Persistent modifications eliminated on next deployment cycle"
-    }
-  ],
-  "cwe_relationships": [],
-  "verification": {
-    "method": "Verify deployment pipeline builds from golden images",
-    "commands": []
-  },
-  "confidence": "Medium",
-  "platforms": [
-    "Any"
-  ]
+    "confidence": "Medium",
+    "platforms": [
+        "Any"
+    ]
 }

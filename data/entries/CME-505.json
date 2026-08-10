@@ -1,37 +1,39 @@
 {
-  "cme_id": "CME-505",
-  "control_name": "IMA/EVM (Integrity Measurement Architecture)",
-  "description": "Kernel subsystem that measures file hashes at access time and optionally enforces an integrity policy. EVM extends this with extended attribute protection. Creates an audit trail of all executed code.",
-  "tactic": "Harden",
-  "category": "Filesystem Hardening",
-  "category_id": "filesystem-hardening",
-  "control_layer": "OS/Kernel",
-  "cvss_vector_impacts": [
-    {
-      "metric": "I",
-      "from": "H",
-      "to": "L",
-      "rationale": "Modified binaries detected/blocked at execution time"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-345",
-    "CWE-494",
-    "CWE-347"
-  ],
-  "verification": {
-    "method": "Check IMA policy is loaded and enforcing",
-    "commands": [
-      {
-        "command": "cat /sys/kernel/security/ima/policy | head -5",
-        "expected": "appraise",
-        "platform": "linux"
-      }
+    "cme_id": "CME-505",
+    "control_name": "IMA/EVM (Integrity Measurement Architecture)",
+    "description": "Kernel subsystem that measures file hashes at access time and optionally enforces an integrity policy. EVM extends this with extended attribute protection. Creates an audit trail of all executed code.",
+    "tactic": "Harden",
+    "category": "Filesystem Hardening",
+    "category_id": "filesystem-hardening",
+    "function_id": "verified-integrity",
+    "control_layer": "OS/Kernel",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "I",
+            "from": "H",
+            "to": "L",
+            "rationale": "Modified binaries detected/blocked at execution time"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-345",
+        "CWE-494",
+        "CWE-347"
+    ],
+    "verification": {
+        "method": "Check IMA policy is loaded and enforcing",
+        "commands": [
+            {
+                "command": "cat /sys/kernel/security/ima/policy | head -5",
+                "expected": "appraise",
+                "platform": "linux"
+            }
+        ]
+    },
+    "confidence": "Medium",
+    "platforms": [
+        "RHEL 9",
+        "RHEL 8"
     ]
-  },
-  "confidence": "Medium",
-  "platforms": [
-    "RHEL 9",
-    "RHEL 8"
-  ]
 }

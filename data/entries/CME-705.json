@@ -1,48 +1,50 @@
 {
-  "cme_id": "CME-705",
-  "control_name": "Dropped Linux Capabilities",
-  "description": "Removes unnecessary POSIX capabilities from container or process bounding set. Default container profiles drop CAP_SYS_ADMIN, CAP_NET_RAW, CAP_SYS_PTRACE, and others not needed by the workload.",
-  "tactic": "Isolate",
-  "category": "Container Isolation",
-  "category_id": "container-isolation",
-  "control_layer": "OS/Kernel",
-  "cvss_vector_impacts": [
-    {
-      "metric": "PR",
-      "from": "L",
-      "to": "H",
-      "rationale": "Even privileged operations require specific capabilities that have been dropped"
+    "cme_id": "CME-705",
+    "control_name": "Dropped Linux Capabilities",
+    "description": "Removes unnecessary POSIX capabilities from container or process bounding set. Default container profiles drop CAP_SYS_ADMIN, CAP_NET_RAW, CAP_SYS_PTRACE, and others not needed by the workload.",
+    "tactic": "Isolate",
+    "category": "Container Isolation",
+    "category_id": "container-isolation",
+    "function_id": "container-runtime",
+    "control_layer": "OS/Kernel",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "PR",
+            "from": "L",
+            "to": "H",
+            "rationale": "Even privileged operations require specific capabilities that have been dropped"
+        },
+        {
+            "metric": "S",
+            "from": "C",
+            "to": "U",
+            "rationale": "Cannot mount filesystems, trace processes, or perform other scope-changing operations"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-250",
+        "CWE-269"
+    ],
+    "verification": {
+        "method": "Check effective capabilities of running process",
+        "commands": [
+            {
+                "command": "grep CapEff /proc/<pid>/status",
+                "expected": "0000000000000000 or minimal set",
+                "platform": "linux"
+            },
+            {
+                "command": "kubectl get pod <pod> -o jsonpath='{.spec.containers[0].securityContext.capabilities.drop}'",
+                "expected": "ALL",
+                "platform": "kubernetes"
+            }
+        ]
     },
-    {
-      "metric": "S",
-      "from": "C",
-      "to": "U",
-      "rationale": "Cannot mount filesystems, trace processes, or perform other scope-changing operations"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-250",
-    "CWE-269"
-  ],
-  "verification": {
-    "method": "Check effective capabilities of running process",
-    "commands": [
-      {
-        "command": "grep CapEff /proc/<pid>/status",
-        "expected": "0000000000000000 or minimal set",
-        "platform": "linux"
-      },
-      {
-        "command": "kubectl get pod <pod> -o jsonpath='{.spec.containers[0].securityContext.capabilities.drop}'",
-        "expected": "ALL",
-        "platform": "kubernetes"
-      }
+    "confidence": "High",
+    "platforms": [
+        "RHEL 9",
+        "Kubernetes",
+        "OpenShift"
     ]
-  },
-  "confidence": "High",
-  "platforms": [
-    "RHEL 9",
-    "Kubernetes",
-    "OpenShift"
-  ]
 }

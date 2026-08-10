@@ -1,56 +1,58 @@
 {
-  "cme_id": "CME-1001",
-  "control_name": "EDR Agent (Endpoint Detection & Response)",
-  "description": "Real-time behavioral detection and automated response agent on endpoints. Detects exploit patterns, lateral movement, and persistence mechanisms. Can kill processes, isolate hosts, and quarantine files automatically.",
-  "tactic": "Detect",
-  "category": "Runtime Detection",
-  "category_id": "runtime-detection",
-  "control_layer": "Application",
-  "cvss_vector_impacts": [
-    {
-      "metric": "AC",
-      "from": "L",
-      "to": "H",
-      "rationale": "Compensating control: exploit behavior patterns are detected and may be blocked in real-time"
-    }
-  ],
-  "cwe_relationships": [],
-  "verification": {
-    "method": "Verify EDR agent is running and connected to management console",
-    "commands": [
-      {
-        "command": "systemctl is-active falcon-sensor 2>/dev/null || systemctl is-active mdatp 2>/dev/null",
-        "expected": "active",
-        "platform": "linux"
-      },
-      {
-        "command": "Get-Service 'Sense' -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Status",
-        "expected": "Running",
-        "platform": "windows"
-      },
-      {
-        "command": "(Get-MpComputerStatus).RealTimeProtectionEnabled",
-        "expected": "True",
-        "platform": "windows"
-      }
+    "cme_id": "CME-1001",
+    "control_name": "EDR Agent (Endpoint Detection & Response)",
+    "description": "Real-time behavioral detection and automated response agent on endpoints. Detects exploit patterns, lateral movement, and persistence mechanisms. Can kill processes, isolate hosts, and quarantine files automatically.",
+    "tactic": "Detect",
+    "category": "Runtime Detection",
+    "category_id": "runtime-detection",
+    "function_id": "host-monitoring",
+    "control_layer": "Application",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "AC",
+            "from": "L",
+            "to": "H",
+            "rationale": "Compensating control: exploit behavior patterns are detected and may be blocked in real-time"
+        }
+    ],
+    "cwe_relationships": [],
+    "verification": {
+        "method": "Verify EDR agent is running and connected to management console",
+        "commands": [
+            {
+                "command": "systemctl is-active falcon-sensor 2>/dev/null || systemctl is-active mdatp 2>/dev/null",
+                "expected": "active",
+                "platform": "linux"
+            },
+            {
+                "command": "Get-Service 'Sense' -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Status",
+                "expected": "Running",
+                "platform": "windows"
+            },
+            {
+                "command": "(Get-MpComputerStatus).RealTimeProtectionEnabled",
+                "expected": "True",
+                "platform": "windows"
+            }
+        ]
+    },
+    "confidence": "Medium",
+    "platforms": [
+        "Any"
+    ],
+    "cve_schema_version": "5.2.0",
+    "cve_affected": [
+        {
+            "vendor": "microsoft",
+            "product": "windows",
+            "cpes": [
+                "cpe:2.3:o:microsoft:windows_10:*:*:*:*:*:*:*:*",
+                "cpe:2.3:o:microsoft:windows_11:*:*:*:*:*:*:*:*",
+                "cpe:2.3:o:microsoft:windows_server_2019:*:*:*:*:*:*:*",
+                "cpe:2.3:o:microsoft:windows_server_2022:*:*:*:*:*:*:*"
+            ],
+            "defaultStatus": "applicable"
+        }
     ]
-  },
-  "confidence": "Medium",
-  "platforms": [
-    "Any"
-  ],
-  "cve_schema_version": "5.2.0",
-  "cve_affected": [
-    {
-      "vendor": "microsoft",
-      "product": "windows",
-      "cpes": [
-        "cpe:2.3:o:microsoft:windows_10:*:*:*:*:*:*:*:*",
-        "cpe:2.3:o:microsoft:windows_11:*:*:*:*:*:*:*:*",
-        "cpe:2.3:o:microsoft:windows_server_2019:*:*:*:*:*:*:*",
-        "cpe:2.3:o:microsoft:windows_server_2022:*:*:*:*:*:*:*"
-      ],
-      "defaultStatus": "applicable"
-    }
-  ]
 }

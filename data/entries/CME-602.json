@@ -1,49 +1,51 @@
 {
-  "cme_id": "CME-602",
-  "control_name": "seccomp-bpf Profile (Container Default)",
-  "description": "Applies the default OCI/Docker/Podman seccomp-bpf profile which blocks ~44 dangerous syscalls including kexec_load, mount, reboot, and others. Basis for container isolation.",
-  "tactic": "Harden",
-  "category": "Syscall & BPF Controls",
-  "category_id": "syscall-bpf-controls",
-  "control_layer": "OS/Kernel",
-  "cvss_vector_impacts": [
-    {
-      "metric": "S",
-      "from": "C",
-      "to": "U",
-      "rationale": "Blocked syscalls prevent container escape via kernel"
+    "cme_id": "CME-602",
+    "control_name": "seccomp-bpf Profile (Container Default)",
+    "description": "Applies the default OCI/Docker/Podman seccomp-bpf profile which blocks ~44 dangerous syscalls including kexec_load, mount, reboot, and others. Basis for container isolation.",
+    "tactic": "Harden",
+    "category": "Syscall & BPF Controls",
+    "category_id": "syscall-bpf-controls",
+    "function_id": "seccomp",
+    "control_layer": "OS/Kernel",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "S",
+            "from": "C",
+            "to": "U",
+            "rationale": "Blocked syscalls prevent container escape via kernel"
+        },
+        {
+            "metric": "AC",
+            "from": "L",
+            "to": "H",
+            "rationale": "Many kernel exploit primitives require blocked syscalls"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-78",
+        "CWE-119",
+        "CWE-269"
+    ],
+    "verification": {
+        "method": "Verify container runtime has seccomp profile applied",
+        "commands": [
+            {
+                "command": "podman inspect <container> | grep -A5 SecurityOpt",
+                "expected": "seccomp",
+                "platform": "linux"
+            },
+            {
+                "command": "kubectl get pod <pod> -o jsonpath='{.spec.securityContext.seccompProfile.type}'",
+                "expected": "RuntimeDefault",
+                "platform": "kubernetes"
+            }
+        ]
     },
-    {
-      "metric": "AC",
-      "from": "L",
-      "to": "H",
-      "rationale": "Many kernel exploit primitives require blocked syscalls"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-78",
-    "CWE-119",
-    "CWE-269"
-  ],
-  "verification": {
-    "method": "Verify container runtime has seccomp profile applied",
-    "commands": [
-      {
-        "command": "podman inspect <container> | grep -A5 SecurityOpt",
-        "expected": "seccomp",
-        "platform": "linux"
-      },
-      {
-        "command": "kubectl get pod <pod> -o jsonpath='{.spec.securityContext.seccompProfile.type}'",
-        "expected": "RuntimeDefault",
-        "platform": "kubernetes"
-      }
+    "confidence": "High",
+    "platforms": [
+        "RHEL 9",
+        "Kubernetes",
+        "OpenShift"
     ]
-  },
-  "confidence": "High",
-  "platforms": [
-    "RHEL 9",
-    "Kubernetes",
-    "OpenShift"
-  ]
 }

@@ -1,45 +1,47 @@
 {
-  "cme_id": "CME-911",
-  "control_name": "Fine-Grained Administrative Permission Scoping",
-  "description": "Decompose coarse-grained administrative roles into fine-grained permission sets and assign each administrator the minimum permission scope required for their operational duties. Instead of granting broad management roles that bundle unrelated capabilities, the application defines atomic permissions (view-users, create-idp-mapper, assign-role, modify-client-settings) and composes them into purpose-specific administrative profiles. Administrators who manage identity providers receive only idp-configuration permissions without role-assignment capability; administrators who manage user accounts receive user-management permissions without IdP access. Regular audits compare each administrator is effective permissions against their documented job function and revoke unnecessary grants. Reduces the blast radius of compromised or malicious admin accounts by ensuring that exploiting one administrative capability does not grant access to unrelated privileged operations.",
-  "tactic": "Isolate",
-  "category": "Application Controls",
-  "category_id": "application-controls",
-  "control_layer": "Application",
-  "cvss_vector_impacts": [
-    {
-      "metric": "C",
-      "from": "H",
-      "to": "L",
-      "rationale": "A compromised administrative account can only access resources within its scoped permission set; data outside the administrator is designated domain is inaccessible, limiting confidentiality impact to the attacker is authorized scope."
-    },
-    {
-      "metric": "I",
-      "from": "H",
-      "to": "L",
-      "rationale": "Write operations are confined to the administrator is scoped permission domain; cross-domain modifications \u2014 such as an IdP admin assigning realm-level roles \u2014 are rejected by the fine-grained permission model, limiting integrity impact to the attacker is authorized scope."
+    "cme_id": "CME-911",
+    "control_name": "Fine-Grained Administrative Permission Scoping",
+    "description": "Decompose coarse-grained administrative roles into fine-grained permission sets and assign each administrator the minimum permission scope required for their operational duties. Instead of granting broad management roles that bundle unrelated capabilities, the application defines atomic permissions (view-users, create-idp-mapper, assign-role, modify-client-settings) and composes them into purpose-specific administrative profiles. Administrators who manage identity providers receive only idp-configuration permissions without role-assignment capability; administrators who manage user accounts receive user-management permissions without IdP access. Regular audits compare each administrator is effective permissions against their documented job function and revoke unnecessary grants. Reduces the blast radius of compromised or malicious admin accounts by ensuring that exploiting one administrative capability does not grant access to unrelated privileged operations.",
+    "tactic": "Isolate",
+    "category": "Application Controls",
+    "category_id": "application-controls",
+    "function_id": "authorization-controls",
+    "control_layer": "Application",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "C",
+            "from": "H",
+            "to": "L",
+            "rationale": "A compromised administrative account can only access resources within its scoped permission set; data outside the administrator is designated domain is inaccessible, limiting confidentiality impact to the attacker is authorized scope."
+        },
+        {
+            "metric": "I",
+            "from": "H",
+            "to": "L",
+            "rationale": "Write operations are confined to the administrator is scoped permission domain; cross-domain modifications \u2014 such as an IdP admin assigning realm-level roles \u2014 are rejected by the fine-grained permission model, limiting integrity impact to the attacker is authorized scope."
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-266",
+        "CWE-269",
+        "CWE-250",
+        "CWE-1220"
+    ],
+    "confidence": "High",
+    "platforms": [
+        "any",
+        "Windows Server 2019",
+        "Windows Server 2022"
+    ],
+    "verification": {
+        "method": "Verify that administrative roles are decomposed into atomic permissions and each admin account holds only the permissions required for their role. Attempt a cross-domain action (e.g., IdP admin trying to assign a realm-admin role) and confirm it is rejected.",
+        "commands": [
+            {
+                "command": "kcadm.sh get ui-ext/brute-force/realms/master/admin-permissions",
+                "expected": "Shows fine-grained permission policies; no admin should hold permissions outside their designated scope",
+                "platform": "any"
+            }
+        ]
     }
-  ],
-  "cwe_relationships": [
-    "CWE-266",
-    "CWE-269",
-    "CWE-250",
-    "CWE-1220"
-  ],
-  "confidence": "High",
-  "platforms": [
-    "any",
-    "Windows Server 2019",
-    "Windows Server 2022"
-  ],
-  "verification": {
-    "method": "Verify that administrative roles are decomposed into atomic permissions and each admin account holds only the permissions required for their role. Attempt a cross-domain action (e.g., IdP admin trying to assign a realm-admin role) and confirm it is rejected.",
-    "commands": [
-      {
-        "command": "kcadm.sh get ui-ext/brute-force/realms/master/admin-permissions",
-        "expected": "Shows fine-grained permission policies; no admin should hold permissions outside their designated scope",
-        "platform": "any"
-      }
-    ]
-  }
 }

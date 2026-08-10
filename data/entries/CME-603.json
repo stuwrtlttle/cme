@@ -1,43 +1,45 @@
 {
-  "cme_id": "CME-603",
-  "control_name": "Unprivileged BPF Disabled",
-  "description": "Prevents unprivileged users from loading BPF programs into the kernel. BPF programs run in kernel context and vulnerabilities in the BPF verifier have been a frequent source of privilege escalation.",
-  "tactic": "Harden",
-  "category": "Syscall & BPF Controls",
-  "category_id": "syscall-bpf-controls",
-  "control_layer": "OS/Kernel",
-  "cvss_vector_impacts": [
-    {
-      "metric": "PR",
-      "from": "L",
-      "to": "H",
-      "rationale": "Unprivileged user cannot load BPF programs to exploit verifier bugs"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-269",
-    "CWE-119"
-  ],
-  "verification": {
-    "method": "Check unprivileged_bpf_disabled sysctl",
-    "commands": [
-      {
-        "command": "cat /proc/sys/kernel/unprivileged_bpf_disabled",
-        "expected": "1",
-        "platform": "linux"
-      }
+    "cme_id": "CME-603",
+    "control_name": "Unprivileged BPF Disabled",
+    "description": "Prevents unprivileged users from loading BPF programs into the kernel. BPF programs run in kernel context and vulnerabilities in the BPF verifier have been a frequent source of privilege escalation.",
+    "tactic": "Harden",
+    "category": "Syscall & BPF Controls",
+    "category_id": "syscall-bpf-controls",
+    "function_id": "seccomp",
+    "control_layer": "OS/Kernel",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "PR",
+            "from": "L",
+            "to": "H",
+            "rationale": "Unprivileged user cannot load BPF programs to exploit verifier bugs"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-269",
+        "CWE-119"
+    ],
+    "verification": {
+        "method": "Check unprivileged_bpf_disabled sysctl",
+        "commands": [
+            {
+                "command": "cat /proc/sys/kernel/unprivileged_bpf_disabled",
+                "expected": "1",
+                "platform": "linux"
+            }
+        ]
+    },
+    "references": [
+        {
+            "source": "Red Hat Security Hardening Guide",
+            "section": "BPF hardening"
+        }
+    ],
+    "confidence": "High",
+    "platforms": [
+        "RHEL 9",
+        "RHEL 8",
+        "Ubuntu 24.04"
     ]
-  },
-  "references": [
-    {
-      "source": "Red Hat Security Hardening Guide",
-      "section": "BPF hardening"
-    }
-  ],
-  "confidence": "High",
-  "platforms": [
-    "RHEL 9",
-    "RHEL 8",
-    "Ubuntu 24.04"
-  ]
 }

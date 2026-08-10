@@ -1,40 +1,42 @@
 {
-  "cme_id": "CME-1006",
-  "control_name": "Privilege Change Audit Logging",
-  "description": "Application-level audit trail that records every modification to user roles, permissions, and authorization policies. Each log entry captures the actor (who made the change), the target (whose privileges changed), the before and after state (e.g., role viewer to admin), the timestamp, and the request context (IP, session, endpoint). Logs authorization decision denials with sufficient context to identify privilege escalation attempts. Distinct from OS-level audit (CME-1002) in that it operates within the application's authorization domain and captures semantically meaningful privilege transitions invisible to syscall-level logging. Enables real-time alerting on anomalous patterns such as self-promotion, bulk role changes, or privilege changes from unexpected sources.",
-  "tactic": "Detect",
-  "category": "Runtime Detection",
-  "category_id": "runtime-detection",
-  "control_layer": "Application",
-  "cvss_vector_impacts": [
-    {
-      "metric": "AC",
-      "from": "L",
-      "to": "H",
-      "rationale": "Privilege escalation actions are recorded with full actor/target/change context in an application-level audit trail; the attacker must escalate privileges AND act before the logged privilege change triggers alerting or review, significantly narrowing the exploitation window."
+    "cme_id": "CME-1006",
+    "control_name": "Privilege Change Audit Logging",
+    "description": "Application-level audit trail that records every modification to user roles, permissions, and authorization policies. Each log entry captures the actor (who made the change), the target (whose privileges changed), the before and after state (e.g., role viewer to admin), the timestamp, and the request context (IP, session, endpoint). Logs authorization decision denials with sufficient context to identify privilege escalation attempts. Distinct from OS-level audit (CME-1002) in that it operates within the application's authorization domain and captures semantically meaningful privilege transitions invisible to syscall-level logging. Enables real-time alerting on anomalous patterns such as self-promotion, bulk role changes, or privilege changes from unexpected sources.",
+    "tactic": "Detect",
+    "category": "Runtime Detection",
+    "category_id": "runtime-detection",
+    "function_id": "application-monitoring",
+    "control_layer": "Application",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "AC",
+            "from": "L",
+            "to": "H",
+            "rationale": "Privilege escalation actions are recorded with full actor/target/change context in an application-level audit trail; the attacker must escalate privileges AND act before the logged privilege change triggers alerting or review, significantly narrowing the exploitation window."
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-778",
+        "CWE-223"
+    ],
+    "confidence": "High",
+    "platforms": [
+        "Any"
+    ],
+    "verification": {
+        "method": "Inspect application source for audit logging on role/permission change operations; verify log entries are generated on privilege modifications",
+        "commands": [
+            {
+                "command": "grep -rn 'audit_log\\|AuditLog\\|log.*role.*change\\|log.*permission\\|ActivityLog\\|SecurityEvent' <app_source>/",
+                "expected": "Audit logging calls present in role/permission modification handlers",
+                "platform": "any"
+            },
+            {
+                "command": "grep -rn 'before.*after\\|old_role.*new_role\\|previous.*current\\|from_state.*to_state' <app_source>/",
+                "expected": "Before/after state capture in privilege change logging",
+                "platform": "any"
+            }
+        ]
     }
-  ],
-  "cwe_relationships": [
-    "CWE-778",
-    "CWE-223"
-  ],
-  "confidence": "High",
-  "platforms": [
-    "Any"
-  ],
-  "verification": {
-    "method": "Inspect application source for audit logging on role/permission change operations; verify log entries are generated on privilege modifications",
-    "commands": [
-      {
-        "command": "grep -rn 'audit_log\\|AuditLog\\|log.*role.*change\\|log.*permission\\|ActivityLog\\|SecurityEvent' <app_source>/",
-        "expected": "Audit logging calls present in role/permission modification handlers",
-        "platform": "any"
-      },
-      {
-        "command": "grep -rn 'before.*after\\|old_role.*new_role\\|previous.*current\\|from_state.*to_state' <app_source>/",
-        "expected": "Before/after state capture in privilege change logging",
-        "platform": "any"
-      }
-    ]
-  }
 }

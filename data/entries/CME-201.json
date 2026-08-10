@@ -1,36 +1,38 @@
 {
-  "cme_id": "CME-201",
-  "control_name": "Zero Trust Gateway / Identity-Aware Proxy",
-  "description": "All network access requires authenticated identity verification. No implicit trust from network position. Every request is authenticated and authorized regardless of source network.",
-  "tactic": "Isolate",
-  "category": "Network Isolation",
-  "category_id": "network-isolation",
-  "control_layer": "Network",
-  "cvss_vector_impacts": [
-    {
-      "metric": "AV",
-      "from": "N",
-      "to": "L",
-      "rationale": "Network-accessible services are shielded behind identity verification; attacker cannot exploit remotely without valid credentials"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-284",
-    "CWE-306",
-    "CWE-287"
-  ],
-  "verification": {
-    "method": "Verify identity-aware proxy or zero trust gateway is in enforcement path",
-    "commands": [
-      {
-        "command": "curl -s -o /dev/null -w '%{http_code}' http://service.internal/healthz",
-        "expected": "401",
-        "platform": "any"
-      }
+    "cme_id": "CME-201",
+    "control_name": "Zero Trust Gateway / Identity-Aware Proxy",
+    "description": "All network access requires authenticated identity verification. No implicit trust from network position. Every request is authenticated and authorized regardless of source network.",
+    "tactic": "Isolate",
+    "category": "Network Isolation",
+    "category_id": "network-isolation",
+    "function_id": "network-access-control",
+    "control_layer": "Network",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "AV",
+            "from": "N",
+            "to": "L",
+            "rationale": "Network-accessible services are shielded behind identity verification; attacker cannot exploit remotely without valid credentials"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-284",
+        "CWE-306",
+        "CWE-287"
+    ],
+    "verification": {
+        "method": "Verify identity-aware proxy or zero trust gateway is in enforcement path",
+        "commands": [
+            {
+                "command": "curl -s -o /dev/null -w '%{http_code}' http://service.internal/healthz",
+                "expected": "401",
+                "platform": "any"
+            }
+        ]
+    },
+    "confidence": "High",
+    "platforms": [
+        "Any"
     ]
-  },
-  "confidence": "High",
-  "platforms": [
-    "Any"
-  ]
 }

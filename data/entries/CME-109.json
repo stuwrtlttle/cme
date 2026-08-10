@@ -1,43 +1,45 @@
 {
-  "cme_id": "CME-109",
-  "control_name": "Kernel Lockdown Mode",
-  "description": "LSM that restricts kernel features allowing arbitrary code execution or direct hardware access from userspace. Integrity mode blocks module parameters, ACPI tables, and iopl/ioperm. Confidentiality mode additionally blocks /dev/mem, kprobes, and BPF reads.",
-  "tactic": "Harden",
-  "category": "Kernel Hardening",
-  "category_id": "kernel-hardening",
-  "control_layer": "OS/Kernel",
-  "cvss_vector_impacts": [
-    {
-      "metric": "PR",
-      "from": "L",
-      "to": "H",
-      "rationale": "Even root cannot modify running kernel via blocked interfaces"
+    "cme_id": "CME-109",
+    "control_name": "Kernel Lockdown Mode",
+    "description": "LSM that restricts kernel features allowing arbitrary code execution or direct hardware access from userspace. Integrity mode blocks module parameters, ACPI tables, and iopl/ioperm. Confidentiality mode additionally blocks /dev/mem, kprobes, and BPF reads.",
+    "tactic": "Harden",
+    "category": "Kernel Hardening",
+    "category_id": "kernel-hardening",
+    "function_id": "kernel-attack-surface",
+    "control_layer": "OS/Kernel",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "PR",
+            "from": "L",
+            "to": "H",
+            "rationale": "Even root cannot modify running kernel via blocked interfaces"
+        },
+        {
+            "metric": "AC",
+            "from": "L",
+            "to": "H",
+            "rationale": "Many kernel exploitation primitives are disabled"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-269",
+        "CWE-284"
+    ],
+    "verification": {
+        "method": "Check lockdown LSM state",
+        "commands": [
+            {
+                "command": "cat /sys/kernel/security/lockdown",
+                "expected": "[integrity]",
+                "platform": "linux"
+            }
+        ]
     },
-    {
-      "metric": "AC",
-      "from": "L",
-      "to": "H",
-      "rationale": "Many kernel exploitation primitives are disabled"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-269",
-    "CWE-284"
-  ],
-  "verification": {
-    "method": "Check lockdown LSM state",
-    "commands": [
-      {
-        "command": "cat /sys/kernel/security/lockdown",
-        "expected": "[integrity]",
-        "platform": "linux"
-      }
+    "confidence": "High",
+    "platforms": [
+        "RHEL 9",
+        "RHEL 8",
+        "Ubuntu 24.04"
     ]
-  },
-  "confidence": "High",
-  "platforms": [
-    "RHEL 9",
-    "RHEL 8",
-    "Ubuntu 24.04"
-  ]
 }

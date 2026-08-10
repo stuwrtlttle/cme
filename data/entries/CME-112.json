@@ -1,45 +1,47 @@
 {
-  "cme_id": "CME-112",
-  "control_name": "RELRO and PIE (Full)",
-  "description": "Compiler/linker hardening that makes the Global Offset Table read-only after relocation (Full RELRO) and builds position-independent executables (PIE), working with ASLR to randomize all code sections.",
-  "tactic": "Harden",
-  "category": "Kernel Hardening",
-  "category_id": "kernel-hardening",
-  "control_layer": "OS/Kernel",
-  "cvss_vector_impacts": [
-    {
-      "metric": "AC",
-      "from": "L",
-      "to": "H",
-      "rationale": "GOT overwrite attacks blocked; all code addresses randomized"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-119",
-    "CWE-120",
-    "CWE-787",
-    "CWE-416"
-  ],
-  "verification": {
-    "method": "Check binary for Full RELRO and PIE",
-    "commands": [
-      {
-        "command": "readelf -l /usr/bin/ls | grep GNU_RELRO",
-        "expected": "GNU_RELRO",
-        "platform": "linux"
-      },
-      {
-        "command": "file /usr/bin/ls | grep 'shared object'",
-        "expected": "shared object",
-        "platform": "linux"
-      }
+    "cme_id": "CME-112",
+    "control_name": "RELRO and PIE (Full)",
+    "description": "Compiler/linker hardening that makes the Global Offset Table read-only after relocation (Full RELRO) and builds position-independent executables (PIE), working with ASLR to randomize all code sections.",
+    "tactic": "Harden",
+    "category": "Kernel Hardening",
+    "category_id": "kernel-hardening",
+    "function_id": "memory-safety",
+    "control_layer": "OS/Kernel",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "AC",
+            "from": "L",
+            "to": "H",
+            "rationale": "GOT overwrite attacks blocked; all code addresses randomized"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-119",
+        "CWE-120",
+        "CWE-787",
+        "CWE-416"
+    ],
+    "verification": {
+        "method": "Check binary for Full RELRO and PIE",
+        "commands": [
+            {
+                "command": "readelf -l /usr/bin/ls | grep GNU_RELRO",
+                "expected": "GNU_RELRO",
+                "platform": "linux"
+            },
+            {
+                "command": "file /usr/bin/ls | grep 'shared object'",
+                "expected": "shared object",
+                "platform": "linux"
+            }
+        ]
+    },
+    "confidence": "High",
+    "platforms": [
+        "RHEL 9",
+        "RHEL 8",
+        "Ubuntu 24.04",
+        "Fedora"
     ]
-  },
-  "confidence": "High",
-  "platforms": [
-    "RHEL 9",
-    "RHEL 8",
-    "Ubuntu 24.04",
-    "Fedora"
-  ]
 }

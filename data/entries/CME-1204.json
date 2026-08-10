@@ -1,47 +1,49 @@
 {
-  "cme_id": "CME-1204",
-  "control_name": "Service Watchdog and Automatic Restart (systemd WatchdogSec/Restart)",
-  "description": "Configures systemd service units with watchdog monitoring (WatchdogSec=) and automatic restart policies (Restart=on-failure or Restart=always, RestartSec=) to recover services that become unresponsive or are killed due to resource exhaustion. When a memory leak causes the OOM killer to terminate a service or the process hangs due to resource starvation, systemd automatically restarts the service from a clean state. The watchdog mechanism requires the service to periodically notify systemd (via sd_notify WATCHDOG=1); failure to notify within the WatchdogSec interval triggers a restart. Combined with cgroup memory limits (CME-704), this provides both containment and recovery \u2014 the cgroup bounds the leak, and systemd restarts the service when the bound is hit.",
-  "tactic": "Restore",
-  "category": "Recovery Controls",
-  "category_id": "recovery-controls",
-  "control_layer": "OS/Kernel",
-  "cvss_vector_impacts": [
-    {
-      "metric": "A",
-      "from": "H",
-      "to": "L",
-      "rationale": "Service recovers automatically from resource exhaustion conditions via systemd restart policy; availability impact is bounded by the restart interval (typically seconds) rather than mean-time-to-manual-recovery (minutes to hours). The watchdog timer detects service hangs caused by resource starvation even when the process has not been OOM-killed."
+    "cme_id": "CME-1204",
+    "control_name": "Service Watchdog and Automatic Restart (systemd WatchdogSec/Restart)",
+    "description": "Configures systemd service units with watchdog monitoring (WatchdogSec=) and automatic restart policies (Restart=on-failure or Restart=always, RestartSec=) to recover services that become unresponsive or are killed due to resource exhaustion. When a memory leak causes the OOM killer to terminate a service or the process hangs due to resource starvation, systemd automatically restarts the service from a clean state. The watchdog mechanism requires the service to periodically notify systemd (via sd_notify WATCHDOG=1); failure to notify within the WatchdogSec interval triggers a restart. Combined with cgroup memory limits (CME-704), this provides both containment and recovery \u2014 the cgroup bounds the leak, and systemd restarts the service when the bound is hit.",
+    "tactic": "Restore",
+    "category": "Recovery Controls",
+    "category_id": "recovery-controls",
+    "function_id": "system-recovery",
+    "control_layer": "OS/Kernel",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "A",
+            "from": "H",
+            "to": "L",
+            "rationale": "Service recovers automatically from resource exhaustion conditions via systemd restart policy; availability impact is bounded by the restart interval (typically seconds) rather than mean-time-to-manual-recovery (minutes to hours). The watchdog timer detects service hangs caused by resource starvation even when the process has not been OOM-killed."
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-772",
+        "CWE-401",
+        "CWE-400",
+        "CWE-770",
+        "CWE-835"
+    ],
+    "confidence": "High",
+    "platforms": [
+        "RHEL 8",
+        "RHEL 9",
+        "RHEL 10",
+        "Ubuntu 24.04",
+        "Fedora"
+    ],
+    "verification": {
+        "method": "Check that critical services have restart policies and watchdog timers configured",
+        "commands": [
+            {
+                "command": "systemctl show sshd -p Restart -p WatchdogSec -p RestartSec",
+                "expected": "Restart=on-failure (or always); WatchdogSec set to a positive value",
+                "platform": "linux"
+            },
+            {
+                "command": "grep -E 'Restart=|WatchdogSec=' /etc/systemd/system/*.service /usr/lib/systemd/system/*.service 2>/dev/null | head -10",
+                "expected": "Critical services have Restart= and WatchdogSec= directives",
+                "platform": "linux"
+            }
+        ]
     }
-  ],
-  "cwe_relationships": [
-    "CWE-772",
-    "CWE-401",
-    "CWE-400",
-    "CWE-770",
-    "CWE-835"
-  ],
-  "confidence": "High",
-  "platforms": [
-    "RHEL 8",
-    "RHEL 9",
-    "RHEL 10",
-    "Ubuntu 24.04",
-    "Fedora"
-  ],
-  "verification": {
-    "method": "Check that critical services have restart policies and watchdog timers configured",
-    "commands": [
-      {
-        "command": "systemctl show sshd -p Restart -p WatchdogSec -p RestartSec",
-        "expected": "Restart=on-failure (or always); WatchdogSec set to a positive value",
-        "platform": "linux"
-      },
-      {
-        "command": "grep -E 'Restart=|WatchdogSec=' /etc/systemd/system/*.service /usr/lib/systemd/system/*.service 2>/dev/null | head -10",
-        "expected": "Critical services have Restart= and WatchdogSec= directives",
-        "platform": "linux"
-      }
-    ]
-  }
 }

@@ -1,39 +1,41 @@
 {
-  "cme_id": "CME-904",
-  "control_name": "WAF (Web Application Firewall)",
-  "description": "HTTP-layer filtering that inspects requests for injection, XSS, path traversal, and other OWASP Top 10 patterns. Can operate in blocking or detection mode with OWASP Core Rule Set.",
-  "tactic": "Harden",
-  "category": "Application Controls",
-  "category_id": "application-controls",
-  "control_layer": "Application",
-  "cvss_vector_impacts": [
-    {
-      "metric": "AC",
-      "from": "L",
-      "to": "H",
-      "rationale": "Common exploit payloads are detected and blocked at the HTTP layer"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-79",
-    "CWE-89",
-    "CWE-94",
-    "CWE-22"
-  ],
-  "verification": {
-    "method": "Verify WAF is in enforcement mode with rules loaded",
-    "commands": [
-      {
-        "command": "curl -s -o /dev/null -w '%{http_code}' 'http://target/?q=<script>alert(1)</script>'",
-        "expected": "403",
-        "platform": "any"
-      }
+    "cme_id": "CME-904",
+    "control_name": "WAF (Web Application Firewall)",
+    "description": "HTTP-layer filtering that inspects requests for injection, XSS, path traversal, and other OWASP Top 10 patterns. Can operate in blocking or detection mode with OWASP Core Rule Set.",
+    "tactic": "Harden",
+    "category": "Application Controls",
+    "category_id": "application-controls",
+    "function_id": "request-filtering",
+    "control_layer": "Application",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "AC",
+            "from": "L",
+            "to": "H",
+            "rationale": "Common exploit payloads are detected and blocked at the HTTP layer"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-79",
+        "CWE-89",
+        "CWE-94",
+        "CWE-22"
+    ],
+    "verification": {
+        "method": "Verify WAF is in enforcement mode with rules loaded",
+        "commands": [
+            {
+                "command": "curl -s -o /dev/null -w '%{http_code}' 'http://target/?q=<script>alert(1)</script>'",
+                "expected": "403",
+                "platform": "any"
+            }
+        ]
+    },
+    "confidence": "Medium",
+    "platforms": [
+        "Any",
+        "Windows Server 2019",
+        "Windows Server 2022"
     ]
-  },
-  "confidence": "Medium",
-  "platforms": [
-    "Any",
-    "Windows Server 2019",
-    "Windows Server 2022"
-  ]
 }

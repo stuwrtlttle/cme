@@ -1,41 +1,43 @@
 {
-  "cme_id": "CME-203",
-  "control_name": "Network Segmentation (VLANs/Subnets)",
-  "description": "Separates network traffic into isolated segments by trust zone, preventing lateral movement between zones (e.g., DMZ, internal, management).",
-  "tactic": "Isolate",
-  "category": "Network Isolation",
-  "category_id": "network-isolation",
-  "control_layer": "Network",
-  "cvss_vector_impacts": [
-    {
-      "metric": "AV",
-      "from": "N",
-      "to": "A",
-      "rationale": "Compromised host in one segment cannot directly reach other segments"
+    "cme_id": "CME-203",
+    "control_name": "Network Segmentation (VLANs/Subnets)",
+    "description": "Separates network traffic into isolated segments by trust zone, preventing lateral movement between zones (e.g., DMZ, internal, management).",
+    "tactic": "Isolate",
+    "category": "Network Isolation",
+    "category_id": "network-isolation",
+    "function_id": "network-filtering",
+    "control_layer": "Network",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "AV",
+            "from": "N",
+            "to": "A",
+            "rationale": "Compromised host in one segment cannot directly reach other segments"
+        },
+        {
+            "metric": "S",
+            "from": "C",
+            "to": "U",
+            "rationale": "Blast radius limited to network segment"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-284",
+        "CWE-668"
+    ],
+    "verification": {
+        "method": "Verify network topology shows segmentation between trust zones",
+        "commands": [
+            {
+                "command": "ip addr show | grep -c 'inet '",
+                "expected": "Multiple interfaces or VLANs",
+                "platform": "linux"
+            }
+        ]
     },
-    {
-      "metric": "S",
-      "from": "C",
-      "to": "U",
-      "rationale": "Blast radius limited to network segment"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-284",
-    "CWE-668"
-  ],
-  "verification": {
-    "method": "Verify network topology shows segmentation between trust zones",
-    "commands": [
-      {
-        "command": "ip addr show | grep -c 'inet '",
-        "expected": "Multiple interfaces or VLANs",
-        "platform": "linux"
-      }
+    "confidence": "High",
+    "platforms": [
+        "Any"
     ]
-  },
-  "confidence": "High",
-  "platforms": [
-    "Any"
-  ]
 }

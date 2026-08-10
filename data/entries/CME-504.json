@@ -1,39 +1,41 @@
 {
-  "cme_id": "CME-504",
-  "control_name": "dm-verity (Verified Boot)",
-  "description": "Cryptographic verification of block device integrity using a Merkle tree hash. Every read from the block device is verified against pre-computed hashes, detecting any tampering at the block level.",
-  "tactic": "Harden",
-  "category": "Filesystem Hardening",
-  "category_id": "filesystem-hardening",
-  "control_layer": "OS/Kernel",
-  "cvss_vector_impacts": [
-    {
-      "metric": "I",
-      "from": "H",
-      "to": "N",
-      "rationale": "Any block-level modification is cryptographically detected and rejected"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-345",
-    "CWE-494",
-    "CWE-347"
-  ],
-  "verification": {
-    "method": "Check dm-verity status on root device",
-    "commands": [
-      {
-        "command": "veritysetup status root",
-        "expected": "status: verified",
-        "platform": "linux"
-      }
+    "cme_id": "CME-504",
+    "control_name": "dm-verity (Verified Boot)",
+    "description": "Cryptographic verification of block device integrity using a Merkle tree hash. Every read from the block device is verified against pre-computed hashes, detecting any tampering at the block level.",
+    "tactic": "Harden",
+    "category": "Filesystem Hardening",
+    "category_id": "filesystem-hardening",
+    "function_id": "verified-integrity",
+    "control_layer": "OS/Kernel",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "I",
+            "from": "H",
+            "to": "N",
+            "rationale": "Any block-level modification is cryptographically detected and rejected"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-345",
+        "CWE-494",
+        "CWE-347"
+    ],
+    "verification": {
+        "method": "Check dm-verity status on root device",
+        "commands": [
+            {
+                "command": "veritysetup status root",
+                "expected": "status: verified",
+                "platform": "linux"
+            }
+        ]
+    },
+    "confidence": "High",
+    "platforms": [
+        "RHEL 9",
+        "Fedora CoreOS",
+        "ChromeOS",
+        "Android"
     ]
-  },
-  "confidence": "High",
-  "platforms": [
-    "RHEL 9",
-    "Fedora CoreOS",
-    "ChromeOS",
-    "Android"
-  ]
 }

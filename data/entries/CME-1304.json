@@ -1,42 +1,44 @@
 {
-  "cme_id": "CME-1304",
-  "control_name": "SSRF Prevention (Outbound Request Allowlist)",
-  "description": "Application-level validation that restricts outbound requests and file access to an allowlist of permitted destinations, schemes, and paths. Blocks requests to internal metadata endpoints (169.254.169.254), localhost, private RFC1918 ranges, and file:// or gopher:// schemes. Prevents attackers from using the application as a proxy to access internal resources.",
-  "tactic": "Harden",
-  "category": "Application Input Validation",
-  "category_id": "application-input-validation",
-  "control_layer": "Application",
-  "cvss_vector_impacts": [
-    {
-      "metric": "C",
-      "from": "H",
-      "to": "L",
-      "rationale": "Cannot reach internal services, cloud metadata, or local files via SSRF"
+    "cme_id": "CME-1304",
+    "control_name": "SSRF Prevention (Outbound Request Allowlist)",
+    "description": "Application-level validation that restricts outbound requests and file access to an allowlist of permitted destinations, schemes, and paths. Blocks requests to internal metadata endpoints (169.254.169.254), localhost, private RFC1918 ranges, and file:// or gopher:// schemes. Prevents attackers from using the application as a proxy to access internal resources.",
+    "tactic": "Harden",
+    "category": "Application Input Validation",
+    "category_id": "application-input-validation",
+    "function_id": "input-validation",
+    "control_layer": "Application",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "C",
+            "from": "H",
+            "to": "L",
+            "rationale": "Cannot reach internal services, cloud metadata, or local files via SSRF"
+        },
+        {
+            "metric": "AC",
+            "from": "L",
+            "to": "H",
+            "rationale": "Destination allowlist blocks common SSRF bypass techniques"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-918"
+    ],
+    "verification": {
+        "method": "Test application with SSRF payloads targeting internal endpoints",
+        "commands": [
+            {
+                "command": "curl -s http://app/fetch?url=http://169.254.169.254/latest/meta-data/ -o /dev/null -w '%{http_code}'",
+                "expected": "400 or 403",
+                "platform": "any"
+            }
+        ]
     },
-    {
-      "metric": "AC",
-      "from": "L",
-      "to": "H",
-      "rationale": "Destination allowlist blocks common SSRF bypass techniques"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-918"
-  ],
-  "verification": {
-    "method": "Test application with SSRF payloads targeting internal endpoints",
-    "commands": [
-      {
-        "command": "curl -s http://app/fetch?url=http://169.254.169.254/latest/meta-data/ -o /dev/null -w '%{http_code}'",
-        "expected": "400 or 403",
-        "platform": "any"
-      }
+    "confidence": "Medium",
+    "platforms": [
+        "Any",
+        "Windows Server 2019",
+        "Windows Server 2022"
     ]
-  },
-  "confidence": "Medium",
-  "platforms": [
-    "Any",
-    "Windows Server 2019",
-    "Windows Server 2022"
-  ]
 }

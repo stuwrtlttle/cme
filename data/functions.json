@@ -124,5 +124,159 @@
     "description": "Filesystem mount options that restrict execution, setuid, and device access on mounted filesystems.",
     "category_id": "filesystem-hardening",
     "control_layer": "OS/Kernel"
+  },
+  "memory-safety": {
+    "name": "Memory Safety",
+    "description": "Compiler and runtime protections against memory corruption: ASLR, NX, stack canaries, FORTIFY_SOURCE, heap hardening, RELRO/PIE, CFI, and integer overflow detection.",
+    "category_id": "kernel-hardening",
+    "control_layer": "OS/Kernel",
+    "d3fend_mapping": {
+      "technique_id": "D3-PSEP",
+      "technique_name": "Process Segment Execution Prevention"
+    }
+  },
+  "kernel-attack-surface": {
+    "name": "Kernel Attack Surface Reduction",
+    "description": "Kernel self-protection mechanisms that restrict access to kernel memory, prevent unauthorized module loading, and reduce privilege escalation paths.",
+    "category_id": "kernel-hardening",
+    "control_layer": "OS/Kernel",
+    "d3fend_mapping": {
+      "technique_id": "D3-KBPI",
+      "technique_name": "Kernel-Based Process Isolation"
+    }
+  },
+  "network-filtering": {
+    "name": "Network Filtering",
+    "description": "Host and network-level packet filtering, segmentation, service binding restrictions, and egress controls that limit network attack surface.",
+    "category_id": "network-isolation",
+    "control_layer": "Network",
+    "d3fend_mapping": {
+      "technique_id": "D3-NTF",
+      "technique_name": "Network Traffic Filtering"
+    }
+  },
+  "network-access-control": {
+    "name": "Network Access Control",
+    "description": "Identity-aware network access, encrypted transport tunnels, and protocol-level protections against network-based attacks.",
+    "category_id": "network-isolation",
+    "control_layer": "Network",
+    "d3fend_mapping": {
+      "technique_id": "D3-NAM",
+      "technique_name": "Network Access Management"
+    }
+  },
+  "host-monitoring": {
+    "name": "Host Monitoring",
+    "description": "OS and kernel-level runtime detection including audit subsystems, eBPF-based security monitoring, EDR agents, and memory error detection.",
+    "category_id": "runtime-detection",
+    "control_layer": "OS/Kernel",
+    "d3fend_mapping": {
+      "technique_id": "D3-PM",
+      "technique_name": "Process Monitoring"
+    }
+  },
+  "application-monitoring": {
+    "name": "Application Monitoring",
+    "description": "Application-layer audit logging, privilege change tracking, and SIEM integration for detecting unauthorized access and lateral movement.",
+    "category_id": "runtime-detection",
+    "control_layer": "Application",
+    "d3fend_mapping": {
+      "technique_id": "D3-AL",
+      "technique_name": "Application Log"
+    }
+  },
+  "integrity-monitoring": {
+    "name": "Integrity Monitoring",
+    "description": "File integrity monitoring, configuration drift detection, and resource pressure monitoring that detect unauthorized system modifications.",
+    "category_id": "integrity-detection",
+    "control_layer": "OS/Kernel",
+    "d3fend_mapping": {
+      "technique_id": "D3-FV",
+      "technique_name": "File Verification"
+    }
+  },
+  "system-recovery": {
+    "name": "System Recovery",
+    "description": "Controls that enable system restoration after compromise including immutable infrastructure, backup verification, disaster recovery, and service auto-restart.",
+    "category_id": "recovery-controls",
+    "control_layer": "Application",
+    "d3fend_mapping": {
+      "technique_id": "D3-RE",
+      "technique_name": "Restore Execution"
+    }
+  },
+  "automated-updates": {
+    "name": "Automated Updates",
+    "description": "Automated patch management including OS package updates, live kernel patching, and container image rebuilds that reduce the window of vulnerability exposure.",
+    "category_id": "patch-management",
+    "control_layer": "OS/Kernel",
+    "d3fend_mapping": {
+      "technique_id": "D3-SU",
+      "technique_name": "Software Update"
+    }
+  },
+  "protocol-config": {
+    "name": "Protocol Configuration Hardening",
+    "description": "Hardening of network protocol configurations including SSH, network services, and kernel network stack parameters.",
+    "category_id": "protocol-hardening",
+    "control_layer": "Network",
+    "d3fend_mapping": {
+      "technique_id": "D3-ACH",
+      "technique_name": "Application Configuration Hardening"
+    }
+  },
+  "crypto-policy": {
+    "name": "Cryptographic Policy",
+    "description": "System-wide cryptographic policy enforcement and FIPS compliance modes that ensure consistent algorithm and protocol selection.",
+    "category_id": "cryptographic-controls",
+    "control_layer": "Application",
+    "d3fend_mapping": {
+      "technique_id": "D3-CE",
+      "technique_name": "Certificate-based Encryption"
+    }
+  },
+  "data-integrity-crypto": {
+    "name": "Data Integrity Cryptography",
+    "description": "Cryptographic controls for data integrity and confidentiality including DNSSEC, package signing, and data-at-rest encryption.",
+    "category_id": "cryptographic-controls",
+    "control_layer": "Data"
+  },
+  "verified-integrity": {
+    "name": "Verified Boot and Integrity",
+    "description": "Boot-time and runtime integrity verification including dm-verity and IMA/EVM that detect unauthorized modifications to system files.",
+    "category_id": "filesystem-hardening",
+    "control_layer": "OS/Kernel",
+    "d3fend_mapping": {
+      "technique_id": "D3-FV",
+      "technique_name": "File Verification"
+    }
+  },
+  "filesystem-access-control": {
+    "name": "Filesystem Access Control",
+    "description": "Controls that restrict filesystem access beyond mount options: Landlock LSM sandboxing, dynamic linker hardening, and service path enforcement.",
+    "category_id": "filesystem-hardening",
+    "control_layer": "OS/Kernel"
+  },
+  "privilege-escalation-control": {
+    "name": "Privilege Escalation Control",
+    "description": "Controls that restrict privilege escalation paths including sudo configuration hardening and privilege boundary enforcement.",
+    "category_id": "privilege-isolation",
+    "control_layer": "OS/Kernel",
+    "d3fend_mapping": {
+      "technique_id": "D3-LFP",
+      "technique_name": "Least Function Policy"
+    }
+  },
+  "request-filtering": {
+    "name": "Request Filtering",
+    "description": "HTTP request-level filtering and normalization including WAFs, rate limiting, and request smuggling prevention.",
+    "category_id": "application-controls",
+    "control_layer": "Application"
+  },
+  "runtime-hardening": {
+    "name": "Runtime Hardening",
+    "description": "Application runtime security controls including browser security policies, process recycling, and JIT compiler hardening.",
+    "category_id": "application-controls",
+    "control_layer": "Application"
   }
 }

@@ -1,43 +1,45 @@
 {
-  "cme_id": "CME-506",
-  "control_name": "Landlock LSM (Filesystem Sandboxing)",
-  "description": "Linux Security Module that allows unprivileged processes to restrict their own filesystem access. Process voluntarily drops access to paths it does not need, reducing impact of compromise.",
-  "tactic": "Isolate",
-  "category": "Filesystem Hardening",
-  "category_id": "filesystem-hardening",
-  "control_layer": "OS/Kernel",
-  "cvss_vector_impacts": [
-    {
-      "metric": "S",
-      "from": "C",
-      "to": "U",
-      "rationale": "Process cannot access filesystem paths outside its Landlock ruleset"
-    },
-    {
-      "metric": "C",
-      "from": "H",
-      "to": "L",
-      "rationale": "File read access restricted to declared paths"
+    "cme_id": "CME-506",
+    "control_name": "Landlock LSM (Filesystem Sandboxing)",
+    "description": "Linux Security Module that allows unprivileged processes to restrict their own filesystem access. Process voluntarily drops access to paths it does not need, reducing impact of compromise.",
+    "tactic": "Isolate",
+    "category": "Filesystem Hardening",
+    "category_id": "filesystem-hardening",
+    "function_id": "filesystem-access-control",
+    "control_layer": "OS/Kernel",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "S",
+            "from": "C",
+            "to": "U",
+            "rationale": "Process cannot access filesystem paths outside its Landlock ruleset"
+        },
+        {
+            "metric": "C",
+            "from": "H",
+            "to": "L",
+            "rationale": "File read access restricted to declared paths"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-284",
+        "CWE-269"
+    ],
+    "confidence": "High",
+    "platforms": [
+        "RHEL 9",
+        "Ubuntu 24.04",
+        "Fedora"
+    ],
+    "verification": {
+        "method": "Check if process has active Landlock restrictions",
+        "commands": [
+            {
+                "command": "grep Landlock /proc/self/status",
+                "expected": "Landlock",
+                "platform": "linux"
+            }
+        ]
     }
-  ],
-  "cwe_relationships": [
-    "CWE-284",
-    "CWE-269"
-  ],
-  "confidence": "High",
-  "platforms": [
-    "RHEL 9",
-    "Ubuntu 24.04",
-    "Fedora"
-  ],
-  "verification": {
-    "method": "Check if process has active Landlock restrictions",
-    "commands": [
-      {
-        "command": "grep Landlock /proc/self/status",
-        "expected": "Landlock",
-        "platform": "linux"
-      }
-    ]
-  }
 }

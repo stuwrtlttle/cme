@@ -1,42 +1,44 @@
 {
-  "cme_id": "CME-701",
-  "control_name": "Sandboxing / gVisor Runtime",
-  "description": "Application-level kernel emulation (gVisor) or VM-based isolation (Kata Containers) that intercepts syscalls and prevents direct host kernel interaction. Provides defense-in-depth for container isolation.",
-  "tactic": "Isolate",
-  "category": "Container Isolation",
-  "category_id": "container-isolation",
-  "control_layer": "Application",
-  "cvss_vector_impacts": [
-    {
-      "metric": "S",
-      "from": "C",
-      "to": "U",
-      "rationale": "Container interacts with gVisor sentry, not host kernel; container escape requires breaking through gVisor first"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-269",
-    "CWE-119",
-    "CWE-653"
-  ],
-  "verification": {
-    "method": "Check container runtime class",
-    "commands": [
-      {
-        "command": "kubectl get pod <pod> -o jsonpath='{.spec.runtimeClassName}'",
-        "expected": "gvisor",
-        "platform": "kubernetes"
-      },
-      {
-        "command": "podman inspect <container> | grep runtime",
-        "expected": "runsc|kata",
-        "platform": "linux"
-      }
+    "cme_id": "CME-701",
+    "control_name": "Sandboxing / gVisor Runtime",
+    "description": "Application-level kernel emulation (gVisor) or VM-based isolation (Kata Containers) that intercepts syscalls and prevents direct host kernel interaction. Provides defense-in-depth for container isolation.",
+    "tactic": "Isolate",
+    "category": "Container Isolation",
+    "category_id": "container-isolation",
+    "function_id": "container-runtime",
+    "control_layer": "Application",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "S",
+            "from": "C",
+            "to": "U",
+            "rationale": "Container interacts with gVisor sentry, not host kernel; container escape requires breaking through gVisor first"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-269",
+        "CWE-119",
+        "CWE-653"
+    ],
+    "verification": {
+        "method": "Check container runtime class",
+        "commands": [
+            {
+                "command": "kubectl get pod <pod> -o jsonpath='{.spec.runtimeClassName}'",
+                "expected": "gvisor",
+                "platform": "kubernetes"
+            },
+            {
+                "command": "podman inspect <container> | grep runtime",
+                "expected": "runsc|kata",
+                "platform": "linux"
+            }
+        ]
+    },
+    "confidence": "High",
+    "platforms": [
+        "Kubernetes",
+        "GKE"
     ]
-  },
-  "confidence": "High",
-  "platforms": [
-    "Kubernetes",
-    "GKE"
-  ]
 }

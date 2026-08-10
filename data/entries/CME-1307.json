@@ -1,49 +1,51 @@
 {
-  "cme_id": "CME-1307",
-  "control_name": "Command Injection Prevention (No Shell Invocation)",
-  "description": "Application avoids invoking shell commands with user-controlled input. Uses direct process execution (subprocess with list args, no shell=True) or purpose-built libraries instead of shell pipelines. When shell interaction is unavoidable, uses strict allowlist validation on inputs.",
-  "tactic": "Harden",
-  "category": "Application Input Validation",
-  "category_id": "application-input-validation",
-  "control_layer": "Application",
-  "cvss_vector_impacts": [
-    {
-      "metric": "AC",
-      "from": "L",
-      "to": "H",
-      "rationale": "Shell metacharacters in user input have no effect; arguments passed as array not string"
+    "cme_id": "CME-1307",
+    "control_name": "Command Injection Prevention (No Shell Invocation)",
+    "description": "Application avoids invoking shell commands with user-controlled input. Uses direct process execution (subprocess with list args, no shell=True) or purpose-built libraries instead of shell pipelines. When shell interaction is unavoidable, uses strict allowlist validation on inputs.",
+    "tactic": "Harden",
+    "category": "Application Input Validation",
+    "category_id": "application-input-validation",
+    "function_id": "injection-prevention",
+    "control_layer": "Application",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "AC",
+            "from": "L",
+            "to": "H",
+            "rationale": "Shell metacharacters in user input have no effect; arguments passed as array not string"
+        },
+        {
+            "metric": "I",
+            "from": "H",
+            "to": "L",
+            "rationale": "Cannot execute arbitrary system commands via injection"
+        },
+        {
+            "metric": "S",
+            "from": "C",
+            "to": "U",
+            "rationale": "Application cannot be leveraged to run commands on the host OS"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-78",
+        "CWE-77"
+    ],
+    "verification": {
+        "method": "Verify no shell=True with user-controlled input; no os.system() or os.popen() calls",
+        "commands": [
+            {
+                "command": "grep -rn 'shell=True\\|os.system\\|os.popen' <app_source>/",
+                "expected": "No shell invocations with user-controlled input",
+                "platform": "any"
+            }
+        ]
     },
-    {
-      "metric": "I",
-      "from": "H",
-      "to": "L",
-      "rationale": "Cannot execute arbitrary system commands via injection"
-    },
-    {
-      "metric": "S",
-      "from": "C",
-      "to": "U",
-      "rationale": "Application cannot be leveraged to run commands on the host OS"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-78",
-    "CWE-77"
-  ],
-  "verification": {
-    "method": "Verify no shell=True with user-controlled input; no os.system() or os.popen() calls",
-    "commands": [
-      {
-        "command": "grep -rn 'shell=True\\|os.system\\|os.popen' <app_source>/",
-        "expected": "No shell invocations with user-controlled input",
-        "platform": "any"
-      }
+    "confidence": "High",
+    "platforms": [
+        "Any",
+        "Windows Server 2019",
+        "Windows Server 2022"
     ]
-  },
-  "confidence": "High",
-  "platforms": [
-    "Any",
-    "Windows Server 2019",
-    "Windows Server 2022"
-  ]
 }

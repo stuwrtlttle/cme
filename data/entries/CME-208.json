@@ -1,58 +1,60 @@
 {
-  "cme_id": "CME-208",
-  "control_name": "Outbound Network Egress Restriction (SSRF Blast Radius Containment)",
-  "description": "Network-layer egress filtering that confines application workloads to only the external destinations they require, blocking outbound connections to internal networks, cloud metadata services, and localhost. Implemented via host-based firewall rules (firewalld/nftables), Kubernetes NetworkPolicy egress rules, or cloud security group outbound rules. Complements application-level SSRF prevention (CME-1304) by providing defense-in-depth: even if the application's URL validation is bypassed through DNS rebinding, IPv6-mapped addresses, URL parser differentials, or HTTP redirect chains, the network layer blocks the resulting connection to internal resources. Specifically blocks egress to 169.254.0.0/16 (link-local/cloud metadata), 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 (RFC1918), and fd00::/8 (ULA IPv6) from application workloads that should only communicate externally.",
-  "tactic": "Isolate",
-  "category": "Network Isolation",
-  "category_id": "network-isolation",
-  "control_layer": "Network",
-  "cvss_vector_impacts": [
-    {
-      "metric": "C",
-      "from": "H",
-      "to": "L",
-      "rationale": "Network egress rules block the SSRF payload from reaching internal services, cloud metadata, or localhost regardless of application-layer bypass techniques; exfiltration of internal data is prevented at the transport layer"
+    "cme_id": "CME-208",
+    "control_name": "Outbound Network Egress Restriction (SSRF Blast Radius Containment)",
+    "description": "Network-layer egress filtering that confines application workloads to only the external destinations they require, blocking outbound connections to internal networks, cloud metadata services, and localhost. Implemented via host-based firewall rules (firewalld/nftables), Kubernetes NetworkPolicy egress rules, or cloud security group outbound rules. Complements application-level SSRF prevention (CME-1304) by providing defense-in-depth: even if the application's URL validation is bypassed through DNS rebinding, IPv6-mapped addresses, URL parser differentials, or HTTP redirect chains, the network layer blocks the resulting connection to internal resources. Specifically blocks egress to 169.254.0.0/16 (link-local/cloud metadata), 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 (RFC1918), and fd00::/8 (ULA IPv6) from application workloads that should only communicate externally.",
+    "tactic": "Isolate",
+    "category": "Network Isolation",
+    "category_id": "network-isolation",
+    "function_id": "network-filtering",
+    "control_layer": "Network",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "C",
+            "from": "H",
+            "to": "L",
+            "rationale": "Network egress rules block the SSRF payload from reaching internal services, cloud metadata, or localhost regardless of application-layer bypass techniques; exfiltration of internal data is prevented at the transport layer"
+        },
+        {
+            "metric": "S",
+            "from": "C",
+            "to": "U",
+            "rationale": "SSRF can no longer pivot to affect internal services beyond the vulnerable component; scope change from the application to the internal network is blocked by network-layer isolation"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-918",
+        "CWE-441"
+    ],
+    "verification": {
+        "method": "Verify that application workloads cannot initiate outbound connections to RFC1918 ranges, link-local addresses, or localhost",
+        "commands": [
+            {
+                "command": "nft list ruleset | grep -A5 'chain output' | grep -E '10\\.0\\.0\\.0|172\\.16\\.0\\.0|192\\.168\\.0\\.0|169\\.254'",
+                "expected": "Drop/reject rules for RFC1918 and link-local ranges in the output chain",
+                "platform": "linux"
+            },
+            {
+                "command": "kubectl get networkpolicy -n <namespace> -o jsonpath='{.items[*].spec.egress}'",
+                "expected": "Egress rules present that restrict destination CIDRs to required external endpoints only",
+                "platform": "any"
+            },
+            {
+                "command": "curl -s --connect-timeout 3 http://169.254.169.254/latest/meta-data/ -o /dev/null -w '%{http_code}' 2>&1 || echo 'blocked'",
+                "expected": "Connection refused, timed out, or blocked \u2014 cloud metadata endpoint unreachable from application workload",
+                "platform": "any"
+            },
+            {
+                "command": "Get-NetFirewallRule -Direction Outbound | Where-Object { $_.Action -eq 'Block' } | Get-NetFirewallAddressFilter | Where-Object { $_.RemoteAddress -match '10\\.|172\\.16|192\\.168|169\\.254' }",
+                "expected": "Outbound block rules present for RFC1918 and link-local ranges",
+                "platform": "windows"
+            }
+        ]
     },
-    {
-      "metric": "S",
-      "from": "C",
-      "to": "U",
-      "rationale": "SSRF can no longer pivot to affect internal services beyond the vulnerable component; scope change from the application to the internal network is blocked by network-layer isolation"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-918",
-    "CWE-441"
-  ],
-  "verification": {
-    "method": "Verify that application workloads cannot initiate outbound connections to RFC1918 ranges, link-local addresses, or localhost",
-    "commands": [
-      {
-        "command": "nft list ruleset | grep -A5 'chain output' | grep -E '10\\.0\\.0\\.0|172\\.16\\.0\\.0|192\\.168\\.0\\.0|169\\.254'",
-        "expected": "Drop/reject rules for RFC1918 and link-local ranges in the output chain",
-        "platform": "linux"
-      },
-      {
-        "command": "kubectl get networkpolicy -n <namespace> -o jsonpath='{.items[*].spec.egress}'",
-        "expected": "Egress rules present that restrict destination CIDRs to required external endpoints only",
-        "platform": "any"
-      },
-      {
-        "command": "curl -s --connect-timeout 3 http://169.254.169.254/latest/meta-data/ -o /dev/null -w '%{http_code}' 2>&1 || echo 'blocked'",
-        "expected": "Connection refused, timed out, or blocked — cloud metadata endpoint unreachable from application workload",
-        "platform": "any"
-      },
-      {
-        "command": "Get-NetFirewallRule -Direction Outbound | Where-Object { $_.Action -eq 'Block' } | Get-NetFirewallAddressFilter | Where-Object { $_.RemoteAddress -match '10\\.|172\\.16|192\\.168|169\\.254' }",
-        "expected": "Outbound block rules present for RFC1918 and link-local ranges",
-        "platform": "windows"
-      }
+    "confidence": "High",
+    "platforms": [
+        "Any",
+        "Windows Server 2019",
+        "Windows Server 2022"
     ]
-  },
-  "confidence": "High",
-  "platforms": [
-    "Any",
-    "Windows Server 2019",
-    "Windows Server 2022"
-  ]
 }

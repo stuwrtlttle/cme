@@ -1,44 +1,46 @@
 {
-  "cme_id": "CME-204",
-  "control_name": "IPsec / WireGuard (Encrypted Transport)",
-  "description": "Encrypts all network traffic between hosts using IPsec or WireGuard, preventing eavesdropping, injection, and man-in-the-middle attacks on the wire.",
-  "tactic": "Isolate",
-  "category": "Network Isolation",
-  "category_id": "network-isolation",
-  "control_layer": "Network",
-  "cvss_vector_impacts": [
-    {
-      "metric": "AC",
-      "from": "L",
-      "to": "H",
-      "rationale": "Network-level MitM requires breaking cryptographic tunnel"
+    "cme_id": "CME-204",
+    "control_name": "IPsec / WireGuard (Encrypted Transport)",
+    "description": "Encrypts all network traffic between hosts using IPsec or WireGuard, preventing eavesdropping, injection, and man-in-the-middle attacks on the wire.",
+    "tactic": "Isolate",
+    "category": "Network Isolation",
+    "category_id": "network-isolation",
+    "function_id": "network-access-control",
+    "control_layer": "Network",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "AC",
+            "from": "L",
+            "to": "H",
+            "rationale": "Network-level MitM requires breaking cryptographic tunnel"
+        },
+        {
+            "metric": "C",
+            "from": "H",
+            "to": "L",
+            "rationale": "Encrypted transit prevents passive eavesdropping"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-319",
+        "CWE-300",
+        "CWE-311"
+    ],
+    "verification": {
+        "method": "Verify IPsec or WireGuard tunnels are established",
+        "commands": [
+            {
+                "command": "ipsec status 2>/dev/null || wg show 2>/dev/null",
+                "expected": "established|interface",
+                "platform": "linux"
+            }
+        ]
     },
-    {
-      "metric": "C",
-      "from": "H",
-      "to": "L",
-      "rationale": "Encrypted transit prevents passive eavesdropping"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-319",
-    "CWE-300",
-    "CWE-311"
-  ],
-  "verification": {
-    "method": "Verify IPsec or WireGuard tunnels are established",
-    "commands": [
-      {
-        "command": "ipsec status 2>/dev/null || wg show 2>/dev/null",
-        "expected": "established|interface",
-        "platform": "linux"
-      }
+    "confidence": "High",
+    "platforms": [
+        "RHEL 9",
+        "RHEL 8",
+        "Ubuntu 24.04"
     ]
-  },
-  "confidence": "High",
-  "platforms": [
-    "RHEL 9",
-    "RHEL 8",
-    "Ubuntu 24.04"
-  ]
 }

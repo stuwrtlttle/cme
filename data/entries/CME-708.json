@@ -1,37 +1,39 @@
 {
-  "cme_id": "CME-708",
-  "control_name": "Least Privilege sudo Configuration",
-  "description": "Configures sudo to allow specific commands only, rather than unrestricted root access. Uses command allowlists, NOPASSWD only for specific safe commands, and requiretty.",
-  "tactic": "Isolate",
-  "category": "Privilege Isolation",
-  "category_id": "privilege-isolation",
-  "control_layer": "OS/Kernel",
-  "cvss_vector_impacts": [
-    {
-      "metric": "PR",
-      "from": "L",
-      "to": "H",
-      "rationale": "Compromised user account has limited elevation paths"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-269",
-    "CWE-250"
-  ],
-  "verification": {
-    "method": "Audit sudoers for overly permissive rules",
-    "commands": [
-      {
-        "command": "grep -r 'ALL=(ALL)' /etc/sudoers /etc/sudoers.d/ 2>/dev/null | grep -v NOPASSWD",
-        "expected": "Minimal matches",
-        "platform": "linux"
-      }
+    "cme_id": "CME-708",
+    "control_name": "Least Privilege sudo Configuration",
+    "description": "Configures sudo to allow specific commands only, rather than unrestricted root access. Uses command allowlists, NOPASSWD only for specific safe commands, and requiretty.",
+    "tactic": "Isolate",
+    "category": "Privilege Isolation",
+    "category_id": "privilege-isolation",
+    "function_id": "privilege-escalation-control",
+    "control_layer": "OS/Kernel",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "PR",
+            "from": "L",
+            "to": "H",
+            "rationale": "Compromised user account has limited elevation paths"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-269",
+        "CWE-250"
+    ],
+    "verification": {
+        "method": "Audit sudoers for overly permissive rules",
+        "commands": [
+            {
+                "command": "grep -r 'ALL=(ALL)' /etc/sudoers /etc/sudoers.d/ 2>/dev/null | grep -v NOPASSWD",
+                "expected": "Minimal matches",
+                "platform": "linux"
+            }
+        ]
+    },
+    "confidence": "Medium",
+    "platforms": [
+        "RHEL 9",
+        "RHEL 8",
+        "Ubuntu 24.04"
     ]
-  },
-  "confidence": "Medium",
-  "platforms": [
-    "RHEL 9",
-    "RHEL 8",
-    "Ubuntu 24.04"
-  ]
 }

@@ -1,36 +1,38 @@
 {
-  "cme_id": "CME-303",
-  "control_name": "SELinux Booleans (Restrictive)",
-  "description": "Fine-grained SELinux policy toggles that disable risky inter-domain interactions. Examples: httpd_can_network_connect=off prevents web servers from making outbound connections; container_manage_cgroup=off restricts container cgroup access.",
-  "tactic": "Harden",
-  "category": "Mandatory Access Control",
-  "category_id": "mandatory-access-control",
-  "control_layer": "OS/Kernel",
-  "cvss_vector_impacts": [
-    {
-      "metric": "S",
-      "from": "C",
-      "to": "U",
-      "rationale": "Disables specific cross-domain access paths"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-284"
-  ],
-  "verification": {
-    "method": "Check key SELinux booleans are set to restrictive values",
-    "commands": [
-      {
-        "command": "getsebool httpd_can_network_connect",
-        "expected": "httpd_can_network_connect --> off",
-        "platform": "rhel"
-      }
+    "cme_id": "CME-303",
+    "control_name": "SELinux Booleans (Restrictive)",
+    "description": "Fine-grained SELinux policy toggles that disable risky inter-domain interactions. Examples: httpd_can_network_connect=off prevents web servers from making outbound connections; container_manage_cgroup=off restricts container cgroup access.",
+    "tactic": "Harden",
+    "category": "Mandatory Access Control",
+    "category_id": "mandatory-access-control",
+    "function_id": "selinux",
+    "control_layer": "OS/Kernel",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "S",
+            "from": "C",
+            "to": "U",
+            "rationale": "Disables specific cross-domain access paths"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-284"
+    ],
+    "verification": {
+        "method": "Check key SELinux booleans are set to restrictive values",
+        "commands": [
+            {
+                "command": "getsebool httpd_can_network_connect",
+                "expected": "httpd_can_network_connect --> off",
+                "platform": "rhel"
+            }
+        ]
+    },
+    "confidence": "Medium",
+    "platforms": [
+        "RHEL 9",
+        "RHEL 8",
+        "Fedora"
     ]
-  },
-  "confidence": "Medium",
-  "platforms": [
-    "RHEL 9",
-    "RHEL 8",
-    "Fedora"
-  ]
 }

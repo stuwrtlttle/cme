@@ -1,48 +1,50 @@
 {
-  "cme_id": "CME-402",
-  "control_name": "FIPS 140-3 Mode",
-  "description": "Enables FIPS-validated cryptographic modules system-wide. Only NIST-approved algorithms are available for all cryptographic operations. Non-compliant operations fail rather than fall back.",
-  "tactic": "Harden",
-  "category": "Cryptographic Controls",
-  "category_id": "cryptographic-controls",
-  "control_layer": "OS/Kernel",
-  "cvss_vector_impacts": [
-    {
-      "metric": "AC",
-      "from": "L",
-      "to": "H",
-      "rationale": "All crypto operations use validated, audited implementations"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-327",
-    "CWE-326",
-    "CWE-328"
-  ],
-  "verification": {
-    "method": "Verify FIPS mode is enabled",
-    "commands": [
-      {
-        "command": "fips-mode-setup --check",
-        "expected": "FIPS mode is enabled",
-        "platform": "rhel"
-      },
-      {
-        "command": "cat /proc/sys/crypto/fips_enabled",
-        "expected": "1",
-        "platform": "linux"
-      }
+    "cme_id": "CME-402",
+    "control_name": "FIPS 140-3 Mode",
+    "description": "Enables FIPS-validated cryptographic modules system-wide. Only NIST-approved algorithms are available for all cryptographic operations. Non-compliant operations fail rather than fall back.",
+    "tactic": "Harden",
+    "category": "Cryptographic Controls",
+    "category_id": "cryptographic-controls",
+    "function_id": "crypto-policy",
+    "control_layer": "OS/Kernel",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "AC",
+            "from": "L",
+            "to": "H",
+            "rationale": "All crypto operations use validated, audited implementations"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-327",
+        "CWE-326",
+        "CWE-328"
+    ],
+    "verification": {
+        "method": "Verify FIPS mode is enabled",
+        "commands": [
+            {
+                "command": "fips-mode-setup --check",
+                "expected": "FIPS mode is enabled",
+                "platform": "rhel"
+            },
+            {
+                "command": "cat /proc/sys/crypto/fips_enabled",
+                "expected": "1",
+                "platform": "linux"
+            }
+        ]
+    },
+    "references": [
+        {
+            "source": "Red Hat Security Hardening Guide",
+            "section": "Switching RHEL to FIPS mode"
+        }
+    ],
+    "confidence": "High",
+    "platforms": [
+        "RHEL 9",
+        "RHEL 8"
     ]
-  },
-  "references": [
-    {
-      "source": "Red Hat Security Hardening Guide",
-      "section": "Switching RHEL to FIPS mode"
-    }
-  ],
-  "confidence": "High",
-  "platforms": [
-    "RHEL 9",
-    "RHEL 8"
-  ]
 }

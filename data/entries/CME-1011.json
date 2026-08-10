@@ -5,6 +5,7 @@
     "tactic": "Detect",
     "category": "Runtime Detection",
     "category_id": "runtime-detection",
+    "function_id": "application-monitoring",
     "control_layer": "Application",
     "attenuation_type": "deterministic",
     "cvss_vector_impacts": [

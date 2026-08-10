@@ -1,38 +1,40 @@
 {
-  "cme_id": "CME-1308",
-  "control_name": "Origin and CORS Validation Enforcement",
-  "description": "Enforces strict Cross-Origin Resource Sharing (CORS) policies and Origin header validation to prevent cross-origin attacks. Configures CORS headers (Access-Control-Allow-Origin, Access-Control-Allow-Methods, Access-Control-Allow-Credentials) with explicit domain allowlists rather than wildcards. Validates the Origin and Referer headers on all state-changing requests, rejecting requests from unlisted origins. Prevents CSRF and cross-origin data leakage attacks that rely on permissive or absent origin checks.",
-  "tactic": "Harden",
-  "category": "Application Input Validation",
-  "category_id": "application-input-validation",
-  "control_layer": "Application",
-  "cvss_vector_impacts": [
-    {
-      "metric": "AC",
-      "from": "L",
-      "to": "H",
-      "rationale": "Strict origin validation forces the attacker to compromise a trusted origin domain or find an origin-bypass vulnerability before executing cross-origin attacks, significantly increasing attack complexity."
+    "cme_id": "CME-1308",
+    "control_name": "Origin and CORS Validation Enforcement",
+    "description": "Enforces strict Cross-Origin Resource Sharing (CORS) policies and Origin header validation to prevent cross-origin attacks. Configures CORS headers (Access-Control-Allow-Origin, Access-Control-Allow-Methods, Access-Control-Allow-Credentials) with explicit domain allowlists rather than wildcards. Validates the Origin and Referer headers on all state-changing requests, rejecting requests from unlisted origins. Prevents CSRF and cross-origin data leakage attacks that rely on permissive or absent origin checks.",
+    "tactic": "Harden",
+    "category": "Application Input Validation",
+    "category_id": "application-input-validation",
+    "function_id": "input-validation",
+    "control_layer": "Application",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "AC",
+            "from": "L",
+            "to": "H",
+            "rationale": "Strict origin validation forces the attacker to compromise a trusted origin domain or find an origin-bypass vulnerability before executing cross-origin attacks, significantly increasing attack complexity."
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-346",
+        "CWE-352"
+    ],
+    "confidence": "High",
+    "platforms": [
+        "RHEL 9",
+        "Ubuntu 24.04",
+        "Windows Server 2019",
+        "Windows Server 2022"
+    ],
+    "verification": {
+        "method": "Check that CORS headers do not allow wildcard origins",
+        "commands": [
+            {
+                "command": "curl -s -H 'Origin: https://evil.example.com' -I http://localhost:8080 | grep -i access-control-allow-origin",
+                "expected": "Should not contain * or evil.example.com",
+                "platform": "any"
+            }
+        ]
     }
-  ],
-  "cwe_relationships": [
-    "CWE-346",
-    "CWE-352"
-  ],
-  "confidence": "High",
-  "platforms": [
-    "RHEL 9",
-    "Ubuntu 24.04",
-    "Windows Server 2019",
-    "Windows Server 2022"
-  ],
-  "verification": {
-    "method": "Check that CORS headers do not allow wildcard origins",
-    "commands": [
-      {
-        "command": "curl -s -H 'Origin: https://evil.example.com' -I http://localhost:8080 | grep -i access-control-allow-origin",
-        "expected": "Should not contain * or evil.example.com",
-        "platform": "any"
-      }
-    ]
-  }
 }

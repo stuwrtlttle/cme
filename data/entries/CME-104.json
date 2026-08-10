@@ -1,43 +1,45 @@
 {
-  "cme_id": "CME-104",
-  "control_name": "KASLR (Kernel Address Space Layout Randomization)",
-  "description": "Randomizes the kernel base address at each boot, making kernel exploits harder by requiring address leaks to locate kernel functions and data structures.",
-  "tactic": "Harden",
-  "category": "Kernel Hardening",
-  "category_id": "kernel-hardening",
-  "control_layer": "OS/Kernel",
-  "cvss_vector_impacts": [
-    {
-      "metric": "AC",
-      "from": "L",
-      "to": "H",
-      "rationale": "Kernel exploit must include info leak to locate kernel symbols"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-119",
-    "CWE-269"
-  ],
-  "verification": {
-    "method": "Verify KASLR is not disabled in boot parameters",
-    "commands": [
-      {
-        "command": "cat /proc/cmdline | grep -v nokaslr && echo 'KASLR active'",
-        "expected": "KASLR active",
-        "platform": "linux"
-      },
-      {
-        "command": "dmesg | grep 'KASLR'",
-        "expected": "KASLR enabled",
-        "platform": "linux"
-      }
+    "cme_id": "CME-104",
+    "control_name": "KASLR (Kernel Address Space Layout Randomization)",
+    "description": "Randomizes the kernel base address at each boot, making kernel exploits harder by requiring address leaks to locate kernel functions and data structures.",
+    "tactic": "Harden",
+    "category": "Kernel Hardening",
+    "category_id": "kernel-hardening",
+    "function_id": "kernel-attack-surface",
+    "control_layer": "OS/Kernel",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "AC",
+            "from": "L",
+            "to": "H",
+            "rationale": "Kernel exploit must include info leak to locate kernel symbols"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-119",
+        "CWE-269"
+    ],
+    "verification": {
+        "method": "Verify KASLR is not disabled in boot parameters",
+        "commands": [
+            {
+                "command": "cat /proc/cmdline | grep -v nokaslr && echo 'KASLR active'",
+                "expected": "KASLR active",
+                "platform": "linux"
+            },
+            {
+                "command": "dmesg | grep 'KASLR'",
+                "expected": "KASLR enabled",
+                "platform": "linux"
+            }
+        ]
+    },
+    "confidence": "High",
+    "platforms": [
+        "RHEL 9",
+        "RHEL 8",
+        "Ubuntu 24.04",
+        "SLES 15"
     ]
-  },
-  "confidence": "High",
-  "platforms": [
-    "RHEL 9",
-    "RHEL 8",
-    "Ubuntu 24.04",
-    "SLES 15"
-  ]
 }

@@ -1,65 +1,67 @@
 {
-  "cme_id": "CME-407",
-  "control_name": "Data-at-Rest Encryption (LUKS/dm-crypt / BitLocker)",
-  "description": "Encrypts data volumes and partitions at the block device layer using LUKS2/dm-crypt, ensuring that sensitive data including credentials, tokens, PII, and configuration secrets is encrypted when stored on disk. Prevents unauthorized data access through physical media theft, backup exposure, or filesystem-level read vulnerabilities. Combined with TPM-backed key sealing, provides boot-time integrity verification and automatic unlocking for authorized systems.",
-  "tactic": "Harden",
-  "category": "Cryptographic Controls",
-  "category_id": "cryptographic-controls",
-  "control_layer": "Data",
-  "cvss_vector_impacts": [
-    {
-      "metric": "C",
-      "from": "H",
-      "to": "L",
-      "rationale": "Even if an attacker gains file read access through a path traversal or application vulnerability, the underlying block device encryption prevents reading the actual cleartext data without the encryption key."
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-312",
-    "CWE-311",
-    "CWE-316"
-  ],
-  "confidence": "High",
-  "platforms": [
-    "RHEL 9",
-    "Ubuntu 24.04",
-    "Fedora 40",
-    "Windows 10",
-    "Windows 11",
-    "Windows Server 2022"
-  ],
-  "verification": {
-    "method": "Check for LUKS-encrypted volumes",
-    "commands": [
-      {
-        "command": "lsblk -o NAME,TYPE,FSTYPE | grep crypt",
-        "expected": "At least one crypt volume present",
-        "platform": "linux"
-      },
-      {
-        "command": "(Get-BitLockerVolume -MountPoint 'C:').ProtectionStatus",
-        "expected": "On",
-        "platform": "windows"
-      },
-      {
-        "command": "(Get-BitLockerVolume -MountPoint 'C:').EncryptionMethod",
-        "expected": "XtsAes256",
-        "platform": "windows"
-      }
+    "cme_id": "CME-407",
+    "control_name": "Data-at-Rest Encryption (LUKS/dm-crypt / BitLocker)",
+    "description": "Encrypts data volumes and partitions at the block device layer using LUKS2/dm-crypt, ensuring that sensitive data including credentials, tokens, PII, and configuration secrets is encrypted when stored on disk. Prevents unauthorized data access through physical media theft, backup exposure, or filesystem-level read vulnerabilities. Combined with TPM-backed key sealing, provides boot-time integrity verification and automatic unlocking for authorized systems.",
+    "tactic": "Harden",
+    "category": "Cryptographic Controls",
+    "category_id": "cryptographic-controls",
+    "function_id": "data-integrity-crypto",
+    "control_layer": "Data",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "C",
+            "from": "H",
+            "to": "L",
+            "rationale": "Even if an attacker gains file read access through a path traversal or application vulnerability, the underlying block device encryption prevents reading the actual cleartext data without the encryption key."
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-312",
+        "CWE-311",
+        "CWE-316"
+    ],
+    "confidence": "High",
+    "platforms": [
+        "RHEL 9",
+        "Ubuntu 24.04",
+        "Fedora 40",
+        "Windows 10",
+        "Windows 11",
+        "Windows Server 2022"
+    ],
+    "verification": {
+        "method": "Check for LUKS-encrypted volumes",
+        "commands": [
+            {
+                "command": "lsblk -o NAME,TYPE,FSTYPE | grep crypt",
+                "expected": "At least one crypt volume present",
+                "platform": "linux"
+            },
+            {
+                "command": "(Get-BitLockerVolume -MountPoint 'C:').ProtectionStatus",
+                "expected": "On",
+                "platform": "windows"
+            },
+            {
+                "command": "(Get-BitLockerVolume -MountPoint 'C:').EncryptionMethod",
+                "expected": "XtsAes256",
+                "platform": "windows"
+            }
+        ]
+    },
+    "cve_schema_version": "5.2.0",
+    "cve_affected": [
+        {
+            "vendor": "microsoft",
+            "product": "windows",
+            "cpes": [
+                "cpe:2.3:o:microsoft:windows_10:*:*:*:*:*:*:*:*",
+                "cpe:2.3:o:microsoft:windows_11:*:*:*:*:*:*:*:*",
+                "cpe:2.3:o:microsoft:windows_server_2019:*:*:*:*:*:*:*",
+                "cpe:2.3:o:microsoft:windows_server_2022:*:*:*:*:*:*:*"
+            ],
+            "defaultStatus": "applicable"
+        }
     ]
-  },
-  "cve_schema_version": "5.2.0",
-  "cve_affected": [
-    {
-      "vendor": "microsoft",
-      "product": "windows",
-      "cpes": [
-        "cpe:2.3:o:microsoft:windows_10:*:*:*:*:*:*:*:*",
-        "cpe:2.3:o:microsoft:windows_11:*:*:*:*:*:*:*:*",
-        "cpe:2.3:o:microsoft:windows_server_2019:*:*:*:*:*:*:*",
-        "cpe:2.3:o:microsoft:windows_server_2022:*:*:*:*:*:*:*"
-      ],
-      "defaultStatus": "applicable"
-    }
-  ]
 }

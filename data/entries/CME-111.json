@@ -1,68 +1,70 @@
 {
-  "cme_id": "CME-111",
-  "control_name": "Secure Boot (UEFI)",
-  "description": "Firmware-level verification that only signed bootloaders and kernels execute, preventing boot-level rootkits and unauthorized kernel replacement.",
-  "tactic": "Harden",
-  "category": "Kernel Hardening",
-  "category_id": "kernel-hardening",
-  "control_layer": "OS/Kernel",
-  "cvss_vector_impacts": [
-    {
-      "metric": "I",
-      "from": "H",
-      "to": "L",
-      "rationale": "Cannot persist malicious bootloader or kernel modifications"
+    "cme_id": "CME-111",
+    "control_name": "Secure Boot (UEFI)",
+    "description": "Firmware-level verification that only signed bootloaders and kernels execute, preventing boot-level rootkits and unauthorized kernel replacement.",
+    "tactic": "Harden",
+    "category": "Kernel Hardening",
+    "category_id": "kernel-hardening",
+    "function_id": "kernel-attack-surface",
+    "control_layer": "OS/Kernel",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "I",
+            "from": "H",
+            "to": "L",
+            "rationale": "Cannot persist malicious bootloader or kernel modifications"
+        },
+        {
+            "metric": "AC",
+            "from": "L",
+            "to": "H",
+            "rationale": "Must bypass cryptographic verification chain"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-345",
+        "CWE-494",
+        "CWE-269",
+        "CWE-347"
+    ],
+    "verification": {
+        "method": "Check UEFI Secure Boot state",
+        "commands": [
+            {
+                "command": "mokutil --sb-state",
+                "expected": "SecureBoot enabled",
+                "platform": "linux"
+            },
+            {
+                "command": "Confirm-SecureBootUEFI",
+                "expected": "True",
+                "platform": "windows"
+            }
+        ]
     },
-    {
-      "metric": "AC",
-      "from": "L",
-      "to": "H",
-      "rationale": "Must bypass cryptographic verification chain"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-345",
-    "CWE-494",
-    "CWE-269",
-    "CWE-347"
-  ],
-  "verification": {
-    "method": "Check UEFI Secure Boot state",
-    "commands": [
-      {
-        "command": "mokutil --sb-state",
-        "expected": "SecureBoot enabled",
-        "platform": "linux"
-      },
-      {
-        "command": "Confirm-SecureBootUEFI",
-        "expected": "True",
-        "platform": "windows"
-      }
+    "confidence": "High",
+    "platforms": [
+        "RHEL 9",
+        "RHEL 8",
+        "Ubuntu 24.04",
+        "SLES 15",
+        "Windows 10",
+        "Windows 11",
+        "Windows Server 2022"
+    ],
+    "cve_schema_version": "5.2.0",
+    "cve_affected": [
+        {
+            "vendor": "microsoft",
+            "product": "windows",
+            "cpes": [
+                "cpe:2.3:o:microsoft:windows_10:*:*:*:*:*:*:*:*",
+                "cpe:2.3:o:microsoft:windows_11:*:*:*:*:*:*:*:*",
+                "cpe:2.3:o:microsoft:windows_server_2019:*:*:*:*:*:*:*",
+                "cpe:2.3:o:microsoft:windows_server_2022:*:*:*:*:*:*:*"
+            ],
+            "defaultStatus": "applicable"
+        }
     ]
-  },
-  "confidence": "High",
-  "platforms": [
-    "RHEL 9",
-    "RHEL 8",
-    "Ubuntu 24.04",
-    "SLES 15",
-    "Windows 10",
-    "Windows 11",
-    "Windows Server 2022"
-  ],
-  "cve_schema_version": "5.2.0",
-  "cve_affected": [
-    {
-      "vendor": "microsoft",
-      "product": "windows",
-      "cpes": [
-        "cpe:2.3:o:microsoft:windows_10:*:*:*:*:*:*:*:*",
-        "cpe:2.3:o:microsoft:windows_11:*:*:*:*:*:*:*:*",
-        "cpe:2.3:o:microsoft:windows_server_2019:*:*:*:*:*:*:*",
-        "cpe:2.3:o:microsoft:windows_server_2022:*:*:*:*:*:*:*"
-      ],
-      "defaultStatus": "applicable"
-    }
-  ]
 }

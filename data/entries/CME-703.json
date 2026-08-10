@@ -1,43 +1,45 @@
 {
-  "cme_id": "CME-703",
-  "control_name": "Rootless Containers",
-  "description": "Containers run entirely without root privileges on the host. The container runtime, image pull, and all container processes run as an unprivileged user, eliminating host-level root compromise from container escape.",
-  "tactic": "Isolate",
-  "category": "Container Isolation",
-  "category_id": "container-isolation",
-  "control_layer": "OS/Kernel",
-  "cvss_vector_impacts": [
-    {
-      "metric": "S",
-      "from": "C",
-      "to": "U",
-      "rationale": "Container escape lands as unprivileged host user, not root"
+    "cme_id": "CME-703",
+    "control_name": "Rootless Containers",
+    "description": "Containers run entirely without root privileges on the host. The container runtime, image pull, and all container processes run as an unprivileged user, eliminating host-level root compromise from container escape.",
+    "tactic": "Isolate",
+    "category": "Container Isolation",
+    "category_id": "container-isolation",
+    "function_id": "container-runtime",
+    "control_layer": "OS/Kernel",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "S",
+            "from": "C",
+            "to": "U",
+            "rationale": "Container escape lands as unprivileged host user, not root"
+        },
+        {
+            "metric": "PR",
+            "from": "L",
+            "to": "H",
+            "rationale": "Even root inside container is unprivileged on host"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-269",
+        "CWE-250"
+    ],
+    "verification": {
+        "method": "Verify podman/docker running rootless",
+        "commands": [
+            {
+                "command": "podman info | grep rootless",
+                "expected": "rootless: true",
+                "platform": "linux"
+            }
+        ]
     },
-    {
-      "metric": "PR",
-      "from": "L",
-      "to": "H",
-      "rationale": "Even root inside container is unprivileged on host"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-269",
-    "CWE-250"
-  ],
-  "verification": {
-    "method": "Verify podman/docker running rootless",
-    "commands": [
-      {
-        "command": "podman info | grep rootless",
-        "expected": "rootless: true",
-        "platform": "linux"
-      }
+    "confidence": "High",
+    "platforms": [
+        "RHEL 9",
+        "Fedora",
+        "Ubuntu 24.04"
     ]
-  },
-  "confidence": "High",
-  "platforms": [
-    "RHEL 9",
-    "Fedora",
-    "Ubuntu 24.04"
-  ]
 }

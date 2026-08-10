@@ -1,67 +1,69 @@
 {
-  "cme_id": "CME-803",
-  "control_name": "Account Lockout Policy (pam_faillock)",
-  "description": "Locks user accounts after a configurable number of failed authentication attempts, preventing online brute force attacks.",
-  "tactic": "Harden",
-  "category": "Credential Hardening",
-  "category_id": "credential-hardening",
-  "control_layer": "Identity",
-  "cvss_vector_impacts": [
-    {
-      "metric": "AC",
-      "from": "L",
-      "to": "H",
-      "rationale": "Brute force limited to N attempts before lockout"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-307"
-  ],
-  "verification": {
-    "method": "Check pam_faillock configuration",
-    "commands": [
-      {
-        "command": "grep faillock /etc/pam.d/system-auth",
-        "expected": "pam_faillock.so",
-        "platform": "rhel"
-      },
-      {
-        "command": "grep deny /etc/security/faillock.conf",
-        "expected": "deny = 5",
-        "platform": "rhel"
-      },
-      {
-        "command": "net accounts | Select-String 'Lockout threshold'",
-        "expected": "Lockout threshold                        5",
-        "platform": "windows"
-      },
-      {
-        "command": "net accounts | Select-String 'Lockout duration'",
-        "expected": "Lockout duration (minutes)               30",
-        "platform": "windows"
-      }
+    "cme_id": "CME-803",
+    "control_name": "Account Lockout Policy (pam_faillock)",
+    "description": "Locks user accounts after a configurable number of failed authentication attempts, preventing online brute force attacks.",
+    "tactic": "Harden",
+    "category": "Credential Hardening",
+    "category_id": "credential-hardening",
+    "function_id": "password-policy",
+    "control_layer": "Identity",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "AC",
+            "from": "L",
+            "to": "H",
+            "rationale": "Brute force limited to N attempts before lockout"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-307"
+    ],
+    "verification": {
+        "method": "Check pam_faillock configuration",
+        "commands": [
+            {
+                "command": "grep faillock /etc/pam.d/system-auth",
+                "expected": "pam_faillock.so",
+                "platform": "rhel"
+            },
+            {
+                "command": "grep deny /etc/security/faillock.conf",
+                "expected": "deny = 5",
+                "platform": "rhel"
+            },
+            {
+                "command": "net accounts | Select-String 'Lockout threshold'",
+                "expected": "Lockout threshold                        5",
+                "platform": "windows"
+            },
+            {
+                "command": "net accounts | Select-String 'Lockout duration'",
+                "expected": "Lockout duration (minutes)               30",
+                "platform": "windows"
+            }
+        ]
+    },
+    "confidence": "High",
+    "platforms": [
+        "RHEL 9",
+        "RHEL 8",
+        "Windows 10",
+        "Windows 11",
+        "Windows Server 2022"
+    ],
+    "cve_schema_version": "5.2.0",
+    "cve_affected": [
+        {
+            "vendor": "microsoft",
+            "product": "windows",
+            "cpes": [
+                "cpe:2.3:o:microsoft:windows_10:*:*:*:*:*:*:*:*",
+                "cpe:2.3:o:microsoft:windows_11:*:*:*:*:*:*:*:*",
+                "cpe:2.3:o:microsoft:windows_server_2019:*:*:*:*:*:*:*",
+                "cpe:2.3:o:microsoft:windows_server_2022:*:*:*:*:*:*:*"
+            ],
+            "defaultStatus": "applicable"
+        }
     ]
-  },
-  "confidence": "High",
-  "platforms": [
-    "RHEL 9",
-    "RHEL 8",
-    "Windows 10",
-    "Windows 11",
-    "Windows Server 2022"
-  ],
-  "cve_schema_version": "5.2.0",
-  "cve_affected": [
-    {
-      "vendor": "microsoft",
-      "product": "windows",
-      "cpes": [
-        "cpe:2.3:o:microsoft:windows_10:*:*:*:*:*:*:*:*",
-        "cpe:2.3:o:microsoft:windows_11:*:*:*:*:*:*:*:*",
-        "cpe:2.3:o:microsoft:windows_server_2019:*:*:*:*:*:*:*",
-        "cpe:2.3:o:microsoft:windows_server_2022:*:*:*:*:*:*:*"
-      ],
-      "defaultStatus": "applicable"
-    }
-  ]
 }

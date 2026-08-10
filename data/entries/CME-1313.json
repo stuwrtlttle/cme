@@ -1,66 +1,68 @@
 {
-  "cme_id": "CME-1313",
-  "control_name": "CRLF / Line Injection Prevention (Newline Sanitization for Structured Formats)",
-  "description": "Prevents injection of carriage return (CR, \\r) and line feed (LF, \\n) characters into structured text formats where newlines serve as record or field delimiters. Enforces single-line invariants on input fields used to construct HTTP headers, log entries, configuration files, Git refs, email headers, and protocol messages. Strips or rejects input containing CR/LF before it reaches format-sensitive output contexts, preventing HTTP response splitting, log forging, configuration file injection, and Git ref manipulation. Complements HTTP header normalization (CME-912) by operating at the application input layer rather than the protocol proxy layer.",
-  "tactic": "Harden",
-  "category": "Application Input Validation",
-  "category_id": "application-input-validation",
-  "control_layer": "Application",
-  "cvss_vector_impacts": [
-    {
-      "metric": "AC",
-      "from": "L",
-      "to": "H",
-      "rationale": "Newline characters in user input are stripped or rejected before reaching format-sensitive contexts; attacker cannot break record boundaries in HTTP headers, config files, Git refs, or log entries"
+    "cme_id": "CME-1313",
+    "control_name": "CRLF / Line Injection Prevention (Newline Sanitization for Structured Formats)",
+    "description": "Prevents injection of carriage return (CR, \\r) and line feed (LF, \\n) characters into structured text formats where newlines serve as record or field delimiters. Enforces single-line invariants on input fields used to construct HTTP headers, log entries, configuration files, Git refs, email headers, and protocol messages. Strips or rejects input containing CR/LF before it reaches format-sensitive output contexts, preventing HTTP response splitting, log forging, configuration file injection, and Git ref manipulation. Complements HTTP header normalization (CME-912) by operating at the application input layer rather than the protocol proxy layer.",
+    "tactic": "Harden",
+    "category": "Application Input Validation",
+    "category_id": "application-input-validation",
+    "function_id": "injection-prevention",
+    "control_layer": "Application",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "AC",
+            "from": "L",
+            "to": "H",
+            "rationale": "Newline characters in user input are stripped or rejected before reaching format-sensitive contexts; attacker cannot break record boundaries in HTTP headers, config files, Git refs, or log entries"
+        },
+        {
+            "metric": "I",
+            "from": "H",
+            "to": "L",
+            "rationale": "Cannot forge log entries, split HTTP responses, inject configuration directives, or manipulate Git refs via embedded newlines"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-93",
+        "CWE-113"
+    ],
+    "verification": {
+        "method": "Verify that input handling code strips or rejects CR/LF characters before constructing multi-line format outputs",
+        "commands": [
+            {
+                "command": "grep -rn 'replace.*\\\\r\\|replace.*\\\\n\\|strip.*newline\\|reject.*newline\\|CRLF' <app_source>/",
+                "expected": "Newline sanitization present in input handling paths that feed into structured text formats",
+                "platform": "any"
+            },
+            {
+                "command": "grep -rn 'set-cookie\\|Set-Header\\|add_header\\|setHeader' <app_source>/ | head -20",
+                "expected": "Header-setting code validates input values do not contain CR/LF",
+                "platform": "any"
+            }
+        ]
     },
-    {
-      "metric": "I",
-      "from": "H",
-      "to": "L",
-      "rationale": "Cannot forge log entries, split HTTP responses, inject configuration directives, or manipulate Git refs via embedded newlines"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-93",
-    "CWE-113"
-  ],
-  "verification": {
-    "method": "Verify that input handling code strips or rejects CR/LF characters before constructing multi-line format outputs",
-    "commands": [
-      {
-        "command": "grep -rn 'replace.*\\\\r\\|replace.*\\\\n\\|strip.*newline\\|reject.*newline\\|CRLF' <app_source>/",
-        "expected": "Newline sanitization present in input handling paths that feed into structured text formats",
-        "platform": "any"
-      },
-      {
-        "command": "grep -rn 'set-cookie\\|Set-Header\\|add_header\\|setHeader' <app_source>/ | head -20",
-        "expected": "Header-setting code validates input values do not contain CR/LF",
-        "platform": "any"
-      }
+    "confidence": "High",
+    "platforms": [
+        "Any",
+        "Windows Server 2019",
+        "Windows Server 2022"
+    ],
+    "references": [
+        {
+            "source": "OWASP",
+            "section": "HTTP Response Splitting / CRLF Injection"
+        },
+        {
+            "source": "CVE-2025-48384",
+            "section": "Git arbitrary code execution via CRLF injection in submodule URLs (8.0, 13 RH products)"
+        },
+        {
+            "source": "CVE-2026-21428",
+            "section": "cpp-httplib SSRF via header injection (CWE-93)"
+        },
+        {
+            "source": "CVE-2026-50574",
+            "section": "yt-dlp aria2c newline injection in DASH manifest URLs"
+        }
     ]
-  },
-  "confidence": "High",
-  "platforms": [
-    "Any",
-    "Windows Server 2019",
-    "Windows Server 2022"
-  ],
-  "references": [
-    {
-      "source": "OWASP",
-      "section": "HTTP Response Splitting / CRLF Injection"
-    },
-    {
-      "source": "CVE-2025-48384",
-      "section": "Git arbitrary code execution via CRLF injection in submodule URLs (8.0, 13 RH products)"
-    },
-    {
-      "source": "CVE-2026-21428",
-      "section": "cpp-httplib SSRF via header injection (CWE-93)"
-    },
-    {
-      "source": "CVE-2026-50574",
-      "section": "yt-dlp aria2c newline injection in DASH manifest URLs"
-    }
-  ]
 }

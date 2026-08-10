@@ -1,43 +1,45 @@
 {
-  "cme_id": "CME-804",
-  "control_name": "SSH Key-Only Authentication",
-  "description": "Disables password-based SSH login entirely, requiring public key authentication. Eliminates remote brute force against SSH as an attack vector.",
-  "tactic": "Harden",
-  "category": "Credential Hardening",
-  "category_id": "credential-hardening",
-  "control_layer": "Identity",
-  "cvss_vector_impacts": [
-    {
-      "metric": "AC",
-      "from": "L",
-      "to": "H",
-      "rationale": "Password brute force impossible; must compromise private key"
+    "cme_id": "CME-804",
+    "control_name": "SSH Key-Only Authentication",
+    "description": "Disables password-based SSH login entirely, requiring public key authentication. Eliminates remote brute force against SSH as an attack vector.",
+    "tactic": "Harden",
+    "category": "Credential Hardening",
+    "category_id": "credential-hardening",
+    "function_id": "authentication-methods",
+    "control_layer": "Identity",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "AC",
+            "from": "L",
+            "to": "H",
+            "rationale": "Password brute force impossible; must compromise private key"
+        },
+        {
+            "metric": "PR",
+            "from": "N",
+            "to": "H",
+            "rationale": "Requires possession of authorized private key"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-287",
+        "CWE-521"
+    ],
+    "verification": {
+        "method": "Check sshd_config for password auth disabled",
+        "commands": [
+            {
+                "command": "sshd -T | grep passwordauthentication",
+                "expected": "passwordauthentication no",
+                "platform": "linux"
+            }
+        ]
     },
-    {
-      "metric": "PR",
-      "from": "N",
-      "to": "H",
-      "rationale": "Requires possession of authorized private key"
-    }
-  ],
-  "cwe_relationships": [
-    "CWE-287",
-    "CWE-521"
-  ],
-  "verification": {
-    "method": "Check sshd_config for password auth disabled",
-    "commands": [
-      {
-        "command": "sshd -T | grep passwordauthentication",
-        "expected": "passwordauthentication no",
-        "platform": "linux"
-      }
+    "confidence": "High",
+    "platforms": [
+        "RHEL 9",
+        "RHEL 8",
+        "Ubuntu 24.04"
     ]
-  },
-  "confidence": "High",
-  "platforms": [
-    "RHEL 9",
-    "RHEL 8",
-    "Ubuntu 24.04"
-  ]
 }

@@ -1,51 +1,53 @@
 {
-  "cme_id": "CME-916",
-  "control_name": "SameSite Cookie Attribute Enforcement",
-  "description": "Configure the web server or reverse proxy to enforce the SameSite attribute (Lax or Strict) on all Set-Cookie response headers. When SameSite=Lax is set, browsers do not include the cookie in cross-site POST, PUT, DELETE, or other state-changing requests initiated from a different origin. When SameSite=Strict is set, cookies are not included in any cross-site navigation. This prevents CSRF attacks because the attacker cross-origin request arrives without the victim session cookie, making it unauthenticated. Modern browsers default to SameSite=Lax for cookies that omit SameSite, but applications that explicitly set SameSite=None (for cross-origin API use) or legacy applications that predate the default bypass this protection. Admin enforcement at the proxy layer overrides the application cookie attributes.",
-  "tactic": "Harden",
-  "category": "Application Controls",
-  "category_id": "application-controls",
-  "control_layer": "Application",
-  "cvss_vector_impacts": [
-    {
-      "metric": "AC",
-      "from": "L",
-      "to": "H",
-      "rationale": "The attacker must find a way to bypass the SameSite restriction (e.g., exploit a subdomain XSS vulnerability to achieve same-site context, or target a browser that does not enforce SameSite) to include the victim session cookie in a cross-site request. Without this bypass, cross-site state-changing requests arrive unauthenticated and are rejected by the application."
+    "cme_id": "CME-916",
+    "control_name": "SameSite Cookie Attribute Enforcement",
+    "description": "Configure the web server or reverse proxy to enforce the SameSite attribute (Lax or Strict) on all Set-Cookie response headers. When SameSite=Lax is set, browsers do not include the cookie in cross-site POST, PUT, DELETE, or other state-changing requests initiated from a different origin. When SameSite=Strict is set, cookies are not included in any cross-site navigation. This prevents CSRF attacks because the attacker cross-origin request arrives without the victim session cookie, making it unauthenticated. Modern browsers default to SameSite=Lax for cookies that omit SameSite, but applications that explicitly set SameSite=None (for cross-origin API use) or legacy applications that predate the default bypass this protection. Admin enforcement at the proxy layer overrides the application cookie attributes.",
+    "tactic": "Harden",
+    "category": "Application Controls",
+    "category_id": "application-controls",
+    "function_id": "origin-cors",
+    "control_layer": "Application",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "AC",
+            "from": "L",
+            "to": "H",
+            "rationale": "The attacker must find a way to bypass the SameSite restriction (e.g., exploit a subdomain XSS vulnerability to achieve same-site context, or target a browser that does not enforce SameSite) to include the victim session cookie in a cross-site request. Without this bypass, cross-site state-changing requests arrive unauthenticated and are rejected by the application."
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-346",
+        "CWE-352",
+        "CWE-1275"
+    ],
+    "confidence": "High",
+    "platforms": [
+        "RHEL 8",
+        "RHEL 9",
+        "RHEL 10",
+        "OpenShift 4",
+        "Windows Server 2019",
+        "Windows Server 2022"
+    ],
+    "verification": {
+        "method": "Verify that all Set-Cookie response headers include SameSite=Lax or SameSite=Strict. Check web server or reverse proxy configuration for cookie attribute enforcement directives.",
+        "commands": [
+            {
+                "command": "grep -rE \"Header.*(edit|always set).*Set-Cookie.*SameSite\" /etc/httpd/conf.d/",
+                "expected": "SameSite enforcement directive present",
+                "platform": "rhel"
+            },
+            {
+                "command": "grep -rE \"proxy_cookie_flags|proxy_cookie_path.*SameSite\" /etc/nginx/",
+                "expected": "SameSite cookie flag directives present",
+                "platform": "rhel"
+            },
+            {
+                "command": "curl -sI https://your-app/ | grep -i \"set-cookie\" | grep -i \"samesite\"",
+                "expected": "SameSite=Lax or SameSite=Strict on all Set-Cookie headers",
+                "platform": "any"
+            }
+        ]
     }
-  ],
-  "cwe_relationships": [
-    "CWE-346",
-    "CWE-352",
-    "CWE-1275"
-  ],
-  "confidence": "High",
-  "platforms": [
-    "RHEL 8",
-    "RHEL 9",
-    "RHEL 10",
-    "OpenShift 4",
-    "Windows Server 2019",
-    "Windows Server 2022"
-  ],
-  "verification": {
-    "method": "Verify that all Set-Cookie response headers include SameSite=Lax or SameSite=Strict. Check web server or reverse proxy configuration for cookie attribute enforcement directives.",
-    "commands": [
-      {
-        "command": "grep -rE \"Header.*(edit|always set).*Set-Cookie.*SameSite\" /etc/httpd/conf.d/",
-        "expected": "SameSite enforcement directive present",
-        "platform": "rhel"
-      },
-      {
-        "command": "grep -rE \"proxy_cookie_flags|proxy_cookie_path.*SameSite\" /etc/nginx/",
-        "expected": "SameSite cookie flag directives present",
-        "platform": "rhel"
-      },
-      {
-        "command": "curl -sI https://your-app/ | grep -i \"set-cookie\" | grep -i \"samesite\"",
-        "expected": "SameSite=Lax or SameSite=Strict on all Set-Cookie headers",
-        "platform": "any"
-      }
-    ]
-  }
 }

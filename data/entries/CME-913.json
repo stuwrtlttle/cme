@@ -1,42 +1,44 @@
 {
-  "cme_id": "CME-913",
-  "control_name": "CSRF Protection (Anti-CSRF Token & SameSite Cookie Enforcement)",
-  "description": "Server-side enforcement of anti-CSRF tokens (synchronizer tokens or double-submit cookies) combined with SameSite=Strict or SameSite=Lax cookie attributes on session cookies. For every state-changing HTTP request (POST, PUT, DELETE, PATCH), the server generates a cryptographically random token bound to the user's session, embeds it in forms or response headers, and rejects requests that do not present a valid token. The SameSite cookie attribute provides defense-in-depth by instructing the browser not to send cookies with cross-origin requests. Together, these controls prevent cross-site request forgery by ensuring that state-changing requests originate from the application's own pages, not from attacker-controlled sites.",
-  "tactic": "Harden",
-  "category": "Application Controls",
-  "category_id": "application-controls",
-  "control_layer": "Application",
-  "cvss_vector_impacts": [
-    {
-      "metric": "AC",
-      "from": "L",
-      "to": "H",
-      "rationale": "The anti-CSRF token is a per-session or per-request cryptographic random value that the attacker cannot predict or obtain cross-origin (blocked by same-origin policy). Exploitation now requires a separate vulnerability (XSS, subdomain takeover) to extract the token, transforming a trivial cross-site form submission into a multi-step attack chain."
+    "cme_id": "CME-913",
+    "control_name": "CSRF Protection (Anti-CSRF Token & SameSite Cookie Enforcement)",
+    "description": "Server-side enforcement of anti-CSRF tokens (synchronizer tokens or double-submit cookies) combined with SameSite=Strict or SameSite=Lax cookie attributes on session cookies. For every state-changing HTTP request (POST, PUT, DELETE, PATCH), the server generates a cryptographically random token bound to the user's session, embeds it in forms or response headers, and rejects requests that do not present a valid token. The SameSite cookie attribute provides defense-in-depth by instructing the browser not to send cookies with cross-origin requests. Together, these controls prevent cross-site request forgery by ensuring that state-changing requests originate from the application's own pages, not from attacker-controlled sites.",
+    "tactic": "Harden",
+    "category": "Application Controls",
+    "category_id": "application-controls",
+    "function_id": "origin-cors",
+    "control_layer": "Application",
+    "attenuation_type": "deterministic",
+    "cvss_vector_impacts": [
+        {
+            "metric": "AC",
+            "from": "L",
+            "to": "H",
+            "rationale": "The anti-CSRF token is a per-session or per-request cryptographic random value that the attacker cannot predict or obtain cross-origin (blocked by same-origin policy). Exploitation now requires a separate vulnerability (XSS, subdomain takeover) to extract the token, transforming a trivial cross-site form submission into a multi-step attack chain."
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-940",
+        "CWE-352"
+    ],
+    "confidence": "High",
+    "platforms": [
+        "Any",
+        "Windows Server 2019",
+        "Windows Server 2022"
+    ],
+    "verification": {
+        "method": "Check that the application framework's CSRF middleware is enabled and that session cookies carry the SameSite attribute",
+        "commands": [
+            {
+                "command": "grep -rn 'csrf\\|CsrfViewMiddleware\\|csrf_protect\\|@csrf_exempt\\|antiforgery\\|ValidateAntiForgeryToken\\|csrftoken' <app_source>/",
+                "expected": "CSRF middleware or token generation present in application code",
+                "platform": "any"
+            },
+            {
+                "command": "curl -sI http://localhost:8080/login | grep -i 'set-cookie.*samesite'",
+                "expected": "SameSite=Strict or SameSite=Lax",
+                "platform": "any"
+            }
+        ]
     }
-  ],
-  "cwe_relationships": [
-    "CWE-940",
-    "CWE-352"
-  ],
-  "confidence": "High",
-  "platforms": [
-    "Any",
-    "Windows Server 2019",
-    "Windows Server 2022"
-  ],
-  "verification": {
-    "method": "Check that the application framework's CSRF middleware is enabled and that session cookies carry the SameSite attribute",
-    "commands": [
-      {
-        "command": "grep -rn 'csrf\\|CsrfViewMiddleware\\|csrf_protect\\|@csrf_exempt\\|antiforgery\\|ValidateAntiForgeryToken\\|csrftoken' <app_source>/",
-        "expected": "CSRF middleware or token generation present in application code",
-        "platform": "any"
-      },
-      {
-        "command": "curl -sI http://localhost:8080/login | grep -i 'set-cookie.*samesite'",
-        "expected": "SameSite=Strict or SameSite=Lax",
-        "platform": "any"
-      }
-    ]
-  }
 }
