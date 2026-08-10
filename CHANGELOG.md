@@ -24,6 +24,11 @@ All notable changes to the CME (Common Mitigation Enumeration) project are docum
 
 - `1187c44` Backfill function_id and attenuation_type across all 123 entries
 
+
+### Auto-generated changelog
+
+- `95a344d` Add functions.json to Docker image for seed FK constraint
+
 ## 2026-07-27
 
 ### Auto-generated changelog
