@@ -2,6 +2,12 @@
 
 All notable changes to the CME (Common Mitigation Enumeration) project are documented here.
 
+## 2026-08-10
+
+### Auto-generated changelog
+
+- `07345ed` Add files via upload
+
 ## 2026-07-27
 
 ### Auto-generated changelog
