@@ -1,0 +1,54 @@
+{
+    "cme_id": "CME-712",
+    "control_name": "Container Image Signing and Provenance Verification (Cosign/Sigstore)",
+    "description": "Require cryptographic signatures on container images before deployment. Cosign/Sigstore verify image provenance against a trust policy, ensuring only images from authorized build pipelines are admitted. Blocks supply chain attacks where a compromised registry or build system pushes malicious images. Verification can be enforced at admission time via policy controllers (Kyverno, Gatekeeper with cosign) or at pull time via container runtime trust policies (Podman policy.json, CRI-O).",
+    "tactic": "Harden",
+    "category": "Container Isolation",
+    "category_id": "container-isolation",
+    "control_layer": "Application",
+    "cvss_vector_impacts": [
+        {
+            "metric": "AC",
+            "from": "L",
+            "to": "H",
+            "rationale": "Attacker must forge a valid cryptographic signature or compromise the signing key to inject a malicious container image; simply pushing to a registry is insufficient"
+        },
+        {
+            "metric": "I",
+            "from": "H",
+            "to": "L",
+            "rationale": "Unsigned or tampered images are rejected at admission; modifications to images after signing are detected and blocked"
+        }
+    ],
+    "cwe_relationships": [
+        "CWE-345",
+        "CWE-494",
+        "CWE-829"
+    ],
+    "verification": {
+        "method": "Verify image signature verification is enforced at admission or runtime level",
+        "commands": [
+            {
+                "command": "kubectl get clusterimagepolicy --no-headers 2>/dev/null || kubectl get policy.sigstore.dev --no-headers 2>/dev/null",
+                "expected": "Image policy resources present",
+                "platform": "container"
+            },
+            {
+                "command": "podman image trust show",
+                "expected": "Trust policy configured with signature requirements for production registries",
+                "platform": "container"
+            },
+            {
+                "command": "cosign verify --key /path/to/cosign.pub <image> 2>&1 | head -1",
+                "expected": "Verification for <image> -- The following checks were performed",
+                "platform": "any"
+            }
+        ]
+    },
+    "confidence": "High",
+    "platforms": [
+        "Kubernetes 1.25+",
+        "OpenShift 4.12+",
+        "Podman"
+    ]
+}
