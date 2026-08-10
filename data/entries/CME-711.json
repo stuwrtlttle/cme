@@ -5,7 +5,9 @@
     "tactic": "Harden",
     "category": "Container Isolation",
     "category_id": "container-isolation",
+    "function_id": "pod-security",
     "control_layer": "Application",
+    "attenuation_type": "deterministic",
     "cvss_vector_impacts": [
         {
             "metric": "PR",
@@ -31,17 +33,17 @@
             {
                 "command": "kubectl get constraint --no-headers 2>/dev/null | wc -l",
                 "expected": "One or more constraints active (OPA/Gatekeeper)",
-                "platform": "container"
+                "platform": "kubernetes"
             },
             {
                 "command": "kubectl get clusterpolicy --no-headers 2>/dev/null | wc -l",
                 "expected": "One or more cluster policies active (Kyverno)",
-                "platform": "container"
+                "platform": "kubernetes"
             },
             {
                 "command": "oc get scc --no-headers | wc -l",
                 "expected": "SecurityContextConstraints present (OpenShift built-in admission)",
-                "platform": "container"
+                "platform": "kubernetes"
             }
         ]
     },

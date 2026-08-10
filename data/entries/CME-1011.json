@@ -6,6 +6,7 @@
     "category": "Runtime Detection",
     "category_id": "runtime-detection",
     "control_layer": "Application",
+    "attenuation_type": "deterministic",
     "cvss_vector_impacts": [
         {
             "metric": "AC",
@@ -24,17 +25,17 @@
             {
                 "command": "kubectl get --raw /apis/audit.k8s.io/v1 2>/dev/null && echo audit-api-available",
                 "expected": "audit-api-available",
-                "platform": "container"
+                "platform": "kubernetes"
             },
             {
                 "command": "grep audit-policy-file /etc/kubernetes/manifests/kube-apiserver.yaml 2>/dev/null",
                 "expected": "Audit policy file referenced in API server configuration",
-                "platform": "container"
+                "platform": "kubernetes"
             },
             {
                 "command": "oc get apiservers.config.openshift.io cluster -o jsonpath='{.spec.audit.profile}'",
                 "expected": "Default, WriteRequestBodies, or AllRequestBodies (not None)",
-                "platform": "container"
+                "platform": "kubernetes"
             }
         ]
     },

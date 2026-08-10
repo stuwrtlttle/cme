@@ -5,7 +5,9 @@
     "tactic": "Harden",
     "category": "Container Isolation",
     "category_id": "container-isolation",
+    "function_id": "container-runtime",
     "control_layer": "OS/Kernel",
+    "attenuation_type": "deterministic",
     "cvss_vector_impacts": [
         {
             "metric": "I",
@@ -31,17 +33,17 @@
             {
                 "command": "kubectl get pod <pod> -o jsonpath='{.spec.containers[*].securityContext.readOnlyRootFilesystem}'",
                 "expected": "true",
-                "platform": "container"
+                "platform": "kubernetes"
             },
             {
                 "command": "podman inspect <ctr> --format '{{.HostConfig.ReadonlyRootfs}}'",
                 "expected": "true",
-                "platform": "container"
+                "platform": "linux"
             },
             {
                 "command": "docker inspect <ctr> --format '{{.HostConfig.ReadonlyRootfs}}'",
                 "expected": "true",
-                "platform": "container"
+                "platform": "linux"
             }
         ]
     },

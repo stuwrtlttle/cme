@@ -5,7 +5,9 @@
     "tactic": "Harden",
     "category": "Container Isolation",
     "category_id": "container-isolation",
+    "function_id": "pod-security",
     "control_layer": "Application",
+    "attenuation_type": "deterministic",
     "cvss_vector_impacts": [
         {
             "metric": "AC",
@@ -31,12 +33,12 @@
             {
                 "command": "kubectl get clusterimagepolicy --no-headers 2>/dev/null || kubectl get policy.sigstore.dev --no-headers 2>/dev/null",
                 "expected": "Image policy resources present",
-                "platform": "container"
+                "platform": "kubernetes"
             },
             {
                 "command": "podman image trust show",
                 "expected": "Trust policy configured with signature requirements for production registries",
-                "platform": "container"
+                "platform": "linux"
             },
             {
                 "command": "cosign verify --key /path/to/cosign.pub <image> 2>&1 | head -1",
