@@ -13,6 +13,12 @@ All notable changes to the CME (Common Mitigation Enumeration) project are docum
 
 - `c7de6b4` Delete skills/cve-to-cme.md
 
+
+### Auto-generated changelog
+
+- `25c91fb` Fix container entries to conform to function/control hierarchy schema
+- `d1ba9ae` Add 4 container-platform CME entries from gap analysis
+
 ## 2026-07-27
 
 ### Auto-generated changelog
