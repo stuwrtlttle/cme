@@ -19,6 +19,11 @@ All notable changes to the CME (Common Mitigation Enumeration) project are docum
 - `25c91fb` Fix container entries to conform to function/control hierarchy schema
 - `d1ba9ae` Add 4 container-platform CME entries from gap analysis
 
+
+### Auto-generated changelog
+
+- `1187c44` Backfill function_id and attenuation_type across all 123 entries
+
 ## 2026-07-27
 
 ### Auto-generated changelog
