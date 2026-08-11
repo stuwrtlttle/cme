@@ -2,6 +2,12 @@
 
 All notable changes to the CME (Common Mitigation Enumeration) project are documented here.
 
+## 2026-08-11
+
+### Auto-generated changelog
+
+- `64ff1c4` Rebuild static site with all 123 entries
+
 ## 2026-08-10
 
 ### Auto-generated changelog
