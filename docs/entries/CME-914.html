@@ -28,6 +28,9 @@
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-application">Application</span>
     
+    <span class="badge badge-attenuation-deterministic">Deterministic</span>
+    
+    
     <span class="badge badge-confidence-high">High Confidence</span>
     
   </div>
@@ -48,6 +51,7 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
+            
             <th>Rationale</th>
           </tr>
         </thead>
@@ -60,6 +64,7 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
+            
             <td class="cvss-rationale">Cross-origin credentialed reads go from trivially possible (wildcard or reflected-origin CORS) to requiring the attacker to compromise an explicitly allowed origin or find a CORS bypass. The mechanism is the server-side origin validation gate that rejects unapproved origins before including permissive CORS headers.</td>
           </tr>
           
@@ -70,6 +75,7 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
+            
             <td class="cvss-rationale">The primary attack vector for CORS-based CWE-940 vulnerabilities is cross-origin data exfiltration via credentialed fetch/XHR. Strict CORS blocks the browser from delivering authenticated response data to the attacker&#39;s JavaScript, limiting confidentiality impact to data obtainable without credentials.</td>
           </tr>
           
@@ -143,6 +149,13 @@
     </section>
 
     
+    <section>
+      <h3>Function</h3>
+      <p class="function-id">origin-cors</p>
+    </section>
+    
+
+    
 
     
     <section>
@@ -165,6 +178,7 @@
         <li><strong>ID:</strong> CME-914</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Application</li>
+        <li><strong>Attenuation:</strong> deterministic</li>
         <li><strong>CWEs:</strong> 2</li>
         <li><strong>CVSS Mods:</strong> 2</li>
       </ul>
@@ -175,7 +189,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-08-11 01:44 UTC &middot; 123 entries &middot;
+    Generated 2026-08-11 01:48 UTC &middot; 123 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

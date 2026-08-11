@@ -8,6 +8,11 @@
   <div class="entry-meta">
     <span class="badge badge-tactic-{{ entry.tactic|lower }}">{{ entry.tactic }}</span>
     <span class="badge badge-layer-{{ entry.control_layer | lower | replace('/', '-') | replace(' ', '') }}">{{ entry.control_layer }}</span>
+    {% if entry.attenuation_type == 'probabilistic' %}
+    <span class="badge badge-attenuation-probabilistic">Probabilistic</span>
+    {% else %}
+    <span class="badge badge-attenuation-deterministic">Deterministic</span>
+    {% endif %}
     {% if entry.confidence %}
     <span class="badge badge-confidence-{{ entry.confidence|lower }}">{{ entry.confidence }} Confidence</span>
     {% endif %}
@@ -29,6 +34,9 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
+            {% if entry.attenuation_type == 'probabilistic' %}
+            <th>Probability</th>
+            {% endif %}
             <th>Rationale</th>
           </tr>
         </thead>
@@ -41,6 +49,21 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">{{ impact.to }}</span>
             </td>
+            {% if entry.attenuation_type == 'probabilistic' %}
+            <td class="cvss-probability">
+              {{ "%.0f%%"|format((impact.probability|default(0.5)) * 100) }}
+              {% if impact.evidence_basis %}
+              <div class="evidence-basis">{{ impact.evidence_basis }}</div>
+              {% endif %}
+              {% if impact.conditions %}
+              <ul class="conditions-list">
+                {% for cond in impact.conditions %}
+                <li>{{ cond }}</li>
+                {% endfor %}
+              </ul>
+              {% endif %}
+            </td>
+            {% endif %}
             <td class="cvss-rationale">{{ impact.rationale | default('') }}</td>
           </tr>
           {% endfor %}
@@ -145,6 +168,13 @@
       <p>{{ entry.category }}</p>
     </section>
 
+    {% if entry.function_id %}
+    <section>
+      <h3>Function</h3>
+      <p class="function-id">{{ entry.function_id }}</p>
+    </section>
+    {% endif %}
+
     {% if entry.d3fend_mapping %}
     <section>
       <h3>D3FEND Mapping</h3>
@@ -172,6 +202,7 @@
         <li><strong>ID:</strong> {{ entry.cme_id }}</li>
         <li><strong>Tactic:</strong> {{ entry.tactic }}</li>
         <li><strong>Layer:</strong> {{ entry.control_layer }}</li>
+        <li><strong>Attenuation:</strong> {{ entry.attenuation_type | default('deterministic') }}</li>
         <li><strong>CWEs:</strong> {{ entry.cwe_relationships | default([]) | length }}</li>
         <li><strong>CVSS Mods:</strong> {{ entry.cvss_vector_impacts | length }}</li>
       </ul>

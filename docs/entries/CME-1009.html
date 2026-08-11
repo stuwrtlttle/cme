@@ -28,6 +28,9 @@
     <span class="badge badge-tactic-detect">Detect</span>
     <span class="badge badge-layer-application">Application</span>
     
+    <span class="badge badge-attenuation-deterministic">Deterministic</span>
+    
+    
     <span class="badge badge-confidence-high">High Confidence</span>
     
   </div>
@@ -48,6 +51,7 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
+            
             <th>Rationale</th>
           </tr>
         </thead>
@@ -60,6 +64,7 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
+            
             <td class="cvss-rationale">Compensating control: unauthorized privilege grants are detected by outcome monitoring regardless of the escalation mechanism, forcing the attacker to also evade the membership audit or accept detection within the monitoring interval.</td>
           </tr>
           
@@ -70,6 +75,7 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
+            
             <td class="cvss-rationale">The window during which the attacker holds escalated privileges — and can access confidential resources — is bounded by the monitoring interval; detection triggers revocation of the unauthorized grant.</td>
           </tr>
           
@@ -136,6 +142,13 @@
     </section>
 
     
+    <section>
+      <h3>Function</h3>
+      <p class="function-id">application-monitoring</p>
+    </section>
+    
+
+    
 
     
     <section>
@@ -154,6 +167,7 @@
         <li><strong>ID:</strong> CME-1009</li>
         <li><strong>Tactic:</strong> Detect</li>
         <li><strong>Layer:</strong> Application</li>
+        <li><strong>Attenuation:</strong> deterministic</li>
         <li><strong>CWEs:</strong> 3</li>
         <li><strong>CVSS Mods:</strong> 2</li>
       </ul>
@@ -164,7 +178,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-08-11 01:44 UTC &middot; 123 entries &middot;
+    Generated 2026-08-11 01:48 UTC &middot; 123 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

@@ -28,6 +28,9 @@
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-os-kernel">OS/Kernel</span>
     
+    <span class="badge badge-attenuation-deterministic">Deterministic</span>
+    
+    
     <span class="badge badge-confidence-high">High Confidence</span>
     
   </div>
@@ -48,6 +51,7 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
+            
             <th>Rationale</th>
           </tr>
         </thead>
@@ -60,6 +64,7 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
+            
             <td class="cvss-rationale">Service paths are properly quoted so Windows does not attempt intermediate path resolution; the attacker must find a different privilege escalation vector since the unquoted path interception technique is eliminated</td>
           </tr>
           
@@ -70,6 +75,7 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
+            
             <td class="cvss-rationale">With filesystem ACLs preventing writes to path prefix directories (C:\, C:\Program Files\), low-privileged users cannot place interception binaries even if an unquoted path remains</td>
           </tr>
           
@@ -153,6 +159,13 @@
     </section>
 
     
+    <section>
+      <h3>Function</h3>
+      <p class="function-id">filesystem-access-control</p>
+    </section>
+    
+
+    
 
     
     <section>
@@ -177,6 +190,7 @@
         <li><strong>ID:</strong> CME-508</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> OS/Kernel</li>
+        <li><strong>Attenuation:</strong> deterministic</li>
         <li><strong>CWEs:</strong> 2</li>
         <li><strong>CVSS Mods:</strong> 2</li>
       </ul>
@@ -187,7 +201,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-08-11 01:44 UTC &middot; 123 entries &middot;
+    Generated 2026-08-11 01:48 UTC &middot; 123 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

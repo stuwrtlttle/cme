@@ -166,6 +166,9 @@ nav a.active { color: #fff; border-bottom-color: #fff; }
 .badge-confidence-medium { background: #fef3e0; color: var(--gold); }
 .badge-confidence-low    { background: #fde8e8; color: var(--red); }
 
+.badge-attenuation-deterministic { background: #e6f4ea; color: var(--green); }
+.badge-attenuation-probabilistic { background: #f3e8fd; color: var(--purple); }
+
 /* --- Taxonomy Tree (Index) --- */
 
 .taxonomy-group { margin-bottom: 32px; }
@@ -307,6 +310,11 @@ nav a.active { color: #fff; border-bottom-color: #fff; }
 .cvss-arrow { color: var(--text-muted); margin: 0 4px; }
 
 .cvss-rationale { color: var(--text-muted); font-size: 13px; }
+.cvss-probability { font-family: "SF Mono", "Fira Code", monospace; font-size: 14px; font-weight: 600; }
+.evidence-basis { font-size: 12px; color: var(--text-muted); font-weight: 400; font-family: inherit; margin-top: 4px; }
+.conditions-list { font-size: 12px; color: var(--text-muted); font-weight: 400; font-family: inherit; margin-top: 4px; padding-left: 16px; }
+.function-id { font-family: "SF Mono", "Fira Code", monospace; font-size: 14px; color: var(--primary); }
+.function-cell { font-family: "SF Mono", "Fira Code", monospace; font-size: 12px; color: var(--text-muted); }
 
 /* --- CWE Links --- */
 

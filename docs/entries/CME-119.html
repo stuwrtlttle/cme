@@ -28,6 +28,9 @@
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-os-kernel">OS/Kernel</span>
     
+    <span class="badge badge-attenuation-deterministic">Deterministic</span>
+    
+    
     <span class="badge badge-confidence-medium">Medium Confidence</span>
     
   </div>
@@ -48,6 +51,7 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
+            
             <th>Rationale</th>
           </tr>
         </thead>
@@ -60,6 +64,7 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
+            
             <td class="cvss-rationale">Integer conversion errors (signed-to-unsigned confusion, implicit narrowing, overflow wrapping) are detected at the point of occurrence and the process is terminated before the corrupted value reaches memory operations; the attacker must find a conversion path in code that is not instrumented by the sanitizer or reach the vulnerable operation through an alternative call chain that bypasses the compiler-inserted checks</td>
           </tr>
           
@@ -171,6 +176,13 @@
     </section>
 
     
+    <section>
+      <h3>Function</h3>
+      <p class="function-id">memory-safety</p>
+    </section>
+    
+
+    
 
     
     <section>
@@ -199,6 +211,7 @@
         <li><strong>ID:</strong> CME-119</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> OS/Kernel</li>
+        <li><strong>Attenuation:</strong> deterministic</li>
         <li><strong>CWEs:</strong> 8</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
@@ -209,7 +222,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-08-11 01:44 UTC &middot; 123 entries &middot;
+    Generated 2026-08-11 01:48 UTC &middot; 123 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

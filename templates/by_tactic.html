@@ -18,7 +18,9 @@
         <th>CME ID</th>
         <th>Control Name</th>
         <th>Category</th>
+        <th>Function</th>
         <th>Layer</th>
+        <th>Type</th>
         <th>CVSS Modifications</th>
         <th>CWEs</th>
       </tr>
@@ -30,7 +32,9 @@
         <td class="cme-id-cell"><a href="entries/{{ entry.cme_id }}.html">{{ entry.cme_id }}</a></td>
         <td><a href="entries/{{ entry.cme_id }}.html">{{ entry.control_name }}</a></td>
         <td>{{ entry.category }}</td>
+        <td class="function-cell">{{ entry.function_id | default('') }}</td>
         <td><span class="badge badge-layer-{{ entry.control_layer | lower | replace('/', '-') | replace(' ', '') }}">{{ entry.control_layer }}</span></td>
+        <td>{% if entry.attenuation_type == 'probabilistic' %}<span class="badge badge-attenuation-probabilistic">Prob</span>{% else %}<span class="badge badge-attenuation-deterministic">Det</span>{% endif %}</td>
         <td>
           {% for impact in entry.cvss_vector_impacts %}
           <span class="cvss-from">{{ impact.metric }}:{{ impact['from'] }}</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">{{ impact.to }}</span>{% if not loop.last %}, {% endif %}

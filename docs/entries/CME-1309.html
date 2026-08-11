@@ -28,6 +28,9 @@
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-application">Application</span>
     
+    <span class="badge badge-attenuation-deterministic">Deterministic</span>
+    
+    
     <span class="badge badge-confidence-high">High Confidence</span>
     
   </div>
@@ -48,6 +51,7 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
+            
             <th>Rationale</th>
           </tr>
         </thead>
@@ -60,6 +64,7 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
+            
             <td class="cvss-rationale">Direct code execution via the scripting engine is blocked; exploitation requires discovering a sandbox bypass or an unrestricted evaluation path, which demands vulnerability-specific research rather than trivial payload submission</td>
           </tr>
           
@@ -70,6 +75,7 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
+            
             <td class="cvss-rationale">Sandboxed script engine cannot invoke arbitrary system commands, modify files, or alter application state outside the permitted API surface; integrity impact is confined to the script&#39;s authorized scope</td>
           </tr>
           
@@ -80,6 +86,7 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
+            
             <td class="cvss-rationale">Script engine cannot read arbitrary files, access credentials, or exfiltrate data from the host; information disclosure is limited to data the script is explicitly permitted to access</td>
           </tr>
           
@@ -169,6 +176,13 @@
     </section>
 
     
+    <section>
+      <h3>Function</h3>
+      <p class="function-id">input-validation</p>
+    </section>
+    
+
+    
 
     
     <section>
@@ -191,6 +205,7 @@
         <li><strong>ID:</strong> CME-1309</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Application</li>
+        <li><strong>Attenuation:</strong> deterministic</li>
         <li><strong>CWEs:</strong> 4</li>
         <li><strong>CVSS Mods:</strong> 3</li>
       </ul>
@@ -201,7 +216,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-08-11 01:44 UTC &middot; 123 entries &middot;
+    Generated 2026-08-11 01:48 UTC &middot; 123 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

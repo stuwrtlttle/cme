@@ -28,6 +28,9 @@
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-application">Application</span>
     
+    <span class="badge badge-attenuation-deterministic">Deterministic</span>
+    
+    
     <span class="badge badge-confidence-high">High Confidence</span>
     
   </div>
@@ -48,6 +51,7 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
+            
             <th>Rationale</th>
           </tr>
         </thead>
@@ -60,6 +64,7 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
+            
             <td class="cvss-rationale">An attacker with any authenticated session is blocked from privileged operations; exploitation requires compromise of a specifically privileged role. The mechanism is the per-endpoint role verification gate that rejects requests from insufficiently privileged callers before business logic executes.</td>
           </tr>
           
@@ -70,6 +75,7 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
+            
             <td class="cvss-rationale">Write operations are confined to the caller&#39;s authorized scope; modification of resources outside the caller&#39;s role permissions is rejected before execution, limiting integrity impact to the attacker&#39;s own authorized data.</td>
           </tr>
           
@@ -152,6 +158,13 @@
     </section>
 
     
+    <section>
+      <h3>Function</h3>
+      <p class="function-id">authorization-controls</p>
+    </section>
+    
+
+    
 
     
     <section>
@@ -174,6 +187,7 @@
         <li><strong>ID:</strong> CME-907</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Application</li>
+        <li><strong>Attenuation:</strong> deterministic</li>
         <li><strong>CWEs:</strong> 5</li>
         <li><strong>CVSS Mods:</strong> 2</li>
       </ul>
@@ -184,7 +198,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-08-11 01:44 UTC &middot; 123 entries &middot;
+    Generated 2026-08-11 01:48 UTC &middot; 123 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

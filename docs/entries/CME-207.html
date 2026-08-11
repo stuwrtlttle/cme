@@ -28,6 +28,9 @@
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-network">Network</span>
     
+    <span class="badge badge-attenuation-deterministic">Deterministic</span>
+    
+    
     <span class="badge badge-confidence-high">High Confidence</span>
     
   </div>
@@ -48,6 +51,7 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
+            
             <th>Rationale</th>
           </tr>
         </thead>
@@ -60,6 +64,7 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
+            
             <td class="cvss-rationale">An attacker on the public internet cannot reach localhost-bound or private-network services via DNS rebinding. The DNS resolver or firewall blocks responses that would map a public domain to a private address, preventing the browser from connecting to internal services. Exploitation requires the attacker to be on the same local network or have direct access to the host.</td>
           </tr>
           
@@ -143,6 +148,13 @@
     </section>
 
     
+    <section>
+      <h3>Function</h3>
+      <p class="function-id">network-access-control</p>
+    </section>
+    
+
+    
 
     
     <section>
@@ -165,6 +177,7 @@
         <li><strong>ID:</strong> CME-207</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Network</li>
+        <li><strong>Attenuation:</strong> deterministic</li>
         <li><strong>CWEs:</strong> 2</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
@@ -175,7 +188,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-08-11 01:44 UTC &middot; 123 entries &middot;
+    Generated 2026-08-11 01:48 UTC &middot; 123 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>
