@@ -13,6 +13,11 @@ All notable changes to the CME (Common Mitigation Enumeration) project are docum
 
 - `2a7f681` Update templates to show function/control hierarchy and attenuation type
 
+
+### Auto-generated changelog
+
+- `b14c472` Add SCF (Secure Controls Framework) identifiers to CME taxonomy
+
 ## 2026-08-10
 
 ### Auto-generated changelog
