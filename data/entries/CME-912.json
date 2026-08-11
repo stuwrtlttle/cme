@@ -1,61 +1,65 @@
 {
-    "cme_id": "CME-912",
-    "control_name": "HTTP Header Normalization and Request Smuggling Prevention",
-    "description": "Enforce strict HTTP header parsing on all HTTP intermediaries (proxies, load balancers, reverse proxies, web servers) to prevent request smuggling via header desynchronization. The control requires: (1) rejecting requests containing both Content-Length and Transfer-Encoding headers per RFC 7230 Section 3.3.3, (2) rejecting requests with duplicate Content-Length headers carrying differing values, (3) disabling relaxed header parsing modes that tolerate whitespace or encoding variations in Transfer-Encoding values, and (4) normalizing or rejecting header values containing illegal characters (bare CR, bare LF, NUL bytes). These measures eliminate the primary desynchronization vectors that enable an attacker to inject smuggled requests across the proxy-backend boundary.",
-    "tactic": "Harden",
-    "category": "Application Controls",
-    "category_id": "application-controls",
-    "function_id": "request-filtering",
-    "control_layer": "Application",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "Strict header normalization closes the standard CL/TE and duplicate-CL desync vectors, forcing the attacker to discover novel parser-specific bypass techniques to achieve smuggling"
-        },
-        {
-            "metric": "I",
-            "from": "H",
-            "to": "L",
-            "rationale": "Preventing request smuggling eliminates the primary integrity impact: cache poisoning and request injection into other users sessions"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-444",
-        "CWE-113",
-        "CWE-436"
-    ],
-    "confidence": "High",
-    "platforms": [
-        "RHEL 9",
-        "RHEL 8",
-        "Any Linux with HTTP proxy/LB"
-    ],
-    "verification": {
-        "method": "Verify that HTTP intermediaries enforce strict header parsing: reject requests with both Content-Length and Transfer-Encoding, reject duplicate Content-Length headers, and disable relaxed parsing modes",
-        "commands": [
-            {
-                "command": "grep -i 'relaxed_header_parser' /etc/squid/squid.conf",
-                "expected": "off",
-                "platform": "linux"
-            },
-            {
-                "command": "grep 'http-request deny.*hdr_cnt(content-length)' /etc/haproxy/haproxy.cfg",
-                "expected": "http-request deny",
-                "platform": "linux"
-            },
-            {
-                "command": "grep -i 'HttpProtocolOptions' /etc/httpd/conf/httpd.conf",
-                "expected": "Strict",
-                "platform": "linux"
-            },
-            {
-                "command": "grep -i 'ignore_invalid_headers' /etc/nginx/nginx.conf",
-                "expected": "on",
-                "platform": "linux"
-            }
-        ]
+  "cme_id": "CME-912",
+  "control_name": "HTTP Header Normalization and Request Smuggling Prevention",
+  "description": "Enforce strict HTTP header parsing on all HTTP intermediaries (proxies, load balancers, reverse proxies, web servers) to prevent request smuggling via header desynchronization. The control requires: (1) rejecting requests containing both Content-Length and Transfer-Encoding headers per RFC 7230 Section 3.3.3, (2) rejecting requests with duplicate Content-Length headers carrying differing values, (3) disabling relaxed header parsing modes that tolerate whitespace or encoding variations in Transfer-Encoding values, and (4) normalizing or rejecting header values containing illegal characters (bare CR, bare LF, NUL bytes). These measures eliminate the primary desynchronization vectors that enable an attacker to inject smuggled requests across the proxy-backend boundary.",
+  "tactic": "Harden",
+  "category": "Application Controls",
+  "category_id": "application-controls",
+  "function_id": "request-filtering",
+  "control_layer": "Application",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Strict header normalization closes the standard CL/TE and duplicate-CL desync vectors, forcing the attacker to discover novel parser-specific bypass techniques to achieve smuggling"
+    },
+    {
+      "metric": "I",
+      "from": "H",
+      "to": "L",
+      "rationale": "Preventing request smuggling eliminates the primary integrity impact: cache poisoning and request injection into other users sessions"
     }
+  ],
+  "cwe_relationships": [
+    "CWE-444",
+    "CWE-113",
+    "CWE-436"
+  ],
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 8",
+    "Any Linux with HTTP proxy/LB"
+  ],
+  "verification": {
+    "method": "Verify that HTTP intermediaries enforce strict header parsing: reject requests with both Content-Length and Transfer-Encoding, reject duplicate Content-Length headers, and disable relaxed parsing modes",
+    "commands": [
+      {
+        "command": "grep -i 'relaxed_header_parser' /etc/squid/squid.conf",
+        "expected": "off",
+        "platform": "linux"
+      },
+      {
+        "command": "grep 'http-request deny.*hdr_cnt(content-length)' /etc/haproxy/haproxy.cfg",
+        "expected": "http-request deny",
+        "platform": "linux"
+      },
+      {
+        "command": "grep -i 'HttpProtocolOptions' /etc/httpd/conf/httpd.conf",
+        "expected": "Strict",
+        "platform": "linux"
+      },
+      {
+        "command": "grep -i 'ignore_invalid_headers' /etc/nginx/nginx.conf",
+        "expected": "on",
+        "platform": "linux"
+      }
+    ]
+  },
+  "scf_identifiers": [
+    "NET-18.4",
+    "WEB-07"
+  ]
 }

@@ -1,51 +1,55 @@
 {
-    "cme_id": "CME-801",
-    "control_name": "Multi-Factor Authentication (MFA)",
-    "description": "Requires multiple authentication factors (password + TOTP/FIDO2/smart card), preventing credential-only compromise. Even stolen passwords are insufficient for access.",
-    "tactic": "Harden",
-    "category": "Credential Hardening",
-    "category_id": "credential-hardening",
-    "function_id": "authentication-methods",
-    "control_layer": "Identity",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "Stolen credential alone is insufficient; second factor required"
-        },
-        {
-            "metric": "PR",
-            "from": "N",
-            "to": "H",
-            "rationale": "Unauthenticated access impossible; multi-factor barrier"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-287",
-        "CWE-306",
-        "CWE-521",
-        "CWE-303",
-        "CWE-305"
-    ],
-    "verification": {
-        "method": "Verify MFA enforcement in PAM or IdP",
-        "commands": [
-            {
-                "command": "grep pam_google_authenticator /etc/pam.d/sshd",
-                "expected": "auth required pam_google_authenticator.so",
-                "platform": "linux"
-            },
-            {
-                "command": "grep -r 'auth.*required.*pam_u2f' /etc/pam.d/",
-                "expected": "pam_u2f.so",
-                "platform": "linux"
-            }
-        ]
+  "cme_id": "CME-801",
+  "control_name": "Multi-Factor Authentication (MFA)",
+  "description": "Requires multiple authentication factors (password + TOTP/FIDO2/smart card), preventing credential-only compromise. Even stolen passwords are insufficient for access.",
+  "tactic": "Harden",
+  "category": "Credential Hardening",
+  "category_id": "credential-hardening",
+  "function_id": "authentication-methods",
+  "control_layer": "Identity",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Stolen credential alone is insufficient; second factor required"
     },
-    "confidence": "High",
-    "platforms": [
-        "Any"
+    {
+      "metric": "PR",
+      "from": "N",
+      "to": "H",
+      "rationale": "Unauthenticated access impossible; multi-factor barrier"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-287",
+    "CWE-306",
+    "CWE-521",
+    "CWE-303",
+    "CWE-305"
+  ],
+  "verification": {
+    "method": "Verify MFA enforcement in PAM or IdP",
+    "commands": [
+      {
+        "command": "grep pam_google_authenticator /etc/pam.d/sshd",
+        "expected": "auth required pam_google_authenticator.so",
+        "platform": "linux"
+      },
+      {
+        "command": "grep -r 'auth.*required.*pam_u2f' /etc/pam.d/",
+        "expected": "pam_u2f.so",
+        "platform": "linux"
+      }
     ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "Any"
+  ],
+  "scf_identifiers": [
+    "IAC-06",
+    "IAC-06.1"
+  ]
 }

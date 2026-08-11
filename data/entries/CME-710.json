@@ -1,38 +1,42 @@
 {
-    "cme_id": "CME-710",
-    "control_name": "DynamicUser (systemd)",
-    "description": "systemd dynamically allocates a unique UID/GID per service instance. No persistent user account exists; each service restart gets a fresh identity, preventing cross-service data access.",
-    "tactic": "Isolate",
-    "category": "Privilege Isolation",
-    "category_id": "privilege-isolation",
-    "function_id": "systemd-sandboxing",
-    "control_layer": "OS/Kernel",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "S",
-            "from": "C",
-            "to": "U",
-            "rationale": "Service runs with ephemeral identity that owns no persistent files"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-269"
-    ],
-    "verification": {
-        "method": "Check DynamicUser setting",
-        "commands": [
-            {
-                "command": "systemctl show <service> -p DynamicUser",
-                "expected": "DynamicUser=yes",
-                "platform": "linux"
-            }
-        ]
-    },
-    "confidence": "High",
-    "platforms": [
-        "RHEL 9",
-        "RHEL 8",
-        "Ubuntu 24.04"
+  "cme_id": "CME-710",
+  "control_name": "DynamicUser (systemd)",
+  "description": "systemd dynamically allocates a unique UID/GID per service instance. No persistent user account exists; each service restart gets a fresh identity, preventing cross-service data access.",
+  "tactic": "Isolate",
+  "category": "Privilege Isolation",
+  "category_id": "privilege-isolation",
+  "function_id": "systemd-sandboxing",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "S",
+      "from": "C",
+      "to": "U",
+      "rationale": "Service runs with ephemeral identity that owns no persistent files"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-269"
+  ],
+  "verification": {
+    "method": "Check DynamicUser setting",
+    "commands": [
+      {
+        "command": "systemctl show <service> -p DynamicUser",
+        "expected": "DynamicUser=yes",
+        "platform": "linux"
+      }
     ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 8",
+    "Ubuntu 24.04"
+  ],
+  "scf_identifiers": [
+    "IAC-09",
+    "SEA-04"
+  ]
 }

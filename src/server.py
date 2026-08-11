@@ -505,6 +505,29 @@ async def get_mitigations_for_product(
 
 
 @mcp.tool()
+async def get_mitigations_for_scf(scf_id: str) -> str:
+    """Find CME controls mapped to a Secure Controls Framework (SCF) identifier or domain.
+
+    Accepts either a specific SCF control ID (e.g., "CRY-03") or a domain prefix
+    (e.g., "CRY") to find all CME entries satisfying controls in that domain.
+
+    Args:
+        scf_id: SCF control identifier (e.g., "CRY-03") or domain prefix (e.g., "CRY", "NET", "IAC")
+
+    Returns CME entries whose scf_identifiers include the given control or domain.
+    """
+    scf = scf_id.upper()
+    results = await _run_db(lambda conn: db.get_mitigations_for_scf(conn, scf))
+    if not results:
+        return json.dumps({"message": f"No CME entries mapped to SCF {scf}", "scf_id": scf})
+    return json.dumps({
+        "scf_query": scf,
+        "total_matches": len(results),
+        "entries": results,
+    }, indent=2)
+
+
+@mcp.tool()
 async def get_cme_coverage_summary() -> str:
     """Get a summary of what the CME database currently covers.
 

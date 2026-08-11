@@ -1,50 +1,54 @@
 {
-    "cme_id": "CME-502",
-    "control_name": "noexec on /tmp and /dev/shm",
-    "description": "Mounts /tmp and /dev/shm with noexec option, preventing execution of attacker-dropped binaries or scripts from temporary directories commonly used as staging areas.",
-    "tactic": "Harden",
-    "category": "Filesystem Hardening",
-    "category_id": "filesystem-hardening",
-    "function_id": "mount-options",
-    "control_layer": "OS/Kernel",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "Attacker cannot execute payloads from common writable directories"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-94",
-        "CWE-427"
-    ],
-    "verification": {
-        "method": "Check mount options for /tmp and /dev/shm",
-        "commands": [
-            {
-                "command": "mount | grep '/tmp' | grep noexec",
-                "expected": "noexec",
-                "platform": "linux"
-            },
-            {
-                "command": "mount | grep '/dev/shm' | grep noexec",
-                "expected": "noexec",
-                "platform": "linux"
-            }
-        ]
-    },
-    "references": [
-        {
-            "source": "CIS RHEL 9 Benchmark",
-            "section": "1.1.4-1.1.9 Ensure noexec option set on /tmp and /dev/shm"
-        }
-    ],
-    "confidence": "High",
-    "platforms": [
-        "RHEL 9",
-        "RHEL 8",
-        "Ubuntu 24.04"
+  "cme_id": "CME-502",
+  "control_name": "noexec on /tmp and /dev/shm",
+  "description": "Mounts /tmp and /dev/shm with noexec option, preventing execution of attacker-dropped binaries or scripts from temporary directories commonly used as staging areas.",
+  "tactic": "Harden",
+  "category": "Filesystem Hardening",
+  "category_id": "filesystem-hardening",
+  "function_id": "mount-options",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Attacker cannot execute payloads from common writable directories"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-94",
+    "CWE-427"
+  ],
+  "verification": {
+    "method": "Check mount options for /tmp and /dev/shm",
+    "commands": [
+      {
+        "command": "mount | grep '/tmp' | grep noexec",
+        "expected": "noexec",
+        "platform": "linux"
+      },
+      {
+        "command": "mount | grep '/dev/shm' | grep noexec",
+        "expected": "noexec",
+        "platform": "linux"
+      }
     ]
+  },
+  "references": [
+    {
+      "source": "CIS RHEL 9 Benchmark",
+      "section": "1.1.4-1.1.9 Ensure noexec option set on /tmp and /dev/shm"
+    }
+  ],
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 8",
+    "Ubuntu 24.04"
+  ],
+  "scf_identifiers": [
+    "CFG-02",
+    "SEA-06"
+  ]
 }

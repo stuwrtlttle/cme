@@ -1,44 +1,48 @@
 {
-    "cme_id": "CME-501",
-    "control_name": "Read-Only Root Filesystem",
-    "description": "Mounts root filesystem as read-only, preventing persistent modification of system binaries, libraries, and configuration. Writable areas are confined to specific tmpfs or overlay mounts.",
-    "tactic": "Isolate",
-    "category": "Filesystem Hardening",
-    "category_id": "filesystem-hardening",
-    "function_id": "mount-options",
-    "control_layer": "OS/Kernel",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "I",
-            "from": "H",
-            "to": "L",
-            "rationale": "Cannot persistently modify system files even with root access"
-        },
-        {
-            "metric": "A",
-            "from": "H",
-            "to": "L",
-            "rationale": "System recovers original state on reboot"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-284"
-    ],
-    "verification": {
-        "method": "Check mount options for root filesystem",
-        "commands": [
-            {
-                "command": "mount | grep 'on / ' | grep 'ro,'",
-                "expected": "ro,",
-                "platform": "linux"
-            }
-        ]
+  "cme_id": "CME-501",
+  "control_name": "Read-Only Root Filesystem",
+  "description": "Mounts root filesystem as read-only, preventing persistent modification of system binaries, libraries, and configuration. Writable areas are confined to specific tmpfs or overlay mounts.",
+  "tactic": "Isolate",
+  "category": "Filesystem Hardening",
+  "category_id": "filesystem-hardening",
+  "function_id": "mount-options",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "I",
+      "from": "H",
+      "to": "L",
+      "rationale": "Cannot persistently modify system files even with root access"
     },
-    "confidence": "High",
-    "platforms": [
-        "RHEL 9",
-        "Fedora CoreOS",
-        "Container-optimized OS"
+    {
+      "metric": "A",
+      "from": "H",
+      "to": "L",
+      "rationale": "System recovers original state on reboot"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-284"
+  ],
+  "verification": {
+    "method": "Check mount options for root filesystem",
+    "commands": [
+      {
+        "command": "mount | grep 'on / ' | grep 'ro,'",
+        "expected": "ro,",
+        "platform": "linux"
+      }
     ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "Fedora CoreOS",
+    "Container-optimized OS"
+  ],
+  "scf_identifiers": [
+    "CFG-02",
+    "SEA-16"
+  ]
 }

@@ -1,44 +1,48 @@
 {
-    "cme_id": "CME-1005",
-    "control_name": "Runtime Memory Error Detection (KASAN/HWASan)",
-    "description": "Kernel AddressSanitizer (KASAN) and Hardware-assisted AddressSanitizer (HWASan) detect memory safety violations at runtime including use-after-free, out-of-bounds access, buffer size miscalculations, and NULL pointer dereferences. KASAN instruments kernel memory allocations with redzones and quarantine zones to detect invalid accesses. HWASan uses ARM Memory Tagging for lower-overhead production deployments. When a violation is detected, the kernel logs a detailed report and can be configured to panic, preventing silent exploitation.",
-    "tactic": "Detect",
-    "category": "Runtime Detection",
-    "category_id": "runtime-detection",
-    "function_id": "host-monitoring",
-    "control_layer": "OS/Kernel",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "Runtime detection of memory corruption forces exploit authors to either avoid instrumented allocation paths or accept detection; exploitation complexity increases significantly as corrupted memory triggers immediate detection rather than enabling controlled code execution."
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-416",
-        "CWE-131",
-        "CWE-193",
-        "CWE-476",
-        "CWE-787",
-        "CWE-125",
-        "CWE-120"
-    ],
-    "confidence": "High",
-    "platforms": [
-        "RHEL 9",
-        "Ubuntu 24.04",
-        "Fedora 40"
-    ],
-    "verification": {
-        "method": "Check if KASAN is enabled in kernel config",
-        "commands": [
-            {
-                "command": "grep CONFIG_KASAN=y /boot/config-$(uname -r)",
-                "expected": "CONFIG_KASAN=y",
-                "platform": "linux"
-            }
-        ]
+  "cme_id": "CME-1005",
+  "control_name": "Runtime Memory Error Detection (KASAN/HWASan)",
+  "description": "Kernel AddressSanitizer (KASAN) and Hardware-assisted AddressSanitizer (HWASan) detect memory safety violations at runtime including use-after-free, out-of-bounds access, buffer size miscalculations, and NULL pointer dereferences. KASAN instruments kernel memory allocations with redzones and quarantine zones to detect invalid accesses. HWASan uses ARM Memory Tagging for lower-overhead production deployments. When a violation is detected, the kernel logs a detailed report and can be configured to panic, preventing silent exploitation.",
+  "tactic": "Detect",
+  "category": "Runtime Detection",
+  "category_id": "runtime-detection",
+  "function_id": "host-monitoring",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Runtime detection of memory corruption forces exploit authors to either avoid instrumented allocation paths or accept detection; exploitation complexity increases significantly as corrupted memory triggers immediate detection rather than enabling controlled code execution."
     }
+  ],
+  "cwe_relationships": [
+    "CWE-416",
+    "CWE-131",
+    "CWE-193",
+    "CWE-476",
+    "CWE-787",
+    "CWE-125",
+    "CWE-120"
+  ],
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "Ubuntu 24.04",
+    "Fedora 40"
+  ],
+  "verification": {
+    "method": "Check if KASAN is enabled in kernel config",
+    "commands": [
+      {
+        "command": "grep CONFIG_KASAN=y /boot/config-$(uname -r)",
+        "expected": "CONFIG_KASAN=y",
+        "platform": "linux"
+      }
+    ]
+  },
+  "scf_identifiers": [
+    "MON-01",
+    "SEA-10"
+  ]
 }

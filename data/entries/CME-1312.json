@@ -1,74 +1,77 @@
 {
-    "cme_id": "CME-1312",
-    "control_name": "Argument Injection Prevention (Downstream Input Delimiter Sanitization)",
-    "description": "Prevents injection of unintended arguments, options, or directives into downstream CLI tools, external processes, and structured input files by sanitizing delimiter characters (newlines, option-prefix dashes, null bytes) in user-controlled input before subprocess invocation. Enforces the -- end-of-options separator when passing variable input as positional arguments, uses array-based argument construction to preserve argument boundaries, and validates that input destined for downstream tool input files does not contain format-breaking delimiters. Distinct from command injection prevention (CME-1307) which addresses shell metacharacter injection: this control addresses injection into the argument parser or input file format of the downstream tool itself, even when no shell is involved.",
-    "tactic": "Harden",
-    "category": "Application Input Validation",
-    "category_id": "application-input-validation",
-    "function_id": "injection-prevention",
-    "control_layer": "Application",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "Delimiter characters in user input are neutralized before reaching the downstream tool's argument parser or input file format; attacker cannot inject option flags, break record boundaries, or introduce additional URIs"
-        },
-        {
-            "metric": "I",
-            "from": "H",
-            "to": "L",
-            "rationale": "Cannot inject --option=value arguments to control downstream tool behavior such as file write destinations, execution targets, or configuration overrides"
-        },
-        {
-            "metric": "S",
-            "from": "C",
-            "to": "U",
-            "rationale": "Downstream tool cannot be manipulated via injected arguments to affect resources outside its intended operational scope"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-88",
-        "CWE-74"
-    ],
-    "verification": {
-        "method": "Verify that subprocess invocations use -- end-of-options before variable arguments and validate input for delimiter characters",
-        "commands": [
-            {
-                "command": "grep -rn '\"--\"' <app_source>/",
-                "expected": "End-of-options separator present before variable positional arguments in subprocess calls",
-                "platform": "any"
-            },
-            {
-                "command": "grep -rn 'subprocess\\|exec\\|spawn' <app_source>/ | grep -v 'shell=True'",
-                "expected": "Subprocess invocations use array-based arguments with input validation for delimiter characters",
-                "platform": "any"
-            }
-        ]
+  "cme_id": "CME-1312",
+  "control_name": "Argument Injection Prevention (Downstream Input Delimiter Sanitization)",
+  "description": "Prevents injection of unintended arguments, options, or directives into downstream CLI tools, external processes, and structured input files by sanitizing delimiter characters (newlines, option-prefix dashes, null bytes) in user-controlled input before subprocess invocation. Enforces the -- end-of-options separator when passing variable input as positional arguments, uses array-based argument construction to preserve argument boundaries, and validates that input destined for downstream tool input files does not contain format-breaking delimiters. Distinct from command injection prevention (CME-1307) which addresses shell metacharacter injection: this control addresses injection into the argument parser or input file format of the downstream tool itself, even when no shell is involved.",
+  "tactic": "Harden",
+  "category": "Application Input Validation",
+  "category_id": "application-input-validation",
+  "function_id": "injection-prevention",
+  "control_layer": "Application",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Delimiter characters in user input are neutralized before reaching the downstream tool's argument parser or input file format; attacker cannot inject option flags, break record boundaries, or introduce additional URIs"
     },
-    "confidence": "High",
-    "platforms": [
-        "Any",
-        "Windows Server 2019",
-        "Windows Server 2022"
-    ],
-    "references": [
-        {
-            "source": "OWASP",
-            "section": "Argument Injection"
-        },
-        {
-            "source": "CVE-2025-21613",
-            "section": "go-git URL argument injection affecting 16 Red Hat products"
-        },
-        {
-            "source": "CVE-2025-48385",
-            "section": "Git arbitrary file writes via argument injection"
-        },
-        {
-            "source": "CVE-2026-50574",
-            "section": "yt-dlp aria2c input file delimiter injection"
-        }
+    {
+      "metric": "I",
+      "from": "H",
+      "to": "L",
+      "rationale": "Cannot inject --option=value arguments to control downstream tool behavior such as file write destinations, execution targets, or configuration overrides"
+    },
+    {
+      "metric": "S",
+      "from": "C",
+      "to": "U",
+      "rationale": "Downstream tool cannot be manipulated via injected arguments to affect resources outside its intended operational scope"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-88",
+    "CWE-74"
+  ],
+  "verification": {
+    "method": "Verify that subprocess invocations use -- end-of-options before variable arguments and validate input for delimiter characters",
+    "commands": [
+      {
+        "command": "grep -rn '\"--\"' <app_source>/",
+        "expected": "End-of-options separator present before variable positional arguments in subprocess calls",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'subprocess\\|exec\\|spawn' <app_source>/ | grep -v 'shell=True'",
+        "expected": "Subprocess invocations use array-based arguments with input validation for delimiter characters",
+        "platform": "any"
+      }
     ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "Any",
+    "Windows Server 2019",
+    "Windows Server 2022"
+  ],
+  "references": [
+    {
+      "source": "OWASP",
+      "section": "Argument Injection"
+    },
+    {
+      "source": "CVE-2025-21613",
+      "section": "go-git URL argument injection affecting 16 Red Hat products"
+    },
+    {
+      "source": "CVE-2025-48385",
+      "section": "Git arbitrary file writes via argument injection"
+    },
+    {
+      "source": "CVE-2026-50574",
+      "section": "yt-dlp aria2c input file delimiter injection"
+    }
+  ],
+  "scf_identifiers": [
+    "WEB-09"
+  ]
 }

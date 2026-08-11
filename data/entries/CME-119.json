@@ -1,63 +1,66 @@
 {
-    "cme_id": "CME-119",
-    "control_name": "Compiler Integer Overflow and Conversion Safety (-ftrapv / UBSan Integer)",
-    "description": "Compiler-enforced runtime detection of integer overflow and unsafe numeric type conversions. Encompasses: (1) GCC/Clang -ftrapv \u2014 traps on signed integer overflow at ~2-5% overhead, suitable for production; (2) UBSan integer sanitizers (-fsanitize=signed-integer-overflow, -fsanitize=unsigned-integer-overflow, -fsanitize=implicit-conversion) \u2014 detect signed/unsigned overflow and implicit narrowing/sign-change conversions at runtime with configurable abort or logging; (3) MSVC /RTCc \u2014 detects data loss from runtime type conversions. When enabled, integer conversion errors that would silently produce incorrect values instead terminate the process, converting potential code execution vulnerabilities into denial-of-service conditions (a less severe outcome). Particularly effective against the dominant CWE-681 attack pattern where a negative signed value converted to unsigned becomes an enormous positive value that bypasses bounds checks and corrupts memory. Complements CME-116 (FORTIFY_SOURCE) which catches the buffer overflow consequence of integer conversion errors, while this control catches the conversion error itself at the point of occurrence.",
-    "tactic": "Harden",
-    "category": "Kernel Hardening",
-    "category_id": "kernel-hardening",
-    "function_id": "memory-safety",
-    "control_layer": "OS/Kernel",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "Integer conversion errors (signed-to-unsigned confusion, implicit narrowing, overflow wrapping) are detected at the point of occurrence and the process is terminated before the corrupted value reaches memory operations; the attacker must find a conversion path in code that is not instrumented by the sanitizer or reach the vulnerable operation through an alternative call chain that bypasses the compiler-inserted checks"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-681",
-        "CWE-190",
-        "CWE-191",
-        "CWE-192",
-        "CWE-194",
-        "CWE-195",
-        "CWE-196",
-        "CWE-197"
-    ],
-    "confidence": "Medium",
-    "platforms": [
-        "RHEL 9",
-        "RHEL 10",
-        "Ubuntu 24.04",
-        "Fedora",
-        "Windows Server 2019",
-        "Windows Server 2022"
-    ],
-    "verification": {
-        "method": "Check that system packages are compiled with -ftrapv or UBSan integer sanitizers, or that binaries contain UBSan runtime symbols indicating instrumented integer operations",
-        "commands": [
-            {
-                "command": "rpm -q --queryformat \"%{OPTFLAGS}\" redhat-rpm-config 2>/dev/null | grep -oE '\\-ftrapv|\\-fsanitize=integer|\\-fsanitize=signed-integer-overflow'",
-                "expected": "-ftrapv or -fsanitize flag present in system build flags",
-                "platform": "rhel"
-            },
-            {
-                "command": "readelf -s /usr/bin/ls 2>/dev/null | grep -c __ubsan",
-                "expected": "non-zero count indicates UBSan-instrumented integer operations",
-                "platform": "linux"
-            },
-            {
-                "command": "objdump -d /usr/bin/coreutils 2>/dev/null | grep -c 'callq.*__ubsan_handle' || objdump -d /usr/bin/ls 2>/dev/null | grep -c 'callq.*__ubsan_handle'",
-                "expected": "non-zero count indicates UBSan integer overflow handlers present",
-                "platform": "linux"
-            },
-            {
-                "command": "Get-Content (Get-ChildItem 'C:\\Program Files\\Microsoft Visual Studio\\*\\*\\VC\\Auxiliary\\Build\\vcvarsall.bat' -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1) 2>$null | Select-String '/RTCc'",
-                "expected": "/RTCc flag present in Visual Studio build configuration",
-                "platform": "windows"
-            }
-        ]
+  "cme_id": "CME-119",
+  "control_name": "Compiler Integer Overflow and Conversion Safety (-ftrapv / UBSan Integer)",
+  "description": "Compiler-enforced runtime detection of integer overflow and unsafe numeric type conversions. Encompasses: (1) GCC/Clang -ftrapv \u2014 traps on signed integer overflow at ~2-5% overhead, suitable for production; (2) UBSan integer sanitizers (-fsanitize=signed-integer-overflow, -fsanitize=unsigned-integer-overflow, -fsanitize=implicit-conversion) \u2014 detect signed/unsigned overflow and implicit narrowing/sign-change conversions at runtime with configurable abort or logging; (3) MSVC /RTCc \u2014 detects data loss from runtime type conversions. When enabled, integer conversion errors that would silently produce incorrect values instead terminate the process, converting potential code execution vulnerabilities into denial-of-service conditions (a less severe outcome). Particularly effective against the dominant CWE-681 attack pattern where a negative signed value converted to unsigned becomes an enormous positive value that bypasses bounds checks and corrupts memory. Complements CME-116 (FORTIFY_SOURCE) which catches the buffer overflow consequence of integer conversion errors, while this control catches the conversion error itself at the point of occurrence.",
+  "tactic": "Harden",
+  "category": "Kernel Hardening",
+  "category_id": "kernel-hardening",
+  "function_id": "memory-safety",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Integer conversion errors (signed-to-unsigned confusion, implicit narrowing, overflow wrapping) are detected at the point of occurrence and the process is terminated before the corrupted value reaches memory operations; the attacker must find a conversion path in code that is not instrumented by the sanitizer or reach the vulnerable operation through an alternative call chain that bypasses the compiler-inserted checks"
     }
+  ],
+  "cwe_relationships": [
+    "CWE-681",
+    "CWE-190",
+    "CWE-191",
+    "CWE-192",
+    "CWE-194",
+    "CWE-195",
+    "CWE-196",
+    "CWE-197"
+  ],
+  "confidence": "Medium",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 10",
+    "Ubuntu 24.04",
+    "Fedora",
+    "Windows Server 2019",
+    "Windows Server 2022"
+  ],
+  "verification": {
+    "method": "Check that system packages are compiled with -ftrapv or UBSan integer sanitizers, or that binaries contain UBSan runtime symbols indicating instrumented integer operations",
+    "commands": [
+      {
+        "command": "rpm -q --queryformat \"%{OPTFLAGS}\" redhat-rpm-config 2>/dev/null | grep -oE '\\-ftrapv|\\-fsanitize=integer|\\-fsanitize=signed-integer-overflow'",
+        "expected": "-ftrapv or -fsanitize flag present in system build flags",
+        "platform": "rhel"
+      },
+      {
+        "command": "readelf -s /usr/bin/ls 2>/dev/null | grep -c __ubsan",
+        "expected": "non-zero count indicates UBSan-instrumented integer operations",
+        "platform": "linux"
+      },
+      {
+        "command": "objdump -d /usr/bin/coreutils 2>/dev/null | grep -c 'callq.*__ubsan_handle' || objdump -d /usr/bin/ls 2>/dev/null | grep -c 'callq.*__ubsan_handle'",
+        "expected": "non-zero count indicates UBSan integer overflow handlers present",
+        "platform": "linux"
+      },
+      {
+        "command": "Get-Content (Get-ChildItem 'C:\\Program Files\\Microsoft Visual Studio\\*\\*\\VC\\Auxiliary\\Build\\vcvarsall.bat' -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1) 2>$null | Select-String '/RTCc'",
+        "expected": "/RTCc flag present in Visual Studio build configuration",
+        "platform": "windows"
+      }
+    ]
+  },
+  "scf_identifiers": [
+    "SEA-10"
+  ]
 }

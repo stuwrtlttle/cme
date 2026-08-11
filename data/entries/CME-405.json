@@ -1,42 +1,47 @@
 {
-    "cme_id": "CME-405",
-    "control_name": "DNSSEC Validation",
-    "description": "Validates DNS responses using cryptographic signatures, preventing DNS spoofing, cache poisoning, and DNS-based redirection attacks.",
-    "tactic": "Harden",
-    "category": "Cryptographic Controls",
-    "category_id": "cryptographic-controls",
-    "function_id": "data-integrity-crypto",
-    "control_layer": "Network",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "DNS-based redirect/spoofing attacks require breaking DNSSEC chain of trust"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-350"
-    ],
-    "verification": {
-        "method": "Verify DNSSEC validation is enabled in resolver",
-        "commands": [
-            {
-                "command": "resolvectl status | grep DNSSEC",
-                "expected": "DNSSEC setting: yes",
-                "platform": "linux"
-            },
-            {
-                "command": "grep 'val-permissive-mode' /etc/unbound/unbound.conf",
-                "expected": "val-permissive-mode: no",
-                "platform": "linux"
-            }
-        ]
-    },
-    "confidence": "High",
-    "platforms": [
-        "RHEL 9",
-        "Ubuntu 24.04"
+  "cme_id": "CME-405",
+  "control_name": "DNSSEC Validation",
+  "description": "Validates DNS responses using cryptographic signatures, preventing DNS spoofing, cache poisoning, and DNS-based redirection attacks.",
+  "tactic": "Harden",
+  "category": "Cryptographic Controls",
+  "category_id": "cryptographic-controls",
+  "function_id": "data-integrity-crypto",
+  "control_layer": "Network",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "DNS-based redirect/spoofing attacks require breaking DNSSEC chain of trust"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-350"
+  ],
+  "verification": {
+    "method": "Verify DNSSEC validation is enabled in resolver",
+    "commands": [
+      {
+        "command": "resolvectl status | grep DNSSEC",
+        "expected": "DNSSEC setting: yes",
+        "platform": "linux"
+      },
+      {
+        "command": "grep 'val-permissive-mode' /etc/unbound/unbound.conf",
+        "expected": "val-permissive-mode: no",
+        "platform": "linux"
+      }
     ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "Ubuntu 24.04"
+  ],
+  "scf_identifiers": [
+    "CRY-04",
+    "CRY-13",
+    "NET-10.2"
+  ]
 }

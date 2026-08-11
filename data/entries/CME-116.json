@@ -1,56 +1,59 @@
 {
-    "cme_id": "CME-116",
-    "control_name": "FORTIFY_SOURCE (Buffer Overflow Detection)",
-    "description": "Compile-time and runtime detection of buffer overflows in common C library functions (memcpy, strcpy, sprintf, read, etc.). At compile time, the compiler replaces standard library calls with bounds-checked variants when buffer sizes are known. At runtime, remaining checks abort the process when a buffer overflow is detected. FORTIFY_SOURCE level 2 checks all detectable overflows; level 3 (GCC 12+) extends coverage to dynamically-sized buffers and flexible array members. Catches many integer-overflow-to-buffer-overflow chains where the overflowed size value is passed to a libc copy function.",
-    "tactic": "Harden",
-    "category": "Kernel Hardening",
-    "category_id": "kernel-hardening",
-    "function_id": "memory-safety",
-    "control_layer": "OS/Kernel",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "Buffer overflows in instrumented libc functions are detected and the process is terminated before attacker-controlled data overwrites adjacent memory; exploitation requires finding an uninstrumented copy path or a non-libc buffer operation"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-119",
-        "CWE-120",
-        "CWE-122",
-        "CWE-787",
-        "CWE-190",
-        "CWE-130",
-        "CWE-681"
-    ],
-    "confidence": "High",
-    "platforms": [
-        "RHEL 8",
-        "RHEL 9",
-        "RHEL 10",
-        "Fedora",
-        "Ubuntu 24.04"
-    ],
-    "verification": {
-        "method": "Check that system packages are compiled with _FORTIFY_SOURCE=2 or higher",
-        "commands": [
-            {
-                "command": "rpm -q --queryformat \"%{OPTFLAGS}\" redhat-rpm-config 2>/dev/null | grep -o \"_FORTIFY_SOURCE=[0-9]\"",
-                "expected": "_FORTIFY_SOURCE=2",
-                "platform": "rhel"
-            },
-            {
-                "command": "readelf -s /usr/bin/ls | grep -c __.*_chk",
-                "expected": "non-zero count indicates fortified functions",
-                "platform": "linux"
-            },
-            {
-                "command": "objdump -d /usr/bin/coreutils 2>/dev/null | grep -c __memcpy_chk || objdump -d /usr/bin/ls | grep -c __memcpy_chk",
-                "expected": "non-zero count",
-                "platform": "linux"
-            }
-        ]
+  "cme_id": "CME-116",
+  "control_name": "FORTIFY_SOURCE (Buffer Overflow Detection)",
+  "description": "Compile-time and runtime detection of buffer overflows in common C library functions (memcpy, strcpy, sprintf, read, etc.). At compile time, the compiler replaces standard library calls with bounds-checked variants when buffer sizes are known. At runtime, remaining checks abort the process when a buffer overflow is detected. FORTIFY_SOURCE level 2 checks all detectable overflows; level 3 (GCC 12+) extends coverage to dynamically-sized buffers and flexible array members. Catches many integer-overflow-to-buffer-overflow chains where the overflowed size value is passed to a libc copy function.",
+  "tactic": "Harden",
+  "category": "Kernel Hardening",
+  "category_id": "kernel-hardening",
+  "function_id": "memory-safety",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Buffer overflows in instrumented libc functions are detected and the process is terminated before attacker-controlled data overwrites adjacent memory; exploitation requires finding an uninstrumented copy path or a non-libc buffer operation"
     }
+  ],
+  "cwe_relationships": [
+    "CWE-119",
+    "CWE-120",
+    "CWE-122",
+    "CWE-787",
+    "CWE-190",
+    "CWE-130",
+    "CWE-681"
+  ],
+  "confidence": "High",
+  "platforms": [
+    "RHEL 8",
+    "RHEL 9",
+    "RHEL 10",
+    "Fedora",
+    "Ubuntu 24.04"
+  ],
+  "verification": {
+    "method": "Check that system packages are compiled with _FORTIFY_SOURCE=2 or higher",
+    "commands": [
+      {
+        "command": "rpm -q --queryformat \"%{OPTFLAGS}\" redhat-rpm-config 2>/dev/null | grep -o \"_FORTIFY_SOURCE=[0-9]\"",
+        "expected": "_FORTIFY_SOURCE=2",
+        "platform": "rhel"
+      },
+      {
+        "command": "readelf -s /usr/bin/ls | grep -c __.*_chk",
+        "expected": "non-zero count indicates fortified functions",
+        "platform": "linux"
+      },
+      {
+        "command": "objdump -d /usr/bin/coreutils 2>/dev/null | grep -c __memcpy_chk || objdump -d /usr/bin/ls | grep -c __memcpy_chk",
+        "expected": "non-zero count",
+        "platform": "linux"
+      }
+    ]
+  },
+  "scf_identifiers": [
+    "SEA-10"
+  ]
 }

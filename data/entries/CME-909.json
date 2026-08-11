@@ -1,52 +1,56 @@
 {
-    "cme_id": "CME-909",
-    "control_name": "Default-Deny API Authorization Policy",
-    "description": "All API endpoints require explicit authorization by default \u2014 any endpoint without a declared authorization rule returns 403 Forbidden. The authorization framework operates as a deny-by-default middleware that intercepts every incoming request and requires an explicit policy match before forwarding to the handler. Only explicitly allowlisted endpoints (health checks, public landing pages) bypass authorization. Prevents vulnerabilities where new endpoints are deployed without authorization checks, or where legacy endpoints silently allow unauthenticated access to sensitive functionality.",
-    "tactic": "Harden",
-    "category": "Application Controls",
-    "category_id": "application-controls",
-    "function_id": "authorization-controls",
-    "control_layer": "Application",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "PR",
-            "from": "N",
-            "to": "L",
-            "rationale": "Unauthenticated access to any endpoint is impossible under default-deny; every request must present valid credentials at minimum, eliminating the entire class of missing-authentication vulnerabilities (CWE-306) at the framework level."
-        },
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "An attacker must find an explicit authorization bypass or policy misconfiguration rather than simply discovering an unprotected endpoint; the framework ensures no endpoint is accidentally exposed without a deliberate policy decision."
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-306",
-        "CWE-862",
-        "CWE-1220",
-        "CWE-551"
-    ],
-    "confidence": "High",
-    "platforms": [
-        "Any",
-        "Windows Server 2019",
-        "Windows Server 2022"
-    ],
-    "verification": {
-        "method": "Verify that unauthenticated requests to non-public endpoints are rejected; inspect framework configuration for default-deny authorization policy",
-        "commands": [
-            {
-                "command": "curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/api/v1/admin/users",
-                "expected": "401 or 403 without credentials",
-                "platform": "any"
-            },
-            {
-                "command": "grep -rn 'default.*deny\\|require_auth\\|authenticate!\\|@login_required\\|IsAuthenticated\\|authorize.*default' <app_source>/",
-                "expected": "Global authentication/authorization middleware configured with deny-by-default",
-                "platform": "any"
-            }
-        ]
+  "cme_id": "CME-909",
+  "control_name": "Default-Deny API Authorization Policy",
+  "description": "All API endpoints require explicit authorization by default \u2014 any endpoint without a declared authorization rule returns 403 Forbidden. The authorization framework operates as a deny-by-default middleware that intercepts every incoming request and requires an explicit policy match before forwarding to the handler. Only explicitly allowlisted endpoints (health checks, public landing pages) bypass authorization. Prevents vulnerabilities where new endpoints are deployed without authorization checks, or where legacy endpoints silently allow unauthenticated access to sensitive functionality.",
+  "tactic": "Harden",
+  "category": "Application Controls",
+  "category_id": "application-controls",
+  "function_id": "authorization-controls",
+  "control_layer": "Application",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "PR",
+      "from": "N",
+      "to": "L",
+      "rationale": "Unauthenticated access to any endpoint is impossible under default-deny; every request must present valid credentials at minimum, eliminating the entire class of missing-authentication vulnerabilities (CWE-306) at the framework level."
+    },
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "An attacker must find an explicit authorization bypass or policy misconfiguration rather than simply discovering an unprotected endpoint; the framework ensures no endpoint is accidentally exposed without a deliberate policy decision."
     }
+  ],
+  "cwe_relationships": [
+    "CWE-306",
+    "CWE-862",
+    "CWE-1220",
+    "CWE-551"
+  ],
+  "confidence": "High",
+  "platforms": [
+    "Any",
+    "Windows Server 2019",
+    "Windows Server 2022"
+  ],
+  "verification": {
+    "method": "Verify that unauthenticated requests to non-public endpoints are rejected; inspect framework configuration for default-deny authorization policy",
+    "commands": [
+      {
+        "command": "curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/api/v1/admin/users",
+        "expected": "401 or 403 without credentials",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'default.*deny\\|require_auth\\|authenticate!\\|@login_required\\|IsAuthenticated\\|authorize.*default' <app_source>/",
+        "expected": "Global authentication/authorization middleware configured with deny-by-default",
+        "platform": "any"
+      }
+    ]
+  },
+  "scf_identifiers": [
+    "IAC-20",
+    "IAC-26"
+  ]
 }

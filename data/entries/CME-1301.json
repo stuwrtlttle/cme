@@ -1,52 +1,55 @@
 {
-    "cme_id": "CME-1301",
-    "control_name": "Path Traversal Prevention (Canonicalization)",
-    "description": "Application-level path validation that canonicalizes user-supplied paths (resolving symlinks, ../, and relative references) and verifies the resolved path falls within an allowed base directory. Rejects absolute path injection and directory traversal sequences before any filesystem operation. Prevents attackers from reading or writing files outside intended directories.",
-    "tactic": "Harden",
-    "category": "Application Input Validation",
-    "category_id": "application-input-validation",
-    "function_id": "input-validation",
-    "control_layer": "Application",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "Traversal payloads (../, absolute paths) are rejected before reaching filesystem operations"
-        },
-        {
-            "metric": "C",
-            "from": "H",
-            "to": "L",
-            "rationale": "File read confined to allowed directory; sensitive files outside base path are unreachable"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-22",
-        "CWE-23",
-        "CWE-36",
-        "CWE-73"
-    ],
-    "verification": {
-        "method": "Test application with path traversal payloads and verify rejection; inspect source for canonicalization before file access",
-        "commands": [
-            {
-                "command": "grep -rn 'os.path.realpath\\|pathlib.*resolve\\|os.path.abspath' <app_source>/",
-                "expected": "Path canonicalization calls present before file operations",
-                "platform": "any"
-            },
-            {
-                "command": "grep -rn 'startswith\\|is_relative_to' <app_source>/",
-                "expected": "Base directory prefix check present after canonicalization",
-                "platform": "any"
-            }
-        ]
+  "cme_id": "CME-1301",
+  "control_name": "Path Traversal Prevention (Canonicalization)",
+  "description": "Application-level path validation that canonicalizes user-supplied paths (resolving symlinks, ../, and relative references) and verifies the resolved path falls within an allowed base directory. Rejects absolute path injection and directory traversal sequences before any filesystem operation. Prevents attackers from reading or writing files outside intended directories.",
+  "tactic": "Harden",
+  "category": "Application Input Validation",
+  "category_id": "application-input-validation",
+  "function_id": "input-validation",
+  "control_layer": "Application",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Traversal payloads (../, absolute paths) are rejected before reaching filesystem operations"
     },
-    "confidence": "High",
-    "platforms": [
-        "Any",
-        "Windows Server 2019",
-        "Windows Server 2022"
+    {
+      "metric": "C",
+      "from": "H",
+      "to": "L",
+      "rationale": "File read confined to allowed directory; sensitive files outside base path are unreachable"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-22",
+    "CWE-23",
+    "CWE-36",
+    "CWE-73"
+  ],
+  "verification": {
+    "method": "Test application with path traversal payloads and verify rejection; inspect source for canonicalization before file access",
+    "commands": [
+      {
+        "command": "grep -rn 'os.path.realpath\\|pathlib.*resolve\\|os.path.abspath' <app_source>/",
+        "expected": "Path canonicalization calls present before file operations",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'startswith\\|is_relative_to' <app_source>/",
+        "expected": "Base directory prefix check present after canonicalization",
+        "platform": "any"
+      }
     ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "Any",
+    "Windows Server 2019",
+    "Windows Server 2022"
+  ],
+  "scf_identifiers": [
+    "WEB-09"
+  ]
 }

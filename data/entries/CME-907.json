@@ -1,53 +1,58 @@
 {
-    "cme_id": "CME-907",
-    "control_name": "Application-Layer RBAC Enforcement",
-    "description": "Enforce role-based access control within the application by mapping each user to a set of roles, each role to a set of permissions, and verifying the caller holds the required permission before executing any privileged operation. Authorization checks run as middleware or decorators on every privileged API endpoint, evaluated after authentication and before business logic. Role assignments follow least privilege \u2014 users receive the minimum role needed for their function. Prevents authenticated users from accessing administrative functions, modifying other users' data, or escalating their own privileges through direct API calls.",
-    "tactic": "Harden",
-    "category": "Application Controls",
-    "category_id": "application-controls",
-    "function_id": "authorization-controls",
-    "control_layer": "Application",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "PR",
-            "from": "L",
-            "to": "H",
-            "rationale": "An attacker with any authenticated session is blocked from privileged operations; exploitation requires compromise of a specifically privileged role. The mechanism is the per-endpoint role verification gate that rejects requests from insufficiently privileged callers before business logic executes."
-        },
-        {
-            "metric": "I",
-            "from": "H",
-            "to": "L",
-            "rationale": "Write operations are confined to the caller's authorized scope; modification of resources outside the caller's role permissions is rejected before execution, limiting integrity impact to the attacker's own authorized data."
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-266",
-        "CWE-1220",
-        "CWE-862",
-        "CWE-863",
-        "CWE-285"
-    ],
-    "confidence": "High",
-    "platforms": [
-        "Any",
-        "Windows Server 2019",
-        "Windows Server 2022"
-    ],
-    "verification": {
-        "method": "Inspect application source for role-based authorization checks on privileged endpoints; test that unprivileged authenticated users receive 403 on admin endpoints",
-        "commands": [
-            {
-                "command": "grep -rn '@require_role\\|@permission_required\\|authorize!\\|has_permission\\|check_permission\\|rbac\\|@roles_required' <app_source>/",
-                "expected": "Authorization decorators or middleware present on privileged endpoint handlers",
-                "platform": "any"
-            },
-            {
-                "command": "curl -s -o /dev/null -w '%{http_code}' -H 'Authorization: Bearer <unprivileged_token>' http://localhost:8080/api/v1/admin/users",
-                "expected": "403",
-                "platform": "any"
-            }
-        ]
+  "cme_id": "CME-907",
+  "control_name": "Application-Layer RBAC Enforcement",
+  "description": "Enforce role-based access control within the application by mapping each user to a set of roles, each role to a set of permissions, and verifying the caller holds the required permission before executing any privileged operation. Authorization checks run as middleware or decorators on every privileged API endpoint, evaluated after authentication and before business logic. Role assignments follow least privilege \u2014 users receive the minimum role needed for their function. Prevents authenticated users from accessing administrative functions, modifying other users' data, or escalating their own privileges through direct API calls.",
+  "tactic": "Harden",
+  "category": "Application Controls",
+  "category_id": "application-controls",
+  "function_id": "authorization-controls",
+  "control_layer": "Application",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "PR",
+      "from": "L",
+      "to": "H",
+      "rationale": "An attacker with any authenticated session is blocked from privileged operations; exploitation requires compromise of a specifically privileged role. The mechanism is the per-endpoint role verification gate that rejects requests from insufficiently privileged callers before business logic executes."
+    },
+    {
+      "metric": "I",
+      "from": "H",
+      "to": "L",
+      "rationale": "Write operations are confined to the caller's authorized scope; modification of resources outside the caller's role permissions is rejected before execution, limiting integrity impact to the attacker's own authorized data."
     }
+  ],
+  "cwe_relationships": [
+    "CWE-266",
+    "CWE-1220",
+    "CWE-862",
+    "CWE-863",
+    "CWE-285"
+  ],
+  "confidence": "High",
+  "platforms": [
+    "Any",
+    "Windows Server 2019",
+    "Windows Server 2022"
+  ],
+  "verification": {
+    "method": "Inspect application source for role-based authorization checks on privileged endpoints; test that unprivileged authenticated users receive 403 on admin endpoints",
+    "commands": [
+      {
+        "command": "grep -rn '@require_role\\|@permission_required\\|authorize!\\|has_permission\\|check_permission\\|rbac\\|@roles_required' <app_source>/",
+        "expected": "Authorization decorators or middleware present on privileged endpoint handlers",
+        "platform": "any"
+      },
+      {
+        "command": "curl -s -o /dev/null -w '%{http_code}' -H 'Authorization: Bearer <unprivileged_token>' http://localhost:8080/api/v1/admin/users",
+        "expected": "403",
+        "platform": "any"
+      }
+    ]
+  },
+  "scf_identifiers": [
+    "IAC-08",
+    "IAC-20",
+    "IAC-21"
+  ]
 }

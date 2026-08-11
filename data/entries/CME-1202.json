@@ -1,30 +1,35 @@
 {
-    "cme_id": "CME-1202",
-    "control_name": "Automated Backup with Integrity Verification",
-    "description": "Regular automated backups with cryptographic integrity verification and tested restore procedures. Enables point-in-time recovery after ransomware, data corruption, or destructive attacks.",
-    "tactic": "Restore",
-    "category": "Recovery Controls",
-    "category_id": "recovery-controls",
-    "function_id": "system-recovery",
-    "control_layer": "Data",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "A",
-            "from": "H",
-            "to": "L",
-            "rationale": "Data recoverable from verified backups; availability impact bounded by RPO"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-345"
-    ],
-    "verification": {
-        "method": "Verify backup schedule and last successful restore test",
-        "commands": []
-    },
-    "confidence": "Medium",
-    "platforms": [
-        "Any"
-    ]
+  "cme_id": "CME-1202",
+  "control_name": "Automated Backup with Integrity Verification",
+  "description": "Regular automated backups with cryptographic integrity verification and tested restore procedures. Enables point-in-time recovery after ransomware, data corruption, or destructive attacks.",
+  "tactic": "Restore",
+  "category": "Recovery Controls",
+  "category_id": "recovery-controls",
+  "function_id": "system-recovery",
+  "control_layer": "Data",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "A",
+      "from": "H",
+      "to": "L",
+      "rationale": "Data recoverable from verified backups; availability impact bounded by RPO"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-345"
+  ],
+  "verification": {
+    "method": "Verify backup schedule and last successful restore test",
+    "commands": []
+  },
+  "confidence": "Medium",
+  "platforms": [
+    "Any"
+  ],
+  "scf_identifiers": [
+    "BCD-11",
+    "BCD-11.1",
+    "BCD-11.4"
+  ]
 }

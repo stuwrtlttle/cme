@@ -175,6 +175,17 @@
     </section>
     {% endif %}
 
+    {% if entry.scf_identifiers %}
+    <section>
+      <h3>SCF Controls</h3>
+      <div class="cwe-list">
+        {% for scf in entry.scf_identifiers %}
+        <span class="cwe-link">{{ scf }}</span>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
     {% if entry.d3fend_mapping %}
     <section>
       <h3>D3FEND Mapping</h3>

@@ -1,40 +1,45 @@
 {
-    "cme_id": "CME-1003",
-    "control_name": "Falco / eBPF Runtime Security",
-    "description": "Kernel-level runtime security using eBPF or kernel modules to detect anomalous behavior: unexpected shell spawns, sensitive file reads, network connections from unusual processes.",
-    "tactic": "Detect",
-    "category": "Runtime Detection",
-    "category_id": "runtime-detection",
-    "function_id": "host-monitoring",
-    "control_layer": "OS/Kernel",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "Compensating control: exploit post-exploitation behavior triggers alerts"
-        }
-    ],
-    "cwe_relationships": [],
-    "verification": {
-        "method": "Verify Falco is running with rules loaded",
-        "commands": [
-            {
-                "command": "systemctl is-active falco",
-                "expected": "active",
-                "platform": "linux"
-            },
-            {
-                "command": "falco --list 2>/dev/null | head -5",
-                "expected": "rule names",
-                "platform": "linux"
-            }
-        ]
-    },
-    "confidence": "Medium",
-    "platforms": [
-        "RHEL 9",
-        "Kubernetes"
+  "cme_id": "CME-1003",
+  "control_name": "Falco / eBPF Runtime Security",
+  "description": "Kernel-level runtime security using eBPF or kernel modules to detect anomalous behavior: unexpected shell spawns, sensitive file reads, network connections from unusual processes.",
+  "tactic": "Detect",
+  "category": "Runtime Detection",
+  "category_id": "runtime-detection",
+  "function_id": "host-monitoring",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Compensating control: exploit post-exploitation behavior triggers alerts"
+    }
+  ],
+  "cwe_relationships": [],
+  "verification": {
+    "method": "Verify Falco is running with rules loaded",
+    "commands": [
+      {
+        "command": "systemctl is-active falco",
+        "expected": "active",
+        "platform": "linux"
+      },
+      {
+        "command": "falco --list 2>/dev/null | head -5",
+        "expected": "rule names",
+        "platform": "linux"
+      }
     ]
+  },
+  "confidence": "Medium",
+  "platforms": [
+    "RHEL 9",
+    "Kubernetes"
+  ],
+  "scf_identifiers": [
+    "END-07",
+    "MON-01.1",
+    "MON-01.6"
+  ]
 }

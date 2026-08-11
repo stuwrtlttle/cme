@@ -73,6 +73,12 @@ def init_db(conn: sqlite3.Connection) -> None:
             platform    TEXT DEFAULT 'linux'
         );
 
+        CREATE TABLE IF NOT EXISTS scf_identifiers (
+            id      INTEGER PRIMARY KEY AUTOINCREMENT,
+            cme_id  TEXT NOT NULL REFERENCES cme_entries(cme_id) ON DELETE CASCADE,
+            scf_id  TEXT NOT NULL
+        );
+
         CREATE TABLE IF NOT EXISTS references_ (
             id      INTEGER PRIMARY KEY AUTOINCREMENT,
             cme_id  TEXT NOT NULL REFERENCES cme_entries(cme_id) ON DELETE CASCADE,
@@ -90,6 +96,8 @@ def init_db(conn: sqlite3.Connection) -> None:
         CREATE INDEX IF NOT EXISTS idx_cvss_cme ON cvss_vector_impacts(cme_id);
         CREATE INDEX IF NOT EXISTS idx_cwe_cme ON cwe_relationships(cme_id);
         CREATE INDEX IF NOT EXISTS idx_cwe_id ON cwe_relationships(cwe_id);
+        CREATE INDEX IF NOT EXISTS idx_scf_cme ON scf_identifiers(cme_id);
+        CREATE INDEX IF NOT EXISTS idx_scf_id ON scf_identifiers(scf_id);
     """)
 
 
@@ -139,7 +147,7 @@ def insert_entry(conn: sqlite3.Connection, entry: dict) -> None:
     )
 
     # Clear child rows for upsert
-    for table in ("cvss_vector_impacts", "cwe_relationships", "verification_commands", "references_"):
+    for table in ("cvss_vector_impacts", "cwe_relationships", "scf_identifiers", "verification_commands", "references_"):
         conn.execute(f"DELETE FROM {table} WHERE cme_id = ?", (entry["cme_id"],))
 
     for impact in entry.get("cvss_vector_impacts", []):
@@ -168,6 +176,12 @@ def insert_entry(conn: sqlite3.Connection, entry: dict) -> None:
             """INSERT INTO verification_commands (cme_id, method, command, expected, platform)
                VALUES (?, ?, ?, ?, ?)""",
             (entry["cme_id"], method, cmd["command"], cmd["expected"], cmd.get("platform", "linux")),
+        )
+
+    for scf in entry.get("scf_identifiers", []):
+        conn.execute(
+            "INSERT INTO scf_identifiers (cme_id, scf_id) VALUES (?, ?)",
+            (entry["cme_id"], scf),
         )
 
     for ref in entry.get("references", []):
@@ -361,6 +375,27 @@ def list_functions(conn: sqlite3.Connection) -> list[dict]:
     return result
 
 
+def get_mitigations_for_scf(conn: sqlite3.Connection, scf_id: str) -> list[dict]:
+    """Find CME entries mapped to an SCF identifier or domain prefix."""
+    if "-" in scf_id:
+        rows = conn.execute(
+            """SELECT DISTINCT e.* FROM cme_entries e
+               JOIN scf_identifiers s ON e.cme_id = s.cme_id
+               WHERE s.scf_id = ?
+               ORDER BY e.cme_id""",
+            (scf_id,),
+        ).fetchall()
+    else:
+        rows = conn.execute(
+            """SELECT DISTINCT e.* FROM cme_entries e
+               JOIN scf_identifiers s ON e.cme_id = s.cme_id
+               WHERE s.scf_id LIKE ?
+               ORDER BY e.cme_id""",
+            (f"{scf_id}-%",),
+        ).fetchall()
+    return [_hydrate(conn, dict(r)) for r in rows]
+
+
 def get_entries_with_cve_affected(conn: sqlite3.Connection) -> list[dict]:
     rows = conn.execute(
         """SELECT * FROM cme_entries
@@ -399,6 +434,10 @@ def _hydrate(conn: sqlite3.Connection, entry: dict) -> dict:
 
     cwes = conn.execute("SELECT cwe_id FROM cwe_relationships WHERE cme_id = ?", (cme_id,)).fetchall()
     entry["cwe_relationships"] = [r["cwe_id"] for r in cwes]
+
+    scfs = conn.execute("SELECT scf_id FROM scf_identifiers WHERE cme_id = ?", (cme_id,)).fetchall()
+    if scfs:
+        entry["scf_identifiers"] = [r["scf_id"] for r in scfs]
 
     vcmds = conn.execute(
         "SELECT method, command, expected, platform FROM verification_commands WHERE cme_id = ?",

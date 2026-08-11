@@ -1,70 +1,74 @@
 {
-    "cme_id": "CME-802",
-    "control_name": "Password Quality Enforcement (pwquality)",
-    "description": "Enforces minimum password complexity (length, character classes, dictionary checks) via pam_pwquality, making brute force and dictionary attacks impractical.",
-    "tactic": "Harden",
-    "category": "Credential Hardening",
-    "category_id": "credential-hardening",
-    "function_id": "password-policy",
-    "control_layer": "Identity",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "Password brute force requires significantly more time/resources"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-521"
-    ],
-    "verification": {
-        "method": "Check pwquality configuration",
-        "commands": [
-            {
-                "command": "grep -E 'minlen|minclass|dcredit' /etc/security/pwquality.conf",
-                "expected": "minlen = 14",
-                "platform": "rhel"
-            },
-            {
-                "command": "net accounts | Select-String 'Minimum password length'",
-                "expected": "Minimum password length                  14",
-                "platform": "windows"
-            }
-        ]
-    },
-    "references": [
-        {
-            "source": "Red Hat Security Hardening Guide",
-            "section": "Password security"
-        },
-        {
-            "source": "CIS RHEL 9 Benchmark",
-            "section": "5.4 Configure PAM"
-        }
-    ],
-    "confidence": "Medium",
-    "platforms": [
-        "RHEL 9",
-        "RHEL 8",
-        "Ubuntu 24.04",
-        "Windows 10",
-        "Windows 11",
-        "Windows Server 2022"
-    ],
-    "cve_schema_version": "5.2.0",
-    "cve_affected": [
-        {
-            "vendor": "microsoft",
-            "product": "windows",
-            "cpes": [
-                "cpe:2.3:o:microsoft:windows_10:*:*:*:*:*:*:*:*",
-                "cpe:2.3:o:microsoft:windows_11:*:*:*:*:*:*:*:*",
-                "cpe:2.3:o:microsoft:windows_server_2019:*:*:*:*:*:*:*",
-                "cpe:2.3:o:microsoft:windows_server_2022:*:*:*:*:*:*:*"
-            ],
-            "defaultStatus": "applicable"
-        }
+  "cme_id": "CME-802",
+  "control_name": "Password Quality Enforcement (pwquality)",
+  "description": "Enforces minimum password complexity (length, character classes, dictionary checks) via pam_pwquality, making brute force and dictionary attacks impractical.",
+  "tactic": "Harden",
+  "category": "Credential Hardening",
+  "category_id": "credential-hardening",
+  "function_id": "password-policy",
+  "control_layer": "Identity",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Password brute force requires significantly more time/resources"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-521"
+  ],
+  "verification": {
+    "method": "Check pwquality configuration",
+    "commands": [
+      {
+        "command": "grep -E 'minlen|minclass|dcredit' /etc/security/pwquality.conf",
+        "expected": "minlen = 14",
+        "platform": "rhel"
+      },
+      {
+        "command": "net accounts | Select-String 'Minimum password length'",
+        "expected": "Minimum password length                  14",
+        "platform": "windows"
+      }
     ]
+  },
+  "references": [
+    {
+      "source": "Red Hat Security Hardening Guide",
+      "section": "Password security"
+    },
+    {
+      "source": "CIS RHEL 9 Benchmark",
+      "section": "5.4 Configure PAM"
+    }
+  ],
+  "confidence": "Medium",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 8",
+    "Ubuntu 24.04",
+    "Windows 10",
+    "Windows 11",
+    "Windows Server 2022"
+  ],
+  "cve_schema_version": "5.2.0",
+  "cve_affected": [
+    {
+      "vendor": "microsoft",
+      "product": "windows",
+      "cpes": [
+        "cpe:2.3:o:microsoft:windows_10:*:*:*:*:*:*:*:*",
+        "cpe:2.3:o:microsoft:windows_11:*:*:*:*:*:*:*:*",
+        "cpe:2.3:o:microsoft:windows_server_2019:*:*:*:*:*:*:*",
+        "cpe:2.3:o:microsoft:windows_server_2022:*:*:*:*:*:*:*"
+      ],
+      "defaultStatus": "applicable"
+    }
+  ],
+  "scf_identifiers": [
+    "IAC-10.1",
+    "IAC-10.4"
+  ]
 }

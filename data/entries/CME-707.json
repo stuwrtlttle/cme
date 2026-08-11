@@ -1,40 +1,44 @@
 {
-    "cme_id": "CME-707",
-    "control_name": "NoNewPrivileges",
-    "description": "Sets the no_new_privs process flag, preventing any child process from gaining new privileges via execve (SUID bits, file capabilities, setuid transitions). Inherited across fork/exec.",
-    "tactic": "Isolate",
-    "category": "Privilege Isolation",
-    "category_id": "privilege-isolation",
-    "function_id": "systemd-sandboxing",
-    "control_layer": "OS/Kernel",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "PR",
-            "from": "L",
-            "to": "H",
-            "rationale": "Cannot use SUID binaries or file capabilities to escalate"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-269",
-        "CWE-250"
-    ],
-    "verification": {
-        "method": "Check NoNewPrivs flag on process",
-        "commands": [
-            {
-                "command": "grep NoNewPrivs /proc/<pid>/status",
-                "expected": "NoNewPrivs:\t1",
-                "platform": "linux"
-            }
-        ]
-    },
-    "confidence": "High",
-    "platforms": [
-        "RHEL 9",
-        "RHEL 8",
-        "Ubuntu 24.04",
-        "Kubernetes"
+  "cme_id": "CME-707",
+  "control_name": "NoNewPrivileges",
+  "description": "Sets the no_new_privs process flag, preventing any child process from gaining new privileges via execve (SUID bits, file capabilities, setuid transitions). Inherited across fork/exec.",
+  "tactic": "Isolate",
+  "category": "Privilege Isolation",
+  "category_id": "privilege-isolation",
+  "function_id": "systemd-sandboxing",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "PR",
+      "from": "L",
+      "to": "H",
+      "rationale": "Cannot use SUID binaries or file capabilities to escalate"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-269",
+    "CWE-250"
+  ],
+  "verification": {
+    "method": "Check NoNewPrivs flag on process",
+    "commands": [
+      {
+        "command": "grep NoNewPrivs /proc/<pid>/status",
+        "expected": "NoNewPrivs:\t1",
+        "platform": "linux"
+      }
     ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 8",
+    "Ubuntu 24.04",
+    "Kubernetes"
+  ],
+  "scf_identifiers": [
+    "IAC-21",
+    "SEA-04"
+  ]
 }

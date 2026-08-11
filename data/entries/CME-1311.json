@@ -1,52 +1,56 @@
 {
-    "cme_id": "CME-1311",
-    "control_name": "Input Size and Quantity Bounds Enforcement",
-    "description": "Validation that user-supplied quantities \u2014 sizes, counts, lengths, offsets, indices, and repetition factors \u2014 fall within expected bounds before they are used in memory allocation, loop iteration, or buffer operations. Rejects values that are negative, zero when unexpected, or exceed a configured maximum. Applied at the protocol parsing layer before data reaches processing logic. This prevents integer overflow chains (where an oversized count wraps to a small value and bypasses bounds checks) and resource exhaustion attacks (where an unbounded count causes excessive allocation or iteration). The root cause control for vulnerabilities where the attacker controls a size or count field in a binary protocol, serialized format, or API parameter.",
-    "tactic": "Harden",
-    "category": "Application Input Validation",
-    "category_id": "application-input-validation",
-    "function_id": "input-validation",
-    "control_layer": "Application",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "Malicious size or count values are rejected before reaching allocation or copy operations; the attacker must find a quantity field that bypasses validation or an alternative code path that does not enforce bounds"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-1284",
-        "CWE-20",
-        "CWE-1285",
-        "CWE-190",
-        "CWE-131",
-        "CWE-130",
-        "CWE-681"
-    ],
-    "confidence": "High",
-    "platforms": [
-        "RHEL 9",
-        "RHEL 10",
-        "Ubuntu 24.04",
-        "Fedora",
-        "Windows Server 2019",
-        "Windows Server 2022"
-    ],
-    "verification": {
-        "method": "Verify that the application enforces maximum size limits on user-supplied quantity fields and rejects values outside expected ranges",
-        "commands": [
-            {
-                "command": "curl -s -o /dev/null -w \"%{http_code}\" -H \"Content-Length: 999999999\" -d @/dev/null https://app/api/upload",
-                "expected": "413 (Payload Too Large)",
-                "platform": "linux"
-            },
-            {
-                "command": "grep -r \"max_.*size\\|MAX_.*SIZE\\|max_.*length\\|MAX_.*LEN\\|max_.*count\\|MAX_.*COUNT\" /etc/nginx/nginx.conf /etc/httpd/conf/httpd.conf 2>/dev/null | head -5",
-                "expected": "configured size limits present",
-                "platform": "linux"
-            }
-        ]
+  "cme_id": "CME-1311",
+  "control_name": "Input Size and Quantity Bounds Enforcement",
+  "description": "Validation that user-supplied quantities \u2014 sizes, counts, lengths, offsets, indices, and repetition factors \u2014 fall within expected bounds before they are used in memory allocation, loop iteration, or buffer operations. Rejects values that are negative, zero when unexpected, or exceed a configured maximum. Applied at the protocol parsing layer before data reaches processing logic. This prevents integer overflow chains (where an oversized count wraps to a small value and bypasses bounds checks) and resource exhaustion attacks (where an unbounded count causes excessive allocation or iteration). The root cause control for vulnerabilities where the attacker controls a size or count field in a binary protocol, serialized format, or API parameter.",
+  "tactic": "Harden",
+  "category": "Application Input Validation",
+  "category_id": "application-input-validation",
+  "function_id": "input-validation",
+  "control_layer": "Application",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Malicious size or count values are rejected before reaching allocation or copy operations; the attacker must find a quantity field that bypasses validation or an alternative code path that does not enforce bounds"
     }
+  ],
+  "cwe_relationships": [
+    "CWE-1284",
+    "CWE-20",
+    "CWE-1285",
+    "CWE-190",
+    "CWE-131",
+    "CWE-130",
+    "CWE-681"
+  ],
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 10",
+    "Ubuntu 24.04",
+    "Fedora",
+    "Windows Server 2019",
+    "Windows Server 2022"
+  ],
+  "verification": {
+    "method": "Verify that the application enforces maximum size limits on user-supplied quantity fields and rejects values outside expected ranges",
+    "commands": [
+      {
+        "command": "curl -s -o /dev/null -w \"%{http_code}\" -H \"Content-Length: 999999999\" -d @/dev/null https://app/api/upload",
+        "expected": "413 (Payload Too Large)",
+        "platform": "linux"
+      },
+      {
+        "command": "grep -r \"max_.*size\\|MAX_.*SIZE\\|max_.*length\\|MAX_.*LEN\\|max_.*count\\|MAX_.*COUNT\" /etc/nginx/nginx.conf /etc/httpd/conf/httpd.conf 2>/dev/null | head -5",
+        "expected": "configured size limits present",
+        "platform": "linux"
+      }
+    ]
+  },
+  "scf_identifiers": [
+    "SEA-10",
+    "WEB-09"
+  ]
 }

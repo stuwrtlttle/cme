@@ -1,55 +1,59 @@
 {
-    "cme_id": "CME-507",
-    "control_name": "Secure Dynamic Linker Configuration (LD_PRELOAD/PATH Hardening)",
-    "description": "Harden the dynamic linker search path and execution environment to prevent library injection and PATH manipulation attacks. Verify that /etc/ld.so.conf.d/ only references trusted, non-writable library directories. For systemd-managed services, use Environment=LD_PRELOAD= LD_LIBRARY_PATH= to explicitly clear dangerous environment variables, or use EnvironmentFile= with a whitelist of required variables. Ensure no world-writable directory appears in any service PATH. For containers and pods, combine with NoNewPrivileges (security_context.allow_privilege_escalation: false) to prevent LD_PRELOAD exploitation in setuid contexts. The dynamic linker (ld-linux.so) already ignores LD_PRELOAD and LD_LIBRARY_PATH for setuid/setgid binaries, but this does not protect non-setuid services running as root or elevated users.",
-    "tactic": "Harden",
-    "category": "Filesystem Hardening",
-    "category_id": "filesystem-hardening",
-    "function_id": "filesystem-access-control",
-    "control_layer": "OS/Kernel",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "With LD_PRELOAD and LD_LIBRARY_PATH cleared for services and library search paths restricted to trusted directories, the attacker cannot simply place a malicious shared library in a writable directory and have it loaded by a privileged process. Exploitation requires either modifying a trusted directory (which requires elevated privileges or a separate vulnerability), exploiting a service that explicitly loads libraries from untrusted paths (an application-level bug), or finding an alternative code injection vector beyond the hardened dynamic linker configuration."
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-426",
-        "CWE-427"
-    ],
-    "confidence": "Medium",
-    "platforms": [
-        "RHEL 8",
-        "RHEL 9",
-        "RHEL 10",
-        "OpenShift 4"
-    ],
-    "verification": {
-        "method": "Verify that the dynamic linker search path only references trusted directories, LD_PRELOAD/LD_LIBRARY_PATH are cleared for services, and no world-writable directories appear in library search paths.",
-        "commands": [
-            {
-                "command": "grep -rn \".\" /etc/ld.so.conf.d/",
-                "expected": "Only trusted, non-writable library directories listed",
-                "platform": "linux"
-            },
-            {
-                "command": "find $(cat /etc/ld.so.conf.d/*.conf 2>/dev/null) -maxdepth 0 -writable 2>/dev/null",
-                "expected": "No output (no writable directories in library path)",
-                "platform": "linux"
-            },
-            {
-                "command": "systemctl show <service> -p Environment | grep -i ld_preload",
-                "expected": "LD_PRELOAD is empty or absent",
-                "platform": "rhel"
-            },
-            {
-                "command": "ldconfig -p | wc -l",
-                "expected": "Library cache populated from trusted paths only",
-                "platform": "linux"
-            }
-        ]
+  "cme_id": "CME-507",
+  "control_name": "Secure Dynamic Linker Configuration (LD_PRELOAD/PATH Hardening)",
+  "description": "Harden the dynamic linker search path and execution environment to prevent library injection and PATH manipulation attacks. Verify that /etc/ld.so.conf.d/ only references trusted, non-writable library directories. For systemd-managed services, use Environment=LD_PRELOAD= LD_LIBRARY_PATH= to explicitly clear dangerous environment variables, or use EnvironmentFile= with a whitelist of required variables. Ensure no world-writable directory appears in any service PATH. For containers and pods, combine with NoNewPrivileges (security_context.allow_privilege_escalation: false) to prevent LD_PRELOAD exploitation in setuid contexts. The dynamic linker (ld-linux.so) already ignores LD_PRELOAD and LD_LIBRARY_PATH for setuid/setgid binaries, but this does not protect non-setuid services running as root or elevated users.",
+  "tactic": "Harden",
+  "category": "Filesystem Hardening",
+  "category_id": "filesystem-hardening",
+  "function_id": "filesystem-access-control",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "With LD_PRELOAD and LD_LIBRARY_PATH cleared for services and library search paths restricted to trusted directories, the attacker cannot simply place a malicious shared library in a writable directory and have it loaded by a privileged process. Exploitation requires either modifying a trusted directory (which requires elevated privileges or a separate vulnerability), exploiting a service that explicitly loads libraries from untrusted paths (an application-level bug), or finding an alternative code injection vector beyond the hardened dynamic linker configuration."
     }
+  ],
+  "cwe_relationships": [
+    "CWE-426",
+    "CWE-427"
+  ],
+  "confidence": "Medium",
+  "platforms": [
+    "RHEL 8",
+    "RHEL 9",
+    "RHEL 10",
+    "OpenShift 4"
+  ],
+  "verification": {
+    "method": "Verify that the dynamic linker search path only references trusted directories, LD_PRELOAD/LD_LIBRARY_PATH are cleared for services, and no world-writable directories appear in library search paths.",
+    "commands": [
+      {
+        "command": "grep -rn \".\" /etc/ld.so.conf.d/",
+        "expected": "Only trusted, non-writable library directories listed",
+        "platform": "linux"
+      },
+      {
+        "command": "find $(cat /etc/ld.so.conf.d/*.conf 2>/dev/null) -maxdepth 0 -writable 2>/dev/null",
+        "expected": "No output (no writable directories in library path)",
+        "platform": "linux"
+      },
+      {
+        "command": "systemctl show <service> -p Environment | grep -i ld_preload",
+        "expected": "LD_PRELOAD is empty or absent",
+        "platform": "rhel"
+      },
+      {
+        "command": "ldconfig -p | wc -l",
+        "expected": "Library cache populated from trusted paths only",
+        "platform": "linux"
+      }
+    ]
+  },
+  "scf_identifiers": [
+    "CFG-02",
+    "END-02"
+  ]
 }

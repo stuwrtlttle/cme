@@ -74,6 +74,14 @@
       },
       "description": "CWE weakness classes this control mitigates"
     },
+    "scf_identifiers": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z]{2,4}-\\d{2}(\\.\\d+)?$"
+      },
+      "description": "Secure Controls Framework (SCF) control identifiers this CME entry satisfies (e.g., CRY-03, NET-06.1)"
+    },
     "verification": {
       "type": "object",
       "properties": {

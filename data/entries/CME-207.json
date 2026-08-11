@@ -1,49 +1,54 @@
 {
-    "cme_id": "CME-207",
-    "control_name": "DNS Rebinding Protection",
-    "description": "Configure DNS resolvers, recursive forwarders, and network firewalls to reject DNS responses that resolve public domain names to private IP addresses (RFC 1918: 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16; loopback: 127.0.0.0/8; link-local: 169.254.0.0/16; IPv6: ::1, fc00::/7, fe80::/10). DNS rebinding attacks exploit the browser same-origin policy by causing an attacker-controlled domain to resolve to a private IP address after the initial page load, giving the attacker JavaScript access to localhost-bound services. Blocking private IP resolution from public domains prevents this attack at the network layer.",
-    "tactic": "Harden",
-    "category": "Network Isolation",
-    "category_id": "network-isolation",
-    "function_id": "network-access-control",
-    "control_layer": "Network",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AV",
-            "from": "N",
-            "to": "L",
-            "rationale": "An attacker on the public internet cannot reach localhost-bound or private-network services via DNS rebinding. The DNS resolver or firewall blocks responses that would map a public domain to a private address, preventing the browser from connecting to internal services. Exploitation requires the attacker to be on the same local network or have direct access to the host."
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-346",
-        "CWE-350"
-    ],
-    "confidence": "High",
-    "platforms": [
-        "RHEL 8",
-        "RHEL 9",
-        "RHEL 10"
-    ],
-    "verification": {
-        "method": "Verify that DNS resolvers are configured to block private IP resolution from public domains, and that firewall rules inspect DNS responses for private address answers.",
-        "commands": [
-            {
-                "command": "grep -E \"stop-dns-rebind|rebind-localhost-ok\" /etc/dnsmasq.conf",
-                "expected": "stop-dns-rebind present",
-                "platform": "linux"
-            },
-            {
-                "command": "grep \"private-address\" /etc/unbound/unbound.conf",
-                "expected": "private-address directives for RFC 1918 ranges",
-                "platform": "linux"
-            },
-            {
-                "command": "dig @localhost rebind-test.example.com A +short",
-                "expected": "No private IP addresses in response (empty output or NXDOMAIN)",
-                "platform": "any"
-            }
-        ]
+  "cme_id": "CME-207",
+  "control_name": "DNS Rebinding Protection",
+  "description": "Configure DNS resolvers, recursive forwarders, and network firewalls to reject DNS responses that resolve public domain names to private IP addresses (RFC 1918: 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16; loopback: 127.0.0.0/8; link-local: 169.254.0.0/16; IPv6: ::1, fc00::/7, fe80::/10). DNS rebinding attacks exploit the browser same-origin policy by causing an attacker-controlled domain to resolve to a private IP address after the initial page load, giving the attacker JavaScript access to localhost-bound services. Blocking private IP resolution from public domains prevents this attack at the network layer.",
+  "tactic": "Harden",
+  "category": "Network Isolation",
+  "category_id": "network-isolation",
+  "function_id": "network-access-control",
+  "control_layer": "Network",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AV",
+      "from": "N",
+      "to": "L",
+      "rationale": "An attacker on the public internet cannot reach localhost-bound or private-network services via DNS rebinding. The DNS resolver or firewall blocks responses that would map a public domain to a private address, preventing the browser from connecting to internal services. Exploitation requires the attacker to be on the same local network or have direct access to the host."
     }
+  ],
+  "cwe_relationships": [
+    "CWE-346",
+    "CWE-350"
+  ],
+  "confidence": "High",
+  "platforms": [
+    "RHEL 8",
+    "RHEL 9",
+    "RHEL 10"
+  ],
+  "verification": {
+    "method": "Verify that DNS resolvers are configured to block private IP resolution from public domains, and that firewall rules inspect DNS responses for private address answers.",
+    "commands": [
+      {
+        "command": "grep -E \"stop-dns-rebind|rebind-localhost-ok\" /etc/dnsmasq.conf",
+        "expected": "stop-dns-rebind present",
+        "platform": "linux"
+      },
+      {
+        "command": "grep \"private-address\" /etc/unbound/unbound.conf",
+        "expected": "private-address directives for RFC 1918 ranges",
+        "platform": "linux"
+      },
+      {
+        "command": "dig @localhost rebind-test.example.com A +short",
+        "expected": "No private IP addresses in response (empty output or NXDOMAIN)",
+        "platform": "any"
+      }
+    ]
+  },
+  "scf_identifiers": [
+    "NET-10",
+    "NET-10.2",
+    "NET-18.5"
+  ]
 }

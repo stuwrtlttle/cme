@@ -1,50 +1,53 @@
 {
-    "cme_id": "CME-103",
-    "control_name": "Stack Canaries (Stack Protector)",
-    "description": "Compiler-inserted random guard values on the stack that are checked before function return. Detects and aborts on stack buffer overflow before attacker gains control.",
-    "tactic": "Harden",
-    "category": "Kernel Hardening",
-    "category_id": "kernel-hardening",
-    "function_id": "memory-safety",
-    "control_layer": "OS/Kernel",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "Attacker must leak or guess canary value to exploit stack overflow"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-121",
-        "CWE-122",
-        "CWE-120"
-    ],
-    "verification": {
-        "method": "Verify binaries compiled with -fstack-protector-strong",
-        "commands": [
-            {
-                "command": "readelf -s /usr/bin/ls | grep __stack_chk_fail",
-                "expected": "__stack_chk_fail",
-                "platform": "linux"
-            },
-            {
-                "command": "rpm -q --queryformat '%{FLAGS}' coreutils | grep stack-protector",
-                "expected": "stack-protector",
-                "platform": "rhel"
-            }
-        ]
-    },
-    "d3fend_mapping": {
-        "technique_id": "D3-SPP",
-        "technique_name": "Stack Frame Canary Validation"
-    },
-    "confidence": "High",
-    "platforms": [
-        "RHEL 9",
-        "RHEL 8",
-        "Ubuntu 24.04",
-        "Fedora"
+  "cme_id": "CME-103",
+  "control_name": "Stack Canaries (Stack Protector)",
+  "description": "Compiler-inserted random guard values on the stack that are checked before function return. Detects and aborts on stack buffer overflow before attacker gains control.",
+  "tactic": "Harden",
+  "category": "Kernel Hardening",
+  "category_id": "kernel-hardening",
+  "function_id": "memory-safety",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Attacker must leak or guess canary value to exploit stack overflow"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-121",
+    "CWE-122",
+    "CWE-120"
+  ],
+  "verification": {
+    "method": "Verify binaries compiled with -fstack-protector-strong",
+    "commands": [
+      {
+        "command": "readelf -s /usr/bin/ls | grep __stack_chk_fail",
+        "expected": "__stack_chk_fail",
+        "platform": "linux"
+      },
+      {
+        "command": "rpm -q --queryformat '%{FLAGS}' coreutils | grep stack-protector",
+        "expected": "stack-protector",
+        "platform": "rhel"
+      }
     ]
+  },
+  "d3fend_mapping": {
+    "technique_id": "D3-SPP",
+    "technique_name": "Stack Frame Canary Validation"
+  },
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 8",
+    "Ubuntu 24.04",
+    "Fedora"
+  ],
+  "scf_identifiers": [
+    "SEA-10"
+  ]
 }

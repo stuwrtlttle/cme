@@ -1,45 +1,50 @@
 {
-    "cme_id": "CME-702",
-    "control_name": "Linux Namespaces (User, PID, Network, Mount)",
-    "description": "Kernel namespace isolation providing separate views of system resources per process group. PID namespace hides host processes, mount namespace isolates filesystem, network namespace isolates network stack, user namespace remaps UIDs.",
-    "tactic": "Isolate",
-    "category": "Container Isolation",
-    "category_id": "container-isolation",
-    "function_id": "container-runtime",
-    "control_layer": "OS/Kernel",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "S",
-            "from": "C",
-            "to": "U",
-            "rationale": "Process cannot see or interact with resources outside its namespace"
-        },
-        {
-            "metric": "PR",
-            "from": "L",
-            "to": "H",
-            "rationale": "UID 0 inside namespace maps to unprivileged user on host (user ns)"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-269"
-    ],
-    "verification": {
-        "method": "Check process namespace isolation",
-        "commands": [
-            {
-                "command": "ls -la /proc/<pid>/ns/",
-                "expected": "user mnt pid net",
-                "platform": "linux"
-            }
-        ]
+  "cme_id": "CME-702",
+  "control_name": "Linux Namespaces (User, PID, Network, Mount)",
+  "description": "Kernel namespace isolation providing separate views of system resources per process group. PID namespace hides host processes, mount namespace isolates filesystem, network namespace isolates network stack, user namespace remaps UIDs.",
+  "tactic": "Isolate",
+  "category": "Container Isolation",
+  "category_id": "container-isolation",
+  "function_id": "container-runtime",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "S",
+      "from": "C",
+      "to": "U",
+      "rationale": "Process cannot see or interact with resources outside its namespace"
     },
-    "confidence": "High",
-    "platforms": [
-        "RHEL 9",
-        "RHEL 8",
-        "Ubuntu 24.04",
-        "Kubernetes"
+    {
+      "metric": "PR",
+      "from": "L",
+      "to": "H",
+      "rationale": "UID 0 inside namespace maps to unprivileged user on host (user ns)"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-269"
+  ],
+  "verification": {
+    "method": "Check process namespace isolation",
+    "commands": [
+      {
+        "command": "ls -la /proc/<pid>/ns/",
+        "expected": "user mnt pid net",
+        "platform": "linux"
+      }
     ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 8",
+    "Ubuntu 24.04",
+    "Kubernetes"
+  ],
+  "scf_identifiers": [
+    "CLD-06",
+    "SEA-03.1",
+    "SEA-04"
+  ]
 }

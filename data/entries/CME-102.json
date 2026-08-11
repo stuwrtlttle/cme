@@ -1,72 +1,76 @@
 {
-    "cme_id": "CME-102",
-    "control_name": "NX/XD Bit (Non-Executable Memory)",
-    "description": "Hardware-enforced memory page permissions that prevent execution of code in data regions (stack, heap), blocking classic code injection.",
-    "tactic": "Harden",
-    "category": "Kernel Hardening",
-    "category_id": "kernel-hardening",
-    "function_id": "memory-safety",
-    "control_layer": "OS/Kernel",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "Attacker must use ROP/JOP instead of direct shellcode injection"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-94",
-        "CWE-119",
-        "CWE-416"
-    ],
-    "verification": {
-        "method": "Check CPU supports NX bit and kernel has it enabled",
-        "commands": [
-            {
-                "command": "grep -q nx /proc/cpuinfo && echo 'NX enabled'",
-                "expected": "NX enabled",
-                "platform": "linux"
-            },
-            {
-                "command": "dmesg | grep -i 'NX.*protection'",
-                "expected": "NX (Execute Disable) protection: active",
-                "platform": "linux"
-            },
-            {
-                "command": "(Get-CimInstance Win32_OperatingSystem).DataExecutionPrevention_SupportPolicy",
-                "expected": "3",
-                "platform": "windows"
-            }
-        ]
-    },
-    "d3fend_mapping": {
-        "technique_id": "D3-EHPV",
-        "technique_name": "Exception Handler Pointer Validation"
-    },
-    "confidence": "High",
-    "platforms": [
-        "RHEL 9",
-        "RHEL 8",
-        "Ubuntu 24.04",
-        "SLES 15",
-        "Windows 10",
-        "Windows 11",
-        "Windows Server 2022"
-    ],
-    "cve_schema_version": "5.2.0",
-    "cve_affected": [
-        {
-            "vendor": "microsoft",
-            "product": "windows",
-            "cpes": [
-                "cpe:2.3:o:microsoft:windows_10:*:*:*:*:*:*:*:*",
-                "cpe:2.3:o:microsoft:windows_11:*:*:*:*:*:*:*:*",
-                "cpe:2.3:o:microsoft:windows_server_2019:*:*:*:*:*:*:*",
-                "cpe:2.3:o:microsoft:windows_server_2022:*:*:*:*:*:*:*"
-            ],
-            "defaultStatus": "applicable"
-        }
+  "cme_id": "CME-102",
+  "control_name": "NX/XD Bit (Non-Executable Memory)",
+  "description": "Hardware-enforced memory page permissions that prevent execution of code in data regions (stack, heap), blocking classic code injection.",
+  "tactic": "Harden",
+  "category": "Kernel Hardening",
+  "category_id": "kernel-hardening",
+  "function_id": "memory-safety",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Attacker must use ROP/JOP instead of direct shellcode injection"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-94",
+    "CWE-119",
+    "CWE-416"
+  ],
+  "verification": {
+    "method": "Check CPU supports NX bit and kernel has it enabled",
+    "commands": [
+      {
+        "command": "grep -q nx /proc/cpuinfo && echo 'NX enabled'",
+        "expected": "NX enabled",
+        "platform": "linux"
+      },
+      {
+        "command": "dmesg | grep -i 'NX.*protection'",
+        "expected": "NX (Execute Disable) protection: active",
+        "platform": "linux"
+      },
+      {
+        "command": "(Get-CimInstance Win32_OperatingSystem).DataExecutionPrevention_SupportPolicy",
+        "expected": "3",
+        "platform": "windows"
+      }
     ]
+  },
+  "d3fend_mapping": {
+    "technique_id": "D3-EHPV",
+    "technique_name": "Exception Handler Pointer Validation"
+  },
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 8",
+    "Ubuntu 24.04",
+    "SLES 15",
+    "Windows 10",
+    "Windows 11",
+    "Windows Server 2022"
+  ],
+  "cve_schema_version": "5.2.0",
+  "cve_affected": [
+    {
+      "vendor": "microsoft",
+      "product": "windows",
+      "cpes": [
+        "cpe:2.3:o:microsoft:windows_10:*:*:*:*:*:*:*:*",
+        "cpe:2.3:o:microsoft:windows_11:*:*:*:*:*:*:*:*",
+        "cpe:2.3:o:microsoft:windows_server_2019:*:*:*:*:*:*:*",
+        "cpe:2.3:o:microsoft:windows_server_2022:*:*:*:*:*:*:*"
+      ],
+      "defaultStatus": "applicable"
+    }
+  ],
+  "scf_identifiers": [
+    "END-02",
+    "SEA-10"
+  ]
 }

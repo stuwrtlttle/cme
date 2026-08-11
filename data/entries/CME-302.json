@@ -1,39 +1,43 @@
 {
-    "cme_id": "CME-302",
-    "control_name": "SELinux Confined User Mapping",
-    "description": "Maps Linux login users to SELinux confined user types instead of unconfined_u. Restricts user-level capabilities like running unconfined applications, accessing network, or executing in /tmp.",
-    "tactic": "Harden",
-    "category": "Mandatory Access Control",
-    "category_id": "mandatory-access-control",
-    "function_id": "selinux",
-    "control_layer": "OS/Kernel",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "PR",
-            "from": "L",
-            "to": "H",
-            "rationale": "Compromised user account has significantly restricted capabilities"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-269",
-        "CWE-284"
-    ],
-    "verification": {
-        "method": "Verify no regular users mapped to unconfined_u",
-        "commands": [
-            {
-                "command": "semanage login -l | grep -v 'unconfined_u\\|Login Name'",
-                "expected": "staff_u|user_u|guest_u",
-                "platform": "rhel"
-            }
-        ]
-    },
-    "confidence": "High",
-    "platforms": [
-        "RHEL 9",
-        "RHEL 8",
-        "Fedora"
+  "cme_id": "CME-302",
+  "control_name": "SELinux Confined User Mapping",
+  "description": "Maps Linux login users to SELinux confined user types instead of unconfined_u. Restricts user-level capabilities like running unconfined applications, accessing network, or executing in /tmp.",
+  "tactic": "Harden",
+  "category": "Mandatory Access Control",
+  "category_id": "mandatory-access-control",
+  "function_id": "selinux",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "PR",
+      "from": "L",
+      "to": "H",
+      "rationale": "Compromised user account has significantly restricted capabilities"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-269",
+    "CWE-284"
+  ],
+  "verification": {
+    "method": "Verify no regular users mapped to unconfined_u",
+    "commands": [
+      {
+        "command": "semanage login -l | grep -v 'unconfined_u\\|Login Name'",
+        "expected": "staff_u|user_u|guest_u",
+        "platform": "rhel"
+      }
     ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 8",
+    "Fedora"
+  ],
+  "scf_identifiers": [
+    "IAC-20",
+    "IAC-21"
+  ]
 }

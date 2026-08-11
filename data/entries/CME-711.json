@@ -1,55 +1,59 @@
 {
-    "cme_id": "CME-711",
-    "control_name": "Admission Controller Policy Enforcement (OPA/Gatekeeper/Kyverno)",
-    "description": "Policy-as-code enforcement at the Kubernetes admission gate. Admission controllers intercept API requests before persistence and reject workloads that violate security policies: no privileged containers, no host namespace sharing, required labels/annotations, image registry allowlists. Provides defense-in-depth on top of Pod Security Standards (CME-706) with custom policy granularity. OPA/Gatekeeper uses Rego policies via ConstraintTemplate CRDs; Kyverno uses Kubernetes-native ClusterPolicy resources. OpenShift SecurityContextConstraints serve as a built-in admission control mechanism.",
-    "tactic": "Harden",
-    "category": "Container Isolation",
-    "category_id": "container-isolation",
-    "function_id": "pod-security",
-    "control_layer": "Application",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "PR",
-            "from": "N",
-            "to": "L",
-            "rationale": "Unauthorized workloads cannot be deployed without policy exemption; admission controller rejects API requests that violate security constraints before the workload is persisted"
-        },
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "Attacker must bypass the policy engine to deploy a malicious or privileged workload; simply having API access is insufficient without a policy-compliant manifest"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-269",
-        "CWE-284",
-        "CWE-250"
-    ],
-    "verification": {
-        "method": "Verify admission controller is deployed and enforcing policies",
-        "commands": [
-            {
-                "command": "kubectl get constraint --no-headers 2>/dev/null | wc -l",
-                "expected": "One or more constraints active (OPA/Gatekeeper)",
-                "platform": "kubernetes"
-            },
-            {
-                "command": "kubectl get clusterpolicy --no-headers 2>/dev/null | wc -l",
-                "expected": "One or more cluster policies active (Kyverno)",
-                "platform": "kubernetes"
-            },
-            {
-                "command": "oc get scc --no-headers | wc -l",
-                "expected": "SecurityContextConstraints present (OpenShift built-in admission)",
-                "platform": "kubernetes"
-            }
-        ]
+  "cme_id": "CME-711",
+  "control_name": "Admission Controller Policy Enforcement (OPA/Gatekeeper/Kyverno)",
+  "description": "Policy-as-code enforcement at the Kubernetes admission gate. Admission controllers intercept API requests before persistence and reject workloads that violate security policies: no privileged containers, no host namespace sharing, required labels/annotations, image registry allowlists. Provides defense-in-depth on top of Pod Security Standards (CME-706) with custom policy granularity. OPA/Gatekeeper uses Rego policies via ConstraintTemplate CRDs; Kyverno uses Kubernetes-native ClusterPolicy resources. OpenShift SecurityContextConstraints serve as a built-in admission control mechanism.",
+  "tactic": "Harden",
+  "category": "Container Isolation",
+  "category_id": "container-isolation",
+  "function_id": "pod-security",
+  "control_layer": "Application",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "PR",
+      "from": "N",
+      "to": "L",
+      "rationale": "Unauthorized workloads cannot be deployed without policy exemption; admission controller rejects API requests that violate security constraints before the workload is persisted"
     },
-    "confidence": "High",
-    "platforms": [
-        "Kubernetes 1.25+",
-        "OpenShift 4.12+"
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Attacker must bypass the policy engine to deploy a malicious or privileged workload; simply having API access is insufficient without a policy-compliant manifest"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-269",
+    "CWE-284",
+    "CWE-250"
+  ],
+  "verification": {
+    "method": "Verify admission controller is deployed and enforcing policies",
+    "commands": [
+      {
+        "command": "kubectl get constraint --no-headers 2>/dev/null | wc -l",
+        "expected": "One or more constraints active (OPA/Gatekeeper)",
+        "platform": "kubernetes"
+      },
+      {
+        "command": "kubectl get clusterpolicy --no-headers 2>/dev/null | wc -l",
+        "expected": "One or more cluster policies active (Kyverno)",
+        "platform": "kubernetes"
+      },
+      {
+        "command": "oc get scc --no-headers | wc -l",
+        "expected": "SecurityContextConstraints present (OpenShift built-in admission)",
+        "platform": "kubernetes"
+      }
     ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "Kubernetes 1.25+",
+    "OpenShift 4.12+"
+  ],
+  "scf_identifiers": [
+    "CFG-06",
+    "CLD-02"
+  ]
 }

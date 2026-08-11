@@ -1,63 +1,67 @@
 {
-    "cme_id": "CME-1309",
-    "control_name": "Script Engine Restriction (Sandbox / Disable)",
-    "description": "Restricts or disables application-embedded scripting and expression language engines to prevent arbitrary code execution. Covers three postures: (1) disable unnecessary script consoles and evaluation endpoints entirely (e.g., Jenkins Script Console, debug REPLs), (2) enforce a language-level sandbox that blocks dangerous operations such as file I/O, process execution, classloading, and reflection while permitting safe computation (e.g., Jenkins Groovy Sandbox, Java SecurityManager for scripting), and (3) restrict expression language evaluation to a safe subset by disabling type resolution, method invocation, and class instantiation in EL/template contexts. Applies to Groovy, OGNL, SpEL, MVEL, Jinja2, EL 3.0, Freemarker, and similar engines embedded in Java EE, CI/CD platforms, and web frameworks.",
-    "tactic": "Harden",
-    "category": "Application Input Validation",
-    "category_id": "application-input-validation",
-    "function_id": "input-validation",
-    "control_layer": "Application",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "Direct code execution via the scripting engine is blocked; exploitation requires discovering a sandbox bypass or an unrestricted evaluation path, which demands vulnerability-specific research rather than trivial payload submission"
-        },
-        {
-            "metric": "I",
-            "from": "H",
-            "to": "L",
-            "rationale": "Sandboxed script engine cannot invoke arbitrary system commands, modify files, or alter application state outside the permitted API surface; integrity impact is confined to the script's authorized scope"
-        },
-        {
-            "metric": "C",
-            "from": "H",
-            "to": "L",
-            "rationale": "Script engine cannot read arbitrary files, access credentials, or exfiltrate data from the host; information disclosure is limited to data the script is explicitly permitted to access"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-94",
-        "CWE-95",
-        "CWE-96",
-        "CWE-917"
-    ],
-    "confidence": "High",
-    "platforms": [
-        "Any",
-        "Windows Server 2019",
-        "Windows Server 2022"
-    ],
-    "verification": {
-        "method": "Verify script consoles are disabled or sandboxed, and expression language evaluation is restricted",
-        "commands": [
-            {
-                "command": "curl -s -o /dev/null -w '%{http_code}' -X POST http://localhost:8080/jenkins/script --data 'script=println(1)'",
-                "expected": "403 or 404 (Script Console disabled or access-restricted to administrators only)",
-                "platform": "any"
-            },
-            {
-                "command": "grep -rn 'GroovySandbox\\|SecureGroovyScript\\|sandbox(true)' <app_source>/",
-                "expected": "Groovy sandbox enforcement present in pipeline/script execution paths",
-                "platform": "any"
-            },
-            {
-                "command": "grep -rn 'SimpleEvaluationContext\\|StandardEvaluationContext' <app_source>/ | grep -c SimpleEvaluationContext",
-                "expected": "SimpleEvaluationContext used instead of StandardEvaluationContext for user-controlled SpEL",
-                "platform": "any"
-            }
-        ]
+  "cme_id": "CME-1309",
+  "control_name": "Script Engine Restriction (Sandbox / Disable)",
+  "description": "Restricts or disables application-embedded scripting and expression language engines to prevent arbitrary code execution. Covers three postures: (1) disable unnecessary script consoles and evaluation endpoints entirely (e.g., Jenkins Script Console, debug REPLs), (2) enforce a language-level sandbox that blocks dangerous operations such as file I/O, process execution, classloading, and reflection while permitting safe computation (e.g., Jenkins Groovy Sandbox, Java SecurityManager for scripting), and (3) restrict expression language evaluation to a safe subset by disabling type resolution, method invocation, and class instantiation in EL/template contexts. Applies to Groovy, OGNL, SpEL, MVEL, Jinja2, EL 3.0, Freemarker, and similar engines embedded in Java EE, CI/CD platforms, and web frameworks.",
+  "tactic": "Harden",
+  "category": "Application Input Validation",
+  "category_id": "application-input-validation",
+  "function_id": "input-validation",
+  "control_layer": "Application",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Direct code execution via the scripting engine is blocked; exploitation requires discovering a sandbox bypass or an unrestricted evaluation path, which demands vulnerability-specific research rather than trivial payload submission"
+    },
+    {
+      "metric": "I",
+      "from": "H",
+      "to": "L",
+      "rationale": "Sandboxed script engine cannot invoke arbitrary system commands, modify files, or alter application state outside the permitted API surface; integrity impact is confined to the script's authorized scope"
+    },
+    {
+      "metric": "C",
+      "from": "H",
+      "to": "L",
+      "rationale": "Script engine cannot read arbitrary files, access credentials, or exfiltrate data from the host; information disclosure is limited to data the script is explicitly permitted to access"
     }
+  ],
+  "cwe_relationships": [
+    "CWE-94",
+    "CWE-95",
+    "CWE-96",
+    "CWE-917"
+  ],
+  "confidence": "High",
+  "platforms": [
+    "Any",
+    "Windows Server 2019",
+    "Windows Server 2022"
+  ],
+  "verification": {
+    "method": "Verify script consoles are disabled or sandboxed, and expression language evaluation is restricted",
+    "commands": [
+      {
+        "command": "curl -s -o /dev/null -w '%{http_code}' -X POST http://localhost:8080/jenkins/script --data 'script=println(1)'",
+        "expected": "403 or 404 (Script Console disabled or access-restricted to administrators only)",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'GroovySandbox\\|SecureGroovyScript\\|sandbox(true)' <app_source>/",
+        "expected": "Groovy sandbox enforcement present in pipeline/script execution paths",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'SimpleEvaluationContext\\|StandardEvaluationContext' <app_source>/ | grep -c SimpleEvaluationContext",
+        "expected": "SimpleEvaluationContext used instead of StandardEvaluationContext for user-controlled SpEL",
+        "platform": "any"
+      }
+    ]
+  },
+  "scf_identifiers": [
+    "SEA-06",
+    "WEB-09"
+  ]
 }

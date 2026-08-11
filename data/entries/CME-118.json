@@ -1,57 +1,61 @@
 {
-    "cme_id": "CME-118",
-    "control_name": "Protected File Links (Kernel Symlink/Hardlink Protection)",
-    "description": "Enable the kernel filesystem link protection sysctls to prevent exploitation of TOCTOU race conditions and symlink following attacks in world-writable sticky directories. fs.protected_symlinks=1 prevents following symlinks in sticky world-writable directories (e.g., /tmp) unless the follower owns the symlink, the directory owner matches, or the symlink target owner matches. fs.protected_hardlinks=1 prevents creating hardlinks to files not owned by the caller, blocking hardlink-based TOCTOU and privilege escalation attacks. fs.protected_regular=2 and fs.protected_fifos=2 extend protection to regular files and FIFOs in sticky directories. These sysctls are enabled by default on RHEL 7+ but may be modified by administrators or overridden by third-party configurations.",
-    "tactic": "Harden",
-    "category": "Kernel Hardening",
-    "category_id": "kernel-hardening",
-    "function_id": "kernel-attack-surface",
-    "control_layer": "OS/Kernel",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "The most common filesystem TOCTOU and symlink following pattern \u2014 symlink or hardlink swap in a sticky world-writable directory like /tmp between a privileged process check and use \u2014 is blocked at the kernel level. The attacker must find a TOCTOU target outside of protected directories, exploit a race that does not involve filesystem links, or resort to more complex techniques such as procfs-based redirects. This significantly increases the complexity required for successful exploitation."
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-59",
-        "CWE-61",
-        "CWE-367",
-        "CWE-362"
-    ],
-    "confidence": "High",
-    "platforms": [
-        "RHEL 7",
-        "RHEL 8",
-        "RHEL 9",
-        "RHEL 10"
-    ],
-    "verification": {
-        "method": "Verify that all four protected file link sysctls are enabled. Check sysctl runtime values and persistence configuration.",
-        "commands": [
-            {
-                "command": "sysctl fs.protected_symlinks",
-                "expected": "fs.protected_symlinks = 1",
-                "platform": "linux"
-            },
-            {
-                "command": "sysctl fs.protected_hardlinks",
-                "expected": "fs.protected_hardlinks = 1",
-                "platform": "linux"
-            },
-            {
-                "command": "sysctl fs.protected_regular",
-                "expected": "fs.protected_regular = 2",
-                "platform": "linux"
-            },
-            {
-                "command": "sysctl fs.protected_fifos",
-                "expected": "fs.protected_fifos = 2",
-                "platform": "linux"
-            }
-        ]
+  "cme_id": "CME-118",
+  "control_name": "Protected File Links (Kernel Symlink/Hardlink Protection)",
+  "description": "Enable the kernel filesystem link protection sysctls to prevent exploitation of TOCTOU race conditions and symlink following attacks in world-writable sticky directories. fs.protected_symlinks=1 prevents following symlinks in sticky world-writable directories (e.g., /tmp) unless the follower owns the symlink, the directory owner matches, or the symlink target owner matches. fs.protected_hardlinks=1 prevents creating hardlinks to files not owned by the caller, blocking hardlink-based TOCTOU and privilege escalation attacks. fs.protected_regular=2 and fs.protected_fifos=2 extend protection to regular files and FIFOs in sticky directories. These sysctls are enabled by default on RHEL 7+ but may be modified by administrators or overridden by third-party configurations.",
+  "tactic": "Harden",
+  "category": "Kernel Hardening",
+  "category_id": "kernel-hardening",
+  "function_id": "kernel-attack-surface",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "The most common filesystem TOCTOU and symlink following pattern \u2014 symlink or hardlink swap in a sticky world-writable directory like /tmp between a privileged process check and use \u2014 is blocked at the kernel level. The attacker must find a TOCTOU target outside of protected directories, exploit a race that does not involve filesystem links, or resort to more complex techniques such as procfs-based redirects. This significantly increases the complexity required for successful exploitation."
     }
+  ],
+  "cwe_relationships": [
+    "CWE-59",
+    "CWE-61",
+    "CWE-367",
+    "CWE-362"
+  ],
+  "confidence": "High",
+  "platforms": [
+    "RHEL 7",
+    "RHEL 8",
+    "RHEL 9",
+    "RHEL 10"
+  ],
+  "verification": {
+    "method": "Verify that all four protected file link sysctls are enabled. Check sysctl runtime values and persistence configuration.",
+    "commands": [
+      {
+        "command": "sysctl fs.protected_symlinks",
+        "expected": "fs.protected_symlinks = 1",
+        "platform": "linux"
+      },
+      {
+        "command": "sysctl fs.protected_hardlinks",
+        "expected": "fs.protected_hardlinks = 1",
+        "platform": "linux"
+      },
+      {
+        "command": "sysctl fs.protected_regular",
+        "expected": "fs.protected_regular = 2",
+        "platform": "linux"
+      },
+      {
+        "command": "sysctl fs.protected_fifos",
+        "expected": "fs.protected_fifos = 2",
+        "platform": "linux"
+      }
+    ]
+  },
+  "scf_identifiers": [
+    "CFG-02",
+    "END-02"
+  ]
 }

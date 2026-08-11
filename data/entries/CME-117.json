@@ -1,53 +1,56 @@
 {
-    "cme_id": "CME-117",
-    "control_name": "Heap Allocator Hardening (glibc Safe-Linking and Metadata Protection)",
-    "description": "Enable and verify glibc heap allocator safety features that specifically target use-after-free and double-free exploitation. Modern glibc (2.32+) includes safe-linking, which encrypts singly-linked list pointers in malloc metadata using a per-thread random key XORed with the storage location. An attacker who corrupts a freed chunk's forward pointer must know both the random key and the chunk address to forge a valid pointer, defeating the standard tcache-poisoning technique used in most heap exploitation. Tcache key verification detects double-free by storing a per-thread random value in freed tcache entries and checking it on subsequent frees; a second free of the same pointer is detected and the process is aborted. On older glibc (2.28, RHEL 8), setting MALLOC_PERTURB_ to a nonzero value fills freed memory with a byte pattern, causing use-after-free reads to return garbage instead of previously valid data, breaking exploitation chains that depend on reading stale heap content.",
-    "tactic": "Harden",
-    "category": "Kernel Hardening",
-    "category_id": "kernel-hardening",
-    "function_id": "memory-safety",
-    "control_layer": "OS/Kernel",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "Safe-linking forces the attacker to defeat pointer encryption (requires both the per-thread random key and the chunk address) before they can redirect allocation to a controlled location via tcache poisoning; tcache key verification detects double-free attempts and aborts the process before the attacker achieves heap corruption \u2014 exploitation requires discovering a bypass for the allocator's integrity checks"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-416",
-        "CWE-415",
-        "CWE-825",
-        "CWE-122"
-    ],
-    "confidence": "High",
-    "platforms": [
-        "RHEL 8",
-        "RHEL 9",
-        "RHEL 10",
-        "Fedora",
-        "Ubuntu 24.04"
-    ],
-    "verification": {
-        "method": "Verify glibc version includes safe-linking (2.32+) and tcache key verification; on older systems, verify MALLOC_PERTURB_ is set",
-        "commands": [
-            {
-                "command": "rpm -q glibc",
-                "expected": "glibc-2.32 or higher for safe-linking and tcache key verification (RHEL 9+)",
-                "platform": "rhel"
-            },
-            {
-                "command": "ldd --version 2>&1 | head -1",
-                "expected": "ldd (GNU libc) 2.32 or higher",
-                "platform": "linux"
-            },
-            {
-                "command": "grep -s MALLOC_PERTURB_ /etc/environment /etc/profile.d/*.sh",
-                "expected": "MALLOC_PERTURB_ set to nonzero value (fallback for glibc < 2.32)",
-                "platform": "rhel"
-            }
-        ]
+  "cme_id": "CME-117",
+  "control_name": "Heap Allocator Hardening (glibc Safe-Linking and Metadata Protection)",
+  "description": "Enable and verify glibc heap allocator safety features that specifically target use-after-free and double-free exploitation. Modern glibc (2.32+) includes safe-linking, which encrypts singly-linked list pointers in malloc metadata using a per-thread random key XORed with the storage location. An attacker who corrupts a freed chunk's forward pointer must know both the random key and the chunk address to forge a valid pointer, defeating the standard tcache-poisoning technique used in most heap exploitation. Tcache key verification detects double-free by storing a per-thread random value in freed tcache entries and checking it on subsequent frees; a second free of the same pointer is detected and the process is aborted. On older glibc (2.28, RHEL 8), setting MALLOC_PERTURB_ to a nonzero value fills freed memory with a byte pattern, causing use-after-free reads to return garbage instead of previously valid data, breaking exploitation chains that depend on reading stale heap content.",
+  "tactic": "Harden",
+  "category": "Kernel Hardening",
+  "category_id": "kernel-hardening",
+  "function_id": "memory-safety",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Safe-linking forces the attacker to defeat pointer encryption (requires both the per-thread random key and the chunk address) before they can redirect allocation to a controlled location via tcache poisoning; tcache key verification detects double-free attempts and aborts the process before the attacker achieves heap corruption \u2014 exploitation requires discovering a bypass for the allocator's integrity checks"
     }
+  ],
+  "cwe_relationships": [
+    "CWE-416",
+    "CWE-415",
+    "CWE-825",
+    "CWE-122"
+  ],
+  "confidence": "High",
+  "platforms": [
+    "RHEL 8",
+    "RHEL 9",
+    "RHEL 10",
+    "Fedora",
+    "Ubuntu 24.04"
+  ],
+  "verification": {
+    "method": "Verify glibc version includes safe-linking (2.32+) and tcache key verification; on older systems, verify MALLOC_PERTURB_ is set",
+    "commands": [
+      {
+        "command": "rpm -q glibc",
+        "expected": "glibc-2.32 or higher for safe-linking and tcache key verification (RHEL 9+)",
+        "platform": "rhel"
+      },
+      {
+        "command": "ldd --version 2>&1 | head -1",
+        "expected": "ldd (GNU libc) 2.32 or higher",
+        "platform": "linux"
+      },
+      {
+        "command": "grep -s MALLOC_PERTURB_ /etc/environment /etc/profile.d/*.sh",
+        "expected": "MALLOC_PERTURB_ set to nonzero value (fallback for glibc < 2.32)",
+        "platform": "rhel"
+      }
+    ]
+  },
+  "scf_identifiers": [
+    "SEA-10"
+  ]
 }

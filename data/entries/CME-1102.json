@@ -1,43 +1,47 @@
 {
-    "cme_id": "CME-1102",
-    "control_name": "Live Kernel Patching (kpatch/livepatch)",
-    "description": "Applies critical kernel security fixes without system reboot, eliminating the patch-reboot delay that leaves systems vulnerable. Patches are applied to the running kernel in memory.",
-    "tactic": "Evict",
-    "category": "Patch Management",
-    "category_id": "patch-management",
-    "function_id": "automated-updates",
-    "control_layer": "OS/Kernel",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "Temporal: kernel vulnerability patched immediately without reboot window"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-119"
-    ],
-    "verification": {
-        "method": "Check for active kernel live patches",
-        "commands": [
-            {
-                "command": "kpatch list",
-                "expected": "installed",
-                "platform": "rhel"
-            },
-            {
-                "command": "canonical-livepatch status",
-                "expected": "running",
-                "platform": "debian"
-            }
-        ]
-    },
-    "confidence": "High",
-    "platforms": [
-        "RHEL 9",
-        "RHEL 8",
-        "Ubuntu Pro"
+  "cme_id": "CME-1102",
+  "control_name": "Live Kernel Patching (kpatch/livepatch)",
+  "description": "Applies critical kernel security fixes without system reboot, eliminating the patch-reboot delay that leaves systems vulnerable. Patches are applied to the running kernel in memory.",
+  "tactic": "Evict",
+  "category": "Patch Management",
+  "category_id": "patch-management",
+  "function_id": "automated-updates",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Temporal: kernel vulnerability patched immediately without reboot window"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-119"
+  ],
+  "verification": {
+    "method": "Check for active kernel live patches",
+    "commands": [
+      {
+        "command": "kpatch list",
+        "expected": "installed",
+        "platform": "rhel"
+      },
+      {
+        "command": "canonical-livepatch status",
+        "expected": "running",
+        "platform": "debian"
+      }
     ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 8",
+    "Ubuntu Pro"
+  ],
+  "scf_identifiers": [
+    "VPM-05",
+    "VPM-05.7"
+  ]
 }

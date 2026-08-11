@@ -1,50 +1,54 @@
 {
-    "cme_id": "CME-908",
-    "control_name": "Object-Level Authorization Checks (IDOR Prevention)",
-    "description": "Enforce per-object ownership and permission verification on every data access operation. Before returning, modifying, or deleting any resource, the application verifies the authenticated caller owns the resource or holds explicit permission to access it. Object identifiers (database IDs, UUIDs, file paths) in API parameters are never trusted as implicit authorization \u2014 the application queries ownership metadata and compares against the caller's identity. Prevents Insecure Direct Object Reference (IDOR) attacks where an attacker enumerates or guesses object identifiers to access resources belonging to other users.",
-    "tactic": "Harden",
-    "category": "Application Controls",
-    "category_id": "application-controls",
-    "function_id": "authorization-controls",
-    "control_layer": "Application",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "Exploitation requires not only discovering valid object identifiers but also bypassing the ownership verification logic; simply enumerating IDs is no longer sufficient for unauthorized access because the authorization layer rejects requests where the caller is not the resource owner."
-        },
-        {
-            "metric": "C",
-            "from": "H",
-            "to": "L",
-            "rationale": "Data exposure is confined to objects the caller owns or is explicitly authorized for; bulk enumeration of other users' data is blocked at the authorization layer before any data is returned."
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-639",
-        "CWE-284"
-    ],
-    "confidence": "High",
-    "platforms": [
-        "Any",
-        "Windows Server 2019",
-        "Windows Server 2022"
-    ],
-    "verification": {
-        "method": "Inspect application source for object-level ownership checks; test that authenticated users cannot access resources belonging to other users by manipulating object identifiers",
-        "commands": [
-            {
-                "command": "grep -rn 'owner_id.*==.*current_user\\|belongs_to.*user\\|authorize_resource\\|object_permission\\|get_object_or_403\\|filter.*user=' <app_source>/",
-                "expected": "Per-object ownership or permission checks present in data access handlers",
-                "platform": "any"
-            },
-            {
-                "command": "curl -s -o /dev/null -w '%{http_code}' -H 'Authorization: Bearer <user_a_token>' http://localhost:8080/api/v1/documents/<user_b_doc_id>",
-                "expected": "403 or 404",
-                "platform": "any"
-            }
-        ]
+  "cme_id": "CME-908",
+  "control_name": "Object-Level Authorization Checks (IDOR Prevention)",
+  "description": "Enforce per-object ownership and permission verification on every data access operation. Before returning, modifying, or deleting any resource, the application verifies the authenticated caller owns the resource or holds explicit permission to access it. Object identifiers (database IDs, UUIDs, file paths) in API parameters are never trusted as implicit authorization \u2014 the application queries ownership metadata and compares against the caller's identity. Prevents Insecure Direct Object Reference (IDOR) attacks where an attacker enumerates or guesses object identifiers to access resources belonging to other users.",
+  "tactic": "Harden",
+  "category": "Application Controls",
+  "category_id": "application-controls",
+  "function_id": "authorization-controls",
+  "control_layer": "Application",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Exploitation requires not only discovering valid object identifiers but also bypassing the ownership verification logic; simply enumerating IDs is no longer sufficient for unauthorized access because the authorization layer rejects requests where the caller is not the resource owner."
+    },
+    {
+      "metric": "C",
+      "from": "H",
+      "to": "L",
+      "rationale": "Data exposure is confined to objects the caller owns or is explicitly authorized for; bulk enumeration of other users' data is blocked at the authorization layer before any data is returned."
     }
+  ],
+  "cwe_relationships": [
+    "CWE-639",
+    "CWE-284"
+  ],
+  "confidence": "High",
+  "platforms": [
+    "Any",
+    "Windows Server 2019",
+    "Windows Server 2022"
+  ],
+  "verification": {
+    "method": "Inspect application source for object-level ownership checks; test that authenticated users cannot access resources belonging to other users by manipulating object identifiers",
+    "commands": [
+      {
+        "command": "grep -rn 'owner_id.*==.*current_user\\|belongs_to.*user\\|authorize_resource\\|object_permission\\|get_object_or_403\\|filter.*user=' <app_source>/",
+        "expected": "Per-object ownership or permission checks present in data access handlers",
+        "platform": "any"
+      },
+      {
+        "command": "curl -s -o /dev/null -w '%{http_code}' -H 'Authorization: Bearer <user_a_token>' http://localhost:8080/api/v1/documents/<user_b_doc_id>",
+        "expected": "403 or 404",
+        "platform": "any"
+      }
+    ]
+  },
+  "scf_identifiers": [
+    "IAC-20",
+    "WEB-04"
+  ]
 }

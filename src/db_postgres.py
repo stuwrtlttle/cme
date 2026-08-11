@@ -98,6 +98,12 @@ _CREATE_TABLES = """
         platform    TEXT DEFAULT 'linux'
     );
 
+    CREATE TABLE IF NOT EXISTS scf_identifiers (
+        id      SERIAL PRIMARY KEY,
+        cme_id  TEXT NOT NULL REFERENCES cme_entries(cme_id) ON DELETE CASCADE,
+        scf_id  TEXT NOT NULL
+    );
+
     CREATE TABLE IF NOT EXISTS references_ (
         id      SERIAL PRIMARY KEY,
         cme_id  TEXT NOT NULL REFERENCES cme_entries(cme_id) ON DELETE CASCADE,
@@ -117,6 +123,8 @@ _CREATE_INDEXES = [
     "CREATE INDEX IF NOT EXISTS idx_cvss_cme ON cvss_vector_impacts(cme_id)",
     "CREATE INDEX IF NOT EXISTS idx_cwe_cme ON cwe_relationships(cme_id)",
     "CREATE INDEX IF NOT EXISTS idx_cwe_id ON cwe_relationships(cwe_id)",
+    "CREATE INDEX IF NOT EXISTS idx_scf_cme ON scf_identifiers(cme_id)",
+    "CREATE INDEX IF NOT EXISTS idx_scf_id ON scf_identifiers(scf_id)",
 ]
 
 
@@ -133,8 +141,8 @@ def init_db(conn: psycopg.Connection) -> None:
 
 def reset_db(conn: psycopg.Connection) -> None:
     """Drop all tables and recreate — used only by the seed script."""
-    for table in ["references_", "verification_commands", "cwe_relationships",
-                  "cvss_vector_impacts", "cme_entries", "functions"]:
+    for table in ["references_", "scf_identifiers", "verification_commands",
+                  "cwe_relationships", "cvss_vector_impacts", "cme_entries", "functions"]:
         conn.execute(f"DROP TABLE IF EXISTS {table} CASCADE")
     init_db(conn)
 
@@ -211,7 +219,7 @@ def insert_entry(conn: psycopg.Connection, entry: dict) -> None:
         },
     )
 
-    for table in ("cvss_vector_impacts", "cwe_relationships", "verification_commands", "references_"):
+    for table in ("cvss_vector_impacts", "cwe_relationships", "scf_identifiers", "verification_commands", "references_"):
         conn.execute(f"DELETE FROM {table} WHERE cme_id = %(cme_id)s", {"cme_id": entry["cme_id"]})
 
     for impact in entry.get("cvss_vector_impacts", []):
@@ -233,6 +241,12 @@ def insert_entry(conn: psycopg.Connection, entry: dict) -> None:
         conn.execute(
             "INSERT INTO cwe_relationships (cme_id, cwe_id) VALUES (%(cme_id)s, %(cwe_id)s)",
             {"cme_id": entry["cme_id"], "cwe_id": cwe},
+        )
+
+    for scf in entry.get("scf_identifiers", []):
+        conn.execute(
+            "INSERT INTO scf_identifiers (cme_id, scf_id) VALUES (%(cme_id)s, %(scf_id)s)",
+            {"cme_id": entry["cme_id"], "scf_id": scf},
         )
 
     verification = entry.get("verification", {})
@@ -426,6 +440,27 @@ def list_functions(conn: psycopg.Connection) -> list[dict]:
     return result
 
 
+def get_mitigations_for_scf(conn: psycopg.Connection, scf_id: str) -> list[dict]:
+    """Find CME entries mapped to an SCF identifier or domain prefix."""
+    if "-" in scf_id:
+        rows = conn.execute(
+            """SELECT DISTINCT e.* FROM cme_entries e
+               JOIN scf_identifiers s ON e.cme_id = s.cme_id
+               WHERE s.scf_id = %(scf_id)s
+               ORDER BY e.cme_id""",
+            {"scf_id": scf_id},
+        ).fetchall()
+    else:
+        rows = conn.execute(
+            """SELECT DISTINCT e.* FROM cme_entries e
+               JOIN scf_identifiers s ON e.cme_id = s.cme_id
+               WHERE s.scf_id LIKE %(prefix)s
+               ORDER BY e.cme_id""",
+            {"prefix": f"{scf_id}-%"},
+        ).fetchall()
+    return _hydrate_batch(conn, [dict(r) for r in rows])
+
+
 def get_entries_with_cve_affected(conn: psycopg.Connection) -> list[dict]:
     rows = conn.execute(
         """SELECT * FROM cme_entries
@@ -464,6 +499,13 @@ def _hydrate_batch(conn: psycopg.Connection, entries: list[dict]) -> list[dict]:
         {"ids": cme_ids},
     ).fetchall():
         cwes_by_id[r["cme_id"]].append(r["cwe_id"])
+
+    scfs_by_id: dict[str, list] = defaultdict(list)
+    for r in conn.execute(
+        "SELECT cme_id, scf_id FROM scf_identifiers WHERE cme_id = ANY(%(ids)s)",
+        {"ids": cme_ids},
+    ).fetchall():
+        scfs_by_id[r["cme_id"]].append(r["scf_id"])
 
     vcmds_by_id: dict[str, list] = defaultdict(list)
     methods_by_id: dict[str, str | None] = {}
@@ -506,6 +548,9 @@ def _hydrate_batch(conn: psycopg.Connection, entries: list[dict]) -> list[dict]:
 
         entry["cvss_vector_impacts"] = impacts_by_id.get(cme_id, [])
         entry["cwe_relationships"] = cwes_by_id.get(cme_id, [])
+        scf = scfs_by_id.get(cme_id, [])
+        if scf:
+            entry["scf_identifiers"] = scf
 
         if cme_id in vcmds_by_id:
             entry["verification"] = {

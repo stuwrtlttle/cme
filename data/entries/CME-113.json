@@ -1,68 +1,71 @@
 {
-    "cme_id": "CME-113",
-    "control_name": "Control Flow Integrity (CFI / Shadow Call Stack)",
-    "description": "Hardware or compiler-enforced control flow integrity that validates indirect branch targets match expected types, blocking ROP/JOP chains. On ARM64, shadow call stack protects return addresses in a separate stack.",
-    "tactic": "Harden",
-    "category": "Kernel Hardening",
-    "category_id": "kernel-hardening",
-    "function_id": "memory-safety",
-    "control_layer": "OS/Kernel",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "ROP/JOP gadget chains are detected and blocked at runtime"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-119",
-        "CWE-120",
-        "CWE-787",
-        "CWE-416",
-        "CWE-843"
-    ],
-    "verification": {
-        "method": "Check kernel config for CFI or Shadow Call Stack",
-        "commands": [
-            {
-                "command": "grep CONFIG_CFI_CLANG /boot/config-$(uname -r)",
-                "expected": "CONFIG_CFI_CLANG=y",
-                "platform": "linux"
-            },
-            {
-                "command": "grep CONFIG_SHADOW_CALL_STACK /boot/config-$(uname -r)",
-                "expected": "CONFIG_SHADOW_CALL_STACK=y",
-                "platform": "linux"
-            },
-            {
-                "command": "(Get-ProcessMitigation -System).CFG.Enable",
-                "expected": "ON",
-                "platform": "windows"
-            }
-        ]
-    },
-    "confidence": "Medium",
-    "platforms": [
-        "RHEL 9",
-        "Ubuntu 24.04",
-        "Windows 10",
-        "Windows 11",
-        "Windows Server 2022"
-    ],
-    "cve_schema_version": "5.2.0",
-    "cve_affected": [
-        {
-            "vendor": "microsoft",
-            "product": "windows",
-            "cpes": [
-                "cpe:2.3:o:microsoft:windows_10:*:*:*:*:*:*:*:*",
-                "cpe:2.3:o:microsoft:windows_11:*:*:*:*:*:*:*:*",
-                "cpe:2.3:o:microsoft:windows_server_2019:*:*:*:*:*:*:*",
-                "cpe:2.3:o:microsoft:windows_server_2022:*:*:*:*:*:*:*"
-            ],
-            "defaultStatus": "applicable"
-        }
+  "cme_id": "CME-113",
+  "control_name": "Control Flow Integrity (CFI / Shadow Call Stack)",
+  "description": "Hardware or compiler-enforced control flow integrity that validates indirect branch targets match expected types, blocking ROP/JOP chains. On ARM64, shadow call stack protects return addresses in a separate stack.",
+  "tactic": "Harden",
+  "category": "Kernel Hardening",
+  "category_id": "kernel-hardening",
+  "function_id": "memory-safety",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "ROP/JOP gadget chains are detected and blocked at runtime"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-119",
+    "CWE-120",
+    "CWE-787",
+    "CWE-416",
+    "CWE-843"
+  ],
+  "verification": {
+    "method": "Check kernel config for CFI or Shadow Call Stack",
+    "commands": [
+      {
+        "command": "grep CONFIG_CFI_CLANG /boot/config-$(uname -r)",
+        "expected": "CONFIG_CFI_CLANG=y",
+        "platform": "linux"
+      },
+      {
+        "command": "grep CONFIG_SHADOW_CALL_STACK /boot/config-$(uname -r)",
+        "expected": "CONFIG_SHADOW_CALL_STACK=y",
+        "platform": "linux"
+      },
+      {
+        "command": "(Get-ProcessMitigation -System).CFG.Enable",
+        "expected": "ON",
+        "platform": "windows"
+      }
     ]
+  },
+  "confidence": "Medium",
+  "platforms": [
+    "RHEL 9",
+    "Ubuntu 24.04",
+    "Windows 10",
+    "Windows 11",
+    "Windows Server 2022"
+  ],
+  "cve_schema_version": "5.2.0",
+  "cve_affected": [
+    {
+      "vendor": "microsoft",
+      "product": "windows",
+      "cpes": [
+        "cpe:2.3:o:microsoft:windows_10:*:*:*:*:*:*:*:*",
+        "cpe:2.3:o:microsoft:windows_11:*:*:*:*:*:*:*:*",
+        "cpe:2.3:o:microsoft:windows_server_2019:*:*:*:*:*:*:*",
+        "cpe:2.3:o:microsoft:windows_server_2022:*:*:*:*:*:*:*"
+      ],
+      "defaultStatus": "applicable"
+    }
+  ],
+  "scf_identifiers": [
+    "SEA-10"
+  ]
 }

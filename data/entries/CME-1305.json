@@ -1,50 +1,54 @@
 {
-    "cme_id": "CME-1305",
-    "control_name": "SQL Injection Prevention (Parameterized Queries)",
-    "description": "Application exclusively uses parameterized queries or prepared statements for all database operations. User input is never concatenated into SQL strings. ORMs with parameterized backends qualify. Prevents attackers from injecting SQL syntax to read, modify, or delete database contents.",
-    "tactic": "Harden",
-    "category": "Application Input Validation",
-    "category_id": "application-input-validation",
-    "function_id": "injection-prevention",
-    "control_layer": "Application",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "SQL injection payloads treated as data, not code; parameterization enforced"
-        },
-        {
-            "metric": "C",
-            "from": "H",
-            "to": "L",
-            "rationale": "Cannot extract data via UNION/blind SQL injection"
-        },
-        {
-            "metric": "I",
-            "from": "H",
-            "to": "L",
-            "rationale": "Cannot modify or delete database records via injection"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-89"
-    ],
-    "verification": {
-        "method": "Verify all database queries use parameterized statements; no string formatting for SQL",
-        "commands": [
-            {
-                "command": "grep -rn 'execute.*%s\\|execute.*format\\|execute.*f\"' <app_source>/ | grep -v 'execute.*,.*params'",
-                "expected": "No string-formatted SQL queries",
-                "platform": "any"
-            }
-        ]
+  "cme_id": "CME-1305",
+  "control_name": "SQL Injection Prevention (Parameterized Queries)",
+  "description": "Application exclusively uses parameterized queries or prepared statements for all database operations. User input is never concatenated into SQL strings. ORMs with parameterized backends qualify. Prevents attackers from injecting SQL syntax to read, modify, or delete database contents.",
+  "tactic": "Harden",
+  "category": "Application Input Validation",
+  "category_id": "application-input-validation",
+  "function_id": "injection-prevention",
+  "control_layer": "Application",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "SQL injection payloads treated as data, not code; parameterization enforced"
     },
-    "confidence": "High",
-    "platforms": [
-        "Any",
-        "Windows Server 2019",
-        "Windows Server 2022"
+    {
+      "metric": "C",
+      "from": "H",
+      "to": "L",
+      "rationale": "Cannot extract data via UNION/blind SQL injection"
+    },
+    {
+      "metric": "I",
+      "from": "H",
+      "to": "L",
+      "rationale": "Cannot modify or delete database records via injection"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-89"
+  ],
+  "verification": {
+    "method": "Verify all database queries use parameterized statements; no string formatting for SQL",
+    "commands": [
+      {
+        "command": "grep -rn 'execute.*%s\\|execute.*format\\|execute.*f\"' <app_source>/ | grep -v 'execute.*,.*params'",
+        "expected": "No string-formatted SQL queries",
+        "platform": "any"
+      }
     ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "Any",
+    "Windows Server 2019",
+    "Windows Server 2022"
+  ],
+  "scf_identifiers": [
+    "WEB-07",
+    "WEB-09"
+  ]
 }

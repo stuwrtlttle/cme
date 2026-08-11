@@ -1,60 +1,65 @@
 {
-    "cme_id": "CME-903",
-    "control_name": "Kernel Network Hardening (sysctl)",
-    "description": "Kernel network stack hardening via sysctl: enable SYN cookies (TCP SYN flood protection), disable IP forwarding, reject source-routed packets, ignore ICMP redirects, enable reverse path filtering.",
-    "tactic": "Harden",
-    "category": "Protocol Hardening",
-    "category_id": "protocol-hardening",
-    "function_id": "protocol-config",
-    "control_layer": "Network",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "Network-level attacks (SYN flood, source routing, ICMP redirect) are blocked"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-284",
-        "CWE-940",
-        "CWE-350"
-    ],
-    "verification": {
-        "method": "Check network hardening sysctls",
-        "commands": [
-            {
-                "command": "sysctl net.ipv4.tcp_syncookies",
-                "expected": "net.ipv4.tcp_syncookies = 1",
-                "platform": "linux"
-            },
-            {
-                "command": "sysctl net.ipv4.conf.all.accept_redirects",
-                "expected": "net.ipv4.conf.all.accept_redirects = 0",
-                "platform": "linux"
-            },
-            {
-                "command": "sysctl net.ipv4.conf.all.rp_filter",
-                "expected": "net.ipv4.conf.all.rp_filter = 1",
-                "platform": "linux"
-            }
-        ]
-    },
-    "references": [
-        {
-            "source": "Red Hat Security Hardening Guide",
-            "section": "Network security"
-        },
-        {
-            "source": "CIS RHEL 9 Benchmark",
-            "section": "3.2 Network Parameters"
-        }
-    ],
-    "confidence": "High",
-    "platforms": [
-        "RHEL 9",
-        "RHEL 8",
-        "Ubuntu 24.04"
+  "cme_id": "CME-903",
+  "control_name": "Kernel Network Hardening (sysctl)",
+  "description": "Kernel network stack hardening via sysctl: enable SYN cookies (TCP SYN flood protection), disable IP forwarding, reject source-routed packets, ignore ICMP redirects, enable reverse path filtering.",
+  "tactic": "Harden",
+  "category": "Protocol Hardening",
+  "category_id": "protocol-hardening",
+  "function_id": "protocol-config",
+  "control_layer": "Network",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Network-level attacks (SYN flood, source routing, ICMP redirect) are blocked"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-284",
+    "CWE-940",
+    "CWE-350"
+  ],
+  "verification": {
+    "method": "Check network hardening sysctls",
+    "commands": [
+      {
+        "command": "sysctl net.ipv4.tcp_syncookies",
+        "expected": "net.ipv4.tcp_syncookies = 1",
+        "platform": "linux"
+      },
+      {
+        "command": "sysctl net.ipv4.conf.all.accept_redirects",
+        "expected": "net.ipv4.conf.all.accept_redirects = 0",
+        "platform": "linux"
+      },
+      {
+        "command": "sysctl net.ipv4.conf.all.rp_filter",
+        "expected": "net.ipv4.conf.all.rp_filter = 1",
+        "platform": "linux"
+      }
     ]
+  },
+  "references": [
+    {
+      "source": "Red Hat Security Hardening Guide",
+      "section": "Network security"
+    },
+    {
+      "source": "CIS RHEL 9 Benchmark",
+      "section": "3.2 Network Parameters"
+    }
+  ],
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 8",
+    "Ubuntu 24.04"
+  ],
+  "scf_identifiers": [
+    "CFG-02",
+    "NET-02.1",
+    "NET-03"
+  ]
 }

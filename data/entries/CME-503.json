@@ -1,43 +1,47 @@
 {
-    "cme_id": "CME-503",
-    "control_name": "nosuid on Non-Root Partitions",
-    "description": "Mounts partitions like /tmp, /var, /home with nosuid, preventing SUID/SGID binaries from taking effect, blocking a privilege escalation vector.",
-    "tactic": "Harden",
-    "category": "Filesystem Hardening",
-    "category_id": "filesystem-hardening",
-    "function_id": "mount-options",
-    "control_layer": "OS/Kernel",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "PR",
-            "from": "L",
-            "to": "H",
-            "rationale": "Cannot deploy SUID binaries to escalate privileges from these partitions"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-269"
-    ],
-    "verification": {
-        "method": "Check nosuid on non-root partitions",
-        "commands": [
-            {
-                "command": "mount | grep '/tmp' | grep nosuid",
-                "expected": "nosuid",
-                "platform": "linux"
-            },
-            {
-                "command": "mount | grep '/home' | grep nosuid",
-                "expected": "nosuid",
-                "platform": "linux"
-            }
-        ]
-    },
-    "confidence": "High",
-    "platforms": [
-        "RHEL 9",
-        "RHEL 8",
-        "Ubuntu 24.04"
+  "cme_id": "CME-503",
+  "control_name": "nosuid on Non-Root Partitions",
+  "description": "Mounts partitions like /tmp, /var, /home with nosuid, preventing SUID/SGID binaries from taking effect, blocking a privilege escalation vector.",
+  "tactic": "Harden",
+  "category": "Filesystem Hardening",
+  "category_id": "filesystem-hardening",
+  "function_id": "mount-options",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "PR",
+      "from": "L",
+      "to": "H",
+      "rationale": "Cannot deploy SUID binaries to escalate privileges from these partitions"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-269"
+  ],
+  "verification": {
+    "method": "Check nosuid on non-root partitions",
+    "commands": [
+      {
+        "command": "mount | grep '/tmp' | grep nosuid",
+        "expected": "nosuid",
+        "platform": "linux"
+      },
+      {
+        "command": "mount | grep '/home' | grep nosuid",
+        "expected": "nosuid",
+        "platform": "linux"
+      }
     ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 8",
+    "Ubuntu 24.04"
+  ],
+  "scf_identifiers": [
+    "CFG-02",
+    "IAC-21"
+  ]
 }

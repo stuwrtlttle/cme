@@ -1,44 +1,48 @@
 {
-    "cme_id": "CME-1306",
-    "control_name": "XSS Prevention (Context-Aware Output Encoding)",
-    "description": "Application applies context-aware output encoding to all user-controlled data before rendering in HTML, JavaScript, CSS, or URL contexts. Uses framework auto-escaping (Django, Jinja2 autoescape, React JSX) rather than manual sanitization. Combined with CSP headers (CME-905), provides defense-in-depth against XSS.",
-    "tactic": "Harden",
-    "category": "Application Input Validation",
-    "category_id": "application-input-validation",
-    "function_id": "injection-prevention",
-    "control_layer": "Application",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "XSS payloads are HTML-encoded and rendered as text, not executed"
-        },
-        {
-            "metric": "I",
-            "from": "H",
-            "to": "L",
-            "rationale": "Cannot inject scripts to modify page behavior or steal session tokens"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-79"
-    ],
-    "verification": {
-        "method": "Verify template engine auto-escaping is enabled and no raw/safe bypasses for user-controlled data",
-        "commands": [
-            {
-                "command": "grep -rn 'autoescape\\|AUTOESCAPE' <app_source>/",
-                "expected": "Auto-escaping enabled in template config",
-                "platform": "any"
-            }
-        ]
+  "cme_id": "CME-1306",
+  "control_name": "XSS Prevention (Context-Aware Output Encoding)",
+  "description": "Application applies context-aware output encoding to all user-controlled data before rendering in HTML, JavaScript, CSS, or URL contexts. Uses framework auto-escaping (Django, Jinja2 autoescape, React JSX) rather than manual sanitization. Combined with CSP headers (CME-905), provides defense-in-depth against XSS.",
+  "tactic": "Harden",
+  "category": "Application Input Validation",
+  "category_id": "application-input-validation",
+  "function_id": "injection-prevention",
+  "control_layer": "Application",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "XSS payloads are HTML-encoded and rendered as text, not executed"
     },
-    "confidence": "High",
-    "platforms": [
-        "Any",
-        "Windows Server 2019",
-        "Windows Server 2022"
+    {
+      "metric": "I",
+      "from": "H",
+      "to": "L",
+      "rationale": "Cannot inject scripts to modify page behavior or steal session tokens"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-79"
+  ],
+  "verification": {
+    "method": "Verify template engine auto-escaping is enabled and no raw/safe bypasses for user-controlled data",
+    "commands": [
+      {
+        "command": "grep -rn 'autoescape\\|AUTOESCAPE' <app_source>/",
+        "expected": "Auto-escaping enabled in template config",
+        "platform": "any"
+      }
     ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "Any",
+    "Windows Server 2019",
+    "Windows Server 2022"
+  ],
+  "scf_identifiers": [
+    "WEB-01.1",
+    "WEB-11"
+  ]
 }

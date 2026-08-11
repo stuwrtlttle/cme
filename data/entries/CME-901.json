@@ -1,51 +1,56 @@
 {
-    "cme_id": "CME-901",
-    "control_name": "SSH Hardening (Comprehensive)",
-    "description": "Comprehensive SSH hardening: disable root login, enforce Protocol 2, restrict ciphers to AEAD (chacha20/aes-gcm), disable X11/agent forwarding, set MaxAuthTries, enable LoginGraceTime.",
-    "tactic": "Harden",
-    "category": "Protocol Hardening",
-    "category_id": "protocol-hardening",
-    "function_id": "protocol-config",
-    "control_layer": "Network",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "PR",
-            "from": "N",
-            "to": "H",
-            "rationale": "Root login disabled; strong auth required"
-        },
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "Weak ciphers unavailable; forwarding attacks blocked"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-287",
-        "CWE-250"
-    ],
-    "verification": {
-        "method": "Audit sshd configuration",
-        "commands": [
-            {
-                "command": "sshd -T | grep -E 'permitrootlogin|maxauthtries|x11forwarding'",
-                "expected": "permitrootlogin no",
-                "platform": "linux"
-            }
-        ]
+  "cme_id": "CME-901",
+  "control_name": "SSH Hardening (Comprehensive)",
+  "description": "Comprehensive SSH hardening: disable root login, enforce Protocol 2, restrict ciphers to AEAD (chacha20/aes-gcm), disable X11/agent forwarding, set MaxAuthTries, enable LoginGraceTime.",
+  "tactic": "Harden",
+  "category": "Protocol Hardening",
+  "category_id": "protocol-hardening",
+  "function_id": "protocol-config",
+  "control_layer": "Network",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "PR",
+      "from": "N",
+      "to": "H",
+      "rationale": "Root login disabled; strong auth required"
     },
-    "references": [
-        {
-            "source": "CIS RHEL 9 Benchmark",
-            "section": "5.2 Configure SSH Server"
-        }
-    ],
-    "confidence": "High",
-    "platforms": [
-        "RHEL 9",
-        "RHEL 8",
-        "Ubuntu 24.04"
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Weak ciphers unavailable; forwarding attacks blocked"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-287",
+    "CWE-250"
+  ],
+  "verification": {
+    "method": "Audit sshd configuration",
+    "commands": [
+      {
+        "command": "sshd -T | grep -E 'permitrootlogin|maxauthtries|x11forwarding'",
+        "expected": "permitrootlogin no",
+        "platform": "linux"
+      }
     ]
+  },
+  "references": [
+    {
+      "source": "CIS RHEL 9 Benchmark",
+      "section": "5.2 Configure SSH Server"
+    }
+  ],
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 8",
+    "Ubuntu 24.04"
+  ],
+  "scf_identifiers": [
+    "CFG-02",
+    "CRY-06",
+    "NET-14.2"
+  ]
 }

@@ -1,44 +1,49 @@
 {
-    "cme_id": "CME-706",
-    "control_name": "Pod Security Standards (Restricted)",
-    "description": "Kubernetes Pod Security Standards at Restricted level: requires non-root, drops ALL capabilities, blocks privilege escalation, requires seccomp, blocks hostPath/hostNetwork/hostPID.",
-    "tactic": "Isolate",
-    "category": "Container Isolation",
-    "category_id": "container-isolation",
-    "function_id": "pod-security",
-    "control_layer": "Application",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "S",
-            "from": "C",
-            "to": "U",
-            "rationale": "Pod cannot access host resources or escalate to host context"
-        },
-        {
-            "metric": "PR",
-            "from": "L",
-            "to": "H",
-            "rationale": "Non-root, no privilege escalation, minimal capabilities"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-269",
-        "CWE-284"
-    ],
-    "verification": {
-        "method": "Check namespace PSS enforcement label",
-        "commands": [
-            {
-                "command": "kubectl get namespace <ns> -o jsonpath='{.metadata.labels.pod-security\\.kubernetes\\.io/enforce}'",
-                "expected": "restricted",
-                "platform": "kubernetes"
-            }
-        ]
+  "cme_id": "CME-706",
+  "control_name": "Pod Security Standards (Restricted)",
+  "description": "Kubernetes Pod Security Standards at Restricted level: requires non-root, drops ALL capabilities, blocks privilege escalation, requires seccomp, blocks hostPath/hostNetwork/hostPID.",
+  "tactic": "Isolate",
+  "category": "Container Isolation",
+  "category_id": "container-isolation",
+  "function_id": "pod-security",
+  "control_layer": "Application",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "S",
+      "from": "C",
+      "to": "U",
+      "rationale": "Pod cannot access host resources or escalate to host context"
     },
-    "confidence": "High",
-    "platforms": [
-        "Kubernetes 1.25+",
-        "OpenShift 4.12+"
+    {
+      "metric": "PR",
+      "from": "L",
+      "to": "H",
+      "rationale": "Non-root, no privilege escalation, minimal capabilities"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-269",
+    "CWE-284"
+  ],
+  "verification": {
+    "method": "Check namespace PSS enforcement label",
+    "commands": [
+      {
+        "command": "kubectl get namespace <ns> -o jsonpath='{.metadata.labels.pod-security\\.kubernetes\\.io/enforce}'",
+        "expected": "restricted",
+        "platform": "kubernetes"
+      }
     ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "Kubernetes 1.25+",
+    "OpenShift 4.12+"
+  ],
+  "scf_identifiers": [
+    "CLD-02",
+    "CLD-05",
+    "IAC-20"
+  ]
 }

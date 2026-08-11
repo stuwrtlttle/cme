@@ -1,43 +1,47 @@
 {
-    "cme_id": "CME-114",
-    "control_name": "Process Resource Limits (ulimit/prlimit)",
-    "description": "Configures per-process resource limits via ulimit/prlimit to prevent algorithmic complexity attacks, infinite loops, and resource exhaustion from consuming unbounded system resources. Key limits include RLIMIT_CPU (maximum CPU time), RLIMIT_AS (maximum address space), RLIMIT_NPROC (maximum processes), and RLIMIT_NOFILE (maximum open files). Complements container-level cgroup limits (CME-704) by providing process-granularity controls that apply even outside containers.",
-    "tactic": "Harden",
-    "category": "Kernel Hardening",
-    "category_id": "kernel-hardening",
-    "function_id": "kernel-attack-surface",
-    "control_layer": "OS/Kernel",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "A",
-            "from": "H",
-            "to": "L",
-            "rationale": "Resource limits contain the blast radius of denial-of-service conditions to the targeted process rather than the system; an infinite loop consumes its CPU quota then receives SIGKILL, preventing system-wide resource exhaustion."
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-835",
-        "CWE-400",
-        "CWE-770",
-        "CWE-834",
-        "CWE-772",
-        "CWE-401"
-    ],
-    "confidence": "High",
-    "platforms": [
-        "RHEL 9",
-        "Ubuntu 24.04",
-        "Fedora 40"
-    ],
-    "verification": {
-        "method": "Check that CPU time limits are set for processes",
-        "commands": [
-            {
-                "command": "ulimit -t",
-                "expected": "A finite value (not unlimited)",
-                "platform": "linux"
-            }
-        ]
+  "cme_id": "CME-114",
+  "control_name": "Process Resource Limits (ulimit/prlimit)",
+  "description": "Configures per-process resource limits via ulimit/prlimit to prevent algorithmic complexity attacks, infinite loops, and resource exhaustion from consuming unbounded system resources. Key limits include RLIMIT_CPU (maximum CPU time), RLIMIT_AS (maximum address space), RLIMIT_NPROC (maximum processes), and RLIMIT_NOFILE (maximum open files). Complements container-level cgroup limits (CME-704) by providing process-granularity controls that apply even outside containers.",
+  "tactic": "Harden",
+  "category": "Kernel Hardening",
+  "category_id": "kernel-hardening",
+  "function_id": "kernel-attack-surface",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "A",
+      "from": "H",
+      "to": "L",
+      "rationale": "Resource limits contain the blast radius of denial-of-service conditions to the targeted process rather than the system; an infinite loop consumes its CPU quota then receives SIGKILL, preventing system-wide resource exhaustion."
     }
+  ],
+  "cwe_relationships": [
+    "CWE-835",
+    "CWE-400",
+    "CWE-770",
+    "CWE-834",
+    "CWE-772",
+    "CWE-401"
+  ],
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "Ubuntu 24.04",
+    "Fedora 40"
+  ],
+  "verification": {
+    "method": "Check that CPU time limits are set for processes",
+    "commands": [
+      {
+        "command": "ulimit -t",
+        "expected": "A finite value (not unlimited)",
+        "platform": "linux"
+      }
+    ]
+  },
+  "scf_identifiers": [
+    "NET-02.1",
+    "SEA-07.2"
+  ]
 }

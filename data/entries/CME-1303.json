@@ -1,46 +1,50 @@
 {
-    "cme_id": "CME-1303",
-    "control_name": "Application-Level Filesystem Access Confinement",
-    "description": "Application enforces its own filesystem access boundaries independent of OS-level controls. Uses chroot-like path scoping, virtual filesystem abstraction, or explicit directory allowlists within the application code. Ensures that even if an attacker controls a file path parameter, operations are confined to the application data directory.",
-    "tactic": "Isolate",
-    "category": "Application Input Validation",
-    "category_id": "application-input-validation",
-    "function_id": "input-validation",
-    "control_layer": "Application",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "C",
-            "from": "H",
-            "to": "L",
-            "rationale": "File operations confined to application data directory; system files unreachable"
-        },
-        {
-            "metric": "S",
-            "from": "C",
-            "to": "U",
-            "rationale": "Application cannot access files belonging to other services or the host OS"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-22",
-        "CWE-73",
-        "CWE-284"
-    ],
-    "verification": {
-        "method": "Verify application restricts filesystem operations to designated directories",
-        "commands": [
-            {
-                "command": "grep -rn 'chroot\\|basedir\\|allowed_paths\\|MEDIA_ROOT\\|UPLOAD_DIR' <app_source>/",
-                "expected": "Application-level directory confinement configured",
-                "platform": "any"
-            }
-        ]
+  "cme_id": "CME-1303",
+  "control_name": "Application-Level Filesystem Access Confinement",
+  "description": "Application enforces its own filesystem access boundaries independent of OS-level controls. Uses chroot-like path scoping, virtual filesystem abstraction, or explicit directory allowlists within the application code. Ensures that even if an attacker controls a file path parameter, operations are confined to the application data directory.",
+  "tactic": "Isolate",
+  "category": "Application Input Validation",
+  "category_id": "application-input-validation",
+  "function_id": "input-validation",
+  "control_layer": "Application",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "C",
+      "from": "H",
+      "to": "L",
+      "rationale": "File operations confined to application data directory; system files unreachable"
     },
-    "confidence": "Medium",
-    "platforms": [
-        "Any",
-        "Windows Server 2019",
-        "Windows Server 2022"
+    {
+      "metric": "S",
+      "from": "C",
+      "to": "U",
+      "rationale": "Application cannot access files belonging to other services or the host OS"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-22",
+    "CWE-73",
+    "CWE-284"
+  ],
+  "verification": {
+    "method": "Verify application restricts filesystem operations to designated directories",
+    "commands": [
+      {
+        "command": "grep -rn 'chroot\\|basedir\\|allowed_paths\\|MEDIA_ROOT\\|UPLOAD_DIR' <app_source>/",
+        "expected": "Application-level directory confinement configured",
+        "platform": "any"
+      }
     ]
+  },
+  "confidence": "Medium",
+  "platforms": [
+    "Any",
+    "Windows Server 2019",
+    "Windows Server 2022"
+  ],
+  "scf_identifiers": [
+    "SEA-04",
+    "WEB-09"
+  ]
 }

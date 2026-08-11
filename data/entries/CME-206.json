@@ -1,78 +1,83 @@
 {
-    "cme_id": "CME-206",
-    "control_name": "Network Policy (Kubernetes)",
-    "description": "Kubernetes NetworkPolicy resources that restrict pod-to-pod and pod-to-external communication. Default-deny ingress/egress with explicit allowlists.",
-    "tactic": "Isolate",
-    "category": "Network Isolation",
-    "category_id": "network-isolation",
-    "function_id": "network-filtering",
-    "control_layer": "Network",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AV",
-            "from": "N",
-            "to": "A",
-            "rationale": "Pod only reachable from explicitly allowed sources"
-        },
-        {
-            "metric": "S",
-            "from": "C",
-            "to": "U",
-            "rationale": "Compromised pod cannot reach arbitrary cluster services"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-284",
-        "CWE-668"
-    ],
-    "verification": {
-        "method": "Check for default-deny NetworkPolicy in namespace",
-        "commands": [
-            {
-                "command": "kubectl get networkpolicy -n <namespace> -o name | head -5",
-                "expected": "networkpolicy.networking.k8s.io/default-deny",
-                "platform": "kubernetes"
-            }
-        ]
+  "cme_id": "CME-206",
+  "control_name": "Network Policy (Kubernetes)",
+  "description": "Kubernetes NetworkPolicy resources that restrict pod-to-pod and pod-to-external communication. Default-deny ingress/egress with explicit allowlists.",
+  "tactic": "Isolate",
+  "category": "Network Isolation",
+  "category_id": "network-isolation",
+  "function_id": "network-filtering",
+  "control_layer": "Network",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AV",
+      "from": "N",
+      "to": "A",
+      "rationale": "Pod only reachable from explicitly allowed sources"
     },
-    "confidence": "High",
-    "platforms": [
-        "Kubernetes",
-        "OpenShift"
-    ],
-    "cve_schema_version": "5.2.0",
-    "cve_affected": [
-        {
-            "vendor": "kubernetes",
-            "product": "kubernetes",
-            "cpes": [
-                "cpe:2.3:a:kubernetes:kubernetes:*:*:*:*:*:*:*:*"
-            ],
-            "defaultStatus": "applicable"
-        },
-        {
-            "vendor": "redhat",
-            "product": "openshift_container_platform",
-            "cpes": [
-                "cpe:2.3:a:redhat:openshift_container_platform:4:*:*:*:*:*:*:*"
-            ],
-            "defaultStatus": "applicable"
-        },
-        {
-            "vendor": "google",
-            "product": "google_kubernetes_engine",
-            "defaultStatus": "applicable"
-        },
-        {
-            "vendor": "amazon",
-            "product": "elastic_kubernetes_service",
-            "defaultStatus": "applicable"
-        },
-        {
-            "vendor": "microsoft",
-            "product": "azure_kubernetes_service",
-            "defaultStatus": "applicable"
-        }
+    {
+      "metric": "S",
+      "from": "C",
+      "to": "U",
+      "rationale": "Compromised pod cannot reach arbitrary cluster services"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-284",
+    "CWE-668"
+  ],
+  "verification": {
+    "method": "Check for default-deny NetworkPolicy in namespace",
+    "commands": [
+      {
+        "command": "kubectl get networkpolicy -n <namespace> -o name | head -5",
+        "expected": "networkpolicy.networking.k8s.io/default-deny",
+        "platform": "kubernetes"
+      }
     ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "Kubernetes",
+    "OpenShift"
+  ],
+  "cve_schema_version": "5.2.0",
+  "cve_affected": [
+    {
+      "vendor": "kubernetes",
+      "product": "kubernetes",
+      "cpes": [
+        "cpe:2.3:a:kubernetes:kubernetes:*:*:*:*:*:*:*:*"
+      ],
+      "defaultStatus": "applicable"
+    },
+    {
+      "vendor": "redhat",
+      "product": "openshift_container_platform",
+      "cpes": [
+        "cpe:2.3:a:redhat:openshift_container_platform:4:*:*:*:*:*:*:*"
+      ],
+      "defaultStatus": "applicable"
+    },
+    {
+      "vendor": "google",
+      "product": "google_kubernetes_engine",
+      "defaultStatus": "applicable"
+    },
+    {
+      "vendor": "amazon",
+      "product": "elastic_kubernetes_service",
+      "defaultStatus": "applicable"
+    },
+    {
+      "vendor": "microsoft",
+      "product": "azure_kubernetes_service",
+      "defaultStatus": "applicable"
+    }
+  ],
+  "scf_identifiers": [
+    "CLD-03",
+    "NET-04.1",
+    "NET-06.6"
+  ]
 }

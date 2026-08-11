@@ -1,62 +1,66 @@
 {
-    "cme_id": "CME-1302",
-    "control_name": "Deserialization Allowlist (Safe Loading)",
-    "description": "Restricts deserialization to an explicit allowlist of permitted types, classes, or functions. Prevents attacker-controlled serialized data from instantiating arbitrary objects, invoking dangerous functions, or triggering unintended code paths. Applies to JSON schema validation, YAML safe_load, pickle restrictions, and custom deserialization frameworks.",
-    "tactic": "Harden",
-    "category": "Application Input Validation",
-    "category_id": "application-input-validation",
-    "function_id": "input-validation",
-    "control_layer": "Application",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "Only allowlisted types can be deserialized; arbitrary class instantiation blocked"
-        },
-        {
-            "metric": "I",
-            "from": "H",
-            "to": "L",
-            "rationale": "Cannot invoke arbitrary functions or modify state via deserialized objects"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-502",
-        "CWE-915",
-        "CWE-1321",
-        "CWE-1188"
-    ],
-    "verification": {
-        "method": "Verify deserialization uses safe loading or allowlist enforcement across all application languages",
-        "commands": [
-            {
-                "command": "grep -rn 'yaml.safe_load\\|SafeLoader\\|json.loads' <app_source>/",
-                "expected": "Safe deserialization calls present (not yaml.load without SafeLoader)",
-                "platform": "any"
-            },
-            {
-                "command": "grep -rn 'yaml.load\\|pickle.load\\|marshal.load' <app_source>/ | grep -v safe_load",
-                "expected": "No unsafe deserialization calls",
-                "platform": "any"
-            },
-            {
-                "command": "grep -rn 'jdk.serialFilter\\|ObjectInputFilter\\|serialFilter' /etc/java/ /usr/lib/jvm/*/conf/ 2>/dev/null || java -XshowSettings 2>&1 | grep serialFilter",
-                "expected": "JVM serialization filter configured with allowlist pattern (JEP 290)",
-                "platform": "any"
-            },
-            {
-                "command": "grep -rn 'TypeNameHandling\\.None\\|TypeNameHandling\\.Auto\\|BinaryFormatter' <app_source>/ | grep -v None",
-                "expected": "No unsafe TypeNameHandling settings (Auto/All/Objects/Arrays) or BinaryFormatter usage",
-                "platform": "any"
-            }
-        ]
+  "cme_id": "CME-1302",
+  "control_name": "Deserialization Allowlist (Safe Loading)",
+  "description": "Restricts deserialization to an explicit allowlist of permitted types, classes, or functions. Prevents attacker-controlled serialized data from instantiating arbitrary objects, invoking dangerous functions, or triggering unintended code paths. Applies to JSON schema validation, YAML safe_load, pickle restrictions, and custom deserialization frameworks.",
+  "tactic": "Harden",
+  "category": "Application Input Validation",
+  "category_id": "application-input-validation",
+  "function_id": "input-validation",
+  "control_layer": "Application",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Only allowlisted types can be deserialized; arbitrary class instantiation blocked"
     },
-    "confidence": "High",
-    "platforms": [
-        "Any",
-        "Windows Server 2019",
-        "Windows Server 2022"
+    {
+      "metric": "I",
+      "from": "H",
+      "to": "L",
+      "rationale": "Cannot invoke arbitrary functions or modify state via deserialized objects"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-502",
+    "CWE-915",
+    "CWE-1321",
+    "CWE-1188"
+  ],
+  "verification": {
+    "method": "Verify deserialization uses safe loading or allowlist enforcement across all application languages",
+    "commands": [
+      {
+        "command": "grep -rn 'yaml.safe_load\\|SafeLoader\\|json.loads' <app_source>/",
+        "expected": "Safe deserialization calls present (not yaml.load without SafeLoader)",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'yaml.load\\|pickle.load\\|marshal.load' <app_source>/ | grep -v safe_load",
+        "expected": "No unsafe deserialization calls",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'jdk.serialFilter\\|ObjectInputFilter\\|serialFilter' /etc/java/ /usr/lib/jvm/*/conf/ 2>/dev/null || java -XshowSettings 2>&1 | grep serialFilter",
+        "expected": "JVM serialization filter configured with allowlist pattern (JEP 290)",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'TypeNameHandling\\.None\\|TypeNameHandling\\.Auto\\|BinaryFormatter' <app_source>/ | grep -v None",
+        "expected": "No unsafe TypeNameHandling settings (Auto/All/Objects/Arrays) or BinaryFormatter usage",
+        "platform": "any"
+      }
     ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "Any",
+    "Windows Server 2019",
+    "Windows Server 2022"
+  ],
+  "scf_identifiers": [
+    "WEB-07",
+    "WEB-09"
+  ]
 }

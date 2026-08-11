@@ -1,62 +1,66 @@
 {
-    "cme_id": "CME-1316",
-    "control_name": "Algorithmic Complexity Safeguards (Pattern/Regex Execution Limits)",
-    "description": "Enforces computational budgets on pattern matching, regular expression evaluation, and recursive parsing operations to prevent algorithmic complexity denial-of-service attacks. Encompasses three complementary techniques: (1) execution limits \u2014 regex step counts, match timeouts, and recursion depth caps that terminate runaway computations before they exhaust CPU or block event loops; (2) safe engine selection \u2014 mandating linear-time regex engines (RE2, Rust regex crate, .NET NonBacktracking mode) or equivalent guaranteed-polynomial parsers instead of backtracking NFA engines susceptible to catastrophic backtracking; (3) pattern compilation guards \u2014 never compiling user-controlled input directly into regex or pattern language without escaping metacharacters or using literal-match APIs, and pre-screening pattern structure for known dangerous constructs (nested quantifiers, overlapping alternations, unbounded repetition groups). Complements CME-114 (OS-level process resource limits) by providing application-level, per-operation granularity \u2014 a regex timeout kills the match attempt while keeping the service alive, whereas ulimit kills the entire process.",
-    "tactic": "Harden",
-    "category": "Application Input Validation",
-    "category_id": "application-input-validation",
-    "function_id": "input-validation",
-    "control_layer": "Application",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "A",
-            "from": "H",
-            "to": "L",
-            "rationale": "Computational budgets (step limits, timeouts) and safe engine guarantees cap the worst-case execution time of any single pattern operation. The attacker can still trigger the vulnerable code path, but the operation is terminated or completes in bounded time, preventing sustained resource exhaustion and event-loop blocking"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-1333",
-        "CWE-407",
-        "CWE-405",
-        "CWE-834",
-        "CWE-730"
-    ],
-    "verification": {
-        "method": "Verify that the application uses linear-time regex engines or enforces execution budgets on pattern operations. Check for RE2 bindings, regex timeout configuration, recursion depth limits, and that user-controlled input is never compiled directly into regex patterns without escaping.",
-        "commands": [
-            {
-                "command": "node -e \"try { require('re2'); console.log('RE2 available') } catch(e) { console.log('RE2 NOT installed \u2014 using backtracking engine') }\"",
-                "expected": "RE2 available",
-                "platform": "any"
-            },
-            {
-                "command": "python3 -c \"import google.re2; print('google-re2 available')\" 2>/dev/null || python3 -c \"import re; print('WARNING: using backtracking re module \u2014 consider google-re2 or regex with timeout')\"",
-                "expected": "google-re2 available",
-                "platform": "any"
-            },
-            {
-                "command": "powershell -Command \"try { [System.Text.RegularExpressions.RegexOptions]::NonBacktracking; Write-Host 'NonBacktracking mode available (.NET 7+)' } catch { Write-Host 'WARNING: NonBacktracking not available \u2014 requires .NET 7+' }\"",
-                "expected": "NonBacktracking mode available (.NET 7+)",
-                "platform": "windows"
-            },
-            {
-                "command": "grep -rn 'RegexOptions\\.NonBacktracking\\|RegexOptions\\.MatchTimeout\\|Regex\\.IsMatch.*TimeSpan' <app_source>/ | head -10",
-                "expected": "Regex operations use NonBacktracking mode (.NET 7+) or explicit MatchTimeout",
-                "platform": "any"
-            },
-            {
-                "command": "grep -rn 'new RegExp(\\|RegExp(.*\\buser\\|RegExp(.*\\breq\\.' <app_source>/ | head -10",
-                "expected": "No instances of user-controlled input compiled into RegExp without escaping",
-                "platform": "any"
-            }
-        ]
-    },
-    "confidence": "High",
-    "platforms": [
-        "Any",
-        "Windows Server 2019",
-        "Windows Server 2022"
+  "cme_id": "CME-1316",
+  "control_name": "Algorithmic Complexity Safeguards (Pattern/Regex Execution Limits)",
+  "description": "Enforces computational budgets on pattern matching, regular expression evaluation, and recursive parsing operations to prevent algorithmic complexity denial-of-service attacks. Encompasses three complementary techniques: (1) execution limits \u2014 regex step counts, match timeouts, and recursion depth caps that terminate runaway computations before they exhaust CPU or block event loops; (2) safe engine selection \u2014 mandating linear-time regex engines (RE2, Rust regex crate, .NET NonBacktracking mode) or equivalent guaranteed-polynomial parsers instead of backtracking NFA engines susceptible to catastrophic backtracking; (3) pattern compilation guards \u2014 never compiling user-controlled input directly into regex or pattern language without escaping metacharacters or using literal-match APIs, and pre-screening pattern structure for known dangerous constructs (nested quantifiers, overlapping alternations, unbounded repetition groups). Complements CME-114 (OS-level process resource limits) by providing application-level, per-operation granularity \u2014 a regex timeout kills the match attempt while keeping the service alive, whereas ulimit kills the entire process.",
+  "tactic": "Harden",
+  "category": "Application Input Validation",
+  "category_id": "application-input-validation",
+  "function_id": "input-validation",
+  "control_layer": "Application",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "A",
+      "from": "H",
+      "to": "L",
+      "rationale": "Computational budgets (step limits, timeouts) and safe engine guarantees cap the worst-case execution time of any single pattern operation. The attacker can still trigger the vulnerable code path, but the operation is terminated or completes in bounded time, preventing sustained resource exhaustion and event-loop blocking"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-1333",
+    "CWE-407",
+    "CWE-405",
+    "CWE-834",
+    "CWE-730"
+  ],
+  "verification": {
+    "method": "Verify that the application uses linear-time regex engines or enforces execution budgets on pattern operations. Check for RE2 bindings, regex timeout configuration, recursion depth limits, and that user-controlled input is never compiled directly into regex patterns without escaping.",
+    "commands": [
+      {
+        "command": "node -e \"try { require('re2'); console.log('RE2 available') } catch(e) { console.log('RE2 NOT installed \u2014 using backtracking engine') }\"",
+        "expected": "RE2 available",
+        "platform": "any"
+      },
+      {
+        "command": "python3 -c \"import google.re2; print('google-re2 available')\" 2>/dev/null || python3 -c \"import re; print('WARNING: using backtracking re module \u2014 consider google-re2 or regex with timeout')\"",
+        "expected": "google-re2 available",
+        "platform": "any"
+      },
+      {
+        "command": "powershell -Command \"try { [System.Text.RegularExpressions.RegexOptions]::NonBacktracking; Write-Host 'NonBacktracking mode available (.NET 7+)' } catch { Write-Host 'WARNING: NonBacktracking not available \u2014 requires .NET 7+' }\"",
+        "expected": "NonBacktracking mode available (.NET 7+)",
+        "platform": "windows"
+      },
+      {
+        "command": "grep -rn 'RegexOptions\\.NonBacktracking\\|RegexOptions\\.MatchTimeout\\|Regex\\.IsMatch.*TimeSpan' <app_source>/ | head -10",
+        "expected": "Regex operations use NonBacktracking mode (.NET 7+) or explicit MatchTimeout",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'new RegExp(\\|RegExp(.*\\buser\\|RegExp(.*\\breq\\.' <app_source>/ | head -10",
+        "expected": "No instances of user-controlled input compiled into RegExp without escaping",
+        "platform": "any"
+      }
     ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "Any",
+    "Windows Server 2019",
+    "Windows Server 2022"
+  ],
+  "scf_identifiers": [
+    "NET-02.1",
+    "WEB-09"
+  ]
 }

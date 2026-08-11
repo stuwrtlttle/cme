@@ -1,39 +1,43 @@
 {
-    "cme_id": "CME-108",
-    "control_name": "kptr_restrict (Kernel Pointer Restriction)",
-    "description": "Hides kernel pointer addresses from unprivileged users, denying the address leaks needed to exploit kernel vulnerabilities when KASLR is active.",
-    "tactic": "Harden",
-    "category": "Kernel Hardening",
-    "category_id": "kernel-hardening",
-    "function_id": "kernel-attack-surface",
-    "control_layer": "OS/Kernel",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "Removes trivial kernel address leak vector via /proc/kallsyms"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-200",
-        "CWE-119"
-    ],
-    "verification": {
-        "method": "Check kptr_restrict sysctl is 1 or 2",
-        "commands": [
-            {
-                "command": "cat /proc/sys/kernel/kptr_restrict",
-                "expected": "1",
-                "platform": "linux"
-            }
-        ]
-    },
-    "confidence": "High",
-    "platforms": [
-        "RHEL 9",
-        "RHEL 8",
-        "Ubuntu 24.04"
+  "cme_id": "CME-108",
+  "control_name": "kptr_restrict (Kernel Pointer Restriction)",
+  "description": "Hides kernel pointer addresses from unprivileged users, denying the address leaks needed to exploit kernel vulnerabilities when KASLR is active.",
+  "tactic": "Harden",
+  "category": "Kernel Hardening",
+  "category_id": "kernel-hardening",
+  "function_id": "kernel-attack-surface",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Removes trivial kernel address leak vector via /proc/kallsyms"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-200",
+    "CWE-119"
+  ],
+  "verification": {
+    "method": "Check kptr_restrict sysctl is 1 or 2",
+    "commands": [
+      {
+        "command": "cat /proc/sys/kernel/kptr_restrict",
+        "expected": "1",
+        "platform": "linux"
+      }
     ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 8",
+    "Ubuntu 24.04"
+  ],
+  "scf_identifiers": [
+    "CFG-02",
+    "SEA-10"
+  ]
 }

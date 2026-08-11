@@ -1,50 +1,54 @@
 {
-    "cme_id": "CME-914",
-    "control_name": "Strict CORS Origin Allowlist Enforcement",
-    "description": "Server-side enforcement of a strict, explicitly enumerated origin allowlist for Cross-Origin Resource Sharing (CORS). The server validates the Origin header of every cross-origin request against a fixed allowlist and only responds with Access-Control-Allow-Origin for approved origins. Critically, the server never reflects the request's Origin header verbatim, never uses wildcard (*) with Access-Control-Allow-Credentials: true, and never relies on partial string matching or regex patterns that can be bypassed with attacker-controlled subdomains. For endpoints that handle credentials or session-sensitive data, Access-Control-Allow-Credentials is only set when the origin is explicitly trusted. This prevents cross-origin JavaScript from reading authenticated responses, exfiltrating session tokens, or making credentialed API calls from attacker-controlled pages.",
-    "tactic": "Harden",
-    "category": "Application Controls",
-    "category_id": "application-controls",
-    "function_id": "origin-cors",
-    "control_layer": "Application",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "Cross-origin credentialed reads go from trivially possible (wildcard or reflected-origin CORS) to requiring the attacker to compromise an explicitly allowed origin or find a CORS bypass. The mechanism is the server-side origin validation gate that rejects unapproved origins before including permissive CORS headers."
-        },
-        {
-            "metric": "C",
-            "from": "H",
-            "to": "L",
-            "rationale": "The primary attack vector for CORS-based CWE-940 vulnerabilities is cross-origin data exfiltration via credentialed fetch/XHR. Strict CORS blocks the browser from delivering authenticated response data to the attacker's JavaScript, limiting confidentiality impact to data obtainable without credentials."
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-940",
-        "CWE-346"
-    ],
-    "confidence": "High",
-    "platforms": [
-        "Any",
-        "Windows Server 2019",
-        "Windows Server 2022"
-    ],
-    "verification": {
-        "method": "Test that the server rejects unapproved origins and does not reflect arbitrary Origin headers in CORS response headers",
-        "commands": [
-            {
-                "command": "curl -sI -H 'Origin: https://evil.example.com' http://localhost:8080/api/v1/user | grep -i 'access-control-allow'",
-                "expected": "No Access-Control-Allow-Origin header, or not reflecting evil.example.com",
-                "platform": "any"
-            },
-            {
-                "command": "curl -sI -H 'Origin: https://trusted.example.com' http://localhost:8080/api/v1/user | grep -i 'access-control-allow'",
-                "expected": "Access-Control-Allow-Origin: https://trusted.example.com",
-                "platform": "any"
-            }
-        ]
+  "cme_id": "CME-914",
+  "control_name": "Strict CORS Origin Allowlist Enforcement",
+  "description": "Server-side enforcement of a strict, explicitly enumerated origin allowlist for Cross-Origin Resource Sharing (CORS). The server validates the Origin header of every cross-origin request against a fixed allowlist and only responds with Access-Control-Allow-Origin for approved origins. Critically, the server never reflects the request's Origin header verbatim, never uses wildcard (*) with Access-Control-Allow-Credentials: true, and never relies on partial string matching or regex patterns that can be bypassed with attacker-controlled subdomains. For endpoints that handle credentials or session-sensitive data, Access-Control-Allow-Credentials is only set when the origin is explicitly trusted. This prevents cross-origin JavaScript from reading authenticated responses, exfiltrating session tokens, or making credentialed API calls from attacker-controlled pages.",
+  "tactic": "Harden",
+  "category": "Application Controls",
+  "category_id": "application-controls",
+  "function_id": "origin-cors",
+  "control_layer": "Application",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Cross-origin credentialed reads go from trivially possible (wildcard or reflected-origin CORS) to requiring the attacker to compromise an explicitly allowed origin or find a CORS bypass. The mechanism is the server-side origin validation gate that rejects unapproved origins before including permissive CORS headers."
+    },
+    {
+      "metric": "C",
+      "from": "H",
+      "to": "L",
+      "rationale": "The primary attack vector for CORS-based CWE-940 vulnerabilities is cross-origin data exfiltration via credentialed fetch/XHR. Strict CORS blocks the browser from delivering authenticated response data to the attacker's JavaScript, limiting confidentiality impact to data obtainable without credentials."
     }
+  ],
+  "cwe_relationships": [
+    "CWE-940",
+    "CWE-346"
+  ],
+  "confidence": "High",
+  "platforms": [
+    "Any",
+    "Windows Server 2019",
+    "Windows Server 2022"
+  ],
+  "verification": {
+    "method": "Test that the server rejects unapproved origins and does not reflect arbitrary Origin headers in CORS response headers",
+    "commands": [
+      {
+        "command": "curl -sI -H 'Origin: https://evil.example.com' http://localhost:8080/api/v1/user | grep -i 'access-control-allow'",
+        "expected": "No Access-Control-Allow-Origin header, or not reflecting evil.example.com",
+        "platform": "any"
+      },
+      {
+        "command": "curl -sI -H 'Origin: https://trusted.example.com' http://localhost:8080/api/v1/user | grep -i 'access-control-allow'",
+        "expected": "Access-Control-Allow-Origin: https://trusted.example.com",
+        "platform": "any"
+      }
+    ]
+  },
+  "scf_identifiers": [
+    "WEB-04",
+    "WEB-07"
+  ]
 }

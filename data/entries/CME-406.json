@@ -1,45 +1,50 @@
 {
-    "cme_id": "CME-406",
-    "control_name": "Signed Package Enforcement (GPG)",
-    "description": "Rejects installation of unsigned or tampered RPM/DEB packages by validating GPG signatures against trusted keys. Prevents supply chain attacks via package repositories.",
-    "tactic": "Harden",
-    "category": "Cryptographic Controls",
-    "category_id": "cryptographic-controls",
-    "function_id": "data-integrity-crypto",
-    "control_layer": "OS/Kernel",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "I",
-            "from": "H",
-            "to": "L",
-            "rationale": "Cannot install tampered packages; cryptographic verification enforced"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-345",
-        "CWE-494",
-        "CWE-347"
-    ],
-    "verification": {
-        "method": "Verify gpgcheck enabled for all repos",
-        "commands": [
-            {
-                "command": "grep -r 'gpgcheck' /etc/yum.repos.d/ | grep -v 'gpgcheck=1'",
-                "expected": "",
-                "platform": "rhel"
-            },
-            {
-                "command": "rpm -qa gpg-pubkey",
-                "expected": "gpg-pubkey",
-                "platform": "rhel"
-            }
-        ]
-    },
-    "confidence": "High",
-    "platforms": [
-        "RHEL 9",
-        "RHEL 8",
-        "Fedora"
+  "cme_id": "CME-406",
+  "control_name": "Signed Package Enforcement (GPG)",
+  "description": "Rejects installation of unsigned or tampered RPM/DEB packages by validating GPG signatures against trusted keys. Prevents supply chain attacks via package repositories.",
+  "tactic": "Harden",
+  "category": "Cryptographic Controls",
+  "category_id": "cryptographic-controls",
+  "function_id": "data-integrity-crypto",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "I",
+      "from": "H",
+      "to": "L",
+      "rationale": "Cannot install tampered packages; cryptographic verification enforced"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-345",
+    "CWE-494",
+    "CWE-347"
+  ],
+  "verification": {
+    "method": "Verify gpgcheck enabled for all repos",
+    "commands": [
+      {
+        "command": "grep -r 'gpgcheck' /etc/yum.repos.d/ | grep -v 'gpgcheck=1'",
+        "expected": "",
+        "platform": "rhel"
+      },
+      {
+        "command": "rpm -qa gpg-pubkey",
+        "expected": "gpg-pubkey",
+        "platform": "rhel"
+      }
     ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 8",
+    "Fedora"
+  ],
+  "scf_identifiers": [
+    "CFG-09.2",
+    "CRY-13",
+    "VPM-05.8"
+  ]
 }

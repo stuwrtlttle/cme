@@ -1,38 +1,42 @@
 {
-    "cme_id": "CME-110",
-    "control_name": "KEXEC Restriction",
-    "description": "Prevents loading a new kernel at runtime via kexec, blocking a vector for kernel-level persistence and Secure Boot bypass.",
-    "tactic": "Harden",
-    "category": "Kernel Hardening",
-    "category_id": "kernel-hardening",
-    "function_id": "kernel-attack-surface",
-    "control_layer": "OS/Kernel",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "Cannot replace running kernel to bypass security controls"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-269"
-    ],
-    "verification": {
-        "method": "Check kexec_load_disabled sysctl",
-        "commands": [
-            {
-                "command": "cat /proc/sys/kernel/kexec_load_disabled",
-                "expected": "1",
-                "platform": "linux"
-            }
-        ]
-    },
-    "confidence": "High",
-    "platforms": [
-        "RHEL 9",
-        "RHEL 8",
-        "Ubuntu 24.04"
+  "cme_id": "CME-110",
+  "control_name": "KEXEC Restriction",
+  "description": "Prevents loading a new kernel at runtime via kexec, blocking a vector for kernel-level persistence and Secure Boot bypass.",
+  "tactic": "Harden",
+  "category": "Kernel Hardening",
+  "category_id": "kernel-hardening",
+  "function_id": "kernel-attack-surface",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Cannot replace running kernel to bypass security controls"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-269"
+  ],
+  "verification": {
+    "method": "Check kexec_load_disabled sysctl",
+    "commands": [
+      {
+        "command": "cat /proc/sys/kernel/kexec_load_disabled",
+        "expected": "1",
+        "platform": "linux"
+      }
     ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 8",
+    "Ubuntu 24.04"
+  ],
+  "scf_identifiers": [
+    "CFG-03",
+    "END-06.5"
+  ]
 }

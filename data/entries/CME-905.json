@@ -1,38 +1,42 @@
 {
-    "cme_id": "CME-905",
-    "control_name": "Content Security Policy (CSP) Headers",
-    "description": "Browser-enforced HTTP header policy that restricts script sources, prevents inline execution, and blocks mixed content. Primary defense against stored/reflected XSS.",
-    "tactic": "Harden",
-    "category": "Application Controls",
-    "category_id": "application-controls",
-    "function_id": "runtime-hardening",
-    "control_layer": "Application",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "XSS payloads blocked by browser CSP enforcement; script sources restricted"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-79"
-    ],
-    "verification": {
-        "method": "Check for CSP header in HTTP responses",
-        "commands": [
-            {
-                "command": "curl -sI http://target/ | grep -i content-security-policy",
-                "expected": "Content-Security-Policy:",
-                "platform": "any"
-            }
-        ]
-    },
-    "confidence": "Medium",
-    "platforms": [
-        "Any",
-        "Windows Server 2019",
-        "Windows Server 2022"
+  "cme_id": "CME-905",
+  "control_name": "Content Security Policy (CSP) Headers",
+  "description": "Browser-enforced HTTP header policy that restricts script sources, prevents inline execution, and blocks mixed content. Primary defense against stored/reflected XSS.",
+  "tactic": "Harden",
+  "category": "Application Controls",
+  "category_id": "application-controls",
+  "function_id": "runtime-hardening",
+  "control_layer": "Application",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "XSS payloads blocked by browser CSP enforcement; script sources restricted"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-79"
+  ],
+  "verification": {
+    "method": "Check for CSP header in HTTP responses",
+    "commands": [
+      {
+        "command": "curl -sI http://target/ | grep -i content-security-policy",
+        "expected": "Content-Security-Policy:",
+        "platform": "any"
+      }
     ]
+  },
+  "confidence": "Medium",
+  "platforms": [
+    "Any",
+    "Windows Server 2019",
+    "Windows Server 2022"
+  ],
+  "scf_identifiers": [
+    "WEB-01.1",
+    "WEB-12"
+  ]
 }

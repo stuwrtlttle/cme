@@ -1,53 +1,57 @@
 {
-    "cme_id": "CME-1010",
-    "control_name": "cgroup Memory Pressure Monitoring (memory.events / PSI)",
-    "description": "Monitors cgroups v2 memory pressure signals \u2014 memory.events (oom_kill, high, max counters) and Pressure Stall Information (PSI) via /proc/pressure/memory \u2014 to detect resource leaks before they exhaust system memory. When a cgroup approaches its memory limit due to a resource leak, these interfaces provide deterministic signals (memory.high threshold crossings, oom_kill increments, PSI stall percentages) that monitoring systems consume to trigger alerts and automated remediation. Complements cgroup memory limits (CME-704) which contain the leak by adding detection of when containment is being stressed. The memory.events counters are monotonically increasing and per-cgroup, enabling precise attribution of pressure to the leaking workload.",
-    "tactic": "Detect",
-    "category": "Integrity Detection",
-    "category_id": "integrity-detection",
-    "function_id": "integrity-monitoring",
-    "control_layer": "OS/Kernel",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "Compensating control: cgroup memory pressure events (memory.events oom_kill/high counters and PSI stall metrics) provide deterministic early warning of resource leaks before system-wide exhaustion occurs, enabling operators to identify and remediate leaking processes within the monitoring interval \u2014 the attacker must exhaust resources faster than the monitoring and response cycle to achieve sustained denial of service."
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-772",
-        "CWE-401",
-        "CWE-400",
-        "CWE-770"
-    ],
-    "confidence": "High",
-    "platforms": [
-        "RHEL 9",
-        "RHEL 10",
-        "Ubuntu 24.04",
-        "Fedora",
-        "Kubernetes"
-    ],
-    "verification": {
-        "method": "Check that cgroup memory.events is accessible and PSI is enabled in the kernel",
-        "commands": [
-            {
-                "command": "cat /sys/fs/cgroup/system.slice/memory.events",
-                "expected": "Non-zero counters if pressure has occurred; file existence confirms cgroup v2 memory accounting is active",
-                "platform": "linux"
-            },
-            {
-                "command": "cat /proc/pressure/memory",
-                "expected": "PSI metrics present (some/full avg10/avg60/avg300 values); confirms CONFIG_PSI=y",
-                "platform": "linux"
-            },
-            {
-                "command": "grep -c CONFIG_PSI=y /boot/config-$(uname -r)",
-                "expected": "1",
-                "platform": "linux"
-            }
-        ]
+  "cme_id": "CME-1010",
+  "control_name": "cgroup Memory Pressure Monitoring (memory.events / PSI)",
+  "description": "Monitors cgroups v2 memory pressure signals \u2014 memory.events (oom_kill, high, max counters) and Pressure Stall Information (PSI) via /proc/pressure/memory \u2014 to detect resource leaks before they exhaust system memory. When a cgroup approaches its memory limit due to a resource leak, these interfaces provide deterministic signals (memory.high threshold crossings, oom_kill increments, PSI stall percentages) that monitoring systems consume to trigger alerts and automated remediation. Complements cgroup memory limits (CME-704) which contain the leak by adding detection of when containment is being stressed. The memory.events counters are monotonically increasing and per-cgroup, enabling precise attribution of pressure to the leaking workload.",
+  "tactic": "Detect",
+  "category": "Integrity Detection",
+  "category_id": "integrity-detection",
+  "function_id": "integrity-monitoring",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Compensating control: cgroup memory pressure events (memory.events oom_kill/high counters and PSI stall metrics) provide deterministic early warning of resource leaks before system-wide exhaustion occurs, enabling operators to identify and remediate leaking processes within the monitoring interval \u2014 the attacker must exhaust resources faster than the monitoring and response cycle to achieve sustained denial of service."
     }
+  ],
+  "cwe_relationships": [
+    "CWE-772",
+    "CWE-401",
+    "CWE-400",
+    "CWE-770"
+  ],
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 10",
+    "Ubuntu 24.04",
+    "Fedora",
+    "Kubernetes"
+  ],
+  "verification": {
+    "method": "Check that cgroup memory.events is accessible and PSI is enabled in the kernel",
+    "commands": [
+      {
+        "command": "cat /sys/fs/cgroup/system.slice/memory.events",
+        "expected": "Non-zero counters if pressure has occurred; file existence confirms cgroup v2 memory accounting is active",
+        "platform": "linux"
+      },
+      {
+        "command": "cat /proc/pressure/memory",
+        "expected": "PSI metrics present (some/full avg10/avg60/avg300 values); confirms CONFIG_PSI=y",
+        "platform": "linux"
+      },
+      {
+        "command": "grep -c CONFIG_PSI=y /boot/config-$(uname -r)",
+        "expected": "1",
+        "platform": "linux"
+      }
+    ]
+  },
+  "scf_identifiers": [
+    "MON-01",
+    "MON-01.4"
+  ]
 }

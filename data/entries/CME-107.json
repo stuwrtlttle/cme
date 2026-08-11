@@ -1,45 +1,50 @@
 {
-    "cme_id": "CME-107",
-    "control_name": "Kernel Module Loading Restriction",
-    "description": "Disables dynamic kernel module loading at runtime, preventing insertion of rootkits or malicious kernel code after boot.",
-    "tactic": "Harden",
-    "category": "Kernel Hardening",
-    "category_id": "kernel-hardening",
-    "function_id": "kernel-attack-surface",
-    "control_layer": "OS/Kernel",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "Cannot load malicious kernel modules even with root access"
-        },
-        {
-            "metric": "I",
-            "from": "H",
-            "to": "L",
-            "rationale": "Prevents kernel-level persistence via modules"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-94",
-        "CWE-829"
-    ],
-    "verification": {
-        "method": "Check modules_disabled sysctl",
-        "commands": [
-            {
-                "command": "cat /proc/sys/kernel/modules_disabled",
-                "expected": "1",
-                "platform": "linux"
-            }
-        ]
+  "cme_id": "CME-107",
+  "control_name": "Kernel Module Loading Restriction",
+  "description": "Disables dynamic kernel module loading at runtime, preventing insertion of rootkits or malicious kernel code after boot.",
+  "tactic": "Harden",
+  "category": "Kernel Hardening",
+  "category_id": "kernel-hardening",
+  "function_id": "kernel-attack-surface",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Cannot load malicious kernel modules even with root access"
     },
-    "confidence": "High",
-    "platforms": [
-        "RHEL 9",
-        "RHEL 8",
-        "Ubuntu 24.04"
+    {
+      "metric": "I",
+      "from": "H",
+      "to": "L",
+      "rationale": "Prevents kernel-level persistence via modules"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-94",
+    "CWE-829"
+  ],
+  "verification": {
+    "method": "Check modules_disabled sysctl",
+    "commands": [
+      {
+        "command": "cat /proc/sys/kernel/modules_disabled",
+        "expected": "1",
+        "platform": "linux"
+      }
     ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 8",
+    "Ubuntu 24.04"
+  ],
+  "scf_identifiers": [
+    "CFG-03",
+    "END-03",
+    "SEA-06"
+  ]
 }

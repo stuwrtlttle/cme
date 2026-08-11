@@ -1,28 +1,33 @@
 {
-    "cme_id": "CME-1203",
-    "control_name": "Disaster Recovery / Multi-Region Failover",
-    "description": "Active-passive or active-active multi-region deployment enabling failover when primary site is compromised or unavailable. Automated failover with defined RTO/RPO.",
-    "tactic": "Restore",
-    "category": "Recovery Controls",
-    "category_id": "recovery-controls",
-    "function_id": "system-recovery",
-    "control_layer": "Application",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "A",
-            "from": "H",
-            "to": "L",
-            "rationale": "Service continues from secondary region; availability impact limited to failover time"
-        }
-    ],
-    "cwe_relationships": [],
-    "verification": {
-        "method": "Verify failover configuration and last failover test",
-        "commands": []
-    },
-    "confidence": "Medium",
-    "platforms": [
-        "Any"
-    ]
+  "cme_id": "CME-1203",
+  "control_name": "Disaster Recovery / Multi-Region Failover",
+  "description": "Active-passive or active-active multi-region deployment enabling failover when primary site is compromised or unavailable. Automated failover with defined RTO/RPO.",
+  "tactic": "Restore",
+  "category": "Recovery Controls",
+  "category_id": "recovery-controls",
+  "function_id": "system-recovery",
+  "control_layer": "Application",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "A",
+      "from": "H",
+      "to": "L",
+      "rationale": "Service continues from secondary region; availability impact limited to failover time"
+    }
+  ],
+  "cwe_relationships": [],
+  "verification": {
+    "method": "Verify failover configuration and last failover test",
+    "commands": []
+  },
+  "confidence": "Medium",
+  "platforms": [
+    "Any"
+  ],
+  "scf_identifiers": [
+    "BCD-01.4",
+    "BCD-09",
+    "BCD-12.2"
+  ]
 }

@@ -1,66 +1,72 @@
 {
-    "cme_id": "CME-807",
-    "control_name": "Session Lifetime and Idle Timeout Enforcement",
-    "description": "Enforce absolute session lifetime limits and idle inactivity timeouts on all authenticated sessions to minimize the window during which a stolen or abandoned session token can be reused. The control requires: (1) an absolute maximum session duration (e.g., 8-12 hours) after which the session is invalidated regardless of activity, forcing re-authentication; (2) an idle timeout (e.g., 15-30 minutes) that invalidates sessions after a period of no activity; (3) server-side session invalidation on explicit logout that destroys the session record rather than merely clearing the client cookie; and (4) session invalidation on security-relevant account changes (password change, privilege escalation, MFA enrollment) to prevent continued use of pre-change session tokens. Configuration is enforced via application server session-timeout directives (web.xml, Tomcat session-config, Django SESSION_COOKIE_AGE, Rails session_store expire_after), reverse proxy session modules (mod_session MaxAge), or identity provider token lifetime policies (Keycloak/RHSSO access token lifespan, SSO session idle/max settings).",
-    "tactic": "Harden",
-    "category": "Credential Hardening",
-    "category_id": "credential-hardening",
-    "function_id": "session-management",
-    "control_layer": "Identity",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "An attacker who obtains a session token via XSS, network sniffing, physical access, or session fixation must use it within the idle timeout window before it is automatically invalidated; the compressed exploitation window requires the attacker to have real-time access and act immediately rather than using a token discovered hours or days later"
-        },
-        {
-            "metric": "PR",
-            "from": "N",
-            "to": "L",
-            "rationale": "Abandoned sessions from previously authenticated users cannot be reused by unauthenticated attackers because idle timeout and absolute lifetime expiration destroy the session state server-side; the attacker must independently authenticate rather than inheriting a stale authenticated session"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-613",
-        "CWE-384",
-        "CWE-539"
-    ],
-    "verification": {
-        "method": "Verify that authenticated sessions have both absolute lifetime limits and idle timeouts configured, and that logout explicitly invalidates the server-side session",
-        "commands": [
-            {
-                "command": "grep -rn 'session-timeout\\|<session-config>' <app_source>/WEB-INF/web.xml",
-                "expected": "session-timeout set to 30 or less (minutes)",
-                "platform": "any"
-            },
-            {
-                "command": "grep -rn 'SESSION_COOKIE_AGE\\|SESSION_EXPIRE_AT_BROWSER_CLOSE\\|SESSION_IDLE_TIMEOUT' <app_source>/settings.py",
-                "expected": "SESSION_COOKIE_AGE set to 1800 or less (seconds); SESSION_EXPIRE_AT_BROWSER_CLOSE = True",
-                "platform": "any"
-            },
-            {
-                "command": "grep -rn 'expire_after\\|session_length\\|timeout.*session' <app_source>/config/",
-                "expected": "Session expiration configured (e.g., expire_after: 30.minutes)",
-                "platform": "any"
-            },
-            {
-                "command": "grep -rn 'session.invalidate\\|request.session.flush\\|session.destroy\\|Session.Abandon' <app_source>/",
-                "expected": "Server-side session invalidation present in logout handler",
-                "platform": "any"
-            },
-            {
-                "command": "Get-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\CurrentVersion\\Policies\\System' -Name InactivityTimeoutSecs -ErrorAction SilentlyContinue | Select-Object InactivityTimeoutSecs",
-                "expected": "InactivityTimeoutSecs set to 900 or less (15 minutes)",
-                "platform": "windows"
-            }
-        ]
+  "cme_id": "CME-807",
+  "control_name": "Session Lifetime and Idle Timeout Enforcement",
+  "description": "Enforce absolute session lifetime limits and idle inactivity timeouts on all authenticated sessions to minimize the window during which a stolen or abandoned session token can be reused. The control requires: (1) an absolute maximum session duration (e.g., 8-12 hours) after which the session is invalidated regardless of activity, forcing re-authentication; (2) an idle timeout (e.g., 15-30 minutes) that invalidates sessions after a period of no activity; (3) server-side session invalidation on explicit logout that destroys the session record rather than merely clearing the client cookie; and (4) session invalidation on security-relevant account changes (password change, privilege escalation, MFA enrollment) to prevent continued use of pre-change session tokens. Configuration is enforced via application server session-timeout directives (web.xml, Tomcat session-config, Django SESSION_COOKIE_AGE, Rails session_store expire_after), reverse proxy session modules (mod_session MaxAge), or identity provider token lifetime policies (Keycloak/RHSSO access token lifespan, SSO session idle/max settings).",
+  "tactic": "Harden",
+  "category": "Credential Hardening",
+  "category_id": "credential-hardening",
+  "function_id": "session-management",
+  "control_layer": "Identity",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "An attacker who obtains a session token via XSS, network sniffing, physical access, or session fixation must use it within the idle timeout window before it is automatically invalidated; the compressed exploitation window requires the attacker to have real-time access and act immediately rather than using a token discovered hours or days later"
     },
-    "confidence": "High",
-    "platforms": [
-        "Any",
-        "Windows Server 2019",
-        "Windows Server 2022"
+    {
+      "metric": "PR",
+      "from": "N",
+      "to": "L",
+      "rationale": "Abandoned sessions from previously authenticated users cannot be reused by unauthenticated attackers because idle timeout and absolute lifetime expiration destroy the session state server-side; the attacker must independently authenticate rather than inheriting a stale authenticated session"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-613",
+    "CWE-384",
+    "CWE-539"
+  ],
+  "verification": {
+    "method": "Verify that authenticated sessions have both absolute lifetime limits and idle timeouts configured, and that logout explicitly invalidates the server-side session",
+    "commands": [
+      {
+        "command": "grep -rn 'session-timeout\\|<session-config>' <app_source>/WEB-INF/web.xml",
+        "expected": "session-timeout set to 30 or less (minutes)",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'SESSION_COOKIE_AGE\\|SESSION_EXPIRE_AT_BROWSER_CLOSE\\|SESSION_IDLE_TIMEOUT' <app_source>/settings.py",
+        "expected": "SESSION_COOKIE_AGE set to 1800 or less (seconds); SESSION_EXPIRE_AT_BROWSER_CLOSE = True",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'expire_after\\|session_length\\|timeout.*session' <app_source>/config/",
+        "expected": "Session expiration configured (e.g., expire_after: 30.minutes)",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'session.invalidate\\|request.session.flush\\|session.destroy\\|Session.Abandon' <app_source>/",
+        "expected": "Server-side session invalidation present in logout handler",
+        "platform": "any"
+      },
+      {
+        "command": "Get-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\CurrentVersion\\Policies\\System' -Name InactivityTimeoutSecs -ErrorAction SilentlyContinue | Select-Object InactivityTimeoutSecs",
+        "expected": "InactivityTimeoutSecs set to 900 or less (15 minutes)",
+        "platform": "windows"
+      }
     ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "Any",
+    "Windows Server 2019",
+    "Windows Server 2022"
+  ],
+  "scf_identifiers": [
+    "IAC-24",
+    "IAC-25",
+    "NET-07",
+    "NET-09.1"
+  ]
 }

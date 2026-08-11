@@ -1,45 +1,49 @@
 {
-    "cme_id": "CME-105",
-    "control_name": "SMEP (Supervisor Mode Execution Prevention)",
-    "description": "CPU feature preventing the kernel from executing code in userspace pages. Blocks ret2usr attacks where kernel exploit redirects execution to attacker-controlled userspace code.",
-    "tactic": "Harden",
-    "category": "Kernel Hardening",
-    "category_id": "kernel-hardening",
-    "function_id": "kernel-attack-surface",
-    "control_layer": "OS/Kernel",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "Kernel exploit cannot simply jump to userspace shellcode"
-        },
-        {
-            "metric": "S",
-            "from": "C",
-            "to": "U",
-            "rationale": "Prevents trivial kernel-to-userspace execution boundary crossing"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-119",
-        "CWE-269"
-    ],
-    "verification": {
-        "method": "Check CPU flags for smep support",
-        "commands": [
-            {
-                "command": "grep -o smep /proc/cpuinfo | head -1",
-                "expected": "smep",
-                "platform": "linux"
-            }
-        ]
+  "cme_id": "CME-105",
+  "control_name": "SMEP (Supervisor Mode Execution Prevention)",
+  "description": "CPU feature preventing the kernel from executing code in userspace pages. Blocks ret2usr attacks where kernel exploit redirects execution to attacker-controlled userspace code.",
+  "tactic": "Harden",
+  "category": "Kernel Hardening",
+  "category_id": "kernel-hardening",
+  "function_id": "kernel-attack-surface",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Kernel exploit cannot simply jump to userspace shellcode"
     },
-    "confidence": "High",
-    "platforms": [
-        "RHEL 9",
-        "RHEL 8",
-        "Ubuntu 24.04"
+    {
+      "metric": "S",
+      "from": "C",
+      "to": "U",
+      "rationale": "Prevents trivial kernel-to-userspace execution boundary crossing"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-119",
+    "CWE-269"
+  ],
+  "verification": {
+    "method": "Check CPU flags for smep support",
+    "commands": [
+      {
+        "command": "grep -o smep /proc/cpuinfo | head -1",
+        "expected": "smep",
+        "platform": "linux"
+      }
     ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 8",
+    "Ubuntu 24.04"
+  ],
+  "scf_identifiers": [
+    "SEA-04",
+    "SEA-10"
+  ]
 }

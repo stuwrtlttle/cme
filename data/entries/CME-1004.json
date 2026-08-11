@@ -1,44 +1,49 @@
 {
-    "cme_id": "CME-1004",
-    "control_name": "AIDE / File Integrity Monitoring",
-    "description": "Detects unauthorized modifications to critical system files by comparing against a known-good baseline database. Scheduled or continuous monitoring of /etc, /bin, /sbin, /usr.",
-    "tactic": "Detect",
-    "category": "Integrity Detection",
-    "category_id": "integrity-detection",
-    "function_id": "integrity-monitoring",
-    "control_layer": "OS/Kernel",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "I",
-            "from": "H",
-            "to": "L",
-            "rationale": "Compensating control: file modifications detected, alerting triggered"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-345"
-    ],
-    "verification": {
-        "method": "Verify AIDE is installed and database is initialized",
-        "commands": [
-            {
-                "command": "aide --check 2>/dev/null; echo $?",
-                "expected": "0",
-                "platform": "linux"
-            }
-        ]
-    },
-    "references": [
-        {
-            "source": "CIS RHEL 9 Benchmark",
-            "section": "1.3 Filesystem Integrity Checking"
-        }
-    ],
-    "confidence": "Medium",
-    "platforms": [
-        "RHEL 9",
-        "RHEL 8",
-        "Ubuntu 24.04"
+  "cme_id": "CME-1004",
+  "control_name": "AIDE / File Integrity Monitoring",
+  "description": "Detects unauthorized modifications to critical system files by comparing against a known-good baseline database. Scheduled or continuous monitoring of /etc, /bin, /sbin, /usr.",
+  "tactic": "Detect",
+  "category": "Integrity Detection",
+  "category_id": "integrity-detection",
+  "function_id": "integrity-monitoring",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "I",
+      "from": "H",
+      "to": "L",
+      "rationale": "Compensating control: file modifications detected, alerting triggered"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-345"
+  ],
+  "verification": {
+    "method": "Verify AIDE is installed and database is initialized",
+    "commands": [
+      {
+        "command": "aide --check 2>/dev/null; echo $?",
+        "expected": "0",
+        "platform": "linux"
+      }
     ]
+  },
+  "references": [
+    {
+      "source": "CIS RHEL 9 Benchmark",
+      "section": "1.3 Filesystem Integrity Checking"
+    }
+  ],
+  "confidence": "Medium",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 8",
+    "Ubuntu 24.04"
+  ],
+  "scf_identifiers": [
+    "END-06",
+    "END-06.3",
+    "MON-01.7"
+  ]
 }

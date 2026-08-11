@@ -1,57 +1,61 @@
 {
-    "cme_id": "CME-713",
-    "control_name": "Read-Only Root Filesystem Enforcement",
-    "description": "Mount the container root filesystem as read-only, forcing all writable data into explicitly declared volumes or tmpfs mounts. Prevents attackers who achieve code execution inside a container from modifying binaries, planting webshells, or persisting backdoors on the filesystem. Combined with NoNewPrivileges (CME-707) and Dropped Capabilities (CME-705), eliminates post-exploitation persistence mechanisms within the container layer.",
-    "tactic": "Harden",
-    "category": "Container Isolation",
-    "category_id": "container-isolation",
-    "function_id": "container-runtime",
-    "control_layer": "OS/Kernel",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "I",
-            "from": "H",
-            "to": "L",
-            "rationale": "Runtime filesystem modification is blocked; attacker cannot persist malicious artifacts, modify binaries, or plant webshells on the root filesystem"
-        },
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "Exploitation chain requires identifying a writable volume mount to stage payloads; the default filesystem is immutable"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-269",
-        "CWE-94",
-        "CWE-506"
-    ],
-    "verification": {
-        "method": "Verify container root filesystem is mounted read-only",
-        "commands": [
-            {
-                "command": "kubectl get pod <pod> -o jsonpath='{.spec.containers[*].securityContext.readOnlyRootFilesystem}'",
-                "expected": "true",
-                "platform": "kubernetes"
-            },
-            {
-                "command": "podman inspect <ctr> --format '{{.HostConfig.ReadonlyRootfs}}'",
-                "expected": "true",
-                "platform": "linux"
-            },
-            {
-                "command": "docker inspect <ctr> --format '{{.HostConfig.ReadonlyRootfs}}'",
-                "expected": "true",
-                "platform": "linux"
-            }
-        ]
+  "cme_id": "CME-713",
+  "control_name": "Read-Only Root Filesystem Enforcement",
+  "description": "Mount the container root filesystem as read-only, forcing all writable data into explicitly declared volumes or tmpfs mounts. Prevents attackers who achieve code execution inside a container from modifying binaries, planting webshells, or persisting backdoors on the filesystem. Combined with NoNewPrivileges (CME-707) and Dropped Capabilities (CME-705), eliminates post-exploitation persistence mechanisms within the container layer.",
+  "tactic": "Harden",
+  "category": "Container Isolation",
+  "category_id": "container-isolation",
+  "function_id": "container-runtime",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "I",
+      "from": "H",
+      "to": "L",
+      "rationale": "Runtime filesystem modification is blocked; attacker cannot persist malicious artifacts, modify binaries, or plant webshells on the root filesystem"
     },
-    "confidence": "High",
-    "platforms": [
-        "Kubernetes 1.25+",
-        "OpenShift 4.12+",
-        "Podman",
-        "Docker"
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Exploitation chain requires identifying a writable volume mount to stage payloads; the default filesystem is immutable"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-269",
+    "CWE-94",
+    "CWE-506"
+  ],
+  "verification": {
+    "method": "Verify container root filesystem is mounted read-only",
+    "commands": [
+      {
+        "command": "kubectl get pod <pod> -o jsonpath='{.spec.containers[*].securityContext.readOnlyRootFilesystem}'",
+        "expected": "true",
+        "platform": "kubernetes"
+      },
+      {
+        "command": "podman inspect <ctr> --format '{{.HostConfig.ReadonlyRootfs}}'",
+        "expected": "true",
+        "platform": "linux"
+      },
+      {
+        "command": "docker inspect <ctr> --format '{{.HostConfig.ReadonlyRootfs}}'",
+        "expected": "true",
+        "platform": "linux"
+      }
     ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "Kubernetes 1.25+",
+    "OpenShift 4.12+",
+    "Podman",
+    "Docker"
+  ],
+  "scf_identifiers": [
+    "CLD-05",
+    "SEA-16"
+  ]
 }

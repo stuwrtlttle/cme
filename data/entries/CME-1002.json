@@ -1,53 +1,59 @@
 {
-    "cme_id": "CME-1002",
-    "control_name": "Audit Subsystem (auditd)",
-    "description": "Linux kernel audit framework that logs syscalls, file access, authentication events, and security-relevant operations. Provides forensic trail and can trigger alerts.",
-    "tactic": "Detect",
-    "category": "Runtime Detection",
-    "category_id": "runtime-detection",
-    "function_id": "host-monitoring",
-    "control_layer": "OS/Kernel",
-    "attenuation_type": "deterministic",
-    "cvss_vector_impacts": [
-        {
-            "metric": "AC",
-            "from": "L",
-            "to": "H",
-            "rationale": "Compensating control: attacker actions are logged and may trigger alerting"
-        }
-    ],
-    "cwe_relationships": [
-        "CWE-778"
-    ],
-    "verification": {
-        "method": "Verify auditd is running with rules loaded",
-        "commands": [
-            {
-                "command": "auditctl -s | grep enabled",
-                "expected": "enabled 1",
-                "platform": "linux"
-            },
-            {
-                "command": "auditctl -l | wc -l",
-                "expected": "Non-zero rule count",
-                "platform": "linux"
-            }
-        ]
-    },
-    "references": [
-        {
-            "source": "Red Hat Security Hardening Guide",
-            "section": "System auditing"
-        },
-        {
-            "source": "CIS RHEL 9 Benchmark",
-            "section": "4. Logging and Auditing"
-        }
-    ],
-    "confidence": "Medium",
-    "platforms": [
-        "RHEL 9",
-        "RHEL 8",
-        "Ubuntu 24.04"
+  "cme_id": "CME-1002",
+  "control_name": "Audit Subsystem (auditd)",
+  "description": "Linux kernel audit framework that logs syscalls, file access, authentication events, and security-relevant operations. Provides forensic trail and can trigger alerts.",
+  "tactic": "Detect",
+  "category": "Runtime Detection",
+  "category_id": "runtime-detection",
+  "function_id": "host-monitoring",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Compensating control: attacker actions are logged and may trigger alerting"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-778"
+  ],
+  "verification": {
+    "method": "Verify auditd is running with rules loaded",
+    "commands": [
+      {
+        "command": "auditctl -s | grep enabled",
+        "expected": "enabled 1",
+        "platform": "linux"
+      },
+      {
+        "command": "auditctl -l | wc -l",
+        "expected": "Non-zero rule count",
+        "platform": "linux"
+      }
     ]
+  },
+  "references": [
+    {
+      "source": "Red Hat Security Hardening Guide",
+      "section": "System auditing"
+    },
+    {
+      "source": "CIS RHEL 9 Benchmark",
+      "section": "4. Logging and Auditing"
+    }
+  ],
+  "confidence": "Medium",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 8",
+    "Ubuntu 24.04"
+  ],
+  "scf_identifiers": [
+    "IAC-21.4",
+    "MON-02",
+    "MON-03",
+    "MON-03.3"
+  ]
 }
