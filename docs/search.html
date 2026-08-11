@@ -172,7 +172,7 @@
     <div class="sr-desc">Configures per-process resource limits via ulimit/prlimit to prevent algorithmic complexity attacks, infinite loops, and resource exhaustion from cons...</div>
   </li>
   
-  <li data-search="cme-116 fortify_source (buffer overflow detection) compile-time and runtime detection of buffer overflows in common c library functions (memcpy, strcpy, sprintf, read, etc.). at compile time, the compiler replaces standard library calls with bounds-checked variants when buffer sizes are known. at runtime, remaining checks abort the process when a buffer overflow is detected. fortify_source level 2 checks all detectable overflows; level 3 (gcc 12+) extends coverage to dynamically-sized buffers and flexible array members. catches many integer-overflow-to-buffer-overflow chains where the overflowed size value is passed to a libc copy function. kernel hardening harden os/kernel cwe-119 cwe-120 cwe-122 cwe-787 cwe-190 cwe-130">
+  <li data-search="cme-116 fortify_source (buffer overflow detection) compile-time and runtime detection of buffer overflows in common c library functions (memcpy, strcpy, sprintf, read, etc.). at compile time, the compiler replaces standard library calls with bounds-checked variants when buffer sizes are known. at runtime, remaining checks abort the process when a buffer overflow is detected. fortify_source level 2 checks all detectable overflows; level 3 (gcc 12+) extends coverage to dynamically-sized buffers and flexible array members. catches many integer-overflow-to-buffer-overflow chains where the overflowed size value is passed to a libc copy function. kernel hardening harden os/kernel cwe-119 cwe-120 cwe-122 cwe-787 cwe-190 cwe-130 cwe-681">
     <div>
       <a href="entries/CME-116.html" class="sr-id">CME-116</a>
       <a href="entries/CME-116.html">FORTIFY_SOURCE (Buffer Overflow Detection)</a>
@@ -200,6 +200,16 @@
       <span class="badge badge-layer-os-kernel">OS/Kernel</span>
     </div>
     <div class="sr-desc">Enable the kernel filesystem link protection sysctls to prevent exploitation of TOCTOU race conditions and symlink following attacks in world-writable...</div>
+  </li>
+  
+  <li data-search="cme-119 compiler integer overflow and conversion safety (-ftrapv / ubsan integer) compiler-enforced runtime detection of integer overflow and unsafe numeric type conversions. encompasses: (1) gcc/clang -ftrapv — traps on signed integer overflow at ~2-5% overhead, suitable for production; (2) ubsan integer sanitizers (-fsanitize=signed-integer-overflow, -fsanitize=unsigned-integer-overflow, -fsanitize=implicit-conversion) — detect signed/unsigned overflow and implicit narrowing/sign-change conversions at runtime with configurable abort or logging; (3) msvc /rtcc — detects data loss from runtime type conversions. when enabled, integer conversion errors that would silently produce incorrect values instead terminate the process, converting potential code execution vulnerabilities into denial-of-service conditions (a less severe outcome). particularly effective against the dominant cwe-681 attack pattern where a negative signed value converted to unsigned becomes an enormous positive value that bypasses bounds checks and corrupts memory. complements cme-116 (fortify_source) which catches the buffer overflow consequence of integer conversion errors, while this control catches the conversion error itself at the point of occurrence. kernel hardening harden os/kernel cwe-681 cwe-190 cwe-191 cwe-192 cwe-194 cwe-195 cwe-196 cwe-197">
+    <div>
+      <a href="entries/CME-119.html" class="sr-id">CME-119</a>
+      <a href="entries/CME-119.html">Compiler Integer Overflow and Conversion Safety (-ftrapv / UBSan Integer)</a>
+      <span class="badge badge-tactic-harden">Harden</span>
+      <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+    </div>
+    <div class="sr-desc">Compiler-enforced runtime detection of integer overflow and unsafe numeric type conversions. Encompasses: (1) GCC/Clang -ftrapv — traps on signed inte...</div>
   </li>
   
   <li data-search="cme-201 zero trust gateway / identity-aware proxy all network access requires authenticated identity verification. no implicit trust from network position. every request is authenticated and authorized regardless of source network. network isolation isolate network cwe-284 cwe-306 cwe-287">
@@ -612,6 +622,36 @@
     <div class="sr-desc">systemd dynamically allocates a unique UID/GID per service instance. No persistent user account exists; each service restart gets a fresh identity, pr...</div>
   </li>
   
+  <li data-search="cme-711 admission controller policy enforcement (opa/gatekeeper/kyverno) policy-as-code enforcement at the kubernetes admission gate. admission controllers intercept api requests before persistence and reject workloads that violate security policies: no privileged containers, no host namespace sharing, required labels/annotations, image registry allowlists. provides defense-in-depth on top of pod security standards (cme-706) with custom policy granularity. opa/gatekeeper uses rego policies via constrainttemplate crds; kyverno uses kubernetes-native clusterpolicy resources. openshift securitycontextconstraints serve as a built-in admission control mechanism. container isolation harden application cwe-269 cwe-284 cwe-250">
+    <div>
+      <a href="entries/CME-711.html" class="sr-id">CME-711</a>
+      <a href="entries/CME-711.html">Admission Controller Policy Enforcement (OPA/Gatekeeper/Kyverno)</a>
+      <span class="badge badge-tactic-harden">Harden</span>
+      <span class="badge badge-layer-application">Application</span>
+    </div>
+    <div class="sr-desc">Policy-as-code enforcement at the Kubernetes admission gate. Admission controllers intercept API requests before persistence and reject workloads that...</div>
+  </li>
+  
+  <li data-search="cme-712 container image signing and provenance verification (cosign/sigstore) require cryptographic signatures on container images before deployment. cosign/sigstore verify image provenance against a trust policy, ensuring only images from authorized build pipelines are admitted. blocks supply chain attacks where a compromised registry or build system pushes malicious images. verification can be enforced at admission time via policy controllers (kyverno, gatekeeper with cosign) or at pull time via container runtime trust policies (podman policy.json, cri-o). container isolation harden application cwe-345 cwe-494 cwe-829">
+    <div>
+      <a href="entries/CME-712.html" class="sr-id">CME-712</a>
+      <a href="entries/CME-712.html">Container Image Signing and Provenance Verification (Cosign/Sigstore)</a>
+      <span class="badge badge-tactic-harden">Harden</span>
+      <span class="badge badge-layer-application">Application</span>
+    </div>
+    <div class="sr-desc">Require cryptographic signatures on container images before deployment. Cosign/Sigstore verify image provenance against a trust policy, ensuring only ...</div>
+  </li>
+  
+  <li data-search="cme-713 read-only root filesystem enforcement mount the container root filesystem as read-only, forcing all writable data into explicitly declared volumes or tmpfs mounts. prevents attackers who achieve code execution inside a container from modifying binaries, planting webshells, or persisting backdoors on the filesystem. combined with nonewprivileges (cme-707) and dropped capabilities (cme-705), eliminates post-exploitation persistence mechanisms within the container layer. container isolation harden os/kernel cwe-269 cwe-94 cwe-506">
+    <div>
+      <a href="entries/CME-713.html" class="sr-id">CME-713</a>
+      <a href="entries/CME-713.html">Read-Only Root Filesystem Enforcement</a>
+      <span class="badge badge-tactic-harden">Harden</span>
+      <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+    </div>
+    <div class="sr-desc">Mount the container root filesystem as read-only, forcing all writable data into explicitly declared volumes or tmpfs mounts. Prevents attackers who a...</div>
+  </li>
+  
   <li data-search="cme-801 multi-factor authentication (mfa) requires multiple authentication factors (password + totp/fido2/smart card), preventing credential-only compromise. even stolen passwords are insufficient for access. credential hardening harden identity cwe-287 cwe-306 cwe-521 cwe-303 cwe-305">
     <div>
       <a href="entries/CME-801.html" class="sr-id">CME-801</a>
@@ -972,6 +1012,16 @@
     <div class="sr-desc">Monitors cgroups v2 memory pressure signals — memory.events (oom_kill, high, max counters) and Pressure Stall Information (PSI) via /proc/pressure/mem...</div>
   </li>
   
+  <li data-search="cme-1011 kubernetes api server audit policy configures the kubernetes api server audit policy to log security-relevant events including authentication failures, rbac denials, sensitive resource access (secrets, configmaps), privileged pod creation, and exec/attach to running containers. provides detection capability for lateral movement, privilege escalation attempts, and unauthorized api access within the cluster. audit logs can feed siem systems for alerting and forensic analysis. openshift provides built-in audit profiles (default, writerequestbodies, allrequestbodies) configurable via the apiserver resource. runtime detection detect application cwe-778 cwe-223">
+    <div>
+      <a href="entries/CME-1011.html" class="sr-id">CME-1011</a>
+      <a href="entries/CME-1011.html">Kubernetes API Server Audit Policy</a>
+      <span class="badge badge-tactic-detect">Detect</span>
+      <span class="badge badge-layer-application">Application</span>
+    </div>
+    <div class="sr-desc">Configures the Kubernetes API server audit policy to log security-relevant events including authentication failures, RBAC denials, sensitive resource ...</div>
+  </li>
+  
   <li data-search="cme-1101 automated patch management (dnf-automatic) automatically downloads and applies security updates on schedule. reduces the window between vulnerability disclosure and patch application from days/weeks to hours. patch management evict os/kernel ">
     <div>
       <a href="entries/CME-1101.html" class="sr-id">CME-1101</a>
@@ -1142,7 +1192,7 @@
     <div class="sr-desc">Server-side validation of uploaded files using content inspection (magic byte verification), extension allowlisting, and size limits before the file i...</div>
   </li>
   
-  <li data-search="cme-1311 input size and quantity bounds enforcement validation that user-supplied quantities — sizes, counts, lengths, offsets, indices, and repetition factors — fall within expected bounds before they are used in memory allocation, loop iteration, or buffer operations. rejects values that are negative, zero when unexpected, or exceed a configured maximum. applied at the protocol parsing layer before data reaches processing logic. this prevents integer overflow chains (where an oversized count wraps to a small value and bypasses bounds checks) and resource exhaustion attacks (where an unbounded count causes excessive allocation or iteration). the root cause control for vulnerabilities where the attacker controls a size or count field in a binary protocol, serialized format, or api parameter. application input validation harden application cwe-1284 cwe-20 cwe-1285 cwe-190 cwe-131 cwe-130">
+  <li data-search="cme-1311 input size and quantity bounds enforcement validation that user-supplied quantities — sizes, counts, lengths, offsets, indices, and repetition factors — fall within expected bounds before they are used in memory allocation, loop iteration, or buffer operations. rejects values that are negative, zero when unexpected, or exceed a configured maximum. applied at the protocol parsing layer before data reaches processing logic. this prevents integer overflow chains (where an oversized count wraps to a small value and bypasses bounds checks) and resource exhaustion attacks (where an unbounded count causes excessive allocation or iteration). the root cause control for vulnerabilities where the attacker controls a size or count field in a binary protocol, serialized format, or api parameter. application input validation harden application cwe-1284 cwe-20 cwe-1285 cwe-190 cwe-131 cwe-130 cwe-681">
     <div>
       <a href="entries/CME-1311.html" class="sr-id">CME-1311</a>
       <a href="entries/CME-1311.html">Input Size and Quantity Bounds Enforcement</a>
@@ -1238,7 +1288,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-07-01 03:37 UTC &middot; 118 entries &middot;
+    Generated 2026-08-11 01:44 UTC &middot; 123 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CME-1002: Audit Subsystem (auditd) — Common Mitigation Enumeration</title>
+  <title>CME-1011: Kubernetes API Server Audit Policy — Common Mitigation Enumeration</title>
   <link rel="stylesheet" href="../style.css">
 </head>
 <body>
@@ -22,11 +22,11 @@
   <main class="container">
     
 <div class="entry-header">
-  <div class="entry-id">CME-1002</div>
-  <h1>Audit Subsystem (auditd)</h1>
+  <div class="entry-id">CME-1011</div>
+  <h1>Kubernetes API Server Audit Policy</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-detect">Detect</span>
-    <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+    <span class="badge badge-layer-application">Application</span>
     
     <span class="badge badge-confidence-medium">Medium Confidence</span>
     
@@ -38,7 +38,7 @@
 
     <section>
       <h2>Description</h2>
-      <p class="entry-description">Linux kernel audit framework that logs syscalls, file access, authentication events, and security-relevant operations. Provides forensic trail and can trigger alerts.</p>
+      <p class="entry-description">Configures the Kubernetes API server audit policy to log security-relevant events including authentication failures, RBAC denials, sensitive resource access (secrets, configmaps), privileged pod creation, and exec/attach to running containers. Provides detection capability for lateral movement, privilege escalation attempts, and unauthorized API access within the cluster. Audit logs can feed SIEM systems for alerting and forensic analysis. OpenShift provides built-in audit profiles (Default, WriteRequestBodies, AllRequestBodies) configurable via the APIServer resource.</p>
     </section>
 
     <section>
@@ -60,7 +60,7 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            <td class="cvss-rationale">Compensating control: attacker actions are logged and may trigger alerting</td>
+            <td class="cvss-rationale">Attacker actions within the cluster are logged and can trigger alerts, increasing detection risk; maintaining stealth requires evading audit policy coverage, which adds significant complexity to the attack chain</td>
           </tr>
           
         </tbody>
@@ -75,6 +75,9 @@
         <a href="https://cwe.mitre.org/data/definitions/778.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-778</a>
         
+        <a href="https://cwe.mitre.org/data/definitions/223.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-223</a>
+        
       </div>
     </section>
     
@@ -83,27 +86,37 @@
     <section>
       <h2>Verification</h2>
       
-      <p class="verification-method">Verify auditd is running with rules loaded</p>
+      <p class="verification-method">Verify Kubernetes API server audit policy is configured and active</p>
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> auditctl -s | grep enabled
+        <span class="cmd-prompt">$</span> kubectl get --raw /apis/audit.k8s.io/v1 2&gt;/dev/null &amp;&amp; echo audit-api-available
         
-        <br><span class="cmd-expected"># Expected: enabled 1</span>
+        <br><span class="cmd-expected"># Expected: audit-api-available</span>
         
       </div>
       
-      <div class="cmd-platform">Platform: linux</div>
+      <div class="cmd-platform">Platform: kubernetes</div>
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> auditctl -l | wc -l
+        <span class="cmd-prompt">$</span> grep audit-policy-file /etc/kubernetes/manifests/kube-apiserver.yaml 2&gt;/dev/null
         
-        <br><span class="cmd-expected"># Expected: Non-zero rule count</span>
+        <br><span class="cmd-expected"># Expected: Audit policy file referenced in API server configuration</span>
         
       </div>
       
-      <div class="cmd-platform">Platform: linux</div>
+      <div class="cmd-platform">Platform: kubernetes</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> oc get apiservers.config.openshift.io cluster -o jsonpath=&#39;{.spec.audit.profile}&#39;
+        
+        <br><span class="cmd-expected"># Expected: Default, WriteRequestBodies, or AllRequestBodies (not None)</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: kubernetes</div>
       
       
     </section>
@@ -111,31 +124,14 @@
 
     
 
-    
-    <section>
-      <h2>References</h2>
-      <ul class="sidebar-list">
-        
-        <li>
-          Red Hat Security Hardening Guide
-           &mdash; System auditing
-        </li>
-        
-        <li>
-          CIS RHEL 9 Benchmark
-           &mdash; 4. Logging and Auditing
-        </li>
-        
-      </ul>
-    </section>
     
 
     <div class="entry-nav">
       
-      <a href="CME-1001.html">&larr; CME-1001: EDR Agent (Endpoint Detection &amp; Response)</a>
+      <a href="CME-1010.html">&larr; CME-1010: cgroup Memory Pressure Monitoring (memory.events / PSI)</a>
       
       
-      <a href="CME-1003.html">CME-1003: Falco / eBPF Runtime Security &rarr;</a>
+      <a href="CME-1101.html">CME-1101: Automated Patch Management (dnf-automatic) &rarr;</a>
       
     </div>
   </div>
@@ -153,11 +149,9 @@
       <h3>Platforms</h3>
       <ul class="sidebar-list">
         
-        <li>RHEL 9</li>
+        <li>Kubernetes 1.25+</li>
         
-        <li>RHEL 8</li>
-        
-        <li>Ubuntu 24.04</li>
+        <li>OpenShift 4.12+</li>
         
       </ul>
     </section>
@@ -166,10 +160,10 @@
     <section>
       <h3>Quick Reference</h3>
       <ul class="sidebar-list">
-        <li><strong>ID:</strong> CME-1002</li>
+        <li><strong>ID:</strong> CME-1011</li>
         <li><strong>Tactic:</strong> Detect</li>
-        <li><strong>Layer:</strong> OS/Kernel</li>
-        <li><strong>CWEs:</strong> 1</li>
+        <li><strong>Layer:</strong> Application</li>
+        <li><strong>CWEs:</strong> 2</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
     </section>

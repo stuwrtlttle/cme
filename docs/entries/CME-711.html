@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CME-706: Pod Security Standards (Restricted) — Common Mitigation Enumeration</title>
+  <title>CME-711: Admission Controller Policy Enforcement (OPA/Gatekeeper/Kyverno) — Common Mitigation Enumeration</title>
   <link rel="stylesheet" href="../style.css">
 </head>
 <body>
@@ -22,10 +22,10 @@
   <main class="container">
     
 <div class="entry-header">
-  <div class="entry-id">CME-706</div>
-  <h1>Pod Security Standards (Restricted)</h1>
+  <div class="entry-id">CME-711</div>
+  <h1>Admission Controller Policy Enforcement (OPA/Gatekeeper/Kyverno)</h1>
   <div class="entry-meta">
-    <span class="badge badge-tactic-isolate">Isolate</span>
+    <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-application">Application</span>
     
     <span class="badge badge-confidence-high">High Confidence</span>
@@ -38,7 +38,7 @@
 
     <section>
       <h2>Description</h2>
-      <p class="entry-description">Kubernetes Pod Security Standards at Restricted level: requires non-root, drops ALL capabilities, blocks privilege escalation, requires seccomp, blocks hostPath/hostNetwork/hostPID.</p>
+      <p class="entry-description">Policy-as-code enforcement at the Kubernetes admission gate. Admission controllers intercept API requests before persistence and reject workloads that violate security policies: no privileged containers, no host namespace sharing, required labels/annotations, image registry allowlists. Provides defense-in-depth on top of Pod Security Standards (CME-706) with custom policy granularity. OPA/Gatekeeper uses Rego policies via ConstraintTemplate CRDs; Kyverno uses Kubernetes-native ClusterPolicy resources. OpenShift SecurityContextConstraints serve as a built-in admission control mechanism.</p>
     </section>
 
     <section>
@@ -54,23 +54,23 @@
         <tbody>
           
           <tr>
-            <td><strong>Scope</strong> (S)</td>
+            <td><strong>Privileges Required</strong> (PR)</td>
             <td>
-              <span class="cvss-from">C</span>
+              <span class="cvss-from">N</span>
               <span class="cvss-arrow">&rarr;</span>
-              <span class="cvss-to">U</span>
+              <span class="cvss-to">L</span>
             </td>
-            <td class="cvss-rationale">Pod cannot access host resources or escalate to host context</td>
+            <td class="cvss-rationale">Unauthorized workloads cannot be deployed without policy exemption; admission controller rejects API requests that violate security constraints before the workload is persisted</td>
           </tr>
           
           <tr>
-            <td><strong>Privileges Required</strong> (PR)</td>
+            <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
               <span class="cvss-from">L</span>
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            <td class="cvss-rationale">Non-root, no privilege escalation, minimal capabilities</td>
+            <td class="cvss-rationale">Attacker must bypass the policy engine to deploy a malicious or privileged workload; simply having API access is insufficient without a policy-compliant manifest</td>
           </tr>
           
         </tbody>
@@ -88,6 +88,9 @@
         <a href="https://cwe.mitre.org/data/definitions/284.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-284</a>
         
+        <a href="https://cwe.mitre.org/data/definitions/250.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-250</a>
+        
       </div>
     </section>
     
@@ -96,13 +99,33 @@
     <section>
       <h2>Verification</h2>
       
-      <p class="verification-method">Check namespace PSS enforcement label</p>
+      <p class="verification-method">Verify admission controller is deployed and enforcing policies</p>
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> kubectl get namespace &lt;ns&gt; -o jsonpath=&#39;{.metadata.labels.pod-security\.kubernetes\.io/enforce}&#39;
+        <span class="cmd-prompt">$</span> kubectl get constraint --no-headers 2&gt;/dev/null | wc -l
         
-        <br><span class="cmd-expected"># Expected: restricted</span>
+        <br><span class="cmd-expected"># Expected: One or more constraints active (OPA/Gatekeeper)</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: kubernetes</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> kubectl get clusterpolicy --no-headers 2&gt;/dev/null | wc -l
+        
+        <br><span class="cmd-expected"># Expected: One or more cluster policies active (Kyverno)</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: kubernetes</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> oc get scc --no-headers | wc -l
+        
+        <br><span class="cmd-expected"># Expected: SecurityContextConstraints present (OpenShift built-in admission)</span>
         
       </div>
       
@@ -118,10 +141,10 @@
 
     <div class="entry-nav">
       
-      <a href="CME-705.html">&larr; CME-705: Dropped Linux Capabilities</a>
+      <a href="CME-710.html">&larr; CME-710: DynamicUser (systemd)</a>
       
       
-      <a href="CME-707.html">CME-707: NoNewPrivileges &rarr;</a>
+      <a href="CME-712.html">CME-712: Container Image Signing and Provenance Verification (Cosign/Sigstore) &rarr;</a>
       
     </div>
   </div>
@@ -150,10 +173,10 @@
     <section>
       <h3>Quick Reference</h3>
       <ul class="sidebar-list">
-        <li><strong>ID:</strong> CME-706</li>
-        <li><strong>Tactic:</strong> Isolate</li>
+        <li><strong>ID:</strong> CME-711</li>
+        <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Application</li>
-        <li><strong>CWEs:</strong> 2</li>
+        <li><strong>CWEs:</strong> 3</li>
         <li><strong>CVSS Mods:</strong> 2</li>
       </ul>
     </section>

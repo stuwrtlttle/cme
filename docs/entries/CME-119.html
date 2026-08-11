@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CME-119: Compiler Integer Overflow and Conversion Safety (-ftrapv / UBSan Integer) — Common Mitigation Enumeration</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="../index.html" class="logo">CME <span>Common Mitigation Enumeration</span></a>
+      <nav>
+        <a href="../index.html" >Home</a>
+        <a href="../by-tactic.html" >By Tactic</a>
+        <a href="../by-cwe.html" >By CWE</a>
+        <a href="../search.html" >Search</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    
+<div class="entry-header">
+  <div class="entry-id">CME-119</div>
+  <h1>Compiler Integer Overflow and Conversion Safety (-ftrapv / UBSan Integer)</h1>
+  <div class="entry-meta">
+    <span class="badge badge-tactic-harden">Harden</span>
+    <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+    
+    <span class="badge badge-confidence-medium">Medium Confidence</span>
+    
+  </div>
+</div>
+
+<div class="entry-body">
+  <div class="entry-main">
+
+    <section>
+      <h2>Description</h2>
+      <p class="entry-description">Compiler-enforced runtime detection of integer overflow and unsafe numeric type conversions. Encompasses: (1) GCC/Clang -ftrapv — traps on signed integer overflow at ~2-5% overhead, suitable for production; (2) UBSan integer sanitizers (-fsanitize=signed-integer-overflow, -fsanitize=unsigned-integer-overflow, -fsanitize=implicit-conversion) — detect signed/unsigned overflow and implicit narrowing/sign-change conversions at runtime with configurable abort or logging; (3) MSVC /RTCc — detects data loss from runtime type conversions. When enabled, integer conversion errors that would silently produce incorrect values instead terminate the process, converting potential code execution vulnerabilities into denial-of-service conditions (a less severe outcome). Particularly effective against the dominant CWE-681 attack pattern where a negative signed value converted to unsigned becomes an enormous positive value that bypasses bounds checks and corrupts memory. Complements CME-116 (FORTIFY_SOURCE) which catches the buffer overflow consequence of integer conversion errors, while this control catches the conversion error itself at the point of occurrence.</p>
+    </section>
+
+    <section>
+      <h2>CVSS Vector Impacts</h2>
+      <table class="cvss-table">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Transition</th>
+            <th>Rationale</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td><strong>Attack Complexity</strong> (AC)</td>
+            <td>
+              <span class="cvss-from">L</span>
+              <span class="cvss-arrow">&rarr;</span>
+              <span class="cvss-to">H</span>
+            </td>
+            <td class="cvss-rationale">Integer conversion errors (signed-to-unsigned confusion, implicit narrowing, overflow wrapping) are detected at the point of occurrence and the process is terminated before the corrupted value reaches memory operations; the attacker must find a conversion path in code that is not instrumented by the sanitizer or reach the vulnerable operation through an alternative call chain that bypasses the compiler-inserted checks</td>
+          </tr>
+          
+        </tbody>
+      </table>
+    </section>
+
+    
+    <section>
+      <h2>CWE Relationships</h2>
+      <div class="cwe-list">
+        
+        <a href="https://cwe.mitre.org/data/definitions/681.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-681</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/190.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-190</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/191.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-191</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/192.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-192</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/194.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-194</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/195.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-195</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/196.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-196</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/197.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-197</a>
+        
+      </div>
+    </section>
+    
+
+    
+    <section>
+      <h2>Verification</h2>
+      
+      <p class="verification-method">Check that system packages are compiled with -ftrapv or UBSan integer sanitizers, or that binaries contain UBSan runtime symbols indicating instrumented integer operations</p>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> rpm -q --queryformat &#34;%{OPTFLAGS}&#34; redhat-rpm-config 2&gt;/dev/null | grep -oE &#39;\-ftrapv|\-fsanitize=integer|\-fsanitize=signed-integer-overflow&#39;
+        
+        <br><span class="cmd-expected"># Expected: -ftrapv or -fsanitize flag present in system build flags</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: rhel</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> readelf -s /usr/bin/ls 2&gt;/dev/null | grep -c __ubsan
+        
+        <br><span class="cmd-expected"># Expected: non-zero count indicates UBSan-instrumented integer operations</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> objdump -d /usr/bin/coreutils 2&gt;/dev/null | grep -c &#39;callq.*__ubsan_handle&#39; || objdump -d /usr/bin/ls 2&gt;/dev/null | grep -c &#39;callq.*__ubsan_handle&#39;
+        
+        <br><span class="cmd-expected"># Expected: non-zero count indicates UBSan integer overflow handlers present</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> Get-Content (Get-ChildItem &#39;C:\Program Files\Microsoft Visual Studio\*\*\VC\Auxiliary\Build\vcvarsall.bat&#39; -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1) 2&gt;$null | Select-String &#39;/RTCc&#39;
+        
+        <br><span class="cmd-expected"># Expected: /RTCc flag present in Visual Studio build configuration</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: windows</div>
+      
+      
+    </section>
+    
+
+    
+
+    
+
+    <div class="entry-nav">
+      
+      <a href="CME-118.html">&larr; CME-118: Protected File Links (Kernel Symlink/Hardlink Protection)</a>
+      
+      
+      <a href="CME-201.html">CME-201: Zero Trust Gateway / Identity-Aware Proxy &rarr;</a>
+      
+    </div>
+  </div>
+
+  <aside class="entry-sidebar">
+    <section>
+      <h3>Category</h3>
+      <p>Kernel Hardening</p>
+    </section>
+
+    
+
+    
+    <section>
+      <h3>Platforms</h3>
+      <ul class="sidebar-list">
+        
+        <li>RHEL 9</li>
+        
+        <li>RHEL 10</li>
+        
+        <li>Ubuntu 24.04</li>
+        
+        <li>Fedora</li>
+        
+        <li>Windows Server 2019</li>
+        
+        <li>Windows Server 2022</li>
+        
+      </ul>
+    </section>
+    
+
+    <section>
+      <h3>Quick Reference</h3>
+      <ul class="sidebar-list">
+        <li><strong>ID:</strong> CME-119</li>
+        <li><strong>Tactic:</strong> Harden</li>
+        <li><strong>Layer:</strong> OS/Kernel</li>
+        <li><strong>CWEs:</strong> 8</li>
+        <li><strong>CVSS Mods:</strong> 1</li>
+      </ul>
+    </section>
+  </aside>
+</div>
+
+  </main>
+
+  <footer class="site-footer">
+    Generated 2026-08-11 01:44 UTC &middot; 123 entries &middot;
+    Common Mitigation Enumeration (CME)
+  </footer>
+</body>
+</html>

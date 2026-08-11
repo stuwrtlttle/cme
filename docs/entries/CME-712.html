@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CME-1301: Path Traversal Prevention (Canonicalization) — Common Mitigation Enumeration</title>
+  <title>CME-712: Container Image Signing and Provenance Verification (Cosign/Sigstore) — Common Mitigation Enumeration</title>
   <link rel="stylesheet" href="../style.css">
 </head>
 <body>
@@ -22,8 +22,8 @@
   <main class="container">
     
 <div class="entry-header">
-  <div class="entry-id">CME-1301</div>
-  <h1>Path Traversal Prevention (Canonicalization)</h1>
+  <div class="entry-id">CME-712</div>
+  <h1>Container Image Signing and Provenance Verification (Cosign/Sigstore)</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-application">Application</span>
@@ -38,7 +38,7 @@
 
     <section>
       <h2>Description</h2>
-      <p class="entry-description">Application-level path validation that canonicalizes user-supplied paths (resolving symlinks, ../, and relative references) and verifies the resolved path falls within an allowed base directory. Rejects absolute path injection and directory traversal sequences before any filesystem operation. Prevents attackers from reading or writing files outside intended directories.</p>
+      <p class="entry-description">Require cryptographic signatures on container images before deployment. Cosign/Sigstore verify image provenance against a trust policy, ensuring only images from authorized build pipelines are admitted. Blocks supply chain attacks where a compromised registry or build system pushes malicious images. Verification can be enforced at admission time via policy controllers (Kyverno, Gatekeeper with cosign) or at pull time via container runtime trust policies (Podman policy.json, CRI-O).</p>
     </section>
 
     <section>
@@ -60,17 +60,17 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            <td class="cvss-rationale">Traversal payloads (../, absolute paths) are rejected before reaching filesystem operations</td>
+            <td class="cvss-rationale">Attacker must forge a valid cryptographic signature or compromise the signing key to inject a malicious container image; simply pushing to a registry is insufficient</td>
           </tr>
           
           <tr>
-            <td><strong>Confidentiality</strong> (C)</td>
+            <td><strong>Integrity</strong> (I)</td>
             <td>
               <span class="cvss-from">H</span>
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-            <td class="cvss-rationale">File read confined to allowed directory; sensitive files outside base path are unreachable</td>
+            <td class="cvss-rationale">Unsigned or tampered images are rejected at admission; modifications to images after signing are detected and blocked</td>
           </tr>
           
         </tbody>
@@ -82,17 +82,14 @@
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
         
-        <a href="https://cwe.mitre.org/data/definitions/22.html"
-           class="cwe-link" target="_blank" rel="noopener">CWE-22</a>
+        <a href="https://cwe.mitre.org/data/definitions/345.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-345</a>
         
-        <a href="https://cwe.mitre.org/data/definitions/23.html"
-           class="cwe-link" target="_blank" rel="noopener">CWE-23</a>
+        <a href="https://cwe.mitre.org/data/definitions/494.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-494</a>
         
-        <a href="https://cwe.mitre.org/data/definitions/36.html"
-           class="cwe-link" target="_blank" rel="noopener">CWE-36</a>
-        
-        <a href="https://cwe.mitre.org/data/definitions/73.html"
-           class="cwe-link" target="_blank" rel="noopener">CWE-73</a>
+        <a href="https://cwe.mitre.org/data/definitions/829.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-829</a>
         
       </div>
     </section>
@@ -102,23 +99,33 @@
     <section>
       <h2>Verification</h2>
       
-      <p class="verification-method">Test application with path traversal payloads and verify rejection; inspect source for canonicalization before file access</p>
+      <p class="verification-method">Verify image signature verification is enforced at admission or runtime level</p>
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> grep -rn &#39;os.path.realpath\|pathlib.*resolve\|os.path.abspath&#39; &lt;app_source&gt;/
+        <span class="cmd-prompt">$</span> kubectl get clusterimagepolicy --no-headers 2&gt;/dev/null || kubectl get policy.sigstore.dev --no-headers 2&gt;/dev/null
         
-        <br><span class="cmd-expected"># Expected: Path canonicalization calls present before file operations</span>
+        <br><span class="cmd-expected"># Expected: Image policy resources present</span>
         
       </div>
       
-      <div class="cmd-platform">Platform: any</div>
+      <div class="cmd-platform">Platform: kubernetes</div>
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> grep -rn &#39;startswith\|is_relative_to&#39; &lt;app_source&gt;/
+        <span class="cmd-prompt">$</span> podman image trust show
         
-        <br><span class="cmd-expected"># Expected: Base directory prefix check present after canonicalization</span>
+        <br><span class="cmd-expected"># Expected: Trust policy configured with signature requirements for production registries</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> cosign verify --key /path/to/cosign.pub &lt;image&gt; 2&gt;&amp;1 | head -1
+        
+        <br><span class="cmd-expected"># Expected: Verification for &lt;image&gt; -- The following checks were performed</span>
         
       </div>
       
@@ -134,10 +141,10 @@
 
     <div class="entry-nav">
       
-      <a href="CME-1204.html">&larr; CME-1204: Service Watchdog and Automatic Restart (systemd WatchdogSec/Restart)</a>
+      <a href="CME-711.html">&larr; CME-711: Admission Controller Policy Enforcement (OPA/Gatekeeper/Kyverno)</a>
       
       
-      <a href="CME-1302.html">CME-1302: Deserialization Allowlist (Safe Loading) &rarr;</a>
+      <a href="CME-713.html">CME-713: Read-Only Root Filesystem Enforcement &rarr;</a>
       
     </div>
   </div>
@@ -145,7 +152,7 @@
   <aside class="entry-sidebar">
     <section>
       <h3>Category</h3>
-      <p>Application Input Validation</p>
+      <p>Container Isolation</p>
     </section>
 
     
@@ -155,11 +162,11 @@
       <h3>Platforms</h3>
       <ul class="sidebar-list">
         
-        <li>Any</li>
+        <li>Kubernetes 1.25+</li>
         
-        <li>Windows Server 2019</li>
+        <li>OpenShift 4.12+</li>
         
-        <li>Windows Server 2022</li>
+        <li>Podman</li>
         
       </ul>
     </section>
@@ -168,10 +175,10 @@
     <section>
       <h3>Quick Reference</h3>
       <ul class="sidebar-list">
-        <li><strong>ID:</strong> CME-1301</li>
+        <li><strong>ID:</strong> CME-712</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Application</li>
-        <li><strong>CWEs:</strong> 4</li>
+        <li><strong>CWEs:</strong> 3</li>
         <li><strong>CVSS Mods:</strong> 2</li>
       </ul>
     </section>
