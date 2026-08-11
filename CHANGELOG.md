@@ -8,6 +8,11 @@ All notable changes to the CME (Common Mitigation Enumeration) project are docum
 
 - `64ff1c4` Rebuild static site with all 123 entries
 
+
+### Auto-generated changelog
+
+- `2a7f681` Update templates to show function/control hierarchy and attenuation type
+
 ## 2026-08-10
 
 ### Auto-generated changelog
