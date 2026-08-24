@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CME-1011: Kubernetes API Server Audit Policy — Common Mitigation Enumeration</title>
+  <title>CME-1012: Pre-commit Secrets Detection (gitleaks/trufflehog) — Common Mitigation Enumeration</title>
   <link rel="stylesheet" href="../style.css">
 </head>
 <body>
@@ -22,8 +22,8 @@
   <main class="container">
     
 <div class="entry-header">
-  <div class="entry-id">CME-1011</div>
-  <h1>Kubernetes API Server Audit Policy</h1>
+  <div class="entry-id">CME-1012</div>
+  <h1>Pre-commit Secrets Detection (gitleaks/trufflehog)</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-detect">Detect</span>
     <span class="badge badge-layer-application">Application</span>
@@ -31,7 +31,7 @@
     <span class="badge badge-attenuation-deterministic">Deterministic</span>
     
     
-    <span class="badge badge-confidence-medium">Medium Confidence</span>
+    <span class="badge badge-confidence-high">High Confidence</span>
     
   </div>
 </div>
@@ -41,7 +41,7 @@
 
     <section>
       <h2>Description</h2>
-      <p class="entry-description">Configures the Kubernetes API server audit policy to log security-relevant events including authentication failures, RBAC denials, sensitive resource access (secrets, configmaps), privileged pod creation, and exec/attach to running containers. Provides detection capability for lateral movement, privilege escalation attempts, and unauthorized API access within the cluster. Audit logs can feed SIEM systems for alerting and forensic analysis. OpenShift provides built-in audit profiles (Default, WriteRequestBodies, AllRequestBodies) configurable via the APIServer resource.</p>
+      <p class="entry-description">Automated scanning of code commits for embedded secrets (API keys, passwords, private keys, tokens, connection strings) using pattern-based and entropy-based detection. Runs as a git pre-commit hook or CI pipeline gate to prevent hard-coded credentials from reaching repositories where they can be harvested by attackers or leaked in public forks. Tools include gitleaks, trufflehog, and git-secrets. Complements credential rotation and vault-based secret management by catching secrets that bypass those controls at the source code layer.</p>
     </section>
 
     <section>
@@ -65,7 +65,7 @@
               <span class="cvss-to">H</span>
             </td>
             
-            <td class="cvss-rationale">Attacker actions within the cluster are logged and can trigger alerts, increasing detection risk; maintaining stealth requires evading audit policy coverage, which adds significant complexity to the attack chain</td>
+            <td class="cvss-rationale">Hard-coded credentials are detected and blocked before they reach the repository; the attacker must find credentials through an alternative channel (vault compromise, memory dump, network intercept) rather than simply reading source code or commit history</td>
           </tr>
           
         </tbody>
@@ -77,11 +77,14 @@
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
         
-        <a href="https://cwe.mitre.org/data/definitions/778.html"
-           class="cwe-link" target="_blank" rel="noopener">CWE-778</a>
+        <a href="https://cwe.mitre.org/data/definitions/798.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-798</a>
         
-        <a href="https://cwe.mitre.org/data/definitions/223.html"
-           class="cwe-link" target="_blank" rel="noopener">CWE-223</a>
+        <a href="https://cwe.mitre.org/data/definitions/312.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-312</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/316.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-316</a>
         
       </div>
     </section>
@@ -91,37 +94,37 @@
     <section>
       <h2>Verification</h2>
       
-      <p class="verification-method">Verify Kubernetes API server audit policy is configured and active</p>
+      <p class="verification-method">Verify that a secrets scanning tool is configured as a git pre-commit hook or CI pipeline stage and reports no findings</p>
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> kubectl get --raw /apis/audit.k8s.io/v1 2&gt;/dev/null &amp;&amp; echo audit-api-available
+        <span class="cmd-prompt">$</span> test -f .git/hooks/pre-commit &amp;&amp; grep -l &#39;gitleaks\|trufflehog\|git-secrets\|detect-secrets&#39; .git/hooks/pre-commit
         
-        <br><span class="cmd-expected"># Expected: audit-api-available</span>
+        <br><span class="cmd-expected"># Expected: Pre-commit hook exists and references a secrets scanning tool</span>
         
       </div>
       
-      <div class="cmd-platform">Platform: kubernetes</div>
+      <div class="cmd-platform">Platform: any</div>
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> grep audit-policy-file /etc/kubernetes/manifests/kube-apiserver.yaml 2&gt;/dev/null
+        <span class="cmd-prompt">$</span> gitleaks detect --source . --no-git 2&gt;&amp;1 | tail -1
         
-        <br><span class="cmd-expected"># Expected: Audit policy file referenced in API server configuration</span>
+        <br><span class="cmd-expected"># Expected: no leaks found</span>
         
       </div>
       
-      <div class="cmd-platform">Platform: kubernetes</div>
+      <div class="cmd-platform">Platform: any</div>
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> oc get apiservers.config.openshift.io cluster -o jsonpath=&#39;{.spec.audit.profile}&#39;
+        <span class="cmd-prompt">$</span> trufflehog filesystem . --no-update 2&gt;&amp;1 | grep -c &#39;Found verified result&#39;
         
-        <br><span class="cmd-expected"># Expected: Default, WriteRequestBodies, or AllRequestBodies (not None)</span>
+        <br><span class="cmd-expected"># Expected: 0 — no verified secrets found</span>
         
       </div>
       
-      <div class="cmd-platform">Platform: kubernetes</div>
+      <div class="cmd-platform">Platform: any</div>
       
       
     </section>
@@ -133,10 +136,10 @@
 
     <div class="entry-nav">
       
-      <a href="CME-1010.html">&larr; CME-1010: cgroup Memory Pressure Monitoring (memory.events / PSI)</a>
+      <a href="CME-1011.html">&larr; CME-1011: Kubernetes API Server Audit Policy</a>
       
       
-      <a href="CME-1012.html">CME-1012: Pre-commit Secrets Detection (gitleaks/trufflehog) &rarr;</a>
+      <a href="CME-1101.html">CME-1101: Automated Patch Management (dnf-automatic) &rarr;</a>
       
     </div>
   </div>
@@ -144,13 +147,13 @@
   <aside class="entry-sidebar">
     <section>
       <h3>Category</h3>
-      <p>Runtime Detection</p>
+      <p>Integrity Detection</p>
     </section>
 
     
     <section>
       <h3>Function</h3>
-      <p class="function-id">application-monitoring</p>
+      <p class="function-id">integrity-monitoring</p>
     </section>
     
 
@@ -159,11 +162,9 @@
       <h3>SCF Controls</h3>
       <div class="cwe-list">
         
-        <span class="cwe-link">CLD-06.2</span>
+        <span class="cwe-link">CFG-02</span>
         
-        <span class="cwe-link">MON-02</span>
-        
-        <span class="cwe-link">MON-03</span>
+        <span class="cwe-link">IAC-15</span>
         
       </div>
     </section>
@@ -176,9 +177,7 @@
       <h3>Platforms</h3>
       <ul class="sidebar-list">
         
-        <li>Kubernetes 1.25+</li>
-        
-        <li>OpenShift 4.12+</li>
+        <li>Any</li>
         
       </ul>
     </section>
@@ -187,11 +186,11 @@
     <section>
       <h3>Quick Reference</h3>
       <ul class="sidebar-list">
-        <li><strong>ID:</strong> CME-1011</li>
+        <li><strong>ID:</strong> CME-1012</li>
         <li><strong>Tactic:</strong> Detect</li>
         <li><strong>Layer:</strong> Application</li>
         <li><strong>Attenuation:</strong> deterministic</li>
-        <li><strong>CWEs:</strong> 2</li>
+        <li><strong>CWEs:</strong> 3</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
     </section>

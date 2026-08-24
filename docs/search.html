@@ -402,6 +402,16 @@
     <div class="sr-desc">Encrypts data volumes and partitions at the block device layer using LUKS2/dm-crypt, ensuring that sensitive data including credentials, tokens, PII, ...</div>
   </li>
   
+  <li data-search="cme-408 system-wide tls/crypto policy enforcement enforce minimum tls version and cipher suite requirements system-wide via os-level cryptographic policy. rhel&#39;s update-crypto-policies sets a baseline (default, future, fips) that applies to all tls-using applications linked against system crypto libraries (openssl, gnutls, nss), preventing applications from accepting weak ciphers, expired certificates, or outdated tls versions regardless of individual application configuration. windows equivalent is schannel registry configuration or group policy cipher suite ordering. eliminates an entire class of tls misconfiguration vulnerabilities by moving the trust decision from each application to the os layer. cryptographic controls harden os/kernel cwe-295 cwe-327 cwe-326 cwe-757">
+    <div>
+      <a href="entries/CME-408.html" class="sr-id">CME-408</a>
+      <a href="entries/CME-408.html">System-wide TLS/Crypto Policy Enforcement</a>
+      <span class="badge badge-tactic-harden">Harden</span>
+      <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+    </div>
+    <div class="sr-desc">Enforce minimum TLS version and cipher suite requirements system-wide via OS-level cryptographic policy. RHEL&#39;s update-crypto-policies sets a baseline...</div>
+  </li>
+  
   <li data-search="cme-501 read-only root filesystem mounts root filesystem as read-only, preventing persistent modification of system binaries, libraries, and configuration. writable areas are confined to specific tmpfs or overlay mounts. filesystem hardening isolate os/kernel cwe-284">
     <div>
       <a href="entries/CME-501.html" class="sr-id">CME-501</a>
@@ -912,6 +922,16 @@
     <div class="sr-desc">Restricts or hardens Just-In-Time compilation in language runtimes and browser engines to prevent type confusion exploitation. Encompasses three postu...</div>
   </li>
   
+  <li data-search="cme-920 database least-privilege access control enforce database-level access control by assigning each application service a dedicated database account with grant-limited permissions. app accounts receive only select, insert, update, delete on specific tables — never create, drop, alter, grant, or dba/superuser roles. prevents sql injection from escalating to schema modification, cross-database access, or os command execution via xp_cmdshell/copy/load_file. each microservice or application component should use a separate credential with the minimum privilege set required for its operations. application controls harden application cwe-89 cwe-862 cwe-269">
+    <div>
+      <a href="entries/CME-920.html" class="sr-id">CME-920</a>
+      <a href="entries/CME-920.html">Database Least-Privilege Access Control</a>
+      <span class="badge badge-tactic-harden">Harden</span>
+      <span class="badge badge-layer-application">Application</span>
+    </div>
+    <div class="sr-desc">Enforce database-level access control by assigning each application service a dedicated database account with GRANT-limited permissions. App accounts ...</div>
+  </li>
+  
   <li data-search="cme-1001 edr agent (endpoint detection &amp; response) real-time behavioral detection and automated response agent on endpoints. detects exploit patterns, lateral movement, and persistence mechanisms. can kill processes, isolate hosts, and quarantine files automatically. runtime detection detect application ">
     <div>
       <a href="entries/CME-1001.html" class="sr-id">CME-1001</a>
@@ -1020,6 +1040,16 @@
       <span class="badge badge-layer-application">Application</span>
     </div>
     <div class="sr-desc">Configures the Kubernetes API server audit policy to log security-relevant events including authentication failures, RBAC denials, sensitive resource ...</div>
+  </li>
+  
+  <li data-search="cme-1012 pre-commit secrets detection (gitleaks/trufflehog) automated scanning of code commits for embedded secrets (api keys, passwords, private keys, tokens, connection strings) using pattern-based and entropy-based detection. runs as a git pre-commit hook or ci pipeline gate to prevent hard-coded credentials from reaching repositories where they can be harvested by attackers or leaked in public forks. tools include gitleaks, trufflehog, and git-secrets. complements credential rotation and vault-based secret management by catching secrets that bypass those controls at the source code layer. integrity detection detect application cwe-798 cwe-312 cwe-316">
+    <div>
+      <a href="entries/CME-1012.html" class="sr-id">CME-1012</a>
+      <a href="entries/CME-1012.html">Pre-commit Secrets Detection (gitleaks/trufflehog)</a>
+      <span class="badge badge-tactic-detect">Detect</span>
+      <span class="badge badge-layer-application">Application</span>
+    </div>
+    <div class="sr-desc">Automated scanning of code commits for embedded secrets (API keys, passwords, private keys, tokens, connection strings) using pattern-based and entrop...</div>
   </li>
   
   <li data-search="cme-1101 automated patch management (dnf-automatic) automatically downloads and applies security updates on schedule. reduces the window between vulnerability disclosure and patch application from days/weeks to hours. patch management evict os/kernel ">
@@ -1288,7 +1318,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-08-11 02:33 UTC &middot; 123 entries &middot;
+    Generated 2026-08-24 00:51 UTC &middot; 126 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

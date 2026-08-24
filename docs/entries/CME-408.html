@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CME-408: System-wide TLS/Crypto Policy Enforcement — Common Mitigation Enumeration</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="../index.html" class="logo">CME <span>Common Mitigation Enumeration</span></a>
+      <nav>
+        <a href="../index.html" >Home</a>
+        <a href="../by-tactic.html" >By Tactic</a>
+        <a href="../by-cwe.html" >By CWE</a>
+        <a href="../search.html" >Search</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    
+<div class="entry-header">
+  <div class="entry-id">CME-408</div>
+  <h1>System-wide TLS/Crypto Policy Enforcement</h1>
+  <div class="entry-meta">
+    <span class="badge badge-tactic-harden">Harden</span>
+    <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+    
+    <span class="badge badge-attenuation-deterministic">Deterministic</span>
+    
+    
+    <span class="badge badge-confidence-high">High Confidence</span>
+    
+  </div>
+</div>
+
+<div class="entry-body">
+  <div class="entry-main">
+
+    <section>
+      <h2>Description</h2>
+      <p class="entry-description">Enforce minimum TLS version and cipher suite requirements system-wide via OS-level cryptographic policy. RHEL&#39;s update-crypto-policies sets a baseline (DEFAULT, FUTURE, FIPS) that applies to all TLS-using applications linked against system crypto libraries (OpenSSL, GnuTLS, NSS), preventing applications from accepting weak ciphers, expired certificates, or outdated TLS versions regardless of individual application configuration. Windows equivalent is SChannel registry configuration or Group Policy cipher suite ordering. Eliminates an entire class of TLS misconfiguration vulnerabilities by moving the trust decision from each application to the OS layer.</p>
+    </section>
+
+    <section>
+      <h2>CVSS Vector Impacts</h2>
+      <table class="cvss-table">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Transition</th>
+            
+            <th>Rationale</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td><strong>Attack Complexity</strong> (AC)</td>
+            <td>
+              <span class="cvss-from">L</span>
+              <span class="cvss-arrow">&rarr;</span>
+              <span class="cvss-to">H</span>
+            </td>
+            
+            <td class="cvss-rationale">MitM requires bypassing system-enforced minimum TLS version and cipher suite restrictions; downgrade attacks to weak protocols (SSLv3, TLS 1.0) or export ciphers are blocked at the OS library layer before reaching the application</td>
+          </tr>
+          
+          <tr>
+            <td><strong>Confidentiality</strong> (C)</td>
+            <td>
+              <span class="cvss-from">H</span>
+              <span class="cvss-arrow">&rarr;</span>
+              <span class="cvss-to">L</span>
+            </td>
+            
+            <td class="cvss-rationale">Traffic cannot be decrypted via weak cipher downgrade or protocol rollback; system policy enforces strong cipher suites across all applications</td>
+          </tr>
+          
+        </tbody>
+      </table>
+    </section>
+
+    
+    <section>
+      <h2>CWE Relationships</h2>
+      <div class="cwe-list">
+        
+        <a href="https://cwe.mitre.org/data/definitions/295.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-295</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/327.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-327</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/326.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-326</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/757.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-757</a>
+        
+      </div>
+    </section>
+    
+
+    
+    <section>
+      <h2>Verification</h2>
+      
+      <p class="verification-method">Verify system-wide crypto policy enforces modern TLS versions and strong cipher suites</p>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> update-crypto-policies --show
+        
+        <br><span class="cmd-expected"># Expected: DEFAULT, FUTURE, or FIPS (not LEGACY)</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: rhel</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> openssl s_client -connect localhost:443 -tls1 &lt;/dev/null 2&gt;&amp;1 | grep -i &#39;protocol\|error&#39;
+        
+        <br><span class="cmd-expected"># Expected: Connection refused or protocol error — TLS 1.0 rejected by system policy</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> update-crypto-policies --check
+        
+        <br><span class="cmd-expected"># Expected: The configured policy matches the generated policy</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: rhel</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> Get-ItemProperty -Path &#39;HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server&#39; -Name Enabled -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Enabled
+        
+        <br><span class="cmd-expected"># Expected: 0 — TLS 1.0 disabled on server side</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: windows</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> Get-TlsCipherSuite | Where-Object {$_.Name -match &#39;RC4|DES|NULL|EXPORT&#39;} | Measure-Object | Select-Object -ExpandProperty Count
+        
+        <br><span class="cmd-expected"># Expected: 0 — no weak cipher suites enabled</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: windows</div>
+      
+      
+    </section>
+    
+
+    
+
+    
+
+    <div class="entry-nav">
+      
+      <a href="CME-407.html">&larr; CME-407: Data-at-Rest Encryption (LUKS/dm-crypt / BitLocker)</a>
+      
+      
+      <a href="CME-501.html">CME-501: Read-Only Root Filesystem &rarr;</a>
+      
+    </div>
+  </div>
+
+  <aside class="entry-sidebar">
+    <section>
+      <h3>Category</h3>
+      <p>Cryptographic Controls</p>
+    </section>
+
+    
+    <section>
+      <h3>Function</h3>
+      <p class="function-id">crypto-policy</p>
+    </section>
+    
+
+    
+    <section>
+      <h3>SCF Controls</h3>
+      <div class="cwe-list">
+        
+        <span class="cwe-link">CRY-01</span>
+        
+        <span class="cwe-link">CRY-03</span>
+        
+      </div>
+    </section>
+    
+
+    
+
+    
+    <section>
+      <h3>Platforms</h3>
+      <ul class="sidebar-list">
+        
+        <li>RHEL 9</li>
+        
+        <li>RHEL 10</li>
+        
+        <li>Fedora</li>
+        
+        <li>Windows Server 2019</li>
+        
+        <li>Windows Server 2022</li>
+        
+      </ul>
+    </section>
+    
+
+    <section>
+      <h3>Quick Reference</h3>
+      <ul class="sidebar-list">
+        <li><strong>ID:</strong> CME-408</li>
+        <li><strong>Tactic:</strong> Harden</li>
+        <li><strong>Layer:</strong> OS/Kernel</li>
+        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>CWEs:</strong> 4</li>
+        <li><strong>CVSS Mods:</strong> 2</li>
+      </ul>
+    </section>
+  </aside>
+</div>
+
+  </main>
+
+  <footer class="site-footer">
+    Generated 2026-08-24 00:51 UTC &middot; 126 entries &middot;
+    Common Mitigation Enumeration (CME)
+  </footer>
+</body>
+</html>

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CME-920: Database Least-Privilege Access Control — Common Mitigation Enumeration</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="../index.html" class="logo">CME <span>Common Mitigation Enumeration</span></a>
+      <nav>
+        <a href="../index.html" >Home</a>
+        <a href="../by-tactic.html" >By Tactic</a>
+        <a href="../by-cwe.html" >By CWE</a>
+        <a href="../search.html" >Search</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    
+<div class="entry-header">
+  <div class="entry-id">CME-920</div>
+  <h1>Database Least-Privilege Access Control</h1>
+  <div class="entry-meta">
+    <span class="badge badge-tactic-harden">Harden</span>
+    <span class="badge badge-layer-application">Application</span>
+    
+    <span class="badge badge-attenuation-deterministic">Deterministic</span>
+    
+    
+    <span class="badge badge-confidence-high">High Confidence</span>
+    
+  </div>
+</div>
+
+<div class="entry-body">
+  <div class="entry-main">
+
+    <section>
+      <h2>Description</h2>
+      <p class="entry-description">Enforce database-level access control by assigning each application service a dedicated database account with GRANT-limited permissions. App accounts receive only SELECT, INSERT, UPDATE, DELETE on specific tables — never CREATE, DROP, ALTER, GRANT, or DBA/superuser roles. Prevents SQL injection from escalating to schema modification, cross-database access, or OS command execution via xp_cmdshell/COPY/LOAD_FILE. Each microservice or application component should use a separate credential with the minimum privilege set required for its operations.</p>
+    </section>
+
+    <section>
+      <h2>CVSS Vector Impacts</h2>
+      <table class="cvss-table">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Transition</th>
+            
+            <th>Rationale</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td><strong>Confidentiality</strong> (C)</td>
+            <td>
+              <span class="cvss-from">H</span>
+              <span class="cvss-arrow">&rarr;</span>
+              <span class="cvss-to">L</span>
+            </td>
+            
+            <td class="cvss-rationale">SQL injection cannot exfiltrate data from other databases or tables outside the app account&#39;s GRANT scope; UNION-based extraction is limited to the account&#39;s SELECT privileges</td>
+          </tr>
+          
+          <tr>
+            <td><strong>Integrity</strong> (I)</td>
+            <td>
+              <span class="cvss-from">H</span>
+              <span class="cvss-arrow">&rarr;</span>
+              <span class="cvss-to">L</span>
+            </td>
+            
+            <td class="cvss-rationale">Cannot modify schema, drop tables, or alter other services&#39; data; DML limited to explicitly GRANTed tables</td>
+          </tr>
+          
+          <tr>
+            <td><strong>Privileges Required</strong> (PR)</td>
+            <td>
+              <span class="cvss-from">N</span>
+              <span class="cvss-arrow">&rarr;</span>
+              <span class="cvss-to">L</span>
+            </td>
+            
+            <td class="cvss-rationale">Exploitation requires the application&#39;s database credential; anonymous or cross-service access is prevented by per-service account isolation</td>
+          </tr>
+          
+        </tbody>
+      </table>
+    </section>
+
+    
+    <section>
+      <h2>CWE Relationships</h2>
+      <div class="cwe-list">
+        
+        <a href="https://cwe.mitre.org/data/definitions/89.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-89</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/862.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-862</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/269.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-269</a>
+        
+      </div>
+    </section>
+    
+
+    
+    <section>
+      <h2>Verification</h2>
+      
+      <p class="verification-method">Verify application database accounts have no superuser, DDL, or GRANT privileges</p>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> psql -h localhost -U &lt;app_user&gt; -c &#34;SELECT rolsuper, rolcreatedb, rolcreaterole FROM pg_roles WHERE rolname=&#39;&lt;app_user&gt;&#39;&#34;
+        
+        <br><span class="cmd-expected"># Expected: All values false — app user has no superuser, createdb, or createrole privileges</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> psql -h localhost -U &lt;app_user&gt; -c &#34;SELECT grantor, privilege_type FROM information_schema.role_table_grants WHERE grantee=&#39;&lt;app_user&gt;&#39;&#34; | grep -iE &#39;create|drop|alter|grant&#39;
+        
+        <br><span class="cmd-expected"># Expected: No output — app user has no DDL or GRANT privileges</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> Invoke-Sqlcmd -Query &#34;SELECT IS_SRVROLEMEMBER(&#39;sysadmin&#39;, &#39;&lt;app_user&gt;&#39;)&#34;
+        
+        <br><span class="cmd-expected"># Expected: 0 — app user is not a sysadmin</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: windows</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> Invoke-Sqlcmd -Query &#34;SELECT dp.permission_name FROM sys.database_permissions dp JOIN sys.database_principals pr ON dp.grantee_principal_id = pr.principal_id WHERE pr.name = &#39;&lt;app_user&gt;&#39; AND dp.permission_name IN (&#39;ALTER&#39;,&#39;CREATE&#39;,&#39;CONTROL&#39;)&#34;
+        
+        <br><span class="cmd-expected"># Expected: No rows — app user has no DDL permissions</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: windows</div>
+      
+      
+    </section>
+    
+
+    
+
+    
+
+    <div class="entry-nav">
+      
+      <a href="CME-919.html">&larr; CME-919: JIT Compiler Hardening (JIT Restriction / V8 Sandbox)</a>
+      
+      
+      <a href="CME-1001.html">CME-1001: EDR Agent (Endpoint Detection &amp; Response) &rarr;</a>
+      
+    </div>
+  </div>
+
+  <aside class="entry-sidebar">
+    <section>
+      <h3>Category</h3>
+      <p>Application Controls</p>
+    </section>
+
+    
+    <section>
+      <h3>Function</h3>
+      <p class="function-id">authorization-controls</p>
+    </section>
+    
+
+    
+    <section>
+      <h3>SCF Controls</h3>
+      <div class="cwe-list">
+        
+        <span class="cwe-link">IAC-25</span>
+        
+        <span class="cwe-link">DCE-06</span>
+        
+      </div>
+    </section>
+    
+
+    
+
+    
+    <section>
+      <h3>Platforms</h3>
+      <ul class="sidebar-list">
+        
+        <li>Any</li>
+        
+        <li>RHEL 9</li>
+        
+        <li>Windows Server 2022</li>
+        
+      </ul>
+    </section>
+    
+
+    <section>
+      <h3>Quick Reference</h3>
+      <ul class="sidebar-list">
+        <li><strong>ID:</strong> CME-920</li>
+        <li><strong>Tactic:</strong> Harden</li>
+        <li><strong>Layer:</strong> Application</li>
+        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>CWEs:</strong> 3</li>
+        <li><strong>CVSS Mods:</strong> 3</li>
+      </ul>
+    </section>
+  </aside>
+</div>
+
+  </main>
+
+  <footer class="site-footer">
+    Generated 2026-08-24 00:51 UTC &middot; 126 entries &middot;
+    Common Mitigation Enumeration (CME)
+  </footer>
+</body>
+</html>

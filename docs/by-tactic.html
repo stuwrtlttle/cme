@@ -29,7 +29,7 @@
 <div class="tactic-section">
   <h2>
     <span class="badge badge-tactic-harden">Harden</span>
-    Harden (83)
+    Harden (85)
   </h2>
   <table class="data-table">
     <thead>
@@ -268,6 +268,25 @@
           <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
           
           <span class="cvss-from">S:C</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">U</span>
+          
+        </td>
+        <td>3</td>
+      </tr>
+      
+      <tr>
+        <td class="cme-id-cell"><a href="entries/CME-920.html">CME-920</a></td>
+        <td><a href="entries/CME-920.html">Database Least-Privilege Access Control</a></td>
+        <td>Application Controls</td>
+        <td class="function-cell">authorization-controls</td>
+        <td><span class="badge badge-layer-application">Application</span></td>
+        <td><span class="badge badge-attenuation-deterministic">Det</span></td>
+        <td>
+          
+          <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>, 
+          
+          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>, 
+          
+          <span class="cvss-from">PR:N</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
           
         </td>
         <td>3</td>
@@ -818,6 +837,23 @@
           
         </td>
         <td>3</td>
+      </tr>
+      
+      <tr>
+        <td class="cme-id-cell"><a href="entries/CME-408.html">CME-408</a></td>
+        <td><a href="entries/CME-408.html">System-wide TLS/Crypto Policy Enforcement</a></td>
+        <td>Cryptographic Controls</td>
+        <td class="function-cell">crypto-policy</td>
+        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
+        <td><span class="badge badge-attenuation-deterministic">Det</span></td>
+        <td>
+          
+          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
+          
+          <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
+          
+        </td>
+        <td>4</td>
       </tr>
       
       
@@ -1804,7 +1840,7 @@
 <div class="tactic-section">
   <h2>
     <span class="badge badge-tactic-detect">Detect</span>
-    Detect (11)
+    Detect (12)
   </h2>
   <table class="data-table">
     <thead>
@@ -1867,6 +1903,21 @@
           
         </td>
         <td>4</td>
+      </tr>
+      
+      <tr>
+        <td class="cme-id-cell"><a href="entries/CME-1012.html">CME-1012</a></td>
+        <td><a href="entries/CME-1012.html">Pre-commit Secrets Detection (gitleaks/trufflehog)</a></td>
+        <td>Integrity Detection</td>
+        <td class="function-cell">integrity-monitoring</td>
+        <td><span class="badge badge-layer-application">Application</span></td>
+        <td><span class="badge badge-attenuation-deterministic">Det</span></td>
+        <td>
+          
+          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
+          
+        </td>
+        <td>3</td>
       </tr>
       
       
@@ -2166,7 +2217,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-08-11 02:33 UTC &middot; 123 entries &middot;
+    Generated 2026-08-24 00:51 UTC &middot; 126 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>
