@@ -29,9 +29,7 @@
   ],
   "confidence": "High",
   "platforms": [
-    "RHEL 9",
-    "RHEL 8",
-    "Any Linux with HTTP proxy/LB"
+    "Any"
   ],
   "verification": {
     "method": "Verify that HTTP intermediaries enforce strict header parsing: reject requests with both Content-Length and Transfer-Encoding, reject duplicate Content-Length headers, and disable relaxed parsing modes",
@@ -52,9 +50,14 @@
         "platform": "linux"
       },
       {
-        "command": "grep -i 'ignore_invalid_headers' /etc/nginx/nginx.conf",
-        "expected": "on",
+        "command": "grep -i 'proxy_http_version' /etc/nginx/nginx.conf /etc/nginx/conf.d/*.conf 2>/dev/null",
+        "expected": "1.1",
         "platform": "linux"
+      },
+      {
+        "command": "Get-WebConfigurationProperty -Filter 'system.webServer/security/requestFiltering' -PSPath 'IIS:\\' -Name allowDoubleEscaping",
+        "expected": "False",
+        "platform": "windows"
       }
     ]
   },

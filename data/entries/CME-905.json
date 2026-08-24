@@ -1,7 +1,7 @@
 {
   "cme_id": "CME-905",
   "control_name": "Content Security Policy (CSP) Headers",
-  "description": "Browser-enforced HTTP header policy that restricts script sources, prevents inline execution, and blocks mixed content. Primary defense against stored/reflected XSS.",
+  "description": "Browser-enforced HTTP header policy that restricts script sources, prevents inline execution, and blocks mixed content. Defense-in-depth against stored/reflected XSS that catches output encoding failures. CSP's frame-ancestors directive also mitigates clickjacking.",
   "tactic": "Harden",
   "category": "Application Controls",
   "category_id": "application-controls",
@@ -13,27 +13,42 @@
       "metric": "AC",
       "from": "L",
       "to": "H",
-      "rationale": "XSS payloads blocked by browser CSP enforcement; script sources restricted"
+      "rationale": "CSP script-src directive restricts script execution to enumerated origins; injected inline scripts are blocked by the browser's enforcement engine regardless of payload encoding or obfuscation",
+      "conditions": [
+        "CSP must not include unsafe-inline or unsafe-eval in script-src",
+        "script-src must be tightly scoped — no CDNs hosting user-controllable or framework-gadget content",
+        "Header must be Content-Security-Policy, not Content-Security-Policy-Report-Only",
+        "Attacker goal must require script execution — CSS/HTML injection is unaffected by CSP"
+      ]
     }
   ],
   "cwe_relationships": [
-    "CWE-79"
+    "CWE-79",
+    "CWE-1021"
   ],
   "verification": {
-    "method": "Check for CSP header in HTTP responses",
+    "method": "Verify CSP header is present with effective script restrictions",
     "commands": [
       {
-        "command": "curl -sI http://target/ | grep -i content-security-policy",
+        "command": "curl -sI http://<target>/ | grep -i content-security-policy",
         "expected": "Content-Security-Policy:",
+        "platform": "any"
+      },
+      {
+        "command": "curl -sI http://<target>/ | grep -i content-security-policy | grep -ic 'unsafe-inline'",
+        "expected": "0",
+        "platform": "any"
+      },
+      {
+        "command": "curl -sI http://<target>/ | grep -i content-security-policy | grep -ic 'unsafe-eval'",
+        "expected": "0",
         "platform": "any"
       }
     ]
   },
   "confidence": "Medium",
   "platforms": [
-    "Any",
-    "Windows Server 2019",
-    "Windows Server 2022"
+    "Any"
   ],
   "scf_identifiers": [
     "WEB-01.1",

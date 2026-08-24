@@ -24,25 +24,29 @@
   ],
   "cwe_relationships": [
     "CWE-940",
-    "CWE-346"
+    "CWE-346",
+    "CWE-942"
   ],
   "confidence": "High",
   "platforms": [
-    "Any",
-    "Windows Server 2019",
-    "Windows Server 2022"
+    "Any"
   ],
   "verification": {
     "method": "Test that the server rejects unapproved origins and does not reflect arbitrary Origin headers in CORS response headers",
     "commands": [
       {
         "command": "curl -sI -H 'Origin: https://evil.example.com' http://localhost:8080/api/v1/user | grep -i 'access-control-allow'",
-        "expected": "No Access-Control-Allow-Origin header, or not reflecting evil.example.com",
+        "expected": "Empty output (no CORS headers returned for untrusted origin)",
         "platform": "any"
       },
       {
         "command": "curl -sI -H 'Origin: https://trusted.example.com' http://localhost:8080/api/v1/user | grep -i 'access-control-allow'",
         "expected": "Access-Control-Allow-Origin: https://trusted.example.com",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'Access-Control-Allow-Origin.*\\*\\|cors_allow_all\\|CORS_ORIGIN_ALLOW_ALL\\|allowedOrigins.*\\*\\|req\\.headers\\[.origin.\\]\\|\\$_SERVER.*HTTP_ORIGIN' <app_source>/",
+        "expected": "Empty output (no wildcard CORS or origin reflection patterns found)",
         "platform": "any"
       }
     ]

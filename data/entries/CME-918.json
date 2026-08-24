@@ -33,12 +33,12 @@
     "commands": [
       {
         "command": "grep -rn '<Location\\|<Directory\\|Require valid-user\\|Require group\\|AuthType' /etc/httpd/conf.d/ /etc/httpd/conf/httpd.conf",
-        "expected": "Authorization directives present on administrative and restricted URL paths (e.g., /admin, /console, /debug)",
-        "platform": "linux"
+        "expected": "Non-empty output — Apache Location/Directory blocks with Require directives on restricted paths",
+        "platform": "rhel"
       },
       {
         "command": "grep -rn 'location.*/admin\\|location.*/console\\|deny all\\|auth_basic\\|auth_request' /etc/nginx/conf.d/ /etc/nginx/nginx.conf",
-        "expected": "Restricted location blocks with authentication or deny directives for administrative paths",
+        "expected": "Non-empty output — nginx location blocks with auth_basic, auth_request, or deny directives on restricted paths",
         "platform": "linux"
       },
       {
@@ -48,16 +48,14 @@
       },
       {
         "command": "Get-WebConfigurationProperty -Filter '/system.webServer/security/authorization' -PSPath 'IIS:\\Sites\\Default Web Site\\admin' -Name 'collection' | Format-Table",
-        "expected": "URL Authorization rules restricting access to administrative paths to specific roles",
+        "expected": "Non-empty output — IIS URL Authorization rules with role-based access restrictions on admin paths",
         "platform": "windows"
       }
     ]
   },
   "confidence": "High",
   "platforms": [
-    "Any",
-    "Windows Server 2019",
-    "Windows Server 2022"
+    "Any"
   ],
   "scf_identifiers": [
     "IAC-20",

@@ -1,46 +1,69 @@
 {
   "cme_id": "CME-906",
   "control_name": "Rate Limiting / Connection Throttling",
-  "description": "Limits request rate per client IP or authenticated identity. Mitigates brute force attacks, credential stuffing, and application-level denial of service.",
+  "description": "Limits request rate per client IP or authenticated identity. Mitigates brute force attacks, credential stuffing, and application-level denial of service from single-source attackers. Does not protect against distributed attacks across many source IPs.",
   "tactic": "Harden",
   "category": "Application Controls",
   "category_id": "application-controls",
   "function_id": "request-filtering",
-  "control_layer": "Network",
-  "attenuation_type": "deterministic",
+  "control_layer": "Application",
+  "attenuation_type": "probabilistic",
   "cvss_vector_impacts": [
     {
       "metric": "A",
       "from": "H",
       "to": "L",
-      "rationale": "Single client cannot exhaust application resources"
+      "rationale": "Per-IP request throttling caps the rate at which any single source can consume application resources (connections, threads, CPU), preventing single-source request flooding from exhausting capacity for other clients",
+      "probability": 0.5,
+      "evidence_basis": "Effective against single-source flooding and automated scanning; ineffective against distributed DoS (botnet traffic from thousands of IPs stays under per-IP limits), application-complexity DoS (single expensive request), and connection-level exhaustion (Slowloris)",
+      "conditions": [
+        "Attack originates from a single source IP or small number of IPs",
+        "Attack relies on request volume, not request complexity",
+        "Rate limiting is configured in blocking mode with appropriate thresholds"
+      ]
     },
     {
       "metric": "AC",
       "from": "L",
       "to": "H",
-      "rationale": "Brute force attacks throttled to impractical speeds"
+      "rationale": "Per-IP throttling limits authentication attempts to a rate that makes dictionary and brute force attacks from a single source impractical (e.g., 5 attempts/minute vs thousands/second)",
+      "probability": 0.6,
+      "evidence_basis": "Effective against single-source brute force and automated credential testing tools; ineffective against distributed credential stuffing using residential proxy rotation or botnet IPs, where each source stays under the per-IP limit",
+      "conditions": [
+        "Brute force originates from a single source IP or small number of IPs",
+        "Attacker is not using credential stuffing with known-valid pairs (few attempts needed)",
+        "Rate limiting applies to authentication endpoints specifically"
+      ]
     }
   ],
   "cwe_relationships": [
     "CWE-307",
-    "CWE-400"
+    "CWE-400",
+    "CWE-799"
   ],
   "verification": {
-    "method": "Verify rate limiting is configured",
+    "method": "Verify rate limiting is configured in the web server or reverse proxy",
     "commands": [
       {
-        "command": "grep -r 'limit_req_zone\\|rate-limit' /etc/nginx/ 2>/dev/null",
+        "command": "grep -r 'limit_req_zone' /etc/nginx/ 2>/dev/null",
         "expected": "limit_req_zone",
-        "platform": "any"
+        "platform": "linux"
+      },
+      {
+        "command": "grep -rE 'mod_ratelimit|mod_evasive' /etc/httpd/conf*/ /etc/apache2/ 2>/dev/null",
+        "expected": "mod_ratelimit",
+        "platform": "linux"
+      },
+      {
+        "command": "Get-WebConfigurationProperty -Filter 'system.webServer/security/dynamicIpSecurity/denyByConcurrentRequests' -PSPath 'IIS:\\Sites\\Default Web Site' -Name enabled",
+        "expected": "True",
+        "platform": "windows"
       }
     ]
   },
   "confidence": "Medium",
   "platforms": [
-    "Any",
-    "Windows Server 2019",
-    "Windows Server 2022"
+    "Any"
   ],
   "scf_identifiers": [
     "NET-02.1",

@@ -19,7 +19,10 @@
       "metric": "S",
       "from": "C",
       "to": "U",
-      "rationale": "V8 Sandbox confines the impact of type confusion to the sandbox boundary; the attacker cannot directly reach renderer process memory or OS resources without an additional escape primitive"
+      "rationale": "V8 Sandbox confines the impact of type confusion to the sandbox boundary; the attacker cannot directly reach renderer process memory or OS resources without an additional escape primitive",
+      "conditions": [
+        "Requires V8 Sandbox posture specifically — JIT disabling (posture 1) eliminates exploitation entirely making scope moot, but JIT tiering restrictions alone (posture 3) do not add a scope boundary"
+      ]
     }
   ],
   "cwe_relationships": [
@@ -32,31 +35,29 @@
     "commands": [
       {
         "command": "grep -r 'jitless\\|--js-flags.*--jitless' /etc/chromium/ /opt/google/chrome/ ~/.config/chromium/ 2>/dev/null",
-        "expected": "--jitless flag present in Chromium launch configuration",
+        "expected": "Non-empty output — --jitless flag found in Chromium launch configuration",
         "platform": "linux"
       },
       {
         "command": "grep -r 'javascript.options.ion' /usr/lib64/firefox/defaults/pref/ ~/.mozilla/firefox/*/prefs.js 2>/dev/null",
-        "expected": "javascript.options.ion set to false for JIT-disabled mode",
+        "expected": "Non-empty output — javascript.options.ion preference found (should be set to false)",
         "platform": "linux"
       },
       {
         "command": "node --v8-flags=--help 2>&1 | grep -i sandbox",
-        "expected": "V8 sandbox flags available in the Node.js runtime",
+        "expected": "Non-empty output — V8 sandbox flags available in the Node.js runtime",
         "platform": "any"
       },
       {
-        "command": "reg query \"HKLM\\SOFTWARE\\Policies\\Google\\Chrome\" /v CommandLineFlagSecurityWarningsEnabled 2>nul",
-        "expected": "Chrome policy flags configured for JIT restriction",
+        "command": "reg query \"HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge\" /v JITDisabled 2>nul & reg query \"HKLM\\SOFTWARE\\Policies\\Google\\Chrome\" /v JITDisabled 2>nul",
+        "expected": "JITDisabled    REG_DWORD    0x1",
         "platform": "windows"
       }
     ]
   },
   "confidence": "High",
   "platforms": [
-    "Any",
-    "Windows Server 2019",
-    "Windows Server 2022"
+    "Any"
   ],
   "scf_identifiers": [
     "SEA-10",

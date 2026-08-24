@@ -22,29 +22,24 @@
   ],
   "confidence": "High",
   "platforms": [
-    "RHEL 9",
-    "RHEL 10",
-    "Ubuntu 24.04",
-    "Fedora",
-    "Windows Server 2019",
-    "Windows Server 2022"
+    "Any"
   ],
   "verification": {
     "method": "Check that application server worker recycling is configured with a finite request limit",
     "commands": [
       {
         "command": "grep -i MaxConnectionsPerChild /etc/httpd/conf/*.conf /etc/httpd/conf.d/*.conf 2>/dev/null",
-        "expected": "A positive integer value (not 0, which means unlimited)",
-        "platform": "linux"
+        "expected": "Non-empty output with a positive integer (not 0, which disables recycling)",
+        "platform": "rhel"
       },
       {
         "command": "grep pm.max_requests /etc/php-fpm.d/*.conf /etc/php/*/fpm/pool.d/*.conf 2>/dev/null",
-        "expected": "A positive integer value (not 0)",
+        "expected": "Non-empty output with a positive integer (not 0, which disables recycling)",
         "platform": "linux"
       },
       {
-        "command": "grep -E 'max.requests|max-requests' /etc/gunicorn/*.py /etc/gunicorn/*.conf 2>/dev/null",
-        "expected": "A positive integer value",
+        "command": "ps aux | grep '[g]unicorn' | grep -oE '\\-\\-max-requests[= ][0-9]+'",
+        "expected": "Non-empty output — --max-requests flag present on running Gunicorn workers",
         "platform": "linux"
       }
     ]

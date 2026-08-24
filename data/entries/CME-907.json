@@ -1,7 +1,7 @@
 {
   "cme_id": "CME-907",
   "control_name": "Application-Layer RBAC Enforcement",
-  "description": "Enforce role-based access control within the application by mapping each user to a set of roles, each role to a set of permissions, and verifying the caller holds the required permission before executing any privileged operation. Authorization checks run as middleware or decorators on every privileged API endpoint, evaluated after authentication and before business logic. Role assignments follow least privilege \u2014 users receive the minimum role needed for their function. Prevents authenticated users from accessing administrative functions, modifying other users' data, or escalating their own privileges through direct API calls.",
+  "description": "Enforce role-based access control within the application by mapping each user to a set of roles, each role to a set of permissions, and verifying the caller holds the required permission before executing any privileged operation. Authorization checks run as middleware or decorators on every privileged API endpoint, evaluated after authentication and before business logic. Role assignments follow least privilege \u2014 users receive the minimum role needed for their function. Prevents authenticated users from accessing administrative functions, modifying data outside their role permissions, or escalating their own privileges through direct API calls.",
   "tactic": "Harden",
   "category": "Application Controls",
   "category_id": "application-controls",
@@ -31,16 +31,14 @@
   ],
   "confidence": "High",
   "platforms": [
-    "Any",
-    "Windows Server 2019",
-    "Windows Server 2022"
+    "Any"
   ],
   "verification": {
     "method": "Inspect application source for role-based authorization checks on privileged endpoints; test that unprivileged authenticated users receive 403 on admin endpoints",
     "commands": [
       {
-        "command": "grep -rn '@require_role\\|@permission_required\\|authorize!\\|has_permission\\|check_permission\\|rbac\\|@roles_required' <app_source>/",
-        "expected": "Authorization decorators or middleware present on privileged endpoint handlers",
+        "command": "grep -rn '@require_role\\|@permission_required\\|authorize!\\|has_permission\\|check_permission\\|rbac\\|@roles_required\\|@PreAuthorize\\|@Secured\\|@RolesAllowed\\|\\[Authorize\\]' <app_source>/",
+        "expected": "Non-empty output — authorization annotations found on endpoint handlers",
         "platform": "any"
       },
       {
