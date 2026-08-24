@@ -28,16 +28,14 @@
   ],
   "confidence": "High",
   "platforms": [
-    "Any",
-    "Windows Server 2019",
-    "Windows Server 2022"
+    "Any"
   ],
   "verification": {
     "method": "Inspect application source for object-level ownership checks; test that authenticated users cannot access resources belonging to other users by manipulating object identifiers",
     "commands": [
       {
-        "command": "grep -rn 'owner_id.*==.*current_user\\|belongs_to.*user\\|authorize_resource\\|object_permission\\|get_object_or_403\\|filter.*user=' <app_source>/",
-        "expected": "Per-object ownership or permission checks present in data access handlers",
+        "command": "grep -rn 'owner_id.*==.*current_user\\|belongs_to.*user\\|authorize_resource\\|object_permission\\|get_object_or_403\\|filter.*user=\\|@PostAuthorize\\|hasPermission' <app_source>/",
+        "expected": "Non-empty output — object ownership checks found in data access handlers",
         "platform": "any"
       },
       {

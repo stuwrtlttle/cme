@@ -24,33 +24,28 @@
   ],
   "confidence": "High",
   "platforms": [
-    "RHEL 8",
-    "RHEL 9",
-    "RHEL 10",
-    "OpenShift 4",
-    "Windows Server 2019",
-    "Windows Server 2022"
+    "Any"
   ],
   "verification": {
     "method": "Check reverse proxy configuration for Origin/Referer header validation on state-changing requests. The proxy should reject requests with an Origin not in the trusted allowlist.",
     "commands": [
       {
         "command": "grep -rE \"valid_referers|map.*\\$http_origin\" /etc/nginx/",
-        "expected": "Origin validation directives present",
+        "expected": "Non-empty output — nginx origin validation map or valid_referers directive found",
         "platform": "rhel"
       },
       {
         "command": "grep -rE \"Require expr.*HTTP_ORIGIN|SetEnvIf Origin\" /etc/httpd/conf.d/",
-        "expected": "Origin validation rules present",
+        "expected": "Non-empty output — Apache Origin validation rules found",
         "platform": "rhel"
       },
       {
         "command": "grep -rE \"hdr\\(Origin\\)|req\\.hdr\\(Origin\\)\" /etc/haproxy/",
-        "expected": "Origin ACL rules present",
+        "expected": "Non-empty output — HAProxy Origin ACL rules found",
         "platform": "rhel"
       },
       {
-        "command": "curl -s -o /dev/null -w \"%{http_code}\" -X POST -H \"Origin: https://evil.example.com\" https://your-app/api/endpoint",
+        "command": "curl -s -o /dev/null -w \"%{http_code}\" -X POST -H \"Origin: https://evil.example.com\" https://<your-app>/api/endpoint",
         "expected": "403",
         "platform": "any"
       }

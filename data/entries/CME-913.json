@@ -17,21 +17,20 @@
     }
   ],
   "cwe_relationships": [
+    "CWE-352",
     "CWE-940",
-    "CWE-352"
+    "CWE-1275"
   ],
   "confidence": "High",
   "platforms": [
-    "Any",
-    "Windows Server 2019",
-    "Windows Server 2022"
+    "Any"
   ],
   "verification": {
     "method": "Check that the application framework's CSRF middleware is enabled and that session cookies carry the SameSite attribute",
     "commands": [
       {
-        "command": "grep -rn 'csrf\\|CsrfViewMiddleware\\|csrf_protect\\|@csrf_exempt\\|antiforgery\\|ValidateAntiForgeryToken\\|csrftoken' <app_source>/",
-        "expected": "CSRF middleware or token generation present in application code",
+        "command": "grep -rn 'csrf\\|CsrfViewMiddleware\\|csrf_protect\\|antiforgery\\|ValidateAntiForgeryToken\\|csrftoken\\|protect_from_forgery\\|authenticity_token\\|CsrfFilter\\|csurf' <app_source>/",
+        "expected": "Non-empty output — CSRF middleware or token configuration found",
         "platform": "any"
       },
       {

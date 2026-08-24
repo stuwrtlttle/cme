@@ -26,25 +26,23 @@
     "CWE-306",
     "CWE-862",
     "CWE-1220",
-    "CWE-551"
+    "CWE-284"
   ],
   "confidence": "High",
   "platforms": [
-    "Any",
-    "Windows Server 2019",
-    "Windows Server 2022"
+    "Any"
   ],
   "verification": {
     "method": "Verify that unauthenticated requests to non-public endpoints are rejected; inspect framework configuration for default-deny authorization policy",
     "commands": [
       {
         "command": "curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/api/v1/admin/users",
-        "expected": "401 or 403 without credentials",
+        "expected": "401 or 403",
         "platform": "any"
       },
       {
-        "command": "grep -rn 'default.*deny\\|require_auth\\|authenticate!\\|@login_required\\|IsAuthenticated\\|authorize.*default' <app_source>/",
-        "expected": "Global authentication/authorization middleware configured with deny-by-default",
+        "command": "grep -rn 'default.*deny\\|require_auth\\|authenticate!\\|@login_required\\|IsAuthenticated\\|authorize.*default\\|anyRequest.*authenticated\\|FallbackPolicy' <app_source>/",
+        "expected": "Non-empty output — global default-deny middleware configuration found",
         "platform": "any"
       }
     ]

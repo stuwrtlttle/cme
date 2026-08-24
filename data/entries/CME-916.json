@@ -23,28 +23,23 @@
   ],
   "confidence": "High",
   "platforms": [
-    "RHEL 8",
-    "RHEL 9",
-    "RHEL 10",
-    "OpenShift 4",
-    "Windows Server 2019",
-    "Windows Server 2022"
+    "Any"
   ],
   "verification": {
     "method": "Verify that all Set-Cookie response headers include SameSite=Lax or SameSite=Strict. Check web server or reverse proxy configuration for cookie attribute enforcement directives.",
     "commands": [
       {
         "command": "grep -rE \"Header.*(edit|always set).*Set-Cookie.*SameSite\" /etc/httpd/conf.d/",
-        "expected": "SameSite enforcement directive present",
+        "expected": "Non-empty output — Apache mod_headers SameSite enforcement directive found",
         "platform": "rhel"
       },
       {
         "command": "grep -rE \"proxy_cookie_flags|proxy_cookie_path.*SameSite\" /etc/nginx/",
-        "expected": "SameSite cookie flag directives present",
+        "expected": "Non-empty output — nginx SameSite cookie flag directive found",
         "platform": "rhel"
       },
       {
-        "command": "curl -sI https://your-app/ | grep -i \"set-cookie\" | grep -i \"samesite\"",
+        "command": "curl -sI https://<your-app>/ | grep -i \"set-cookie\" | grep -i \"samesite\"",
         "expected": "SameSite=Lax or SameSite=Strict on all Set-Cookie headers",
         "platform": "any"
       }
