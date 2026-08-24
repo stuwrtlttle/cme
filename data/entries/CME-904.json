@@ -7,36 +7,58 @@
   "category_id": "application-controls",
   "function_id": "request-filtering",
   "control_layer": "Application",
-  "attenuation_type": "deterministic",
+  "attenuation_type": "probabilistic",
   "cvss_vector_impacts": [
     {
       "metric": "AC",
       "from": "L",
       "to": "H",
-      "rationale": "Common exploit payloads are detected and blocked at the HTTP layer"
+      "rationale": "OWASP Core Rule Set signature matching detects and blocks known injection, XSS, path traversal, and protocol violation patterns at the HTTP request layer before they reach the application",
+      "probability": 0.7,
+      "evidence_basis": "OWASP CRS in blocking mode at paranoia level 2+ blocks the majority of automated and scripted attacks; manual bypass by skilled attackers remains possible via encoding evasion, payload obfuscation, and WAF-specific techniques",
+      "conditions": [
+        "WAF must be in blocking mode, not detection-only",
+        "OWASP CRS or equivalent ruleset must be loaded and current",
+        "No direct-to-origin access path exists that bypasses the WAF",
+        "WAF must cover all application endpoints"
+      ]
     }
   ],
   "cwe_relationships": [
     "CWE-79",
     "CWE-89",
     "CWE-94",
+    "CWE-78",
     "CWE-22"
   ],
   "verification": {
-    "method": "Verify WAF is in enforcement mode with rules loaded",
+    "method": "Verify WAF is in enforcement mode with rules loaded and blocking common attack payloads",
     "commands": [
       {
-        "command": "curl -s -o /dev/null -w '%{http_code}' 'http://target/?q=<script>alert(1)</script>'",
+        "command": "curl -s -o /dev/null -w '%{http_code}' 'http://<target>/?q=<script>alert(1)</script>'",
         "expected": "403",
         "platform": "any"
+      },
+      {
+        "command": "curl -s -o /dev/null -w '%{http_code}' 'http://<target>/?id=1+UNION+SELECT+1,2,3--'",
+        "expected": "403",
+        "platform": "any"
+      },
+      {
+        "command": "curl -s -o /dev/null -w '%{http_code}' 'http://<target>/../../etc/passwd'",
+        "expected": "403",
+        "platform": "any"
+      },
+      {
+        "command": "apachectl -M 2>/dev/null | grep security",
+        "expected": "security2_module",
+        "platform": "linux"
       }
     ]
   },
   "confidence": "Medium",
   "platforms": [
-    "Any",
-    "Windows Server 2019",
-    "Windows Server 2022"
+    "Any"
   ],
   "scf_identifiers": [
     "NET-08",

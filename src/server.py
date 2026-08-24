@@ -1,6 +1,8 @@
 """CME MCP Server — exposes the Common Mitigation Enumeration database via MCP tools."""
 
 import json
+import subprocess
+import sys
 from pathlib import Path
 
 import anyio
@@ -767,10 +769,26 @@ async def approve_cme_proposal(cme_id: str) -> str:
 
     await _run_db(_insert)
 
+    site_status = "skipped"
+    build_script = PROJECT_ROOT / "build_site.py"
+    if build_script.exists():
+        try:
+            subprocess.run(
+                [sys.executable, str(build_script)],
+                cwd=str(PROJECT_ROOT),
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            site_status = "rebuilt"
+        except subprocess.CalledProcessError as e:
+            site_status = f"failed: {e.stderr.strip()}"
+
     return json.dumps({
         "status": "approved",
         "cme_id": cme_id,
         "entry_file": str(entry_path),
+        "site_rebuild": site_status,
         "message": f"{cme_id} is now live in the database and saved to {entry_path}.",
     }, indent=2)
 
