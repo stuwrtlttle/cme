@@ -23,6 +23,11 @@ All notable changes to the CME (Common Mitigation Enumeration) project are docum
 
 - `82e2a0f` Update 13 CME entries (CME-905,CME-906,CME-907,CME-908,CME-909,CME-912,CME-913,CME-914,CME-915,CME-916,CME-917,CME-918,CME-919);Update data/.DS_Store
 
+
+### Auto-generated changelog
+
+- `f84a7e8` Update docs/by-cwe.html,docs/by-tactic.html,docs/entries/CME-1001.html,docs/entries/CME-1002.html,docs/entries/CME-1003.html
+
 ## 2026-08-11
 
 ### Auto-generated changelog
