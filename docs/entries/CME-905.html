@@ -41,7 +41,7 @@
 
     <section>
       <h2>Description</h2>
-      <p class="entry-description">Browser-enforced HTTP header policy that restricts script sources, prevents inline execution, and blocks mixed content. Primary defense against stored/reflected XSS.</p>
+      <p class="entry-description">Browser-enforced HTTP header policy that restricts script sources, prevents inline execution, and blocks mixed content. Defense-in-depth against stored/reflected XSS that catches output encoding failures. CSP&#39;s frame-ancestors directive also mitigates clickjacking.</p>
     </section>
 
     <section>
@@ -65,7 +65,7 @@
               <span class="cvss-to">H</span>
             </td>
             
-            <td class="cvss-rationale">XSS payloads blocked by browser CSP enforcement; script sources restricted</td>
+            <td class="cvss-rationale">CSP script-src directive restricts script execution to enumerated origins; injected inline scripts are blocked by the browser&#39;s enforcement engine regardless of payload encoding or obfuscation</td>
           </tr>
           
         </tbody>
@@ -80,6 +80,9 @@
         <a href="https://cwe.mitre.org/data/definitions/79.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-79</a>
         
+        <a href="https://cwe.mitre.org/data/definitions/1021.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-1021</a>
+        
       </div>
     </section>
     
@@ -88,13 +91,33 @@
     <section>
       <h2>Verification</h2>
       
-      <p class="verification-method">Check for CSP header in HTTP responses</p>
+      <p class="verification-method">Verify CSP header is present with effective script restrictions</p>
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> curl -sI http://target/ | grep -i content-security-policy
+        <span class="cmd-prompt">$</span> curl -sI http://&lt;target&gt;/ | grep -i content-security-policy
         
         <br><span class="cmd-expected"># Expected: Content-Security-Policy:</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> curl -sI http://&lt;target&gt;/ | grep -i content-security-policy | grep -ic &#39;unsafe-inline&#39;
+        
+        <br><span class="cmd-expected"># Expected: 0</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> curl -sI http://&lt;target&gt;/ | grep -i content-security-policy | grep -ic &#39;unsafe-eval&#39;
+        
+        <br><span class="cmd-expected"># Expected: 0</span>
         
       </div>
       
@@ -153,10 +176,6 @@
         
         <li>Any</li>
         
-        <li>Windows Server 2019</li>
-        
-        <li>Windows Server 2022</li>
-        
       </ul>
     </section>
     
@@ -168,7 +187,7 @@
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Application</li>
         <li><strong>Attenuation:</strong> deterministic</li>
-        <li><strong>CWEs:</strong> 1</li>
+        <li><strong>CWEs:</strong> 2</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
     </section>
@@ -178,7 +197,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-08-24 00:51 UTC &middot; 126 entries &middot;
+    Generated 2026-08-24 01:43 UTC &middot; 126 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

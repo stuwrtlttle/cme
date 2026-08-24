@@ -77,11 +77,14 @@
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
         
+        <a href="https://cwe.mitre.org/data/definitions/352.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-352</a>
+        
         <a href="https://cwe.mitre.org/data/definitions/940.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-940</a>
         
-        <a href="https://cwe.mitre.org/data/definitions/352.html"
-           class="cwe-link" target="_blank" rel="noopener">CWE-352</a>
+        <a href="https://cwe.mitre.org/data/definitions/1275.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-1275</a>
         
       </div>
     </section>
@@ -95,9 +98,9 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> grep -rn &#39;csrf\|CsrfViewMiddleware\|csrf_protect\|@csrf_exempt\|antiforgery\|ValidateAntiForgeryToken\|csrftoken&#39; &lt;app_source&gt;/
+        <span class="cmd-prompt">$</span> grep -rn &#39;csrf\|CsrfViewMiddleware\|csrf_protect\|antiforgery\|ValidateAntiForgeryToken\|csrftoken\|protect_from_forgery\|authenticity_token\|CsrfFilter\|csurf&#39; &lt;app_source&gt;/
         
-        <br><span class="cmd-expected"># Expected: CSRF middleware or token generation present in application code</span>
+        <br><span class="cmd-expected"># Expected: Non-empty output — CSRF middleware or token configuration found</span>
         
       </div>
       
@@ -166,10 +169,6 @@
         
         <li>Any</li>
         
-        <li>Windows Server 2019</li>
-        
-        <li>Windows Server 2022</li>
-        
       </ul>
     </section>
     
@@ -181,7 +180,7 @@
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Application</li>
         <li><strong>Attenuation:</strong> deterministic</li>
-        <li><strong>CWEs:</strong> 2</li>
+        <li><strong>CWEs:</strong> 3</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
     </section>
@@ -191,7 +190,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-08-24 00:51 UTC &middot; 126 entries &middot;
+    Generated 2026-08-24 01:43 UTC &middot; 126 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

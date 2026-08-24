@@ -79,17 +79,6 @@
             <td class="cvss-rationale">Cannot modify schema, drop tables, or alter other services&#39; data; DML limited to explicitly GRANTed tables</td>
           </tr>
           
-          <tr>
-            <td><strong>Privileges Required</strong> (PR)</td>
-            <td>
-              <span class="cvss-from">N</span>
-              <span class="cvss-arrow">&rarr;</span>
-              <span class="cvss-to">L</span>
-            </td>
-            
-            <td class="cvss-rationale">Exploitation requires the application&#39;s database credential; anonymous or cross-service access is prevented by per-service account isolation</td>
-          </tr>
-          
         </tbody>
       </table>
     </section>
@@ -101,6 +90,9 @@
         
         <a href="https://cwe.mitre.org/data/definitions/89.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-89</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/250.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-250</a>
         
         <a href="https://cwe.mitre.org/data/definitions/862.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-862</a>
@@ -122,7 +114,7 @@
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> psql -h localhost -U &lt;app_user&gt; -c &#34;SELECT rolsuper, rolcreatedb, rolcreaterole FROM pg_roles WHERE rolname=&#39;&lt;app_user&gt;&#39;&#34;
         
-        <br><span class="cmd-expected"># Expected: All values false — app user has no superuser, createdb, or createrole privileges</span>
+        <br><span class="cmd-expected"># Expected: f|f|f</span>
         
       </div>
       
@@ -132,8 +124,6 @@
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> psql -h localhost -U &lt;app_user&gt; -c &#34;SELECT grantor, privilege_type FROM information_schema.role_table_grants WHERE grantee=&#39;&lt;app_user&gt;&#39;&#34; | grep -iE &#39;create|drop|alter|grant&#39;
         
-        <br><span class="cmd-expected"># Expected: No output — app user has no DDL or GRANT privileges</span>
-        
       </div>
       
       <div class="cmd-platform">Platform: linux</div>
@@ -142,7 +132,7 @@
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> Invoke-Sqlcmd -Query &#34;SELECT IS_SRVROLEMEMBER(&#39;sysadmin&#39;, &#39;&lt;app_user&gt;&#39;)&#34;
         
-        <br><span class="cmd-expected"># Expected: 0 — app user is not a sysadmin</span>
+        <br><span class="cmd-expected"># Expected: 0</span>
         
       </div>
       
@@ -152,11 +142,19 @@
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> Invoke-Sqlcmd -Query &#34;SELECT dp.permission_name FROM sys.database_permissions dp JOIN sys.database_principals pr ON dp.grantee_principal_id = pr.principal_id WHERE pr.name = &#39;&lt;app_user&gt;&#39; AND dp.permission_name IN (&#39;ALTER&#39;,&#39;CREATE&#39;,&#39;CONTROL&#39;)&#34;
         
-        <br><span class="cmd-expected"># Expected: No rows — app user has no DDL permissions</span>
+        <br><span class="cmd-expected"># Expected: (0 rows affected)</span>
         
       </div>
       
       <div class="cmd-platform">Platform: windows</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> mysql -h localhost -u &lt;app_user&gt; -e &#34;SHOW GRANTS FOR CURRENT_USER()&#34; | grep -iE &#39;ALL PRIVILEGES|SUPER|CREATE|DROP|ALTER|GRANT&#39;
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
       
       
     </section>
@@ -226,8 +224,8 @@
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Application</li>
         <li><strong>Attenuation:</strong> deterministic</li>
-        <li><strong>CWEs:</strong> 3</li>
-        <li><strong>CVSS Mods:</strong> 3</li>
+        <li><strong>CWEs:</strong> 4</li>
+        <li><strong>CVSS Mods:</strong> 2</li>
       </ul>
     </section>
   </aside>
@@ -236,7 +234,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-08-24 00:51 UTC &middot; 126 entries &middot;
+    Generated 2026-08-24 01:43 UTC &middot; 126 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>
