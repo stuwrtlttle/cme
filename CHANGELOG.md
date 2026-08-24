@@ -28,6 +28,11 @@ All notable changes to the CME (Common Mitigation Enumeration) project are docum
 
 - `f84a7e8` Update docs/by-cwe.html,docs/by-tactic.html,docs/entries/CME-1001.html,docs/entries/CME-1002.html,docs/entries/CME-1003.html
 
+
+### Auto-generated changelog
+
+- `0528a7a` Update 2 CME entries (CME-1301,CME-1302);Update docs/by-cwe.html,docs/by-tactic.html,docs/entries/CME-1001.html,docs/entries/CME-1002.html,docs/entries/CME-1003.html
+
 ## 2026-08-11
 
 ### Auto-generated changelog
