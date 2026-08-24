@@ -20,16 +20,11 @@
       "from": "H",
       "to": "L",
       "rationale": "Cannot modify schema, drop tables, or alter other services' data; DML limited to explicitly GRANTed tables"
-    },
-    {
-      "metric": "PR",
-      "from": "N",
-      "to": "L",
-      "rationale": "Exploitation requires the application's database credential; anonymous or cross-service access is prevented by per-service account isolation"
     }
   ],
   "cwe_relationships": [
     "CWE-89",
+    "CWE-250",
     "CWE-862",
     "CWE-269"
   ],
@@ -38,23 +33,28 @@
     "commands": [
       {
         "command": "psql -h localhost -U <app_user> -c \"SELECT rolsuper, rolcreatedb, rolcreaterole FROM pg_roles WHERE rolname='<app_user>'\"",
-        "expected": "All values false — app user has no superuser, createdb, or createrole privileges",
+        "expected": "f|f|f",
         "platform": "linux"
       },
       {
         "command": "psql -h localhost -U <app_user> -c \"SELECT grantor, privilege_type FROM information_schema.role_table_grants WHERE grantee='<app_user>'\" | grep -iE 'create|drop|alter|grant'",
-        "expected": "No output — app user has no DDL or GRANT privileges",
+        "expected": "",
         "platform": "linux"
       },
       {
         "command": "Invoke-Sqlcmd -Query \"SELECT IS_SRVROLEMEMBER('sysadmin', '<app_user>')\"",
-        "expected": "0 — app user is not a sysadmin",
+        "expected": "0",
         "platform": "windows"
       },
       {
         "command": "Invoke-Sqlcmd -Query \"SELECT dp.permission_name FROM sys.database_permissions dp JOIN sys.database_principals pr ON dp.grantee_principal_id = pr.principal_id WHERE pr.name = '<app_user>' AND dp.permission_name IN ('ALTER','CREATE','CONTROL')\"",
-        "expected": "No rows — app user has no DDL permissions",
+        "expected": "(0 rows affected)",
         "platform": "windows"
+      },
+      {
+        "command": "mysql -h localhost -u <app_user> -e \"SHOW GRANTS FOR CURRENT_USER()\" | grep -iE 'ALL PRIVILEGES|SUPER|CREATE|DROP|ALTER|GRANT'",
+        "expected": "",
+        "platform": "linux"
       }
     ]
   },
