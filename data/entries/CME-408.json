@@ -1,0 +1,73 @@
+{
+  "cme_id": "CME-408",
+  "control_name": "System-wide TLS/Crypto Policy Enforcement",
+  "description": "Enforce minimum TLS version and cipher suite requirements system-wide via OS-level cryptographic policy. RHEL's update-crypto-policies sets a baseline (DEFAULT, FUTURE, FIPS) that applies to all TLS-using applications linked against system crypto libraries (OpenSSL, GnuTLS, NSS), preventing applications from accepting weak ciphers, expired certificates, or outdated TLS versions regardless of individual application configuration. Windows equivalent is SChannel registry configuration or Group Policy cipher suite ordering. Eliminates an entire class of TLS misconfiguration vulnerabilities by moving the trust decision from each application to the OS layer.",
+  "tactic": "Harden",
+  "category": "Cryptographic Controls",
+  "category_id": "cryptographic-controls",
+  "function_id": "crypto-policy",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "MitM requires bypassing system-enforced minimum TLS version and cipher suite restrictions; downgrade attacks to weak protocols (SSLv3, TLS 1.0) or export ciphers are blocked at the OS library layer before reaching the application"
+    },
+    {
+      "metric": "C",
+      "from": "H",
+      "to": "L",
+      "rationale": "Traffic cannot be decrypted via weak cipher downgrade or protocol rollback; system policy enforces strong cipher suites across all applications"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-295",
+    "CWE-327",
+    "CWE-326",
+    "CWE-757"
+  ],
+  "verification": {
+    "method": "Verify system-wide crypto policy enforces modern TLS versions and strong cipher suites",
+    "commands": [
+      {
+        "command": "update-crypto-policies --show",
+        "expected": "DEFAULT, FUTURE, or FIPS (not LEGACY)",
+        "platform": "rhel"
+      },
+      {
+        "command": "openssl s_client -connect localhost:443 -tls1 </dev/null 2>&1 | grep -i 'protocol\\|error'",
+        "expected": "Connection refused or protocol error — TLS 1.0 rejected by system policy",
+        "platform": "linux"
+      },
+      {
+        "command": "update-crypto-policies --check",
+        "expected": "The configured policy matches the generated policy",
+        "platform": "rhel"
+      },
+      {
+        "command": "Get-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.0\\Server' -Name Enabled -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Enabled",
+        "expected": "0 — TLS 1.0 disabled on server side",
+        "platform": "windows"
+      },
+      {
+        "command": "Get-TlsCipherSuite | Where-Object {$_.Name -match 'RC4|DES|NULL|EXPORT'} | Measure-Object | Select-Object -ExpandProperty Count",
+        "expected": "0 — no weak cipher suites enabled",
+        "platform": "windows"
+      }
+    ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 10",
+    "Fedora",
+    "Windows Server 2019",
+    "Windows Server 2022"
+  ],
+  "scf_identifiers": [
+    "CRY-01",
+    "CRY-03"
+  ]
+}

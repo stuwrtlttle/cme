@@ -1,0 +1,52 @@
+{
+  "cme_id": "CME-1012",
+  "control_name": "Pre-commit Secrets Detection (gitleaks/trufflehog)",
+  "description": "Automated scanning of code commits for embedded secrets (API keys, passwords, private keys, tokens, connection strings) using pattern-based and entropy-based detection. Runs as a git pre-commit hook or CI pipeline gate to prevent hard-coded credentials from reaching repositories where they can be harvested by attackers or leaked in public forks. Tools include gitleaks, trufflehog, and git-secrets. Complements credential rotation and vault-based secret management by catching secrets that bypass those controls at the source code layer.",
+  "tactic": "Detect",
+  "category": "Integrity Detection",
+  "category_id": "integrity-detection",
+  "function_id": "integrity-monitoring",
+  "control_layer": "Application",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Hard-coded credentials are detected and blocked before they reach the repository; the attacker must find credentials through an alternative channel (vault compromise, memory dump, network intercept) rather than simply reading source code or commit history"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-798",
+    "CWE-312",
+    "CWE-316"
+  ],
+  "verification": {
+    "method": "Verify that a secrets scanning tool is configured as a git pre-commit hook or CI pipeline stage and reports no findings",
+    "commands": [
+      {
+        "command": "test -f .git/hooks/pre-commit && grep -l 'gitleaks\\|trufflehog\\|git-secrets\\|detect-secrets' .git/hooks/pre-commit",
+        "expected": "Pre-commit hook exists and references a secrets scanning tool",
+        "platform": "any"
+      },
+      {
+        "command": "gitleaks detect --source . --no-git 2>&1 | tail -1",
+        "expected": "no leaks found",
+        "platform": "any"
+      },
+      {
+        "command": "trufflehog filesystem . --no-update 2>&1 | grep -c 'Found verified result'",
+        "expected": "0 — no verified secrets found",
+        "platform": "any"
+      }
+    ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "Any"
+  ],
+  "scf_identifiers": [
+    "CFG-02",
+    "IAC-15"
+  ]
+}

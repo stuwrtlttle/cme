@@ -1,0 +1,71 @@
+{
+  "cme_id": "CME-920",
+  "control_name": "Database Least-Privilege Access Control",
+  "description": "Enforce database-level access control by assigning each application service a dedicated database account with GRANT-limited permissions. App accounts receive only SELECT, INSERT, UPDATE, DELETE on specific tables — never CREATE, DROP, ALTER, GRANT, or DBA/superuser roles. Prevents SQL injection from escalating to schema modification, cross-database access, or OS command execution via xp_cmdshell/COPY/LOAD_FILE. Each microservice or application component should use a separate credential with the minimum privilege set required for its operations.",
+  "tactic": "Harden",
+  "category": "Application Controls",
+  "category_id": "application-controls",
+  "function_id": "authorization-controls",
+  "control_layer": "Application",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "C",
+      "from": "H",
+      "to": "L",
+      "rationale": "SQL injection cannot exfiltrate data from other databases or tables outside the app account's GRANT scope; UNION-based extraction is limited to the account's SELECT privileges"
+    },
+    {
+      "metric": "I",
+      "from": "H",
+      "to": "L",
+      "rationale": "Cannot modify schema, drop tables, or alter other services' data; DML limited to explicitly GRANTed tables"
+    },
+    {
+      "metric": "PR",
+      "from": "N",
+      "to": "L",
+      "rationale": "Exploitation requires the application's database credential; anonymous or cross-service access is prevented by per-service account isolation"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-89",
+    "CWE-862",
+    "CWE-269"
+  ],
+  "verification": {
+    "method": "Verify application database accounts have no superuser, DDL, or GRANT privileges",
+    "commands": [
+      {
+        "command": "psql -h localhost -U <app_user> -c \"SELECT rolsuper, rolcreatedb, rolcreaterole FROM pg_roles WHERE rolname='<app_user>'\"",
+        "expected": "All values false — app user has no superuser, createdb, or createrole privileges",
+        "platform": "linux"
+      },
+      {
+        "command": "psql -h localhost -U <app_user> -c \"SELECT grantor, privilege_type FROM information_schema.role_table_grants WHERE grantee='<app_user>'\" | grep -iE 'create|drop|alter|grant'",
+        "expected": "No output — app user has no DDL or GRANT privileges",
+        "platform": "linux"
+      },
+      {
+        "command": "Invoke-Sqlcmd -Query \"SELECT IS_SRVROLEMEMBER('sysadmin', '<app_user>')\"",
+        "expected": "0 — app user is not a sysadmin",
+        "platform": "windows"
+      },
+      {
+        "command": "Invoke-Sqlcmd -Query \"SELECT dp.permission_name FROM sys.database_permissions dp JOIN sys.database_principals pr ON dp.grantee_principal_id = pr.principal_id WHERE pr.name = '<app_user>' AND dp.permission_name IN ('ALTER','CREATE','CONTROL')\"",
+        "expected": "No rows — app user has no DDL permissions",
+        "platform": "windows"
+      }
+    ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "Any",
+    "RHEL 9",
+    "Windows Server 2022"
+  ],
+  "scf_identifiers": [
+    "IAC-25",
+    "DCE-06"
+  ]
+}
