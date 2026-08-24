@@ -65,7 +65,18 @@
               <span class="cvss-to">H</span>
             </td>
             
-            <td class="cvss-rationale">Only allowlisted types can be deserialized; arbitrary class instantiation blocked</td>
+            <td class="cvss-rationale">Only allowlisted types can be deserialized; attacker must find an exploitable gadget chain using only permitted types, which is fundamentally harder than exploiting unrestricted deserialization</td>
+          </tr>
+          
+          <tr>
+            <td><strong>Confidentiality</strong> (C)</td>
+            <td>
+              <span class="cvss-from">H</span>
+              <span class="cvss-arrow">&rarr;</span>
+              <span class="cvss-to">L</span>
+            </td>
+            
+            <td class="cvss-rationale">Arbitrary code execution via gadget chains blocked; attacker cannot exfiltrate data beyond what allowlisted types expose</td>
           </tr>
           
           <tr>
@@ -76,7 +87,7 @@
               <span class="cvss-to">L</span>
             </td>
             
-            <td class="cvss-rationale">Cannot invoke arbitrary functions or modify state via deserialized objects</td>
+            <td class="cvss-rationale">Cannot invoke arbitrary functions or modify state via deserialized objects; modifications limited to intended domain of allowlisted types</td>
           </tr>
           
         </tbody>
@@ -88,14 +99,11 @@
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
         
+        <a href="https://cwe.mitre.org/data/definitions/470.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-470</a>
+        
         <a href="https://cwe.mitre.org/data/definitions/502.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-502</a>
-        
-        <a href="https://cwe.mitre.org/data/definitions/915.html"
-           class="cwe-link" target="_blank" rel="noopener">CWE-915</a>
-        
-        <a href="https://cwe.mitre.org/data/definitions/1321.html"
-           class="cwe-link" target="_blank" rel="noopener">CWE-1321</a>
         
         <a href="https://cwe.mitre.org/data/definitions/1188.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-1188</a>
@@ -112,9 +120,9 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> grep -rn &#39;yaml.safe_load\|SafeLoader\|json.loads&#39; &lt;app_source&gt;/
+        <span class="cmd-prompt">$</span> grep -rn &#39;yaml.safe_load\|SafeLoader\|RestrictedUnpickler\|ObjectInputFilter\|JsonSerializer&#39; &lt;app_source&gt;/
         
-        <br><span class="cmd-expected"># Expected: Safe deserialization calls present (not yaml.load without SafeLoader)</span>
+        <br><span class="cmd-expected"># Expected: safe_load|SafeLoader|RestrictedUnpickler|ObjectInputFilter|JsonSerializer</span>
         
       </div>
       
@@ -122,9 +130,9 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> grep -rn &#39;yaml.load\|pickle.load\|marshal.load&#39; &lt;app_source&gt;/ | grep -v safe_load
+        <span class="cmd-prompt">$</span> grep -rn &#39;yaml.load\|pickle.load\|marshal.load&#39; &lt;app_source&gt;/ | grep -v &#39;safe_load\|SafeLoader&#39;
         
-        <br><span class="cmd-expected"># Expected: No unsafe deserialization calls</span>
+        <br><span class="cmd-expected"># Expected: No output</span>
         
       </div>
       
@@ -134,17 +142,17 @@
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rn &#39;jdk.serialFilter\|ObjectInputFilter\|serialFilter&#39; /etc/java/ /usr/lib/jvm/*/conf/ 2&gt;/dev/null || java -XshowSettings 2&gt;&amp;1 | grep serialFilter
         
-        <br><span class="cmd-expected"># Expected: JVM serialization filter configured with allowlist pattern (JEP 290)</span>
+        <br><span class="cmd-expected"># Expected: serialFilter</span>
         
       </div>
       
-      <div class="cmd-platform">Platform: any</div>
+      <div class="cmd-platform">Platform: linux</div>
       
       
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rn &#39;TypeNameHandling\.None\|TypeNameHandling\.Auto\|BinaryFormatter&#39; &lt;app_source&gt;/ | grep -v None
         
-        <br><span class="cmd-expected"># Expected: No unsafe TypeNameHandling settings (Auto/All/Objects/Arrays) or BinaryFormatter usage</span>
+        <br><span class="cmd-expected"># Expected: No output</span>
         
       </div>
       
@@ -203,10 +211,6 @@
         
         <li>Any</li>
         
-        <li>Windows Server 2019</li>
-        
-        <li>Windows Server 2022</li>
-        
       </ul>
     </section>
     
@@ -218,8 +222,8 @@
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Application</li>
         <li><strong>Attenuation:</strong> deterministic</li>
-        <li><strong>CWEs:</strong> 4</li>
-        <li><strong>CVSS Mods:</strong> 2</li>
+        <li><strong>CWEs:</strong> 3</li>
+        <li><strong>CVSS Mods:</strong> 3</li>
       </ul>
     </section>
   </aside>
@@ -228,7 +232,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-08-24 01:43 UTC &middot; 126 entries &middot;
+    Generated 2026-08-24 01:58 UTC &middot; 126 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>
