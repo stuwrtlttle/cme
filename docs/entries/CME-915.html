@@ -103,7 +103,7 @@
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rE &#34;valid_referers|map.*\$http_origin&#34; /etc/nginx/
         
-        <br><span class="cmd-expected"># Expected: Origin validation directives present</span>
+        <br><span class="cmd-expected"># Expected: Non-empty output — nginx origin validation map or valid_referers directive found</span>
         
       </div>
       
@@ -113,7 +113,7 @@
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rE &#34;Require expr.*HTTP_ORIGIN|SetEnvIf Origin&#34; /etc/httpd/conf.d/
         
-        <br><span class="cmd-expected"># Expected: Origin validation rules present</span>
+        <br><span class="cmd-expected"># Expected: Non-empty output — Apache Origin validation rules found</span>
         
       </div>
       
@@ -123,7 +123,7 @@
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rE &#34;hdr\(Origin\)|req\.hdr\(Origin\)&#34; /etc/haproxy/
         
-        <br><span class="cmd-expected"># Expected: Origin ACL rules present</span>
+        <br><span class="cmd-expected"># Expected: Non-empty output — HAProxy Origin ACL rules found</span>
         
       </div>
       
@@ -131,7 +131,7 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> curl -s -o /dev/null -w &#34;%{http_code}&#34; -X POST -H &#34;Origin: https://evil.example.com&#34; https://your-app/api/endpoint
+        <span class="cmd-prompt">$</span> curl -s -o /dev/null -w &#34;%{http_code}&#34; -X POST -H &#34;Origin: https://evil.example.com&#34; https://&lt;your-app&gt;/api/endpoint
         
         <br><span class="cmd-expected"># Expected: 403</span>
         
@@ -190,17 +190,7 @@
       <h3>Platforms</h3>
       <ul class="sidebar-list">
         
-        <li>RHEL 8</li>
-        
-        <li>RHEL 9</li>
-        
-        <li>RHEL 10</li>
-        
-        <li>OpenShift 4</li>
-        
-        <li>Windows Server 2019</li>
-        
-        <li>Windows Server 2022</li>
+        <li>Any</li>
         
       </ul>
     </section>
@@ -223,7 +213,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-08-24 00:51 UTC &middot; 126 entries &middot;
+    Generated 2026-08-24 01:43 UTC &middot; 126 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

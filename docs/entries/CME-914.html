@@ -94,6 +94,9 @@
         <a href="https://cwe.mitre.org/data/definitions/346.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-346</a>
         
+        <a href="https://cwe.mitre.org/data/definitions/942.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-942</a>
+        
       </div>
     </section>
     
@@ -108,7 +111,7 @@
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> curl -sI -H &#39;Origin: https://evil.example.com&#39; http://localhost:8080/api/v1/user | grep -i &#39;access-control-allow&#39;
         
-        <br><span class="cmd-expected"># Expected: No Access-Control-Allow-Origin header, or not reflecting evil.example.com</span>
+        <br><span class="cmd-expected"># Expected: Empty output (no CORS headers returned for untrusted origin)</span>
         
       </div>
       
@@ -119,6 +122,16 @@
         <span class="cmd-prompt">$</span> curl -sI -H &#39;Origin: https://trusted.example.com&#39; http://localhost:8080/api/v1/user | grep -i &#39;access-control-allow&#39;
         
         <br><span class="cmd-expected"># Expected: Access-Control-Allow-Origin: https://trusted.example.com</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -rn &#39;Access-Control-Allow-Origin.*\*\|cors_allow_all\|CORS_ORIGIN_ALLOW_ALL\|allowedOrigins.*\*\|req\.headers\[.origin.\]\|\$_SERVER.*HTTP_ORIGIN&#39; &lt;app_source&gt;/
+        
+        <br><span class="cmd-expected"># Expected: Empty output (no wildcard CORS or origin reflection patterns found)</span>
         
       </div>
       
@@ -177,10 +190,6 @@
         
         <li>Any</li>
         
-        <li>Windows Server 2019</li>
-        
-        <li>Windows Server 2022</li>
-        
       </ul>
     </section>
     
@@ -192,7 +201,7 @@
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Application</li>
         <li><strong>Attenuation:</strong> deterministic</li>
-        <li><strong>CWEs:</strong> 2</li>
+        <li><strong>CWEs:</strong> 3</li>
         <li><strong>CVSS Mods:</strong> 2</li>
       </ul>
     </section>
@@ -202,7 +211,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-08-24 00:51 UTC &middot; 126 entries &middot;
+    Generated 2026-08-24 01:43 UTC &middot; 126 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

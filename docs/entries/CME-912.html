@@ -139,13 +139,23 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> grep -i &#39;ignore_invalid_headers&#39; /etc/nginx/nginx.conf
+        <span class="cmd-prompt">$</span> grep -i &#39;proxy_http_version&#39; /etc/nginx/nginx.conf /etc/nginx/conf.d/*.conf 2&gt;/dev/null
         
-        <br><span class="cmd-expected"># Expected: on</span>
+        <br><span class="cmd-expected"># Expected: 1.1</span>
         
       </div>
       
       <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> Get-WebConfigurationProperty -Filter &#39;system.webServer/security/requestFiltering&#39; -PSPath &#39;IIS:\&#39; -Name allowDoubleEscaping
+        
+        <br><span class="cmd-expected"># Expected: False</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: windows</div>
       
       
     </section>
@@ -198,11 +208,7 @@
       <h3>Platforms</h3>
       <ul class="sidebar-list">
         
-        <li>RHEL 9</li>
-        
-        <li>RHEL 8</li>
-        
-        <li>Any Linux with HTTP proxy/LB</li>
+        <li>Any</li>
         
       </ul>
     </section>
@@ -225,7 +231,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-08-24 00:51 UTC &middot; 126 entries &middot;
+    Generated 2026-08-24 01:43 UTC &middot; 126 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

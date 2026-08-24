@@ -114,17 +114,17 @@
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rn &#39;&lt;Location\|&lt;Directory\|Require valid-user\|Require group\|AuthType&#39; /etc/httpd/conf.d/ /etc/httpd/conf/httpd.conf
         
-        <br><span class="cmd-expected"># Expected: Authorization directives present on administrative and restricted URL paths (e.g., /admin, /console, /debug)</span>
+        <br><span class="cmd-expected"># Expected: Non-empty output — Apache Location/Directory blocks with Require directives on restricted paths</span>
         
       </div>
       
-      <div class="cmd-platform">Platform: linux</div>
+      <div class="cmd-platform">Platform: rhel</div>
       
       
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rn &#39;location.*/admin\|location.*/console\|deny all\|auth_basic\|auth_request&#39; /etc/nginx/conf.d/ /etc/nginx/nginx.conf
         
-        <br><span class="cmd-expected"># Expected: Restricted location blocks with authentication or deny directives for administrative paths</span>
+        <br><span class="cmd-expected"># Expected: Non-empty output — nginx location blocks with auth_basic, auth_request, or deny directives on restricted paths</span>
         
       </div>
       
@@ -144,7 +144,7 @@
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> Get-WebConfigurationProperty -Filter &#39;/system.webServer/security/authorization&#39; -PSPath &#39;IIS:\Sites\Default Web Site\admin&#39; -Name &#39;collection&#39; | Format-Table
         
-        <br><span class="cmd-expected"># Expected: URL Authorization rules restricting access to administrative paths to specific roles</span>
+        <br><span class="cmd-expected"># Expected: Non-empty output — IIS URL Authorization rules with role-based access restrictions on admin paths</span>
         
       </div>
       
@@ -203,10 +203,6 @@
         
         <li>Any</li>
         
-        <li>Windows Server 2019</li>
-        
-        <li>Windows Server 2022</li>
-        
       </ul>
     </section>
     
@@ -228,7 +224,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-08-24 00:51 UTC &middot; 126 entries &middot;
+    Generated 2026-08-24 01:43 UTC &middot; 126 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

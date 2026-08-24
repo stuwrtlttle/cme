@@ -41,7 +41,7 @@
 
     <section>
       <h2>Description</h2>
-      <p class="entry-description">Enforce role-based access control within the application by mapping each user to a set of roles, each role to a set of permissions, and verifying the caller holds the required permission before executing any privileged operation. Authorization checks run as middleware or decorators on every privileged API endpoint, evaluated after authentication and before business logic. Role assignments follow least privilege — users receive the minimum role needed for their function. Prevents authenticated users from accessing administrative functions, modifying other users&#39; data, or escalating their own privileges through direct API calls.</p>
+      <p class="entry-description">Enforce role-based access control within the application by mapping each user to a set of roles, each role to a set of permissions, and verifying the caller holds the required permission before executing any privileged operation. Authorization checks run as middleware or decorators on every privileged API endpoint, evaluated after authentication and before business logic. Role assignments follow least privilege — users receive the minimum role needed for their function. Prevents authenticated users from accessing administrative functions, modifying data outside their role permissions, or escalating their own privileges through direct API calls.</p>
     </section>
 
     <section>
@@ -115,9 +115,9 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> grep -rn &#39;@require_role\|@permission_required\|authorize!\|has_permission\|check_permission\|rbac\|@roles_required&#39; &lt;app_source&gt;/
+        <span class="cmd-prompt">$</span> grep -rn &#39;@require_role\|@permission_required\|authorize!\|has_permission\|check_permission\|rbac\|@roles_required\|@PreAuthorize\|@Secured\|@RolesAllowed\|\[Authorize\]&#39; &lt;app_source&gt;/
         
-        <br><span class="cmd-expected"># Expected: Authorization decorators or middleware present on privileged endpoint handlers</span>
+        <br><span class="cmd-expected"># Expected: Non-empty output — authorization annotations found on endpoint handlers</span>
         
       </div>
       
@@ -188,10 +188,6 @@
         
         <li>Any</li>
         
-        <li>Windows Server 2019</li>
-        
-        <li>Windows Server 2022</li>
-        
       </ul>
     </section>
     
@@ -213,7 +209,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-08-24 00:51 UTC &middot; 126 entries &middot;
+    Generated 2026-08-24 01:43 UTC &middot; 126 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

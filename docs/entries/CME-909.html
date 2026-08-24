@@ -97,8 +97,8 @@
         <a href="https://cwe.mitre.org/data/definitions/1220.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-1220</a>
         
-        <a href="https://cwe.mitre.org/data/definitions/551.html"
-           class="cwe-link" target="_blank" rel="noopener">CWE-551</a>
+        <a href="https://cwe.mitre.org/data/definitions/284.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-284</a>
         
       </div>
     </section>
@@ -114,7 +114,7 @@
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> curl -s -o /dev/null -w &#39;%{http_code}&#39; http://localhost:8080/api/v1/admin/users
         
-        <br><span class="cmd-expected"># Expected: 401 or 403 without credentials</span>
+        <br><span class="cmd-expected"># Expected: 401 or 403</span>
         
       </div>
       
@@ -122,9 +122,9 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> grep -rn &#39;default.*deny\|require_auth\|authenticate!\|@login_required\|IsAuthenticated\|authorize.*default&#39; &lt;app_source&gt;/
+        <span class="cmd-prompt">$</span> grep -rn &#39;default.*deny\|require_auth\|authenticate!\|@login_required\|IsAuthenticated\|authorize.*default\|anyRequest.*authenticated\|FallbackPolicy&#39; &lt;app_source&gt;/
         
-        <br><span class="cmd-expected"># Expected: Global authentication/authorization middleware configured with deny-by-default</span>
+        <br><span class="cmd-expected"># Expected: Non-empty output — global default-deny middleware configuration found</span>
         
       </div>
       
@@ -183,10 +183,6 @@
         
         <li>Any</li>
         
-        <li>Windows Server 2019</li>
-        
-        <li>Windows Server 2022</li>
-        
       </ul>
     </section>
     
@@ -208,7 +204,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-08-24 00:51 UTC &middot; 126 entries &middot;
+    Generated 2026-08-24 01:43 UTC &middot; 126 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

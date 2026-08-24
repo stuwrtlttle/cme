@@ -100,7 +100,7 @@
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rE &#34;Header.*(edit|always set).*Set-Cookie.*SameSite&#34; /etc/httpd/conf.d/
         
-        <br><span class="cmd-expected"># Expected: SameSite enforcement directive present</span>
+        <br><span class="cmd-expected"># Expected: Non-empty output — Apache mod_headers SameSite enforcement directive found</span>
         
       </div>
       
@@ -110,7 +110,7 @@
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rE &#34;proxy_cookie_flags|proxy_cookie_path.*SameSite&#34; /etc/nginx/
         
-        <br><span class="cmd-expected"># Expected: SameSite cookie flag directives present</span>
+        <br><span class="cmd-expected"># Expected: Non-empty output — nginx SameSite cookie flag directive found</span>
         
       </div>
       
@@ -118,7 +118,7 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> curl -sI https://your-app/ | grep -i &#34;set-cookie&#34; | grep -i &#34;samesite&#34;
+        <span class="cmd-prompt">$</span> curl -sI https://&lt;your-app&gt;/ | grep -i &#34;set-cookie&#34; | grep -i &#34;samesite&#34;
         
         <br><span class="cmd-expected"># Expected: SameSite=Lax or SameSite=Strict on all Set-Cookie headers</span>
         
@@ -177,17 +177,7 @@
       <h3>Platforms</h3>
       <ul class="sidebar-list">
         
-        <li>RHEL 8</li>
-        
-        <li>RHEL 9</li>
-        
-        <li>RHEL 10</li>
-        
-        <li>OpenShift 4</li>
-        
-        <li>Windows Server 2019</li>
-        
-        <li>Windows Server 2022</li>
+        <li>Any</li>
         
       </ul>
     </section>
@@ -210,7 +200,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-08-24 00:51 UTC &middot; 126 entries &middot;
+    Generated 2026-08-24 01:43 UTC &middot; 126 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

@@ -28,7 +28,7 @@
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-application">Application</span>
     
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
+    <span class="badge badge-attenuation-probabilistic">Probabilistic</span>
     
     
     <span class="badge badge-confidence-medium">Medium Confidence</span>
@@ -52,6 +52,8 @@
             <th>Metric</th>
             <th>Transition</th>
             
+            <th>Probability</th>
+            
             <th>Rationale</th>
           </tr>
         </thead>
@@ -65,7 +67,27 @@
               <span class="cvss-to">H</span>
             </td>
             
-            <td class="cvss-rationale">Common exploit payloads are detected and blocked at the HTTP layer</td>
+            <td class="cvss-probability">
+              70%
+              
+              <div class="evidence-basis">OWASP CRS in blocking mode at paranoia level 2+ blocks the majority of automated and scripted attacks; manual bypass by skilled attackers remains possible via encoding evasion, payload obfuscation, and WAF-specific techniques</div>
+              
+              
+              <ul class="conditions-list">
+                
+                <li>WAF must be in blocking mode, not detection-only</li>
+                
+                <li>OWASP CRS or equivalent ruleset must be loaded and current</li>
+                
+                <li>No direct-to-origin access path exists that bypasses the WAF</li>
+                
+                <li>WAF must cover all application endpoints</li>
+                
+              </ul>
+              
+            </td>
+            
+            <td class="cvss-rationale">OWASP Core Rule Set signature matching detects and blocks known injection, XSS, path traversal, and protocol violation patterns at the HTTP request layer before they reach the application</td>
           </tr>
           
         </tbody>
@@ -86,6 +108,9 @@
         <a href="https://cwe.mitre.org/data/definitions/94.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-94</a>
         
+        <a href="https://cwe.mitre.org/data/definitions/78.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-78</a>
+        
         <a href="https://cwe.mitre.org/data/definitions/22.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-22</a>
         
@@ -97,17 +122,47 @@
     <section>
       <h2>Verification</h2>
       
-      <p class="verification-method">Verify WAF is in enforcement mode with rules loaded</p>
+      <p class="verification-method">Verify WAF is in enforcement mode with rules loaded and blocking common attack payloads</p>
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> curl -s -o /dev/null -w &#39;%{http_code}&#39; &#39;http://target/?q=&lt;script&gt;alert(1)&lt;/script&gt;&#39;
+        <span class="cmd-prompt">$</span> curl -s -o /dev/null -w &#39;%{http_code}&#39; &#39;http://&lt;target&gt;/?q=&lt;script&gt;alert(1)&lt;/script&gt;&#39;
         
         <br><span class="cmd-expected"># Expected: 403</span>
         
       </div>
       
       <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> curl -s -o /dev/null -w &#39;%{http_code}&#39; &#39;http://&lt;target&gt;/?id=1+UNION+SELECT+1,2,3--&#39;
+        
+        <br><span class="cmd-expected"># Expected: 403</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> curl -s -o /dev/null -w &#39;%{http_code}&#39; &#39;http://&lt;target&gt;/../../etc/passwd&#39;
+        
+        <br><span class="cmd-expected"># Expected: 403</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> apachectl -M 2&gt;/dev/null | grep security
+        
+        <br><span class="cmd-expected"># Expected: security2_module</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
       
       
     </section>
@@ -162,10 +217,6 @@
         
         <li>Any</li>
         
-        <li>Windows Server 2019</li>
-        
-        <li>Windows Server 2022</li>
-        
       </ul>
     </section>
     
@@ -176,8 +227,8 @@
         <li><strong>ID:</strong> CME-904</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Application</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
-        <li><strong>CWEs:</strong> 4</li>
+        <li><strong>Attenuation:</strong> probabilistic</li>
+        <li><strong>CWEs:</strong> 5</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
     </section>
@@ -187,7 +238,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-08-24 00:51 UTC &middot; 126 entries &middot;
+    Generated 2026-08-24 01:43 UTC &middot; 126 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

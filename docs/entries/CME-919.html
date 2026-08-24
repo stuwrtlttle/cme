@@ -111,7 +111,7 @@
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -r &#39;jitless\|--js-flags.*--jitless&#39; /etc/chromium/ /opt/google/chrome/ ~/.config/chromium/ 2&gt;/dev/null
         
-        <br><span class="cmd-expected"># Expected: --jitless flag present in Chromium launch configuration</span>
+        <br><span class="cmd-expected"># Expected: Non-empty output — --jitless flag found in Chromium launch configuration</span>
         
       </div>
       
@@ -121,7 +121,7 @@
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -r &#39;javascript.options.ion&#39; /usr/lib64/firefox/defaults/pref/ ~/.mozilla/firefox/*/prefs.js 2&gt;/dev/null
         
-        <br><span class="cmd-expected"># Expected: javascript.options.ion set to false for JIT-disabled mode</span>
+        <br><span class="cmd-expected"># Expected: Non-empty output — javascript.options.ion preference found (should be set to false)</span>
         
       </div>
       
@@ -131,7 +131,7 @@
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> node --v8-flags=--help 2&gt;&amp;1 | grep -i sandbox
         
-        <br><span class="cmd-expected"># Expected: V8 sandbox flags available in the Node.js runtime</span>
+        <br><span class="cmd-expected"># Expected: Non-empty output — V8 sandbox flags available in the Node.js runtime</span>
         
       </div>
       
@@ -139,9 +139,9 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> reg query &#34;HKLM\SOFTWARE\Policies\Google\Chrome&#34; /v CommandLineFlagSecurityWarningsEnabled 2&gt;nul
+        <span class="cmd-prompt">$</span> reg query &#34;HKLM\SOFTWARE\Policies\Microsoft\Edge&#34; /v JITDisabled 2&gt;nul &amp; reg query &#34;HKLM\SOFTWARE\Policies\Google\Chrome&#34; /v JITDisabled 2&gt;nul
         
-        <br><span class="cmd-expected"># Expected: Chrome policy flags configured for JIT restriction</span>
+        <br><span class="cmd-expected"># Expected: JITDisabled    REG_DWORD    0x1</span>
         
       </div>
       
@@ -200,10 +200,6 @@
         
         <li>Any</li>
         
-        <li>Windows Server 2019</li>
-        
-        <li>Windows Server 2022</li>
-        
       </ul>
     </section>
     
@@ -225,7 +221,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-08-24 00:51 UTC &middot; 126 entries &middot;
+    Generated 2026-08-24 01:43 UTC &middot; 126 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>
