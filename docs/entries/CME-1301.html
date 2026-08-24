@@ -65,7 +65,7 @@
               <span class="cvss-to">H</span>
             </td>
             
-            <td class="cvss-rationale">Traversal payloads (../, absolute paths) are rejected before reaching filesystem operations</td>
+            <td class="cvss-rationale">Traversal payloads (../, absolute paths) are rejected before reaching filesystem operations; attacker must find a bypass that survives full path canonicalization and prefix validation</td>
           </tr>
           
           <tr>
@@ -77,6 +77,17 @@
             </td>
             
             <td class="cvss-rationale">File read confined to allowed directory; sensitive files outside base path are unreachable</td>
+          </tr>
+          
+          <tr>
+            <td><strong>Integrity</strong> (I)</td>
+            <td>
+              <span class="cvss-from">H</span>
+              <span class="cvss-arrow">&rarr;</span>
+              <span class="cvss-to">L</span>
+            </td>
+            
+            <td class="cvss-rationale">File write operations confined to allowed directory; attacker cannot overwrite arbitrary system files outside the base path</td>
           </tr>
           
         </tbody>
@@ -97,6 +108,9 @@
         <a href="https://cwe.mitre.org/data/definitions/36.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-36</a>
         
+        <a href="https://cwe.mitre.org/data/definitions/59.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-59</a>
+        
         <a href="https://cwe.mitre.org/data/definitions/73.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-73</a>
         
@@ -112,9 +126,9 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> grep -rn &#39;os.path.realpath\|pathlib.*resolve\|os.path.abspath&#39; &lt;app_source&gt;/
+        <span class="cmd-prompt">$</span> grep -rn &#39;os.path.realpath\|pathlib.*resolve\|os.path.abspath\|getCanonicalPath\|toRealPath\|path\.resolve\|realpathSync\|filepath\.EvalSymlinks\|filepath\.Abs\|Path\.GetFullPath&#39; &lt;app_source&gt;/
         
-        <br><span class="cmd-expected"># Expected: Path canonicalization calls present before file operations</span>
+        <br><span class="cmd-expected"># Expected: realpath|resolve|getCanonicalPath|GetFullPath|EvalSymlinks</span>
         
       </div>
       
@@ -122,9 +136,19 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> grep -rn &#39;startswith\|is_relative_to&#39; &lt;app_source&gt;/
+        <span class="cmd-prompt">$</span> grep -rn &#39;is_relative_to\|os.path.commonpath\|startsWith.*getCanonical\|path\.relative\|filepath\.Rel\|Path\.GetRelativePath&#39; &lt;app_source&gt;/
         
-        <br><span class="cmd-expected"># Expected: Base directory prefix check present after canonicalization</span>
+        <br><span class="cmd-expected"># Expected: is_relative_to|commonpath|startsWith|relative|Rel</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> curl -s -o /dev/null -w &#39;%{http_code}&#39; &#39;http://&lt;target&gt;/&lt;endpoint&gt;?path=../../etc/passwd&#39;
+        
+        <br><span class="cmd-expected"># Expected: 400 or 403</span>
         
       </div>
       
@@ -181,10 +205,6 @@
         
         <li>Any</li>
         
-        <li>Windows Server 2019</li>
-        
-        <li>Windows Server 2022</li>
-        
       </ul>
     </section>
     
@@ -196,8 +216,8 @@
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Application</li>
         <li><strong>Attenuation:</strong> deterministic</li>
-        <li><strong>CWEs:</strong> 4</li>
-        <li><strong>CVSS Mods:</strong> 2</li>
+        <li><strong>CWEs:</strong> 5</li>
+        <li><strong>CVSS Mods:</strong> 3</li>
       </ul>
     </section>
   </aside>
@@ -206,7 +226,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-08-24 01:43 UTC &middot; 126 entries &middot;
+    Generated 2026-08-24 01:58 UTC &middot; 126 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

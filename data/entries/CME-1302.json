@@ -13,51 +13,54 @@
       "metric": "AC",
       "from": "L",
       "to": "H",
-      "rationale": "Only allowlisted types can be deserialized; arbitrary class instantiation blocked"
+      "rationale": "Only allowlisted types can be deserialized; attacker must find an exploitable gadget chain using only permitted types, which is fundamentally harder than exploiting unrestricted deserialization"
+    },
+    {
+      "metric": "C",
+      "from": "H",
+      "to": "L",
+      "rationale": "Arbitrary code execution via gadget chains blocked; attacker cannot exfiltrate data beyond what allowlisted types expose"
     },
     {
       "metric": "I",
       "from": "H",
       "to": "L",
-      "rationale": "Cannot invoke arbitrary functions or modify state via deserialized objects"
+      "rationale": "Cannot invoke arbitrary functions or modify state via deserialized objects; modifications limited to intended domain of allowlisted types"
     }
   ],
   "cwe_relationships": [
+    "CWE-470",
     "CWE-502",
-    "CWE-915",
-    "CWE-1321",
     "CWE-1188"
   ],
   "verification": {
     "method": "Verify deserialization uses safe loading or allowlist enforcement across all application languages",
     "commands": [
       {
-        "command": "grep -rn 'yaml.safe_load\\|SafeLoader\\|json.loads' <app_source>/",
-        "expected": "Safe deserialization calls present (not yaml.load without SafeLoader)",
+        "command": "grep -rn 'yaml.safe_load\\|SafeLoader\\|RestrictedUnpickler\\|ObjectInputFilter\\|JsonSerializer' <app_source>/",
+        "expected": "safe_load|SafeLoader|RestrictedUnpickler|ObjectInputFilter|JsonSerializer",
         "platform": "any"
       },
       {
-        "command": "grep -rn 'yaml.load\\|pickle.load\\|marshal.load' <app_source>/ | grep -v safe_load",
-        "expected": "No unsafe deserialization calls",
+        "command": "grep -rn 'yaml.load\\|pickle.load\\|marshal.load' <app_source>/ | grep -v 'safe_load\\|SafeLoader'",
+        "expected": "No output",
         "platform": "any"
       },
       {
         "command": "grep -rn 'jdk.serialFilter\\|ObjectInputFilter\\|serialFilter' /etc/java/ /usr/lib/jvm/*/conf/ 2>/dev/null || java -XshowSettings 2>&1 | grep serialFilter",
-        "expected": "JVM serialization filter configured with allowlist pattern (JEP 290)",
-        "platform": "any"
+        "expected": "serialFilter",
+        "platform": "linux"
       },
       {
         "command": "grep -rn 'TypeNameHandling\\.None\\|TypeNameHandling\\.Auto\\|BinaryFormatter' <app_source>/ | grep -v None",
-        "expected": "No unsafe TypeNameHandling settings (Auto/All/Objects/Arrays) or BinaryFormatter usage",
+        "expected": "No output",
         "platform": "any"
       }
     ]
   },
   "confidence": "High",
   "platforms": [
-    "Any",
-    "Windows Server 2019",
-    "Windows Server 2022"
+    "Any"
   ],
   "scf_identifiers": [
     "WEB-07",
