@@ -2,6 +2,12 @@
 
 All notable changes to the CME (Common Mitigation Enumeration) project are documented here.
 
+## 2026-08-24
+
+### Auto-generated changelog
+
+- `ffc0077` Add 3 CME entries and fix Dockerfile missing categories.json
+
 ## 2026-08-11
 
 ### Auto-generated changelog
