@@ -13,6 +13,11 @@ All notable changes to the CME (Common Mitigation Enumeration) project are docum
 
 - `dde0471` Rebuild static site with all 126 entries
 
+
+### Auto-generated changelog
+
+- `b19b523` Update 2 CME entries (CME-904,CME-920);Update src/server.py,data/.DS_Store,scripts/push-and-merge.sh
+
 ## 2026-08-11
 
 ### Auto-generated changelog
