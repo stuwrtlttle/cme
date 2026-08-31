@@ -2,6 +2,12 @@
 
 All notable changes to the CME (Common Mitigation Enumeration) project are documented here.
 
+## 2026-08-31
+
+### Auto-generated changelog
+
+- `862f179` Add CME-921: URL Request Path Canonicalization Before Authorization
+
 ## 2026-08-24
 
 ### Auto-generated changelog
