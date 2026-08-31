@@ -1,0 +1,69 @@
+{
+  "cme_id": "CME-921",
+  "control_name": "URL Request Path Canonicalization Before Authorization",
+  "description": "Ensure the web server, reverse proxy, or application framework canonicalizes request URIs — resolving path equivalences (., ..), stripping matrix parameters (;param=value), normalizing percent-encoding, collapsing duplicate slashes, and standardizing trailing slashes — before the authorization module evaluates access control rules. The root cause of CWE-551 is a behavior ordering defect where authorization sees a raw URI form that does not match configured security constraints, but the routing/dispatch layer later normalizes the URI and matches a protected resource. Canonicalization-first ensures the authorization decision and the routing decision operate on the same resolved path. Implementation varies by stack: Spring Security's StrictHttpFirewall rejects non-normalized requests; Tomcat's encodedSolidusHandling and allowBackslash settings control normalization; Nginx's merge_slashes and location matching normalize by default; Apache's AllowEncodedSlashes and mod_rewrite handle encoding normalization. Reverse proxies should be configured to normalize before forwarding to backends, and frameworks should reject requests containing path-equivalent sequences rather than silently normalizing them.",
+  "tactic": "Harden",
+  "category": "Application Controls",
+  "category_id": "application-controls",
+  "function_id": "request-filtering",
+  "control_layer": "Application",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Attacker can no longer bypass authorization using non-canonical URL forms (matrix parameters, double encoding, path segment equivalences, trailing characters); exploitation requires finding a bypass that survives full URI canonicalization before the authorization decision evaluates the request"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-551",
+    "CWE-41",
+    "CWE-863",
+    "CWE-696"
+  ],
+  "verification": {
+    "method": "Test that non-canonical URL forms (matrix parameters, dot-segments, encoded path separators) do not bypass authorization on protected endpoints; inspect web server and framework configuration for canonicalization-before-auth settings",
+    "commands": [
+      {
+        "command": "curl -s -o /dev/null -w '%{http_code}' 'http://<target>/admin/;anything'",
+        "expected": "401 or 403 — matrix parameter does not bypass auth",
+        "platform": "any"
+      },
+      {
+        "command": "curl -s -o /dev/null -w '%{http_code}' 'http://<target>/./admin/'",
+        "expected": "401 or 403 — dot-segment does not bypass auth",
+        "platform": "any"
+      },
+      {
+        "command": "curl -s -o /dev/null -w '%{http_code}' 'http://<target>/%2e/admin/'",
+        "expected": "401 or 403 — encoded dot does not bypass auth",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'StrictHttpFirewall\\|setAllowSemicolon\\|setAllowUrlEncodedPercent\\|setAllowUrlEncodedSlash' <app_source>/",
+        "expected": "StrictHttpFirewall configured with restrictive defaults",
+        "platform": "any"
+      },
+      {
+        "command": "grep -E 'merge_slashes|proxy_pass.*\\$uri' /etc/nginx/nginx.conf /etc/nginx/conf.d/*.conf 2>/dev/null",
+        "expected": "merge_slashes on (default); proxy_pass uses normalized $uri",
+        "platform": "linux"
+      },
+      {
+        "command": "grep -i 'AllowEncodedSlashes|AllowEncodedPercent' /etc/httpd/conf/*.conf /etc/apache2/*.conf 2>/dev/null",
+        "expected": "AllowEncodedSlashes NoDecode or absent (default deny)",
+        "platform": "linux"
+      }
+    ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "Any"
+  ],
+  "scf_identifiers": [
+    "WEB-01",
+    "WEB-09",
+    "IAC-20"
+  ]
+}
