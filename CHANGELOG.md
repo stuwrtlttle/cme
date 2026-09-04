@@ -37,6 +37,11 @@ This migration implements the recommendations in [issue #2, comment 5520782141](
 
 - `74ea34d` Publish rendered MCP reference page
 
+
+### Auto-generated changelog
+
+- `392a08a` Document Issue 2 evidence model migration
+
 ## 2026-08-31
 
 ### Auto-generated changelog
