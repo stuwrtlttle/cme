@@ -8,6 +8,11 @@ All notable changes to the CME (Common Mitigation Enumeration) project are docum
 
 - `8b40a62` Update 1 CME entries (CME-1005);Update src/server.py,.codex/config.toml,data/.DS_Store
 
+
+### Auto-generated changelog
+
+- `17c685b` Add CME-923 mass-assignment prevention
+
 ## 2026-08-31
 
 ### Auto-generated changelog
