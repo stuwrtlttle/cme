@@ -1,0 +1,12 @@
+[shell_environment_policy]
+inherit = "core"
+
+[shell_environment_policy.set]
+EXPLOITIQ_MCP_URL = "https://exploitiq-mcp-server-exploit-iq-testings.apps.ai-dev03.kni.syseng.devcluster.openshift.com/mcp"
+
+[mcp_servers.cme-server]
+command = "/Users/jwest/projects/cme/.venv/bin/python"
+args = [
+    "-m",
+    "src.server",
+]

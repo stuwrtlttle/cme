@@ -23,7 +23,8 @@
     "CWE-476",
     "CWE-787",
     "CWE-125",
-    "CWE-120"
+    "CWE-120",
+    "CWE-805"
   ],
   "confidence": "High",
   "platforms": [

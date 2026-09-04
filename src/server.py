@@ -10,6 +10,7 @@ from jsonschema import Draft202012Validator
 from mcp.server.fastmcp import FastMCP
 
 from . import config
+from .cwe_hierarchy import ancestor_cwes
 
 if config.DB_BACKEND == "postgres":
     from . import db_postgres as db
@@ -130,7 +131,20 @@ async def get_mitigations_for_weakness(cwe_id: str) -> str:
     cwe = cwe_id.upper()
     if not cwe.startswith("CWE-"):
         cwe = f"CWE-{cwe}"
-    results = await _run_db(lambda conn: db.get_mitigations_for_cwe(conn, cwe))
+    matched_cwes = ancestor_cwes(cwe)
+    grouped_results = await _run_db(
+        lambda conn: [(matched_cwe, db.get_mitigations_for_cwe(conn, matched_cwe))
+                      for matched_cwe in matched_cwes]
+    )
+    results = []
+    seen_cme_ids: set[str] = set()
+    for matched_cwe, entries in grouped_results:
+        for entry in entries:
+            if entry["cme_id"] in seen_cme_ids:
+                continue
+            seen_cme_ids.add(entry["cme_id"])
+            entry["matched_via_cwe"] = matched_cwe
+            results.append(entry)
     if not results:
         return json.dumps({"message": f"No mitigations found for {cwe}", "cwe_id": cwe})
     return json.dumps(results, indent=2)
