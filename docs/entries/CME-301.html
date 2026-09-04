@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-301</div>
   <h1>SELinux (Enforcing Mode)</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-os-kernel">OS/Kernel</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Scope</strong> (S)</td>
             <td>
@@ -64,10 +61,10 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">U</span>
             </td>
-            
+
             <td class="cvss-rationale">Compromised process cannot escape its SELinux domain to affect other services</td>
           </tr>
-          
+
           <tr>
             <td><strong>Confidentiality</strong> (C)</td>
             <td>
@@ -75,10 +72,10 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-            
+
             <td class="cvss-rationale">Process cannot read files outside its policy-allowed set</td>
           </tr>
-          
+
           <tr>
             <td><strong>Integrity</strong> (I)</td>
             <td>
@@ -86,66 +83,67 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-            
+
             <td class="cvss-rationale">Process cannot modify files or resources outside its domain</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/269.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-269</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/284.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-284</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/732.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-732</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/653.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-653</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Verify SELinux is in enforcing mode</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> getenforce
-        
+
         <br><span class="cmd-expected"># Expected: Enforcing</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: rhel</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> sestatus | grep &#39;Current mode&#39;
-        
-        <br><span class="cmd-expected"># Expected: Current mode:                   enforcing</span>
-        
-      </div>
-      
-      <div class="cmd-platform">Platform: rhel</div>
-      
-      
-    </section>
-    
 
-    
+        <br><span class="cmd-expected"># Expected: Current mode:                   enforcing</span>
+
+      </div>
+
+      <div class="cmd-platform">Platform: rhel</div>
+
+
+    </section>
+
+
+
     <section>
       <h2>Applicability (CVE 5.2.0 Schema)</h2>
       <table class="cvss-table">
@@ -159,58 +157,58 @@
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td>redhat</td>
             <td>enterprise_linux</td>
             <td class="cpe-cell">
-              
+
               <code class="cpe-string">cpe:2.3:o:redhat:enterprise_linux:9:*:*:*:*:*:*:*</code><br>
-              
+
               <code class="cpe-string">cpe:2.3:o:redhat:enterprise_linux:8:*:*:*:*:*:*:*</code>
-              
+
             </td>
             <td>x86_64, aarch64, s390x, ppc64le</td>
             <td><span class="badge badge-confidence-high">applicable</span></td>
           </tr>
-          
+
           <tr>
             <td>fedoraproject</td>
             <td>fedora</td>
             <td class="cpe-cell">
-              
+
               <code class="cpe-string">cpe:2.3:o:fedoraproject:fedora:*:*:*:*:*:*:*:*</code>
-              
+
             </td>
             <td>All</td>
             <td><span class="badge badge-confidence-high">applicable</span></td>
           </tr>
-          
+
           <tr>
             <td>centos</td>
             <td>centos_stream</td>
             <td class="cpe-cell">
-              
+
             </td>
             <td>All</td>
             <td><span class="badge badge-confidence-high">applicable</span></td>
           </tr>
-          
+
         </tbody>
       </table>
-      
-    </section>
-    
 
-    
+    </section>
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-208.html">&larr; CME-208: Outbound Network Egress Restriction (SSRF Blast Radius Containment)</a>
-      
-      
+
+
       <a href="CME-302.html">CME-302: SELinux Confined User Mapping &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -220,31 +218,31 @@
       <p>Mandatory Access Control</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">selinux</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">END-16</span>
-        
+
         <span class="cwe-link">IAC-20</span>
-        
+
         <span class="cwe-link">SEA-04</span>
-        
+
         <span class="cwe-link">SEA-04.1</span>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h3>D3FEND Mapping</h3>
       <a href="https://d3fend.mitre.org/technique/D3-MAC/"
@@ -252,24 +250,24 @@
         D3-MAC &mdash; Mandatory Access Control
       </a>
     </section>
-    
 
-    
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>RHEL 9</li>
-        
+
         <li>RHEL 8</li>
-        
+
         <li>Fedora</li>
-        
+
         <li>CentOS Stream</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -277,7 +275,8 @@
         <li><strong>ID:</strong> CME-301</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> OS/Kernel</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 4</li>
         <li><strong>CVSS Mods:</strong> 3</li>
       </ul>
@@ -288,7 +287,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

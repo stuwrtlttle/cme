@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-118</div>
   <h1>Protected File Links (Kernel Symlink/Hardlink Protection)</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-os-kernel">OS/Kernel</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
@@ -64,96 +61,97 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            
+
             <td class="cvss-rationale">The most common filesystem TOCTOU and symlink following pattern — symlink or hardlink swap in a sticky world-writable directory like /tmp between a privileged process check and use — is blocked at the kernel level. The attacker must find a TOCTOU target outside of protected directories, exploit a race that does not involve filesystem links, or resort to more complex techniques such as procfs-based redirects. This significantly increases the complexity required for successful exploitation.</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/59.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-59</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/61.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-61</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/367.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-367</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/362.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-362</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Verify that all four protected file link sysctls are enabled. Check sysctl runtime values and persistence configuration.</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> sysctl fs.protected_symlinks
-        
+
         <br><span class="cmd-expected"># Expected: fs.protected_symlinks = 1</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> sysctl fs.protected_hardlinks
-        
+
         <br><span class="cmd-expected"># Expected: fs.protected_hardlinks = 1</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> sysctl fs.protected_regular
-        
+
         <br><span class="cmd-expected"># Expected: fs.protected_regular = 2</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> sysctl fs.protected_fifos
-        
+
         <br><span class="cmd-expected"># Expected: fs.protected_fifos = 2</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-117.html">&larr; CME-117: Heap Allocator Hardening (glibc Safe-Linking and Metadata Protection)</a>
-      
-      
+
+
       <a href="CME-119.html">CME-119: Compiler Integer Overflow and Conversion Safety (-ftrapv / UBSan Integer) &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -163,44 +161,44 @@
       <p>Kernel Hardening</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">kernel-attack-surface</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">CFG-02</span>
-        
+
         <span class="cwe-link">END-02</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>RHEL 7</li>
-        
+
         <li>RHEL 8</li>
-        
+
         <li>RHEL 9</li>
-        
+
         <li>RHEL 10</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -208,7 +206,8 @@
         <li><strong>ID:</strong> CME-118</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> OS/Kernel</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 4</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
@@ -219,7 +218,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

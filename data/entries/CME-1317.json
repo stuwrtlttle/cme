@@ -1,7 +1,7 @@
 {
   "cme_id": "CME-1317",
   "control_name": "XML External Entity Prevention (Secure XML Parser Configuration)",
-  "description": "Configures XML parsers to disable external entity resolution, DTD processing, and XInclude expansion, preventing XXE attacks that exploit default-permissive XML parser behavior to read local files, perform SSRF, or cause denial of service via entity expansion (billion laughs). Covers all major XML parsing APIs: Java (DocumentBuilderFactory, SAXParserFactory, XMLInputFactory with FEATURE_SECURE_PROCESSING and disallow-doctype-decl), Python (defusedxml, lxml with resolve_entities=False), .NET (XmlReaderSettings with DtdProcessing.Prohibit), PHP (libxml_disable_entity_loader), C/C++ (libxml2 without XML_PARSE_NOENT), and Go (xml.Decoder with strict mode). The control must be applied at parser instantiation \u2014 not as post-parse validation \u2014 because entity resolution occurs during parsing. When XML input is required but DTDs are needed for schema validation, use catalog-based resolution with a local-only catalog that rejects network fetches.",
+  "description": "Configures XML parsers to disable external entity resolution, DTD processing, and XInclude expansion, preventing XXE attacks that exploit default-permissive XML parser behavior to read local files, perform SSRF, or cause denial of service via entity expansion (billion laughs). Covers all major XML parsing APIs: Java (DocumentBuilderFactory, SAXParserFactory, XMLInputFactory with FEATURE_SECURE_PROCESSING and disallow-doctype-decl), Python (defusedxml, lxml with resolve_entities=False), .NET (XmlReaderSettings with DtdProcessing.Prohibit), PHP (libxml_disable_entity_loader), C/C++ (libxml2 without XML_PARSE_NOENT), and Go (xml.Decoder with strict mode). The control must be applied at parser instantiation — not as post-parse validation — because entity resolution occurs during parsing. When XML input is required but DTDs are needed for schema validation, use catalog-based resolution with a local-only catalog that rejects network fetches.",
   "tactic": "Harden",
   "category": "Application Input Validation",
   "category_id": "application-input-validation",
@@ -61,5 +61,61 @@
   "scf_identifiers": [
     "WEB-07",
     "WEB-09"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-611",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-776",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-827",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/C",
+      "value": "H->N",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/A",
+      "value": "H->N",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "WEB-07",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "WEB-09",
+      "relationship_type": "maps_to"
+    }
   ]
 }

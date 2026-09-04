@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-802</div>
   <h1>Password Quality Enforcement (pwquality)</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-identity">Identity</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-medium">Medium Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
@@ -64,57 +61,58 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            
+
             <td class="cvss-rationale">Password brute force requires significantly more time/resources</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/521.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-521</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Check pwquality configuration</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -E &#39;minlen|minclass|dcredit&#39; /etc/security/pwquality.conf
-        
+
         <br><span class="cmd-expected"># Expected: minlen = 14</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: rhel</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> net accounts | Select-String &#39;Minimum password length&#39;
-        
-        <br><span class="cmd-expected"># Expected: Minimum password length                  14</span>
-        
-      </div>
-      
-      <div class="cmd-platform">Platform: windows</div>
-      
-      
-    </section>
-    
 
-    
+        <br><span class="cmd-expected"># Expected: Minimum password length                  14</span>
+
+      </div>
+
+      <div class="cmd-platform">Platform: windows</div>
+
+
+    </section>
+
+
+
     <section>
       <h2>Applicability (CVE 5.2.0 Schema)</h2>
       <table class="cvss-table">
@@ -128,57 +126,57 @@
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td>microsoft</td>
             <td>windows</td>
             <td class="cpe-cell">
-              
+
               <code class="cpe-string">cpe:2.3:o:microsoft:windows_10:*:*:*:*:*:*:*:*</code><br>
-              
+
               <code class="cpe-string">cpe:2.3:o:microsoft:windows_11:*:*:*:*:*:*:*:*</code><br>
-              
+
               <code class="cpe-string">cpe:2.3:o:microsoft:windows_server_2019:*:*:*:*:*:*:*</code><br>
-              
+
               <code class="cpe-string">cpe:2.3:o:microsoft:windows_server_2022:*:*:*:*:*:*:*</code>
-              
+
             </td>
             <td>All</td>
             <td><span class="badge badge-confidence-high">applicable</span></td>
           </tr>
-          
+
         </tbody>
       </table>
-      
-    </section>
-    
 
-    
+    </section>
+
+
+
     <section>
       <h2>References</h2>
       <ul class="sidebar-list">
-        
+
         <li>
           Red Hat Security Hardening Guide
            &mdash; Password security
         </li>
-        
+
         <li>
           CIS RHEL 9 Benchmark
            &mdash; 5.4 Configure PAM
         </li>
-        
+
       </ul>
     </section>
-    
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-801.html">&larr; CME-801: Multi-Factor Authentication (MFA)</a>
-      
-      
+
+
       <a href="CME-803.html">CME-803: Account Lockout Policy (pam_faillock) &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -188,48 +186,48 @@
       <p>Credential Hardening</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">password-policy</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">IAC-10.1</span>
-        
+
         <span class="cwe-link">IAC-10.4</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>RHEL 9</li>
-        
+
         <li>RHEL 8</li>
-        
+
         <li>Ubuntu 24.04</li>
-        
+
         <li>Windows 10</li>
-        
+
         <li>Windows 11</li>
-        
+
         <li>Windows Server 2022</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -237,7 +235,8 @@
         <li><strong>ID:</strong> CME-802</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Identity</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 1</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
@@ -248,7 +247,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

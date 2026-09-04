@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-1312</div>
   <h1>Argument Injection Prevention (Downstream Input Delimiter Sanitization)</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-application">Application</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
@@ -64,10 +61,10 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            
+
             <td class="cvss-rationale">Delimiter characters in user input are neutralized before reaching the downstream tool&#39;s argument parser or input file format; attacker cannot inject option flags, break record boundaries, or introduce additional URIs</td>
           </tr>
-          
+
           <tr>
             <td><strong>Integrity</strong> (I)</td>
             <td>
@@ -75,10 +72,10 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-            
+
             <td class="cvss-rationale">Cannot inject --option=value arguments to control downstream tool behavior such as file write destinations, execution targets, or configuration overrides</td>
           </tr>
-          
+
           <tr>
             <td><strong>Scope</strong> (S)</td>
             <td>
@@ -86,97 +83,98 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">U</span>
             </td>
-            
+
             <td class="cvss-rationale">Downstream tool cannot be manipulated via injected arguments to affect resources outside its intended operational scope</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/88.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-88</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/74.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-74</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Verify that subprocess invocations use -- end-of-options before variable arguments and validate input for delimiter characters</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rn &#39;&#34;--&#34;&#39; &lt;app_source&gt;/
-        
+
         <br><span class="cmd-expected"># Expected: End-of-options separator present before variable positional arguments in subprocess calls</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rn &#39;subprocess\|exec\|spawn&#39; &lt;app_source&gt;/ | grep -v &#39;shell=True&#39;
-        
+
         <br><span class="cmd-expected"># Expected: Subprocess invocations use array-based arguments with input validation for delimiter characters</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h2>References</h2>
       <ul class="sidebar-list">
-        
+
         <li>
           OWASP
            &mdash; Argument Injection
         </li>
-        
+
         <li>
           CVE-2025-21613
            &mdash; go-git URL argument injection affecting 16 Red Hat products
         </li>
-        
+
         <li>
           CVE-2025-48385
            &mdash; Git arbitrary file writes via argument injection
         </li>
-        
+
         <li>
           CVE-2026-50574
            &mdash; yt-dlp aria2c input file delimiter injection
         </li>
-        
+
       </ul>
     </section>
-    
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-1311.html">&larr; CME-1311: Input Size and Quantity Bounds Enforcement</a>
-      
-      
+
+
       <a href="CME-1313.html">CME-1313: CRLF / Line Injection Prevention (Newline Sanitization for Structured Formats) &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -186,40 +184,40 @@
       <p>Application Input Validation</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">injection-prevention</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">WEB-09</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>Any</li>
-        
+
         <li>Windows Server 2019</li>
-        
+
         <li>Windows Server 2022</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -227,7 +225,8 @@
         <li><strong>ID:</strong> CME-1312</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Application</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 2</li>
         <li><strong>CVSS Mods:</strong> 3</li>
       </ul>
@@ -238,7 +237,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

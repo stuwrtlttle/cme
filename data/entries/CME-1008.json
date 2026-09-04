@@ -1,7 +1,7 @@
 {
   "cme_id": "CME-1008",
   "control_name": "Application Admin Event Logging (SIEM Integration)",
-  "description": "Record every administrative action performed through the application management interface into a structured, tamper-evident audit log, and forward events in real time to a centralized SIEM for correlation and alerting. Each log entry captures the authenticated actor, the operation performed, the target resource, a before/after state diff, the source IP, and a timestamp. The SIEM ingests these events and evaluates them against detection rules tuned to the application threat model \u2014 for example, alerting when an identity provider mapper of type hardcoded-role-mapper is created targeting a high-privilege role, or when an OAuth client redirect URI is modified. Distinct from OS-level audit logging (auditd, Falco) which operates below the application and cannot interpret application-domain semantics such as role names, policy changes, or resource ownership. Prevents attackers from making undetected administrative changes by ensuring that every privileged operation is recorded with sufficient context for security analysts to distinguish legitimate administration from exploitation.",
+  "description": "Record every administrative action performed through the application management interface into a structured, tamper-evident audit log, and forward events in real time to a centralized SIEM for correlation and alerting. Each log entry captures the authenticated actor, the operation performed, the target resource, a before/after state diff, the source IP, and a timestamp. The SIEM ingests these events and evaluates them against detection rules tuned to the application threat model — for example, alerting when an identity provider mapper of type hardcoded-role-mapper is created targeting a high-privilege role, or when an OAuth client redirect URI is modified. Distinct from OS-level audit logging (auditd, Falco) which operates below the application and cannot interpret application-domain semantics such as role names, policy changes, or resource ownership. Prevents attackers from making undetected administrative changes by ensuring that every privileged operation is recorded with sufficient context for security analysts to distinguish legitimate administration from exploitation.",
   "tactic": "Detect",
   "category": "Runtime Detection",
   "category_id": "runtime-detection",
@@ -41,5 +41,71 @@
     "MON-01.2",
     "MON-02",
     "MON-03.3"
+  ],
+  "effect_mode": "detective",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-266",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-269",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-284",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-778",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "IAC-21.4",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "MON-01.2",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "MON-02",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "MON-03.3",
+      "relationship_type": "maps_to"
+    }
   ]
 }

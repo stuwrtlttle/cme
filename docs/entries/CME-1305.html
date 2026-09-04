@@ -20,28 +20,25 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-1305</div>
   <h1>SQL Injection Prevention (Parameterized Queries)</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-application">Application</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
 
+
     <section>
       <h2>Description</h2>
-      <p class="entry-description">Application exclusively uses parameterized queries or prepared statements for all database operations. User input is never concatenated into SQL strings. ORMs with parameterized backends qualify. Prevents attackers from injecting SQL syntax to read, modify, or delete database contents.</p>
+      <p class="entry-description">Application uses parameterized queries or prepared statements at every database boundary, including direct driver calls, ORM query APIs, stored procedure invocations, and legacy data-access code. Untrusted values are passed only through binding APIs and are never concatenated, interpolated, or formatted into SQL text. SQL elements that drivers cannot bind, including table names, column names, sort directions, keywords, and query fragments, are selected through fixed mappings or strict allowlists. Raw-query and literal-expression escape hatches are prohibited or independently reviewed. This separation of SQL structure from data prevents attackers from injecting statements that read, modify, or delete database contents. Database least privilege in CME-920 limits residual impact, while WAF filtering in CME-904 provides probabilistic defense in depth.</p>
     </section>
 
     <section>
@@ -51,23 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
-          <tr>
-            <td><strong>Attack Complexity</strong> (AC)</td>
-            <td>
-              <span class="cvss-from">L</span>
-              <span class="cvss-arrow">&rarr;</span>
-              <span class="cvss-to">H</span>
-            </td>
-            
-            <td class="cvss-rationale">SQL injection payloads treated as data, not code; parameterization enforced</td>
-          </tr>
-          
+
           <tr>
             <td><strong>Confidentiality</strong> (C)</td>
             <td>
@@ -75,10 +61,10 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-            
-            <td class="cvss-rationale">Cannot extract data via UNION/blind SQL injection</td>
+
+            <td class="cvss-rationale">When every database boundary binds untrusted values and strictly maps non-bindable SQL elements, attacker input cannot alter query structure to perform UNION, error-based, stacked, or blind extraction. Low confidentiality impact remains possible through data returned by the application&#39;s intended query behavior. This attenuation requires complete coverage of direct queries, ORM escape hatches, stored procedures, and legacy data-access paths.</td>
           </tr>
-          
+
           <tr>
             <td><strong>Integrity</strong> (I)</td>
             <td>
@@ -86,57 +72,78 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-            
-            <td class="cvss-rationale">Cannot modify or delete database records via injection</td>
+
+            <td class="cvss-rationale">When every database boundary binds untrusted values and strictly maps non-bindable SQL elements, attacker input cannot inject UPDATE, DELETE, DDL, or stacked statements. Low integrity impact remains possible through modifications permitted by the application&#39;s intended operations. This attenuation requires complete coverage of direct queries, ORM escape hatches, stored procedures, and legacy data-access paths.</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/89.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-89</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
-      <p class="verification-method">Verify all database queries use parameterized statements; no string formatting for SQL</p>
-      
-      
+
+      <p class="verification-method">Use language- and framework-specific static analysis to inventory every database boundary and fail on SQL built through concatenation, interpolation, formatting, raw-query APIs, literal-expression APIs, or dynamically constructed stored procedures. Review every non-bindable identifier or fragment for a fixed mapping or strict allowlist. Pair source analysis with application-specific dynamic tests that exercise representative read and write sinks using boolean, UNION, stacked-query, error-based, time-based, encoded, and second-order payloads. The audit and test commands must cover all production data-access components and emit the exact PASS strings below; set each environment variable to the project&#39;s corresponding audit or test command.</p>
+
+
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> grep -rn &#39;execute.*%s\|execute.*format\|execute.*f&#34;&#39; &lt;app_source&gt;/ | grep -v &#39;execute.*,.*params&#39;
-        
-        <br><span class="cmd-expected"># Expected: No string-formatted SQL queries</span>
-        
+        <span class="cmd-prompt">$</span> test -n &#34;$CME_SQL_SOURCE_AUDIT_COMMAND&#34; || { echo &#39;ERROR: set CME_SQL_SOURCE_AUDIT_COMMAND&#39;; exit 2; }; output=$(sh -c &#34;$CME_SQL_SOURCE_AUDIT_COMMAND&#34;) &amp;&amp; test &#34;$output&#34; = &#39;PASS: all database boundaries use parameter binding or strict mappings&#39; &amp;&amp; printf &#39;%s\n&#39; &#34;$output&#34;
+
+        <br><span class="cmd-expected"># Expected: PASS: all database boundaries use parameter binding or strict mappings</span>
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> test -n &#34;$CME_SQLI_READ_TEST_COMMAND&#34; || { echo &#39;ERROR: set CME_SQLI_READ_TEST_COMMAND&#39;; exit 2; }; output=$(sh -c &#34;$CME_SQLI_READ_TEST_COMMAND&#34;) &amp;&amp; test &#34;$output&#34; = &#39;PASS: SQL injection read payloads cannot alter query structure&#39; &amp;&amp; printf &#39;%s\n&#39; &#34;$output&#34;
+
+        <br><span class="cmd-expected"># Expected: PASS: SQL injection read payloads cannot alter query structure</span>
+
+      </div>
+
+      <div class="cmd-platform">Platform: any</div>
+
+
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> test -n &#34;$CME_SQLI_WRITE_TEST_COMMAND&#34; || { echo &#39;ERROR: set CME_SQLI_WRITE_TEST_COMMAND&#39;; exit 2; }; output=$(sh -c &#34;$CME_SQLI_WRITE_TEST_COMMAND&#34;) &amp;&amp; test &#34;$output&#34; = &#39;PASS: SQL injection write payloads cannot modify database state&#39; &amp;&amp; printf &#39;%s\n&#39; &#34;$output&#34;
+
+        <br><span class="cmd-expected"># Expected: PASS: SQL injection write payloads cannot modify database state</span>
+
+      </div>
+
+      <div class="cmd-platform">Platform: any</div>
+
+
     </section>
-    
 
-    
 
-    
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-1304.html">&larr; CME-1304: SSRF Prevention (Outbound Request Allowlist)</a>
-      
-      
+
+
       <a href="CME-1306.html">CME-1306: XSS Prevention (Context-Aware Output Encoding) &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -146,42 +153,38 @@
       <p>Application Input Validation</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">injection-prevention</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">WEB-07</span>
-        
+
         <span class="cwe-link">WEB-09</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>Any</li>
-        
-        <li>Windows Server 2019</li>
-        
-        <li>Windows Server 2022</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -189,9 +192,10 @@
         <li><strong>ID:</strong> CME-1305</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Application</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 1</li>
-        <li><strong>CVSS Mods:</strong> 3</li>
+        <li><strong>CVSS Mods:</strong> 2</li>
       </ul>
     </section>
   </aside>
@@ -200,7 +204,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

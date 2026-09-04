@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-712</div>
   <h1>Container Image Signing and Provenance Verification (Cosign/Sigstore)</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-application">Application</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
@@ -64,10 +61,10 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            
+
             <td class="cvss-rationale">Attacker must forge a valid cryptographic signature or compromise the signing key to inject a malicious container image; simply pushing to a registry is insufficient</td>
           </tr>
-          
+
           <tr>
             <td><strong>Integrity</strong> (I)</td>
             <td>
@@ -75,83 +72,84 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-            
+
             <td class="cvss-rationale">Unsigned or tampered images are rejected at admission; modifications to images after signing are detected and blocked</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/345.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-345</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/494.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-494</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/829.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-829</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Verify image signature verification is enforced at admission or runtime level</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> kubectl get clusterimagepolicy --no-headers 2&gt;/dev/null || kubectl get policy.sigstore.dev --no-headers 2&gt;/dev/null
-        
+
         <br><span class="cmd-expected"># Expected: Image policy resources present</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: kubernetes</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> podman image trust show
-        
+
         <br><span class="cmd-expected"># Expected: Trust policy configured with signature requirements for production registries</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> cosign verify --key /path/to/cosign.pub &lt;image&gt; 2&gt;&amp;1 | head -1
-        
+
         <br><span class="cmd-expected"># Expected: Verification for &lt;image&gt; -- The following checks were performed</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-711.html">&larr; CME-711: Admission Controller Policy Enforcement (OPA/Gatekeeper/Kyverno)</a>
-      
-      
+
+
       <a href="CME-713.html">CME-713: Read-Only Root Filesystem Enforcement &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -161,44 +159,44 @@
       <p>Container Isolation</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">pod-security</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">CFG-09.2</span>
-        
+
         <span class="cwe-link">CLD-05</span>
-        
+
         <span class="cwe-link">CRY-13</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>Kubernetes 1.25+</li>
-        
+
         <li>OpenShift 4.12+</li>
-        
+
         <li>Podman</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -206,7 +204,8 @@
         <li><strong>ID:</strong> CME-712</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Application</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 3</li>
         <li><strong>CVSS Mods:</strong> 2</li>
       </ul>
@@ -217,7 +216,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

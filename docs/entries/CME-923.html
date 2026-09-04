@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-923</div>
   <h1>Mass-Assignment Prevention Through Explicit Request Schemas</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-application">Application</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-medium">Medium Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
@@ -64,77 +61,78 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            
+
             <td class="cvss-rationale">A trivial request-body modification no longer reaches server-managed fields. To achieve the same unauthorized state change, an attacker must find an unprotected create or update path, bypass the explicit request schema, or exploit a separate serialization or authorization defect.</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/915.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-915</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">For every create and update endpoint, run authenticated negative tests that supply a foreign tenant, workspace, owner, role, or other server-managed field. Each request must be rejected or the supplied field must be ignored; a subsequent read must confirm that the persisted object retains its original server-managed state.</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> curl -sS -o /dev/null -w &#39;%{http_code}\n&#39; -X PATCH &#39;https://&lt;app&gt;/api/&lt;resource&gt;/&lt;id&gt;&#39; -H &#39;Authorization: Bearer &lt;low_privilege_token&gt;&#39; -H &#39;Content-Type: application/json&#39; --data &#39;{&#34;workspaceId&#34;:&#34;&lt;foreign_workspace_id&gt;&#34;}&#39;
-        
+
         <br><span class="cmd-expected"># Expected: ^(400|403|404)$</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> curl -sS &#39;https://&lt;app&gt;/api/&lt;resource&gt;/&lt;id&gt;&#39; -H &#39;Authorization: Bearer &lt;low_privilege_token&gt;&#39; | jq -e &#39;.workspaceId != &#34;&lt;foreign_workspace_id&gt;&#34;&#39;
-        
+
         <br><span class="cmd-expected"># Expected: ^true$</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> curl -sS -o /dev/null -w &#39;%{http_code}\n&#39; -X POST &#39;https://&lt;app&gt;/api/&lt;resource&gt;&#39; -H &#39;Authorization: Bearer &lt;low_privilege_token&gt;&#39; -H &#39;Content-Type: application/json&#39; --data &#39;{&#34;role&#34;:&#34;admin&#34;,&#34;ownerId&#34;:&#34;&lt;other_user_id&gt;&#34;}&#39;
-        
+
         <br><span class="cmd-expected"># Expected: ^(400|403)$</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-921.html">&larr; CME-921: URL Request Path Canonicalization Before Authorization</a>
-      
-      
+
+
       <a href="CME-1001.html">CME-1001: EDR Agent (Endpoint Detection &amp; Response) &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -144,27 +142,27 @@
       <p>Application Controls</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">request-filtering</p>
     </section>
-    
 
-    
 
-    
 
-    
+
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>Any</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -172,7 +170,8 @@
         <li><strong>ID:</strong> CME-923</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Application</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 1</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
@@ -183,7 +182,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

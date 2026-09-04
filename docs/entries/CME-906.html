@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-906</div>
   <h1>Rate Limiting / Connection Throttling</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-application">Application</span>
-    
-    <span class="badge badge-attenuation-probabilistic">Probabilistic</span>
-    
-    
-    <span class="badge badge-confidence-medium">Medium Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,14 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
-            <th>Probability</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Availability</strong> (A)</td>
             <td>
@@ -66,28 +61,10 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-            
-            <td class="cvss-probability">
-              50%
-              
-              <div class="evidence-basis">Effective against single-source flooding and automated scanning; ineffective against distributed DoS (botnet traffic from thousands of IPs stays under per-IP limits), application-complexity DoS (single expensive request), and connection-level exhaustion (Slowloris)</div>
-              
-              
-              <ul class="conditions-list">
-                
-                <li>Attack originates from a single source IP or small number of IPs</li>
-                
-                <li>Attack relies on request volume, not request complexity</li>
-                
-                <li>Rate limiting is configured in blocking mode with appropriate thresholds</li>
-                
-              </ul>
-              
-            </td>
-            
+
             <td class="cvss-rationale">Per-IP request throttling caps the rate at which any single source can consume application resources (connections, threads, CPU), preventing single-source request flooding from exhausting capacity for other clients</td>
           </tr>
-          
+
           <tr>
             <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
@@ -95,101 +72,84 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            
-            <td class="cvss-probability">
-              60%
-              
-              <div class="evidence-basis">Effective against single-source brute force and automated credential testing tools; ineffective against distributed credential stuffing using residential proxy rotation or botnet IPs, where each source stays under the per-IP limit</div>
-              
-              
-              <ul class="conditions-list">
-                
-                <li>Brute force originates from a single source IP or small number of IPs</li>
-                
-                <li>Attacker is not using credential stuffing with known-valid pairs (few attempts needed)</li>
-                
-                <li>Rate limiting applies to authentication endpoints specifically</li>
-                
-              </ul>
-              
-            </td>
-            
+
             <td class="cvss-rationale">Per-IP throttling limits authentication attempts to a rate that makes dictionary and brute force attacks from a single source impractical (e.g., 5 attempts/minute vs thousands/second)</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/307.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-307</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/400.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-400</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/799.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-799</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Verify rate limiting is configured in the web server or reverse proxy</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -r &#39;limit_req_zone&#39; /etc/nginx/ 2&gt;/dev/null
-        
+
         <br><span class="cmd-expected"># Expected: limit_req_zone</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rE &#39;mod_ratelimit|mod_evasive&#39; /etc/httpd/conf*/ /etc/apache2/ 2&gt;/dev/null
-        
+
         <br><span class="cmd-expected"># Expected: mod_ratelimit</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> Get-WebConfigurationProperty -Filter &#39;system.webServer/security/dynamicIpSecurity/denyByConcurrentRequests&#39; -PSPath &#39;IIS:\Sites\Default Web Site&#39; -Name enabled
-        
+
         <br><span class="cmd-expected"># Expected: True</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: windows</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-905.html">&larr; CME-905: Content Security Policy (CSP) Headers</a>
-      
-      
+
+
       <a href="CME-907.html">CME-907: Application-Layer RBAC Enforcement &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -199,40 +159,40 @@
       <p>Application Controls</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">request-filtering</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">NET-02.1</span>
-        
+
         <span class="cwe-link">NET-03.1</span>
-        
+
         <span class="cwe-link">WEB-04</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>Any</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -240,7 +200,8 @@
         <li><strong>ID:</strong> CME-906</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Application</li>
-        <li><strong>Attenuation:</strong> probabilistic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 3</li>
         <li><strong>CVSS Mods:</strong> 2</li>
       </ul>
@@ -251,7 +212,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

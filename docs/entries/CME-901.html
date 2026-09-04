@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-901</div>
   <h1>SSH Hardening (Comprehensive)</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-network">Network</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Privileges Required</strong> (PR)</td>
             <td>
@@ -64,10 +61,10 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            
+
             <td class="cvss-rationale">Root login disabled; strong auth required</td>
           </tr>
-          
+
           <tr>
             <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
@@ -75,72 +72,73 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            
+
             <td class="cvss-rationale">Weak ciphers unavailable; forwarding attacks blocked</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/287.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-287</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/250.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-250</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Audit sshd configuration</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> sshd -T | grep -E &#39;permitrootlogin|maxauthtries|x11forwarding&#39;
-        
+
         <br><span class="cmd-expected"># Expected: permitrootlogin no</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h2>References</h2>
       <ul class="sidebar-list">
-        
+
         <li>
           CIS RHEL 9 Benchmark
            &mdash; 5.2 Configure SSH Server
         </li>
-        
+
       </ul>
     </section>
-    
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-807.html">&larr; CME-807: Session Lifetime and Idle Timeout Enforcement</a>
-      
-      
+
+
       <a href="CME-902.html">CME-902: Disable Unused Network Services &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -150,44 +148,44 @@
       <p>Protocol Hardening</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">protocol-config</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">CFG-02</span>
-        
+
         <span class="cwe-link">CRY-06</span>
-        
+
         <span class="cwe-link">NET-14.2</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>RHEL 9</li>
-        
+
         <li>RHEL 8</li>
-        
+
         <li>Ubuntu 24.04</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -195,7 +193,8 @@
         <li><strong>ID:</strong> CME-901</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Network</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 2</li>
         <li><strong>CVSS Mods:</strong> 2</li>
       </ul>
@@ -206,7 +205,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

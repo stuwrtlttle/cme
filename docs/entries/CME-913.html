@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-913</div>
   <h1>CSRF Protection (Anti-CSRF Token &amp; SameSite Cookie Enforcement)</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-application">Application</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
@@ -64,73 +61,74 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            
+
             <td class="cvss-rationale">The anti-CSRF token is a per-session or per-request cryptographic random value that the attacker cannot predict or obtain cross-origin (blocked by same-origin policy). Exploitation now requires a separate vulnerability (XSS, subdomain takeover) to extract the token, transforming a trivial cross-site form submission into a multi-step attack chain.</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/352.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-352</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/940.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-940</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/1275.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-1275</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Check that the application framework&#39;s CSRF middleware is enabled and that session cookies carry the SameSite attribute</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rn &#39;csrf\|CsrfViewMiddleware\|csrf_protect\|antiforgery\|ValidateAntiForgeryToken\|csrftoken\|protect_from_forgery\|authenticity_token\|CsrfFilter\|csurf&#39; &lt;app_source&gt;/
-        
+
         <br><span class="cmd-expected"># Expected: Non-empty output — CSRF middleware or token configuration found</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> curl -sI http://localhost:8080/login | grep -i &#39;set-cookie.*samesite&#39;
-        
+
         <br><span class="cmd-expected"># Expected: SameSite=Strict or SameSite=Lax</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-912.html">&larr; CME-912: HTTP Header Normalization and Request Smuggling Prevention</a>
-      
-      
+
+
       <a href="CME-914.html">CME-914: Strict CORS Origin Allowlist Enforcement &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -140,38 +138,38 @@
       <p>Application Controls</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">origin-cors</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">WEB-04</span>
-        
+
         <span class="cwe-link">WEB-05</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>Any</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -179,7 +177,8 @@
         <li><strong>ID:</strong> CME-913</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Application</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 3</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
@@ -190,7 +189,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

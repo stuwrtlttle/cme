@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-1311</div>
   <h1>Input Size and Quantity Bounds Enforcement</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-application">Application</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
@@ -64,85 +61,86 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            
+
             <td class="cvss-rationale">Malicious size or count values are rejected before reaching allocation or copy operations; the attacker must find a quantity field that bypasses validation or an alternative code path that does not enforce bounds</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/1284.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-1284</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/20.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-20</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/1285.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-1285</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/190.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-190</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/131.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-131</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/130.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-130</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/681.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-681</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Verify that the application enforces maximum size limits on user-supplied quantity fields and rejects values outside expected ranges</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> curl -s -o /dev/null -w &#34;%{http_code}&#34; -H &#34;Content-Length: 999999999&#34; -d @/dev/null https://app/api/upload
-        
+
         <br><span class="cmd-expected"># Expected: 413 (Payload Too Large)</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -r &#34;max_.*size\|MAX_.*SIZE\|max_.*length\|MAX_.*LEN\|max_.*count\|MAX_.*COUNT&#34; /etc/nginx/nginx.conf /etc/httpd/conf/httpd.conf 2&gt;/dev/null | head -5
-        
+
         <br><span class="cmd-expected"># Expected: configured size limits present</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-1310.html">&larr; CME-1310: File Upload Validation (Content Inspection and Extension Allowlist)</a>
-      
-      
+
+
       <a href="CME-1312.html">CME-1312: Argument Injection Prevention (Downstream Input Delimiter Sanitization) &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -152,48 +150,48 @@
       <p>Application Input Validation</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">input-validation</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">SEA-10</span>
-        
+
         <span class="cwe-link">WEB-09</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>RHEL 9</li>
-        
+
         <li>RHEL 10</li>
-        
+
         <li>Ubuntu 24.04</li>
-        
+
         <li>Fedora</li>
-        
+
         <li>Windows Server 2019</li>
-        
+
         <li>Windows Server 2022</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -201,7 +199,8 @@
         <li><strong>ID:</strong> CME-1311</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Application</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 7</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
@@ -212,7 +211,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-501</div>
   <h1>Read-Only Root Filesystem</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-isolate">Isolate</span>
     <span class="badge badge-layer-os-kernel">OS/Kernel</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Integrity</strong> (I)</td>
             <td>
@@ -64,10 +61,10 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-            
+
             <td class="cvss-rationale">Cannot persistently modify system files even with root access</td>
           </tr>
-          
+
           <tr>
             <td><strong>Availability</strong> (A)</td>
             <td>
@@ -75,57 +72,58 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-            
+
             <td class="cvss-rationale">System recovers original state on reboot</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/284.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-284</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Check mount options for root filesystem</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> mount | grep &#39;on / &#39; | grep &#39;ro,&#39;
-        
+
         <br><span class="cmd-expected"># Expected: ro,</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-408.html">&larr; CME-408: System-wide TLS/Crypto Policy Enforcement</a>
-      
-      
+
+
       <a href="CME-502.html">CME-502: noexec on /tmp and /dev/shm &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -135,42 +133,42 @@
       <p>Filesystem Hardening</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">mount-options</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">CFG-02</span>
-        
+
         <span class="cwe-link">SEA-16</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>RHEL 9</li>
-        
+
         <li>Fedora CoreOS</li>
-        
+
         <li>Container-optimized OS</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -178,7 +176,8 @@
         <li><strong>ID:</strong> CME-501</li>
         <li><strong>Tactic:</strong> Isolate</li>
         <li><strong>Layer:</strong> OS/Kernel</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 1</li>
         <li><strong>CVSS Mods:</strong> 2</li>
       </ul>
@@ -189,7 +188,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

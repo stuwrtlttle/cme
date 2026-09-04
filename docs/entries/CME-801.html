@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-801</div>
   <h1>Multi-Factor Authentication (MFA)</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-identity">Identity</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
@@ -64,10 +61,10 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            
+
             <td class="cvss-rationale">Stolen credential alone is insufficient; second factor required</td>
           </tr>
-          
+
           <tr>
             <td><strong>Privileges Required</strong> (PR)</td>
             <td>
@@ -75,79 +72,80 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            
+
             <td class="cvss-rationale">Unauthenticated access impossible; multi-factor barrier</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/287.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-287</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/306.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-306</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/521.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-521</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/303.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-303</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/305.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-305</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Verify MFA enforcement in PAM or IdP</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep pam_google_authenticator /etc/pam.d/sshd
-        
+
         <br><span class="cmd-expected"># Expected: auth required pam_google_authenticator.so</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -r &#39;auth.*required.*pam_u2f&#39; /etc/pam.d/
-        
+
         <br><span class="cmd-expected"># Expected: pam_u2f.so</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-713.html">&larr; CME-713: Read-Only Root Filesystem Enforcement</a>
-      
-      
+
+
       <a href="CME-802.html">CME-802: Password Quality Enforcement (pwquality) &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -157,38 +155,38 @@
       <p>Credential Hardening</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">authentication-methods</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">IAC-06</span>
-        
+
         <span class="cwe-link">IAC-06.1</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>Any</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -196,7 +194,8 @@
         <li><strong>ID:</strong> CME-801</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Identity</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 5</li>
         <li><strong>CVSS Mods:</strong> 2</li>
       </ul>
@@ -207,7 +206,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

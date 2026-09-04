@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-505</div>
   <h1>IMA/EVM (Integrity Measurement Architecture)</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-os-kernel">OS/Kernel</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-medium">Medium Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Integrity</strong> (I)</td>
             <td>
@@ -64,63 +61,64 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-            
+
             <td class="cvss-rationale">Modified binaries detected/blocked at execution time</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/345.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-345</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/494.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-494</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/347.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-347</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Check IMA policy is loaded and enforcing</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> cat /sys/kernel/security/ima/policy | head -5
-        
+
         <br><span class="cmd-expected"># Expected: appraise</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-504.html">&larr; CME-504: dm-verity (Verified Boot)</a>
-      
-      
+
+
       <a href="CME-506.html">CME-506: Landlock LSM (Filesystem Sandboxing) &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -130,40 +128,40 @@
       <p>Filesystem Hardening</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">verified-integrity</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">END-06</span>
-        
+
         <span class="cwe-link">END-06.1</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>RHEL 9</li>
-        
+
         <li>RHEL 8</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -171,7 +169,8 @@
         <li><strong>ID:</strong> CME-505</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> OS/Kernel</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 3</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
@@ -182,7 +181,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

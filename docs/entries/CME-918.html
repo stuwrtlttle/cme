@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-918</div>
   <h1>URL Path Authorization Enforcement (Forced Browsing Prevention)</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-application">Application</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Privileges Required</strong> (PR)</td>
             <td>
@@ -64,10 +61,10 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-            
+
             <td class="cvss-rationale">Forced browsing to administrative or internal endpoints fails because the web server rejects unauthenticated requests to restricted URL patterns before the application processes them; the attacker must first obtain valid credentials to reach any protected path</td>
           </tr>
-          
+
           <tr>
             <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
@@ -75,96 +72,97 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            
+
             <td class="cvss-rationale">Discovering and accessing a restricted endpoint requires bypassing both the web server URL authorization rules and the application-layer authorization checks; simply guessing or enumerating URLs is insufficient because the infrastructure layer denies access to any path not explicitly permitted for the caller&#39;s role</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/425.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-425</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/862.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-862</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/306.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-306</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/284.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-284</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Verify that the web server or reverse proxy enforces URL-pattern-based authorization on restricted paths, and that unauthenticated requests to administrative or internal endpoints are denied</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rn &#39;&lt;Location\|&lt;Directory\|Require valid-user\|Require group\|AuthType&#39; /etc/httpd/conf.d/ /etc/httpd/conf/httpd.conf
-        
+
         <br><span class="cmd-expected"># Expected: Non-empty output — Apache Location/Directory blocks with Require directives on restricted paths</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: rhel</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rn &#39;location.*/admin\|location.*/console\|deny all\|auth_basic\|auth_request&#39; /etc/nginx/conf.d/ /etc/nginx/nginx.conf
-        
+
         <br><span class="cmd-expected"># Expected: Non-empty output — nginx location blocks with auth_basic, auth_request, or deny directives on restricted paths</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> curl -s -o /dev/null -w &#39;%{http_code}&#39; http://localhost:8080/admin/
-        
+
         <br><span class="cmd-expected"># Expected: 401 or 403 (access denied without valid credentials)</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> Get-WebConfigurationProperty -Filter &#39;/system.webServer/security/authorization&#39; -PSPath &#39;IIS:\Sites\Default Web Site\admin&#39; -Name &#39;collection&#39; | Format-Table
-        
+
         <br><span class="cmd-expected"># Expected: Non-empty output — IIS URL Authorization rules with role-based access restrictions on admin paths</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: windows</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-917.html">&larr; CME-917: Worker Process Recycling (MaxConnectionsPerChild / max_requests)</a>
-      
-      
+
+
       <a href="CME-919.html">CME-919: JIT Compiler Hardening (JIT Restriction / V8 Sandbox) &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -174,38 +172,38 @@
       <p>Application Controls</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">authorization-controls</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">IAC-20</span>
-        
+
         <span class="cwe-link">WEB-04</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>Any</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -213,7 +211,8 @@
         <li><strong>ID:</strong> CME-918</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Application</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 4</li>
         <li><strong>CVSS Mods:</strong> 2</li>
       </ul>
@@ -224,7 +223,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

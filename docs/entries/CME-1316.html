@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-1316</div>
   <h1>Algorithmic Complexity Safeguards (Pattern/Regex Execution Limits)</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-application">Application</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Availability</strong> (A)</td>
             <td>
@@ -64,109 +61,110 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-            
+
             <td class="cvss-rationale">Computational budgets (step limits, timeouts) and safe engine guarantees cap the worst-case execution time of any single pattern operation. The attacker can still trigger the vulnerable code path, but the operation is terminated or completes in bounded time, preventing sustained resource exhaustion and event-loop blocking</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/1333.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-1333</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/407.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-407</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/405.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-405</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/834.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-834</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/730.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-730</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Verify that the application uses linear-time regex engines or enforces execution budgets on pattern operations. Check for RE2 bindings, regex timeout configuration, recursion depth limits, and that user-controlled input is never compiled directly into regex patterns without escaping.</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> node -e &#34;try { require(&#39;re2&#39;); console.log(&#39;RE2 available&#39;) } catch(e) { console.log(&#39;RE2 NOT installed — using backtracking engine&#39;) }&#34;
-        
+
         <br><span class="cmd-expected"># Expected: RE2 available</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> python3 -c &#34;import google.re2; print(&#39;google-re2 available&#39;)&#34; 2&gt;/dev/null || python3 -c &#34;import re; print(&#39;WARNING: using backtracking re module — consider google-re2 or regex with timeout&#39;)&#34;
-        
+
         <br><span class="cmd-expected"># Expected: google-re2 available</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> powershell -Command &#34;try { [System.Text.RegularExpressions.RegexOptions]::NonBacktracking; Write-Host &#39;NonBacktracking mode available (.NET 7+)&#39; } catch { Write-Host &#39;WARNING: NonBacktracking not available — requires .NET 7+&#39; }&#34;
-        
+
         <br><span class="cmd-expected"># Expected: NonBacktracking mode available (.NET 7+)</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: windows</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rn &#39;RegexOptions\.NonBacktracking\|RegexOptions\.MatchTimeout\|Regex\.IsMatch.*TimeSpan&#39; &lt;app_source&gt;/ | head -10
-        
+
         <br><span class="cmd-expected"># Expected: Regex operations use NonBacktracking mode (.NET 7+) or explicit MatchTimeout</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rn &#39;new RegExp(\|RegExp(.*\buser\|RegExp(.*\breq\.&#39; &lt;app_source&gt;/ | head -10
-        
+
         <br><span class="cmd-expected"># Expected: No instances of user-controlled input compiled into RegExp without escaping</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-1315.html">&larr; CME-1315: Allowlist-Preferred Input Validation (Deny-by-Default Filtering)</a>
-      
-      
+
+
       <a href="CME-1317.html">CME-1317: XML External Entity Prevention (Secure XML Parser Configuration) &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -176,42 +174,42 @@
       <p>Application Input Validation</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">input-validation</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">NET-02.1</span>
-        
+
         <span class="cwe-link">WEB-09</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>Any</li>
-        
+
         <li>Windows Server 2019</li>
-        
+
         <li>Windows Server 2022</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -219,7 +217,8 @@
         <li><strong>ID:</strong> CME-1316</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Application</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 5</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
@@ -230,7 +229,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

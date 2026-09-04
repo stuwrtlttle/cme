@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-1009</div>
   <h1>Privilege Assignment Monitoring (Role Grant Alerting)</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-detect">Detect</span>
     <span class="badge badge-layer-application">Application</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-detective">Detective</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
@@ -64,10 +61,10 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            
+
             <td class="cvss-rationale">Compensating control: unauthorized privilege grants are detected by outcome monitoring regardless of the escalation mechanism, forcing the attacker to also evade the membership audit or accept detection within the monitoring interval.</td>
           </tr>
-          
+
           <tr>
             <td><strong>Confidentiality</strong> (C)</td>
             <td>
@@ -75,63 +72,64 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-            
+
             <td class="cvss-rationale">The window during which the attacker holds escalated privileges — and can access confidential resources — is bounded by the monitoring interval; detection triggers revocation of the unauthorized grant.</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/266.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-266</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/269.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-269</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/284.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-284</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Verify that a scheduled job or event-driven monitor tracks high-privilege role membership and alerts on unauthorized additions. Grant a test user a high-privilege role and confirm an alert fires within the expected interval.</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> kcadm.sh get roles/realm-admin/users -r master --fields username
-        
+
         <br><span class="cmd-expected"># Expected: Lists all users with realm-admin role; compare against approved baseline</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-1008.html">&larr; CME-1008: Application Admin Event Logging (SIEM Integration)</a>
-      
-      
+
+
       <a href="CME-1010.html">CME-1010: cgroup Memory Pressure Monitoring (memory.events / PSI) &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -141,40 +139,40 @@
       <p>Runtime Detection</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">application-monitoring</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">IAC-17</span>
-        
+
         <span class="cwe-link">MON-01.15</span>
-        
+
         <span class="cwe-link">MON-16.4</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>any</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -182,7 +180,8 @@
         <li><strong>ID:</strong> CME-1009</li>
         <li><strong>Tactic:</strong> Detect</li>
         <li><strong>Layer:</strong> Application</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> detective</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 3</li>
         <li><strong>CVSS Mods:</strong> 2</li>
       </ul>
@@ -193,7 +192,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

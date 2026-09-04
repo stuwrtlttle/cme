@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-114</div>
   <h1>Process Resource Limits (ulimit/prlimit)</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-os-kernel">OS/Kernel</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Availability</strong> (A)</td>
             <td>
@@ -64,72 +61,73 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-            
+
             <td class="cvss-rationale">Resource limits contain the blast radius of denial-of-service conditions to the targeted process rather than the system; an infinite loop consumes its CPU quota then receives SIGKILL, preventing system-wide resource exhaustion.</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/835.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-835</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/400.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-400</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/770.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-770</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/834.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-834</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/772.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-772</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/401.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-401</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Check that CPU time limits are set for processes</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> ulimit -t
-        
+
         <br><span class="cmd-expected"># Expected: A finite value (not unlimited)</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-113.html">&larr; CME-113: Control Flow Integrity (CFI / Shadow Call Stack)</a>
-      
-      
+
+
       <a href="CME-116.html">CME-116: FORTIFY_SOURCE (Buffer Overflow Detection) &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -139,42 +137,42 @@
       <p>Kernel Hardening</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">kernel-attack-surface</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">NET-02.1</span>
-        
+
         <span class="cwe-link">SEA-07.2</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>RHEL 9</li>
-        
+
         <li>Ubuntu 24.04</li>
-        
+
         <li>Fedora 40</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -182,7 +180,8 @@
         <li><strong>ID:</strong> CME-114</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> OS/Kernel</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 6</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
@@ -193,7 +192,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

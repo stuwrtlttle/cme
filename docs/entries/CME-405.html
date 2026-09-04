@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-405</div>
   <h1>DNSSEC Validation</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-network">Network</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
@@ -64,67 +61,68 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            
+
             <td class="cvss-rationale">DNS-based redirect/spoofing attacks require breaking DNSSEC chain of trust</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/350.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-350</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Verify DNSSEC validation is enabled in resolver</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> resolvectl status | grep DNSSEC
-        
+
         <br><span class="cmd-expected"># Expected: DNSSEC setting: yes</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep &#39;val-permissive-mode&#39; /etc/unbound/unbound.conf
-        
+
         <br><span class="cmd-expected"># Expected: val-permissive-mode: no</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-404.html">&larr; CME-404: Certificate Pinning</a>
-      
-      
+
+
       <a href="CME-406.html">CME-406: Signed Package Enforcement (GPG) &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -134,42 +132,42 @@
       <p>Cryptographic Controls</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">data-integrity-crypto</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">CRY-04</span>
-        
+
         <span class="cwe-link">CRY-13</span>
-        
+
         <span class="cwe-link">NET-10.2</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>RHEL 9</li>
-        
+
         <li>Ubuntu 24.04</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -177,7 +175,8 @@
         <li><strong>ID:</strong> CME-405</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Network</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 1</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
@@ -188,7 +187,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

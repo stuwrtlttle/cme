@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-904</div>
   <h1>WAF (Web Application Firewall)</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-application">Application</span>
-    
-    <span class="badge badge-attenuation-probabilistic">Probabilistic</span>
-    
-    
-    <span class="badge badge-confidence-medium">Medium Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,14 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
-            <th>Probability</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
@@ -66,119 +61,100 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            
-            <td class="cvss-probability">
-              70%
-              
-              <div class="evidence-basis">OWASP CRS in blocking mode at paranoia level 2+ blocks the majority of automated and scripted attacks; manual bypass by skilled attackers remains possible via encoding evasion, payload obfuscation, and WAF-specific techniques</div>
-              
-              
-              <ul class="conditions-list">
-                
-                <li>WAF must be in blocking mode, not detection-only</li>
-                
-                <li>OWASP CRS or equivalent ruleset must be loaded and current</li>
-                
-                <li>No direct-to-origin access path exists that bypasses the WAF</li>
-                
-                <li>WAF must cover all application endpoints</li>
-                
-              </ul>
-              
-            </td>
-            
+
             <td class="cvss-rationale">OWASP Core Rule Set signature matching detects and blocks known injection, XSS, path traversal, and protocol violation patterns at the HTTP request layer before they reach the application</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/79.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-79</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/89.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-89</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/94.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-94</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/78.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-78</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/22.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-22</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Verify WAF is in enforcement mode with rules loaded and blocking common attack payloads</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> curl -s -o /dev/null -w &#39;%{http_code}&#39; &#39;http://&lt;target&gt;/?q=&lt;script&gt;alert(1)&lt;/script&gt;&#39;
-        
+
         <br><span class="cmd-expected"># Expected: 403</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> curl -s -o /dev/null -w &#39;%{http_code}&#39; &#39;http://&lt;target&gt;/?id=1+UNION+SELECT+1,2,3--&#39;
-        
+
         <br><span class="cmd-expected"># Expected: 403</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> curl -s -o /dev/null -w &#39;%{http_code}&#39; &#39;http://&lt;target&gt;/../../etc/passwd&#39;
-        
+
         <br><span class="cmd-expected"># Expected: 403</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> apachectl -M 2&gt;/dev/null | grep security
-        
+
         <br><span class="cmd-expected"># Expected: security2_module</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-903.html">&larr; CME-903: Kernel Network Hardening (sysctl)</a>
-      
-      
+
+
       <a href="CME-905.html">CME-905: Content Security Policy (CSP) Headers &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -188,38 +164,38 @@
       <p>Application Controls</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">request-filtering</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">NET-08</span>
-        
+
         <span class="cwe-link">WEB-03</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>Any</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -227,7 +203,8 @@
         <li><strong>ID:</strong> CME-904</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Application</li>
-        <li><strong>Attenuation:</strong> probabilistic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 5</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
@@ -238,7 +215,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

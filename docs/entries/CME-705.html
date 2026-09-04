@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-705</div>
   <h1>Dropped Linux Capabilities</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-isolate">Isolate</span>
     <span class="badge badge-layer-os-kernel">OS/Kernel</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Privileges Required</strong> (PR)</td>
             <td>
@@ -64,10 +61,10 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            
+
             <td class="cvss-rationale">Even privileged operations require specific capabilities that have been dropped</td>
           </tr>
-          
+
           <tr>
             <td><strong>Scope</strong> (S)</td>
             <td>
@@ -75,70 +72,71 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">U</span>
             </td>
-            
+
             <td class="cvss-rationale">Cannot mount filesystems, trace processes, or perform other scope-changing operations</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/250.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-250</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/269.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-269</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Check effective capabilities of running process</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep CapEff /proc/&lt;pid&gt;/status
-        
+
         <br><span class="cmd-expected"># Expected: 0000000000000000 or minimal set</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> kubectl get pod &lt;pod&gt; -o jsonpath=&#39;{.spec.containers[0].securityContext.capabilities.drop}&#39;
-        
+
         <br><span class="cmd-expected"># Expected: ALL</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: kubernetes</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-704.html">&larr; CME-704: cgroups v2 Resource Limits</a>
-      
-      
+
+
       <a href="CME-706.html">CME-706: Pod Security Standards (Restricted) &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -148,42 +146,42 @@
       <p>Container Isolation</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">container-runtime</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">CFG-03</span>
-        
+
         <span class="cwe-link">IAC-21</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>RHEL 9</li>
-        
+
         <li>Kubernetes</li>
-        
+
         <li>OpenShift</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -191,7 +189,8 @@
         <li><strong>ID:</strong> CME-705</li>
         <li><strong>Tactic:</strong> Isolate</li>
         <li><strong>Layer:</strong> OS/Kernel</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 2</li>
         <li><strong>CVSS Mods:</strong> 2</li>
       </ul>
@@ -202,7 +201,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

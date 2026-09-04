@@ -168,6 +168,11 @@ nav a.active { color: #fff; border-bottom-color: #fff; }
 
 .badge-attenuation-deterministic { background: #e6f4ea; color: var(--green); }
 .badge-attenuation-probabilistic { background: #f3e8fd; color: var(--purple); }
+.badge-attenuation-quantified { background: #f3e8fd; color: var(--purple); }
+.badge-attenuation-unquantified { background: #fef3e0; color: var(--gold); }
+.badge-layer-preventive { background: #e6f4ea; color: var(--green); }
+.badge-layer-detective { background: #ddf4ff; color: var(--blue); }
+.badge-layer-corrective { background: #f3e8fd; color: var(--purple); }
 
 /* --- Taxonomy Tree (Index) --- */
 

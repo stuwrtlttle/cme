@@ -13,6 +13,12 @@ def load_schema() -> dict:
         return json.load(f)
 
 
+def load_coverage_assessment_schema() -> dict:
+    schema_path = Path(__file__).parent.parent / "schema" / "coverage-assessment.schema.json"
+    with open(schema_path) as f:
+        return json.load(f)
+
+
 def load_categories() -> dict:
     categories_path = Path(__file__).parent.parent / "data" / "categories.json"
     with open(categories_path) as f:
@@ -128,6 +134,23 @@ def validate_dir(
     return errors_found, seen_ids
 
 
+def validate_coverage_assessments(validator: Draft202012Validator) -> bool:
+    assessment_dir = Path(__file__).parent.parent / "data" / "coverage-assessments"
+    errors_found = False
+    for path in sorted(assessment_dir.glob("CMA-*.json")):
+        with open(path) as f:
+            assessment = json.load(f)
+        if assessment.get("assessment_id") != path.stem:
+            print(f"FAIL {path.name}: assessment_id does not match filename")
+            errors_found = True
+        for error in validator.iter_errors(assessment):
+            print(f"FAIL {path.name}: {error.message}")
+            errors_found = True
+        if not errors_found:
+            print(f"  OK {path.name}")
+    return errors_found
+
+
 def main():
     schema = load_schema()
     validator = Draft202012Validator(schema)
@@ -169,6 +192,10 @@ def main():
                     f"({entry_ids[cme_id]}) — delete the stale proposal (or re-approve via the tool)"
                 )
                 errors_found = True
+
+    coverage_validator = Draft202012Validator(load_coverage_assessment_schema())
+    print("\nValidating coverage assessments ...")
+    errors_found |= validate_coverage_assessments(coverage_validator)
 
     summary = f"Validated {len(categories)} categories and {len(entry_files)} entries"
     if proposal_files:

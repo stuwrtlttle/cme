@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-1008</div>
   <h1>Application Admin Event Logging (SIEM Integration)</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-detect">Detect</span>
     <span class="badge badge-layer-application">Application</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-detective">Detective</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
@@ -64,66 +61,67 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            
+
             <td class="cvss-rationale">Compensating control: administrative actions are logged with application-domain context and forwarded to a SIEM in real time; the attacker must evade application-level audit logging or accept near-immediate detection, significantly increasing attack complexity.</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/266.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-266</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/269.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-269</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/284.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-284</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/778.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-778</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Verify that application admin event logging is enabled and events are forwarded to the SIEM. Perform a sensitive administrative action and confirm the event appears in the SIEM within the expected latency.</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> kcadm.sh get events/config -r master --fields eventsEnabled,adminEventsEnabled,adminEventsDetailsIncluded
-        
+
         <br><span class="cmd-expected"># Expected: adminEventsEnabled: true, adminEventsDetailsIncluded: true</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-1007.html">&larr; CME-1007: Application Configuration Drift Detection (IaC Enforcement)</a>
-      
-      
+
+
       <a href="CME-1009.html">CME-1009: Privilege Assignment Monitoring (Role Grant Alerting) &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -133,42 +131,42 @@
       <p>Runtime Detection</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">application-monitoring</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">IAC-21.4</span>
-        
+
         <span class="cwe-link">MON-01.2</span>
-        
+
         <span class="cwe-link">MON-02</span>
-        
+
         <span class="cwe-link">MON-03.3</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>any</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -176,7 +174,8 @@
         <li><strong>ID:</strong> CME-1008</li>
         <li><strong>Tactic:</strong> Detect</li>
         <li><strong>Layer:</strong> Application</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> detective</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 4</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
@@ -187,7 +186,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

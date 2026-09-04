@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-407</div>
   <h1>Data-at-Rest Encryption (LUKS/dm-crypt / BitLocker)</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-data">Data</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Confidentiality</strong> (C)</td>
             <td>
@@ -64,73 +61,74 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-            
+
             <td class="cvss-rationale">Even if an attacker gains file read access through a path traversal or application vulnerability, the underlying block device encryption prevents reading the actual cleartext data without the encryption key.</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/312.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-312</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/311.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-311</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/316.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-316</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Check for LUKS-encrypted volumes</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> lsblk -o NAME,TYPE,FSTYPE | grep crypt
-        
+
         <br><span class="cmd-expected"># Expected: At least one crypt volume present</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> (Get-BitLockerVolume -MountPoint &#39;C:&#39;).ProtectionStatus
-        
+
         <br><span class="cmd-expected"># Expected: On</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: windows</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> (Get-BitLockerVolume -MountPoint &#39;C:&#39;).EncryptionMethod
-        
-        <br><span class="cmd-expected"># Expected: XtsAes256</span>
-        
-      </div>
-      
-      <div class="cmd-platform">Platform: windows</div>
-      
-      
-    </section>
-    
 
-    
+        <br><span class="cmd-expected"># Expected: XtsAes256</span>
+
+      </div>
+
+      <div class="cmd-platform">Platform: windows</div>
+
+
+    </section>
+
+
+
     <section>
       <h2>Applicability (CVE 5.2.0 Schema)</h2>
       <table class="cvss-table">
@@ -144,40 +142,40 @@
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td>microsoft</td>
             <td>windows</td>
             <td class="cpe-cell">
-              
+
               <code class="cpe-string">cpe:2.3:o:microsoft:windows_10:*:*:*:*:*:*:*:*</code><br>
-              
+
               <code class="cpe-string">cpe:2.3:o:microsoft:windows_11:*:*:*:*:*:*:*:*</code><br>
-              
+
               <code class="cpe-string">cpe:2.3:o:microsoft:windows_server_2019:*:*:*:*:*:*:*</code><br>
-              
+
               <code class="cpe-string">cpe:2.3:o:microsoft:windows_server_2022:*:*:*:*:*:*:*</code>
-              
+
             </td>
             <td>All</td>
             <td><span class="badge badge-confidence-high">applicable</span></td>
           </tr>
-          
+
         </tbody>
       </table>
-      
-    </section>
-    
 
-    
+    </section>
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-406.html">&larr; CME-406: Signed Package Enforcement (GPG)</a>
-      
-      
+
+
       <a href="CME-408.html">CME-408: System-wide TLS/Crypto Policy Enforcement &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -187,48 +185,48 @@
       <p>Cryptographic Controls</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">data-integrity-crypto</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">CRY-05</span>
-        
+
         <span class="cwe-link">CRY-05.1</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>RHEL 9</li>
-        
+
         <li>Ubuntu 24.04</li>
-        
+
         <li>Fedora 40</li>
-        
+
         <li>Windows 10</li>
-        
+
         <li>Windows 11</li>
-        
+
         <li>Windows Server 2022</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -236,7 +234,8 @@
         <li><strong>ID:</strong> CME-407</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Data</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 3</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
@@ -247,7 +246,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

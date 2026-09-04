@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-912</div>
   <h1>HTTP Header Normalization and Request Smuggling Prevention</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-application">Application</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
@@ -64,10 +61,10 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            
+
             <td class="cvss-rationale">Strict header normalization closes the standard CL/TE and duplicate-CL desync vectors, forcing the attacker to discover novel parser-specific bypass techniques to achieve smuggling</td>
           </tr>
-          
+
           <tr>
             <td><strong>Integrity</strong> (I)</td>
             <td>
@@ -75,103 +72,104 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-            
+
             <td class="cvss-rationale">Preventing request smuggling eliminates the primary integrity impact: cache poisoning and request injection into other users sessions</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/444.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-444</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/113.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-113</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/436.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-436</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Verify that HTTP intermediaries enforce strict header parsing: reject requests with both Content-Length and Transfer-Encoding, reject duplicate Content-Length headers, and disable relaxed parsing modes</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -i &#39;relaxed_header_parser&#39; /etc/squid/squid.conf
-        
+
         <br><span class="cmd-expected"># Expected: off</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep &#39;http-request deny.*hdr_cnt(content-length)&#39; /etc/haproxy/haproxy.cfg
-        
+
         <br><span class="cmd-expected"># Expected: http-request deny</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -i &#39;HttpProtocolOptions&#39; /etc/httpd/conf/httpd.conf
-        
+
         <br><span class="cmd-expected"># Expected: Strict</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -i &#39;proxy_http_version&#39; /etc/nginx/nginx.conf /etc/nginx/conf.d/*.conf 2&gt;/dev/null
-        
+
         <br><span class="cmd-expected"># Expected: 1.1</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> Get-WebConfigurationProperty -Filter &#39;system.webServer/security/requestFiltering&#39; -PSPath &#39;IIS:\&#39; -Name allowDoubleEscaping
-        
+
         <br><span class="cmd-expected"># Expected: False</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: windows</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-911.html">&larr; CME-911: Fine-Grained Administrative Permission Scoping</a>
-      
-      
+
+
       <a href="CME-913.html">CME-913: CSRF Protection (Anti-CSRF Token &amp; SameSite Cookie Enforcement) &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -181,38 +179,38 @@
       <p>Application Controls</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">request-filtering</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">NET-18.4</span>
-        
+
         <span class="cwe-link">WEB-07</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>Any</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -220,7 +218,8 @@
         <li><strong>ID:</strong> CME-912</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Application</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 3</li>
         <li><strong>CVSS Mods:</strong> 2</li>
       </ul>
@@ -231,7 +230,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

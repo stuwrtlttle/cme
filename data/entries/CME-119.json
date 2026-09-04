@@ -1,7 +1,7 @@
 {
   "cme_id": "CME-119",
   "control_name": "Compiler Integer Overflow and Conversion Safety (-ftrapv / UBSan Integer)",
-  "description": "Compiler-enforced runtime detection of integer overflow and unsafe numeric type conversions. Encompasses: (1) GCC/Clang -ftrapv \u2014 traps on signed integer overflow at ~2-5% overhead, suitable for production; (2) UBSan integer sanitizers (-fsanitize=signed-integer-overflow, -fsanitize=unsigned-integer-overflow, -fsanitize=implicit-conversion) \u2014 detect signed/unsigned overflow and implicit narrowing/sign-change conversions at runtime with configurable abort or logging; (3) MSVC /RTCc \u2014 detects data loss from runtime type conversions. When enabled, integer conversion errors that would silently produce incorrect values instead terminate the process, converting potential code execution vulnerabilities into denial-of-service conditions (a less severe outcome). Particularly effective against the dominant CWE-681 attack pattern where a negative signed value converted to unsigned becomes an enormous positive value that bypasses bounds checks and corrupts memory. Complements CME-116 (FORTIFY_SOURCE) which catches the buffer overflow consequence of integer conversion errors, while this control catches the conversion error itself at the point of occurrence.",
+  "description": "Compiler-enforced runtime detection of integer overflow and unsafe numeric type conversions. Encompasses: (1) GCC/Clang -ftrapv — traps on signed integer overflow at ~2-5% overhead, suitable for production; (2) UBSan integer sanitizers (-fsanitize=signed-integer-overflow, -fsanitize=unsigned-integer-overflow, -fsanitize=implicit-conversion) — detect signed/unsigned overflow and implicit narrowing/sign-change conversions at runtime with configurable abort or logging; (3) MSVC /RTCc — detects data loss from runtime type conversions. When enabled, integer conversion errors that would silently produce incorrect values instead terminate the process, converting potential code execution vulnerabilities into denial-of-service conditions (a less severe outcome). Particularly effective against the dominant CWE-681 attack pattern where a negative signed value converted to unsigned becomes an enormous positive value that bypasses bounds checks and corrupts memory. Complements CME-116 (FORTIFY_SOURCE) which catches the buffer overflow consequence of integer conversion errors, while this control catches the conversion error itself at the point of occurrence.",
   "tactic": "Harden",
   "category": "Kernel Hardening",
   "category_id": "kernel-hardening",
@@ -62,5 +62,84 @@
   },
   "scf_identifiers": [
     "SEA-10"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-681",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-190",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-191",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-192",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-194",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-195",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-196",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-197",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "SEA-10",
+      "relationship_type": "maps_to"
+    }
   ]
 }

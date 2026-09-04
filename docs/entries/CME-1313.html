@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-1313</div>
   <h1>CRLF / Line Injection Prevention (Newline Sanitization for Structured Formats)</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-application">Application</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
@@ -64,10 +61,10 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            
+
             <td class="cvss-rationale">Newline characters in user input are stripped or rejected before reaching format-sensitive contexts; attacker cannot break record boundaries in HTTP headers, config files, Git refs, or log entries</td>
           </tr>
-          
+
           <tr>
             <td><strong>Integrity</strong> (I)</td>
             <td>
@@ -75,97 +72,98 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-            
+
             <td class="cvss-rationale">Cannot forge log entries, split HTTP responses, inject configuration directives, or manipulate Git refs via embedded newlines</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/93.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-93</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/113.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-113</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Verify that input handling code strips or rejects CR/LF characters before constructing multi-line format outputs</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rn &#39;replace.*\\r\|replace.*\\n\|strip.*newline\|reject.*newline\|CRLF&#39; &lt;app_source&gt;/
-        
+
         <br><span class="cmd-expected"># Expected: Newline sanitization present in input handling paths that feed into structured text formats</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rn &#39;set-cookie\|Set-Header\|add_header\|setHeader&#39; &lt;app_source&gt;/ | head -20
-        
+
         <br><span class="cmd-expected"># Expected: Header-setting code validates input values do not contain CR/LF</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h2>References</h2>
       <ul class="sidebar-list">
-        
+
         <li>
           OWASP
            &mdash; HTTP Response Splitting / CRLF Injection
         </li>
-        
+
         <li>
           CVE-2025-48384
            &mdash; Git arbitrary code execution via CRLF injection in submodule URLs (8.0, 13 RH products)
         </li>
-        
+
         <li>
           CVE-2026-21428
            &mdash; cpp-httplib SSRF via header injection (CWE-93)
         </li>
-        
+
         <li>
           CVE-2026-50574
            &mdash; yt-dlp aria2c newline injection in DASH manifest URLs
         </li>
-        
+
       </ul>
     </section>
-    
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-1312.html">&larr; CME-1312: Argument Injection Prevention (Downstream Input Delimiter Sanitization)</a>
-      
-      
+
+
       <a href="CME-1314.html">CME-1314: Input Canonicalization Before Security Decision &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -175,40 +173,40 @@
       <p>Application Input Validation</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">injection-prevention</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">WEB-09</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>Any</li>
-        
+
         <li>Windows Server 2019</li>
-        
+
         <li>Windows Server 2022</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -216,7 +214,8 @@
         <li><strong>ID:</strong> CME-1313</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Application</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 2</li>
         <li><strong>CVSS Mods:</strong> 2</li>
       </ul>
@@ -227,7 +226,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

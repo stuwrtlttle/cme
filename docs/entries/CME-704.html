@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-704</div>
   <h1>cgroups v2 Resource Limits</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-isolate">Isolate</span>
     <span class="badge badge-layer-os-kernel">OS/Kernel</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Availability</strong> (A)</td>
             <td>
@@ -64,76 +61,77 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-            
+
             <td class="cvss-rationale">Process cannot exhaust host resources; OOM killer scoped to cgroup</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/400.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-400</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/770.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-770</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/772.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-772</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/401.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-401</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Check cgroup v2 is mounted and limits are set</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> mount | grep cgroup2
-        
+
         <br><span class="cmd-expected"># Expected: cgroup2</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> cat /sys/fs/cgroup/&lt;slice&gt;/memory.max
-        
+
         <br><span class="cmd-expected"># Expected: numeric limit</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-703.html">&larr; CME-703: Rootless Containers</a>
-      
-      
+
+
       <a href="CME-705.html">CME-705: Dropped Linux Capabilities &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -143,44 +141,44 @@
       <p>Container Isolation</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">container-runtime</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">CLD-06</span>
-        
+
         <span class="cwe-link">NET-02.1</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>RHEL 9</li>
-        
+
         <li>RHEL 8</li>
-        
+
         <li>Ubuntu 24.04</li>
-        
+
         <li>Kubernetes</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -188,7 +186,8 @@
         <li><strong>ID:</strong> CME-704</li>
         <li><strong>Tactic:</strong> Isolate</li>
         <li><strong>Layer:</strong> OS/Kernel</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 4</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
@@ -199,7 +198,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

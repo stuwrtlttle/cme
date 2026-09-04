@@ -23,6 +23,8 @@ PROPOSALS_DIR = PROJECT_ROOT / "data" / "proposals"
 SCHEMA_PATH = PROJECT_ROOT / "schema" / "cme-entry.schema.json"
 CATEGORIES_PATH = PROJECT_ROOT / "data" / "categories.json"
 FUNCTIONS_PATH = PROJECT_ROOT / "data" / "functions.json"
+COVERAGE_ASSESSMENTS_DIR = PROJECT_ROOT / "data" / "coverage-assessments"
+COVERAGE_ASSESSMENT_SCHEMA_PATH = PROJECT_ROOT / "schema" / "coverage-assessment.schema.json"
 
 mcp = FastMCP(
     "CME — Common Mitigation Enumeration",
@@ -151,6 +153,32 @@ async def get_mitigations_for_weakness(cwe_id: str) -> str:
 
 
 @mcp.tool()
+async def get_coverage_assessments(namespace: str, target_id: str) -> str:
+    """Return evidence-backed CME coverage assessments for a CWE, CVE, or capability.
+
+    Negative coverage conclusions are returned only when the assessment records
+    candidates considered and the evidence supporting their rejection.
+    """
+    namespace = namespace.upper()
+    target_id = target_id.upper() if namespace in {"CWE", "CVE"} else target_id
+    assessments = []
+    for path in sorted(COVERAGE_ASSESSMENTS_DIR.glob("CMA-*.json")):
+        with open(path) as f:
+            assessment = json.load(f)
+        target = assessment.get("target", {})
+        if target.get("namespace") == namespace and target.get("id", "").upper() == target_id:
+            assessments.append(assessment)
+    if not assessments:
+        return json.dumps({
+            "namespace": namespace,
+            "target_id": target_id,
+            "conclusion": "coverage_unknown",
+            "message": "No evidence-backed coverage assessment exists for this target.",
+        })
+    return json.dumps(assessments, indent=2)
+
+
+@mcp.tool()
 async def calculate_attenuation(active_cme_ids: list[str]) -> str:
     """Calculate CVSS risk attenuation for a set of active CME controls.
 
@@ -177,16 +205,23 @@ async def calculate_attenuation(active_cme_ids: list[str]) -> str:
 
     severity_order = {"N": 0, "L": 1, "A": 2, "P": 3, "U": 4, "H": 5, "C": 6}
     deterministic: dict[str, dict] = {}
-    probabilistic: dict[str, list] = {}
+    quantified: dict[str, list] = {}
+    unquantified = []
     details = []
 
     for impact in impacts:
         details.append(impact)
         metric = impact["metric"]
-        atype = impact.get("attenuation_type", "deterministic")
+        evidence_state = impact.get("evidence_state") or "unquantified"
 
-        if atype == "probabilistic":
-            probabilistic.setdefault(metric, []).append(impact)
+        if evidence_state == "unquantified":
+            unquantified.append(impact)
+            continue
+
+        if evidence_state == "quantified":
+            if impact.get("probability") is None:
+                continue
+            quantified.setdefault(metric, []).append(impact)
         else:
             if metric not in deterministic:
                 deterministic[metric] = {
@@ -202,10 +237,10 @@ async def calculate_attenuation(active_cme_ids: list[str]) -> str:
                     deterministic[metric]["modified_to"] = impact["to_value"]
 
     prob_adjustments = []
-    for metric, prob_impacts in probabilistic.items():
+    for metric, prob_impacts in quantified.items():
         if metric in deterministic:
             continue
-        probs = [p.get("probability", 0.5) for p in prob_impacts]
+        probs = [p["probability"] for p in prob_impacts]
         combined = 1.0 - 1.0
         for p in probs:
             combined *= (1.0 - p)
@@ -224,7 +259,8 @@ async def calculate_attenuation(active_cme_ids: list[str]) -> str:
     return json.dumps({
         "active_controls": len(ids),
         "deterministic_attenuation": list(deterministic.values()),
-        "probabilistic_adjustments": prob_adjustments,
+        "quantified_adjustments": prob_adjustments,
+        "unquantified_effects": unquantified,
         "detail": details,
     }, indent=2)
 
@@ -303,12 +339,13 @@ async def simulate_cve_risk(
     severity_order = {"N": 0, "L": 1, "A": 2, "P": 3, "U": 4, "H": 5, "C": 6}
     det_modifications = []
     det_metrics = dict(metrics)
-    prob_modifications = []
-    prob_by_metric: dict[str, list] = {}
+    quantified_modifications = []
+    quantified_by_metric: dict[str, list] = {}
+    unquantified_effects = []
 
     for impact in impacts:
         metric = impact["metric"]
-        atype = impact.get("attenuation_type", "deterministic")
+        evidence_state = impact.get("evidence_state") or "unquantified"
         if metric not in metrics or metrics[metric] != impact["from_value"]:
             continue
 
@@ -319,26 +356,30 @@ async def simulate_cve_risk(
             "from": impact["from_value"],
             "to": impact["to_value"],
             "rationale": impact["rationale"],
-            "attenuation_type": atype,
+            "evidence_state": evidence_state,
         }
 
-        if atype == "probabilistic":
-            mod["probability"] = impact.get("probability", 0.5)
+        if evidence_state == "unquantified":
+            unquantified_effects.append(mod)
+        elif evidence_state == "quantified":
+            if impact.get("probability") is None:
+                continue
+            mod["probability"] = impact["probability"]
             if impact.get("evidence_basis"):
                 mod["evidence_basis"] = impact["evidence_basis"]
             if impact.get("conditions"):
                 mod["conditions"] = impact["conditions"]
-            prob_modifications.append(mod)
-            prob_by_metric.setdefault(metric, []).append(mod)
+            quantified_modifications.append(mod)
+            quantified_by_metric.setdefault(metric, []).append(mod)
         else:
             det_metrics[metric] = impact["to_value"]
             det_modifications.append(mod)
 
     prob_adjustments = []
-    for metric, mods in prob_by_metric.items():
+    for metric, mods in quantified_by_metric.items():
         if det_metrics.get(metric) != metrics.get(metric):
             continue
-        probs = [m.get("probability", 0.5) for m in mods]
+        probs = [m["probability"] for m in mods]
         combined = 1.0
         for p in probs:
             combined *= (1.0 - p)
@@ -369,15 +410,19 @@ async def simulate_cve_risk(
     }
 
     if prob_adjustments:
-        result["probabilistic_adjustments"] = prob_adjustments
+        result["quantified_adjustments"] = prob_adjustments
         best_case = dict(det_metrics)
         for adj in prob_adjustments:
             best_case[adj["metric"]] = adj["conditional_to"]
         result["best_case_vector"] = prefix + "/" + "/".join(f"{k}:{v}" for k, v in best_case.items())
 
+    if unquantified_effects:
+        result["unquantified_effects"] = unquantified_effects
+
     result["note"] = (
         "Deterministic vector reflects guaranteed metric shifts. "
-        "Probabilistic adjustments show conditional shifts with combined probability. "
+        "Quantified adjustments show conditional shifts with measured probability. "
+        "Unquantified effects are surfaced but do not change the score. "
         "Best-case vector assumes all probabilistic controls are effective."
     )
 
@@ -642,6 +687,9 @@ async def propose_cme_entry(
     control_name: str,
     description: str,
     tactic: str,
+    effect_mode: str,
+    evidence_state: str,
+    efficacy_json: str,
     category: str = "",
     category_id: str = "",
     control_layer: str = "",
@@ -650,7 +698,7 @@ async def propose_cme_entry(
     verification_method: str = "",
     verification_commands_json: str = "[]",
     platforms: list[str] = [],
-    confidence: str = "Medium",
+    framework_bindings_json: str = "[]",
 ) -> str:
     """Propose a new CME entry for review.
 
@@ -662,6 +710,9 @@ async def propose_cme_entry(
         control_name: Formal name (e.g., "Kernel-Level Syscall Filtering (seccomp)")
         description: Technical description of what the control does
         tactic: D3FEND tactic (Harden, Isolate, Detect, Evict, Restore)
+        effect_mode: Primary control effect (preventive, detective, corrective)
+        evidence_state: Evidence maturity (deterministic, quantified, unquantified)
+        efficacy_json: JSON evidence object. Quantified effects require probability, evidence_basis, and conditions; unquantified effects require conditions.
         category: Sub-category name (e.g., "Kernel Hardening", "Network Isolation")
         category_id: Category slug (e.g., "kernel-hardening"). If provided, category name is derived from registry.
         control_layer: Technology layer (Network, OS/Kernel, Application, Data, Identity)
@@ -670,7 +721,7 @@ async def propose_cme_entry(
         verification_method: Human-readable verification description
         verification_commands_json: JSON array of commands, e.g. [{"command":"cat /proc/...","expected":"2","platform":"linux"}]
         platforms: Applicable platforms (e.g., ["RHEL 9", "Ubuntu 24.04"])
-        confidence: Confidence level (High, Medium, Low)
+        framework_bindings_json: Optional JSON array of external-framework bindings.
 
     Returns the proposed entry with a suggested CME-ID and file path.
     """
@@ -696,7 +747,7 @@ async def propose_cme_entry(
     suggested_id = await _run_db(lambda conn: _next_cme_id(conn, prefix))
 
     try:
-        cvss_impacts = json.loads(cvss_impacts_json)
+        cvss_impacts = json.loads(cvss_impacts_json or "[]")
     except json.JSONDecodeError:
         return json.dumps({"error": "cvss_impacts_json is not valid JSON"})
 
@@ -704,6 +755,12 @@ async def propose_cme_entry(
         verification_commands = json.loads(verification_commands_json)
     except json.JSONDecodeError:
         return json.dumps({"error": "verification_commands_json is not valid JSON"})
+
+    try:
+        efficacy = json.loads(efficacy_json)
+        framework_bindings = json.loads(framework_bindings_json)
+    except json.JSONDecodeError:
+        return json.dumps({"error": "efficacy_json or framework_bindings_json is not valid JSON"})
 
     entry = {
         "cme_id": suggested_id,
@@ -713,9 +770,20 @@ async def propose_cme_entry(
         "category": resolved_category,
         "category_id": resolved_category_id,
         "control_layer": control_layer,
+        "effect_mode": effect_mode,
+        "evidence_state": evidence_state,
+        "efficacy": efficacy,
         "cvss_vector_impacts": cvss_impacts,
         "cwe_relationships": cwe_ids,
-        "confidence": confidence,
+        "relationships": [
+            {"target_namespace": "CWE", "target_id": cwe, "relationship_type": "mitigates", "method": "supportive", "evidence_state": evidence_state}
+            for cwe in cwe_ids
+        ],
+        "framework_bindings": framework_bindings + [
+            {"namespace": "CVSS", "version": "4.0", "identifier": f"Environmental/{impact['metric']}",
+             "value": f"{impact['from']}->{impact['to']}", "relationship_type": "maps_to"}
+            for impact in cvss_impacts
+        ],
         "platforms": platforms,
     }
 

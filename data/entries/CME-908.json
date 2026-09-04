@@ -1,7 +1,7 @@
 {
   "cme_id": "CME-908",
   "control_name": "Object-Level Authorization Checks (IDOR Prevention)",
-  "description": "Enforce per-object ownership and permission verification on every data access operation. Before returning, modifying, or deleting any resource, the application verifies the authenticated caller owns the resource or holds explicit permission to access it. Object identifiers (database IDs, UUIDs, file paths) in API parameters are never trusted as implicit authorization \u2014 the application queries ownership metadata and compares against the caller's identity. Prevents Insecure Direct Object Reference (IDOR) attacks where an attacker enumerates or guesses object identifiers to access resources belonging to other users.",
+  "description": "Enforce per-object ownership and permission verification on every data access operation. Before returning, modifying, or deleting any resource, the application verifies the authenticated caller owns the resource or holds explicit permission to access it. Object identifiers (database IDs, UUIDs, file paths) in API parameters are never trusted as implicit authorization — the application queries ownership metadata and compares against the caller's identity. Prevents Insecure Direct Object Reference (IDOR) attacks where an attacker enumerates or guesses object identifiers to access resources belonging to other users.",
   "tactic": "Harden",
   "category": "Application Controls",
   "category_id": "application-controls",
@@ -48,5 +48,54 @@
   "scf_identifiers": [
     "IAC-20",
     "WEB-04"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-639",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-284",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/C",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "IAC-20",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "WEB-04",
+      "relationship_type": "maps_to"
+    }
   ]
 }

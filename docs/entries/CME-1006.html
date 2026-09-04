@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-1006</div>
   <h1>Privilege Change Audit Logging</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-detect">Detect</span>
     <span class="badge badge-layer-application">Application</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-detective">Detective</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
@@ -64,70 +61,71 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            
+
             <td class="cvss-rationale">Privilege escalation actions are recorded with full actor/target/change context in an application-level audit trail; the attacker must escalate privileges AND act before the logged privilege change triggers alerting or review, significantly narrowing the exploitation window.</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/778.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-778</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/223.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-223</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Inspect application source for audit logging on role/permission change operations; verify log entries are generated on privilege modifications</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rn &#39;audit_log\|AuditLog\|log.*role.*change\|log.*permission\|ActivityLog\|SecurityEvent&#39; &lt;app_source&gt;/
-        
+
         <br><span class="cmd-expected"># Expected: Audit logging calls present in role/permission modification handlers</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rn &#39;before.*after\|old_role.*new_role\|previous.*current\|from_state.*to_state&#39; &lt;app_source&gt;/
-        
+
         <br><span class="cmd-expected"># Expected: Before/after state capture in privilege change logging</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-1005.html">&larr; CME-1005: Runtime Memory Error Detection (KASAN/HWASan)</a>
-      
-      
+
+
       <a href="CME-1007.html">CME-1007: Application Configuration Drift Detection (IaC Enforcement) &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -137,40 +135,40 @@
       <p>Runtime Detection</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">application-monitoring</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">IAC-15.4</span>
-        
+
         <span class="cwe-link">MON-03.3</span>
-        
+
         <span class="cwe-link">MON-16.4</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>Any</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -178,7 +176,8 @@
         <li><strong>ID:</strong> CME-1006</li>
         <li><strong>Tactic:</strong> Detect</li>
         <li><strong>Layer:</strong> Application</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> detective</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 2</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
@@ -189,7 +188,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

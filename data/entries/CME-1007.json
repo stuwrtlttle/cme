@@ -1,7 +1,7 @@
 {
   "cme_id": "CME-1007",
   "control_name": "Application Configuration Drift Detection (IaC Enforcement)",
-  "description": "Continuously monitor application-managed configuration objects \u2014 stored in databases, APIs, or runtime registries rather than filesystem files \u2014 against a declared baseline, and alert or auto-remediate when unauthorized changes appear. Configuration baselines are maintained in version-controlled Infrastructure-as-Code repositories (Terraform, Ansible, Helm values, Keycloak realm exports). A reconciliation loop periodically exports the live application state via its management API, diffs it against the IaC baseline, and either reverts the drift automatically or raises an alert for human review. Prevents attackers from persisting unauthorized configuration changes \u2014 such as adding a malicious identity provider mapper, injecting a rogue OAuth client, or modifying authorization policies \u2014 by ensuring that any manual change not committed to the IaC repository is detected and reported within the reconciliation interval.",
+  "description": "Continuously monitor application-managed configuration objects — stored in databases, APIs, or runtime registries rather than filesystem files — against a declared baseline, and alert or auto-remediate when unauthorized changes appear. Configuration baselines are maintained in version-controlled Infrastructure-as-Code repositories (Terraform, Ansible, Helm values, Keycloak realm exports). A reconciliation loop periodically exports the live application state via its management API, diffs it against the IaC baseline, and either reverts the drift automatically or raises an alert for human review. Prevents attackers from persisting unauthorized configuration changes — such as adding a malicious identity provider mapper, injecting a rogue OAuth client, or modifying authorization policies — by ensuring that any manual change not committed to the IaC repository is detected and reported within the reconciliation interval.",
   "tactic": "Detect",
   "category": "Integrity Detection",
   "category_id": "integrity-detection",
@@ -13,7 +13,7 @@
       "metric": "AC",
       "from": "L",
       "to": "H",
-      "rationale": "Compensating control: unauthorized configuration changes are detected within the reconciliation interval and may be automatically reverted, requiring the attacker to re-exploit during each cycle or to compromise the IaC pipeline itself \u2014 significantly increasing attack complexity."
+      "rationale": "Compensating control: unauthorized configuration changes are detected within the reconciliation interval and may be automatically reverted, requiring the attacker to re-exploit during each cycle or to compromise the IaC pipeline itself — significantly increasing attack complexity."
     },
     {
       "metric": "I",
@@ -51,5 +51,73 @@
     "CFG-02.8",
     "CFG-06.1",
     "MON-01.7"
+  ],
+  "effect_mode": "detective",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-266",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-284",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-1220",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-16",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/I",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "CFG-02.8",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "CFG-06.1",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "MON-01.7",
+      "relationship_type": "maps_to"
+    }
   ]
 }

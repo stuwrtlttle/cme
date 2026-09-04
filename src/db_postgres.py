@@ -62,6 +62,9 @@ _CREATE_TABLES = """
         category_id     TEXT NOT NULL,
         function_id     TEXT REFERENCES functions(function_id),
         control_layer   TEXT CHECK(control_layer IN ('Network','OS/Kernel','Application','Data','Identity')),
+        effect_mode     TEXT NOT NULL CHECK(effect_mode IN ('preventive','detective','corrective')),
+        evidence_state  TEXT NOT NULL CHECK(evidence_state IN ('deterministic','quantified','unquantified')),
+        efficacy_json   TEXT,
         attenuation_type TEXT DEFAULT 'deterministic' CHECK(attenuation_type IN ('deterministic','probabilistic')),
         confidence      TEXT CHECK(confidence IN ('High','Medium','Low')),
         platforms_json  TEXT,
@@ -87,6 +90,31 @@ _CREATE_TABLES = """
         id      SERIAL PRIMARY KEY,
         cme_id  TEXT NOT NULL REFERENCES cme_entries(cme_id) ON DELETE CASCADE,
         cwe_id  TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS relationships (
+        id                  SERIAL PRIMARY KEY,
+        cme_id              TEXT NOT NULL REFERENCES cme_entries(cme_id) ON DELETE CASCADE,
+        target_namespace    TEXT NOT NULL,
+        target_id           TEXT NOT NULL,
+        relationship_type   TEXT NOT NULL,
+        method              TEXT,
+        properties_json     TEXT,
+        rationale           TEXT,
+        evidence_state      TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS framework_bindings (
+        id                  SERIAL PRIMARY KEY,
+        cme_id              TEXT NOT NULL REFERENCES cme_entries(cme_id) ON DELETE CASCADE,
+        namespace           TEXT NOT NULL,
+        version             TEXT,
+        identifier          TEXT NOT NULL,
+        value               TEXT,
+        relationship_type   TEXT NOT NULL,
+        rationale           TEXT,
+        conditions_json     TEXT,
+        evidence_basis      TEXT
     );
 
     CREATE TABLE IF NOT EXISTS verification_commands (
@@ -120,9 +148,12 @@ _CREATE_INDEXES = [
     "CREATE INDEX IF NOT EXISTS idx_entries_category_id ON cme_entries(category_id)",
     "CREATE INDEX IF NOT EXISTS idx_entries_function ON cme_entries(function_id)",
     "CREATE INDEX IF NOT EXISTS idx_entries_attenuation ON cme_entries(attenuation_type)",
+    "CREATE INDEX IF NOT EXISTS idx_entries_evidence_state ON cme_entries(evidence_state)",
     "CREATE INDEX IF NOT EXISTS idx_cvss_cme ON cvss_vector_impacts(cme_id)",
     "CREATE INDEX IF NOT EXISTS idx_cwe_cme ON cwe_relationships(cme_id)",
     "CREATE INDEX IF NOT EXISTS idx_cwe_id ON cwe_relationships(cwe_id)",
+    "CREATE INDEX IF NOT EXISTS idx_relationships_target ON relationships(target_namespace, target_id)",
+    "CREATE INDEX IF NOT EXISTS idx_bindings_namespace ON framework_bindings(namespace, identifier)",
     "CREATE INDEX IF NOT EXISTS idx_scf_cme ON scf_identifiers(cme_id)",
     "CREATE INDEX IF NOT EXISTS idx_scf_id ON scf_identifiers(scf_id)",
 ]
@@ -136,13 +167,28 @@ def init_db(conn: psycopg.Connection) -> None:
             conn.execute(statement)
     for stmt in _CREATE_INDEXES:
         conn.execute(stmt)
+    for statement in (
+        "ALTER TABLE cme_entries ADD COLUMN IF NOT EXISTS effect_mode TEXT",
+        "ALTER TABLE cme_entries ADD COLUMN IF NOT EXISTS evidence_state TEXT",
+        "ALTER TABLE cme_entries ADD COLUMN IF NOT EXISTS efficacy_json TEXT",
+    ):
+        conn.execute(statement)
+    conn.execute(
+        """UPDATE cme_entries
+           SET effect_mode = COALESCE(effect_mode, CASE
+               WHEN tactic = 'Detect' THEN 'detective'
+               WHEN tactic IN ('Evict', 'Restore') THEN 'corrective'
+               ELSE 'preventive' END),
+               evidence_state = COALESCE(evidence_state, 'unquantified'),
+               efficacy_json = COALESCE(efficacy_json, '{"conditions":["Legacy database row migrated pending evidence review."]}')"""
+    )
     conn.commit()
 
 
 def reset_db(conn: psycopg.Connection) -> None:
     """Drop all tables and recreate — used only by the seed script."""
-    for table in ["references_", "scf_identifiers", "verification_commands",
-                  "cwe_relationships", "cvss_vector_impacts", "cme_entries", "functions"]:
+    for table in ["references_", "scf_identifiers", "verification_commands", "framework_bindings",
+                  "relationships", "cwe_relationships", "cvss_vector_impacts", "cme_entries", "functions"]:
         conn.execute(f"DROP TABLE IF EXISTS {table} CASCADE")
     init_db(conn)
 
@@ -177,11 +223,11 @@ def insert_entry(conn: psycopg.Connection, entry: dict) -> None:
     conn.execute(
         """INSERT INTO cme_entries
            (cme_id, control_name, description, tactic, category, category_id,
-            function_id, control_layer, attenuation_type,
+            function_id, control_layer, effect_mode, evidence_state, efficacy_json, attenuation_type,
             confidence, platforms_json, d3fend_technique_id, d3fend_technique_name,
             cve_schema_version, cve_affected_json)
            VALUES (%(cme_id)s, %(control_name)s, %(description)s, %(tactic)s, %(category)s,
-                   %(category_id)s, %(function_id)s, %(control_layer)s, %(attenuation_type)s,
+                   %(category_id)s, %(function_id)s, %(control_layer)s, %(effect_mode)s, %(evidence_state)s, %(efficacy_json)s, %(attenuation_type)s,
                    %(confidence)s, %(platforms_json)s,
                    %(d3fend_technique_id)s, %(d3fend_technique_name)s,
                    %(cve_schema_version)s, %(cve_affected_json)s)
@@ -193,6 +239,9 @@ def insert_entry(conn: psycopg.Connection, entry: dict) -> None:
                category_id = EXCLUDED.category_id,
                function_id = EXCLUDED.function_id,
                control_layer = EXCLUDED.control_layer,
+               effect_mode = EXCLUDED.effect_mode,
+               evidence_state = EXCLUDED.evidence_state,
+               efficacy_json = EXCLUDED.efficacy_json,
                attenuation_type = EXCLUDED.attenuation_type,
                confidence = EXCLUDED.confidence,
                platforms_json = EXCLUDED.platforms_json,
@@ -209,7 +258,10 @@ def insert_entry(conn: psycopg.Connection, entry: dict) -> None:
             "category_id": entry["category_id"],
             "function_id": entry.get("function_id"),
             "control_layer": entry.get("control_layer"),
-            "attenuation_type": entry.get("attenuation_type", "deterministic"),
+            "effect_mode": entry["effect_mode"],
+            "evidence_state": entry["evidence_state"],
+            "efficacy_json": json.dumps(entry.get("efficacy")) if entry.get("efficacy") else None,
+            "attenuation_type": entry.get("attenuation_type"),
             "confidence": entry.get("confidence"),
             "platforms_json": json.dumps(entry.get("platforms", [])),
             "d3fend_technique_id": entry.get("d3fend_mapping", {}).get("technique_id"),
@@ -219,7 +271,7 @@ def insert_entry(conn: psycopg.Connection, entry: dict) -> None:
         },
     )
 
-    for table in ("cvss_vector_impacts", "cwe_relationships", "scf_identifiers", "verification_commands", "references_"):
+    for table in ("cvss_vector_impacts", "cwe_relationships", "relationships", "framework_bindings", "scf_identifiers", "verification_commands", "references_"):
         conn.execute(f"DELETE FROM {table} WHERE cme_id = %(cme_id)s", {"cme_id": entry["cme_id"]})
 
     for impact in entry.get("cvss_vector_impacts", []):
@@ -241,6 +293,28 @@ def insert_entry(conn: psycopg.Connection, entry: dict) -> None:
         conn.execute(
             "INSERT INTO cwe_relationships (cme_id, cwe_id) VALUES (%(cme_id)s, %(cwe_id)s)",
             {"cme_id": entry["cme_id"], "cwe_id": cwe},
+        )
+
+    for relationship in entry.get("relationships", []):
+        conn.execute(
+            """INSERT INTO relationships
+               (cme_id, target_namespace, target_id, relationship_type, method, properties_json, rationale, evidence_state)
+               VALUES (%(cme_id)s, %(target_namespace)s, %(target_id)s, %(relationship_type)s, %(method)s, %(properties_json)s, %(rationale)s, %(evidence_state)s)""",
+            {"cme_id": entry["cme_id"], "target_namespace": relationship["target_namespace"],
+             "target_id": relationship["target_id"], "relationship_type": relationship["relationship_type"],
+             "method": relationship.get("method"), "properties_json": json.dumps(relationship["properties"]) if relationship.get("properties") else None,
+             "rationale": relationship.get("rationale"), "evidence_state": relationship.get("evidence_state")},
+        )
+
+    for binding in entry.get("framework_bindings", []):
+        conn.execute(
+            """INSERT INTO framework_bindings
+               (cme_id, namespace, version, identifier, value, relationship_type, rationale, conditions_json, evidence_basis)
+               VALUES (%(cme_id)s, %(namespace)s, %(version)s, %(identifier)s, %(value)s, %(relationship_type)s, %(rationale)s, %(conditions_json)s, %(evidence_basis)s)""",
+            {"cme_id": entry["cme_id"], "namespace": binding["namespace"], "version": binding.get("version"),
+             "identifier": binding["identifier"], "value": binding.get("value"), "relationship_type": binding["relationship_type"],
+             "rationale": binding.get("rationale"), "conditions_json": json.dumps(binding["conditions"]) if binding.get("conditions") else None,
+             "evidence_basis": binding.get("evidence_basis")},
         )
 
     for scf in entry.get("scf_identifiers", []):
@@ -321,7 +395,7 @@ def get_attenuation_for_cve(conn: psycopg.Connection, active_cme_ids: list[str])
     if not active_cme_ids:
         return []
     rows = conn.execute(
-        """SELECT e.cme_id, e.control_name, e.attenuation_type,
+        """SELECT e.cme_id, e.control_name, e.evidence_state,
                   v.metric, v.from_value, v.to_value, v.rationale,
                   v.probability, v.evidence_basis, v.conditions_json
            FROM cme_entries e
@@ -526,9 +600,36 @@ def _hydrate_batch(conn: psycopg.Connection, entries: list[dict]) -> list[dict]:
     ).fetchall():
         refs_by_id[r["cme_id"]].append({"source": r["source"], "url": r["url"], "section": r["section"]})
 
+    relationships_by_id: dict[str, list] = defaultdict(list)
+    for r in conn.execute(
+        """SELECT cme_id, target_namespace, target_id, relationship_type, method,
+                  properties_json, rationale, evidence_state
+           FROM relationships WHERE cme_id = ANY(%(ids)s)""",
+        {"ids": cme_ids},
+    ).fetchall():
+        relationship = {k: r[k] for k in ("target_namespace", "target_id", "relationship_type", "method", "rationale", "evidence_state") if r[k] is not None}
+        if r["properties_json"]:
+            relationship["properties"] = json.loads(r["properties_json"])
+        relationships_by_id[r["cme_id"]].append(relationship)
+
+    bindings_by_id: dict[str, list] = defaultdict(list)
+    for r in conn.execute(
+        """SELECT cme_id, namespace, version, identifier, value, relationship_type,
+                  rationale, conditions_json, evidence_basis
+           FROM framework_bindings WHERE cme_id = ANY(%(ids)s)""",
+        {"ids": cme_ids},
+    ).fetchall():
+        binding = {k: r[k] for k in ("namespace", "version", "identifier", "value", "relationship_type", "rationale", "evidence_basis") if r[k] is not None}
+        if r["conditions_json"]:
+            binding["conditions"] = json.loads(r["conditions_json"])
+        bindings_by_id[r["cme_id"]].append(binding)
+
     for entry in entries:
         cme_id = entry["cme_id"]
         entry["platforms"] = json.loads(entry.pop("platforms_json") or "[]")
+        efficacy_raw = entry.pop("efficacy_json", None)
+        if efficacy_raw:
+            entry["efficacy"] = json.loads(efficacy_raw)
 
         cve_affected_raw = entry.pop("cve_affected_json", None)
         if cve_affected_raw:
@@ -548,6 +649,10 @@ def _hydrate_batch(conn: psycopg.Connection, entries: list[dict]) -> list[dict]:
 
         entry["cvss_vector_impacts"] = impacts_by_id.get(cme_id, [])
         entry["cwe_relationships"] = cwes_by_id.get(cme_id, [])
+        if cme_id in relationships_by_id:
+            entry["relationships"] = relationships_by_id[cme_id]
+        if cme_id in bindings_by_id:
+            entry["framework_bindings"] = bindings_by_id[cme_id]
         scf = scfs_by_id.get(cme_id, [])
         if scf:
             entry["scf_identifiers"] = scf

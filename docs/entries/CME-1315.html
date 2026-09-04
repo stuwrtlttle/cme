@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-1315</div>
   <h1>Allowlist-Preferred Input Validation (Deny-by-Default Filtering)</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-application">Application</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
@@ -64,10 +61,10 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            
+
             <td class="cvss-rationale">The attacker must find an input that satisfies the explicit allowlist criteria while still achieving the malicious objective — this is fundamentally harder than finding an input that evades a denylist, because novel or unexpected input formats are rejected by default rather than implicitly permitted</td>
           </tr>
-          
+
           <tr>
             <td><strong>Integrity</strong> (I)</td>
             <td>
@@ -75,82 +72,83 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-            
+
             <td class="cvss-rationale">Unauthorized operations (SSRF to internal hosts, deserialization of gadget types, sandbox escape via unblocked APIs, policy-bypassed file access) are prevented because only explicitly permitted targets, types, capabilities, or destinations are accepted</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/184.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-184</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/183.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-183</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/693.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-693</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/20.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-20</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/1286.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-1286</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/601.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-601</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Review application source code and configuration to verify that security-sensitive input validation uses explicit allowlists with default-deny semantics rather than denylists with default-permit. Check SSRF filters, deserialization type validators, sandbox capability lists, and application security policy files.</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rn &#39;allowlist\|whitelist\|permitted\|allowed_types\|SAFE_&#39; &lt;app_source&gt;/ | head -20
-        
+
         <br><span class="cmd-expected"># Expected: Security validation uses allowlist patterns (explicit permit with default deny)</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rn &#39;blocklist\|blacklist\|denylist\|BLOCKED_\|UNSAFE_\|DANGEROUS_&#39; &lt;app_source&gt;/ | head -20
-        
+
         <br><span class="cmd-expected"># Expected: Denylist patterns should be supplementary to allowlists, not the sole validation mechanism</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-1314.html">&larr; CME-1314: Input Canonicalization Before Security Decision</a>
-      
-      
+
+
       <a href="CME-1316.html">CME-1316: Algorithmic Complexity Safeguards (Pattern/Regex Execution Limits) &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -160,40 +158,40 @@
       <p>Application Input Validation</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">input-validation</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">WEB-09</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>Any</li>
-        
+
         <li>Windows Server 2019</li>
-        
+
         <li>Windows Server 2022</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -201,7 +199,8 @@
         <li><strong>ID:</strong> CME-1315</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Application</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 6</li>
         <li><strong>CVSS Mods:</strong> 2</li>
       </ul>
@@ -212,7 +211,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

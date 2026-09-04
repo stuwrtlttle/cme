@@ -8,20 +8,15 @@
   <div class="entry-meta">
     <span class="badge badge-tactic-{{ entry.tactic|lower }}">{{ entry.tactic }}</span>
     <span class="badge badge-layer-{{ entry.control_layer | lower | replace('/', '-') | replace(' ', '') }}">{{ entry.control_layer }}</span>
-    {% if entry.attenuation_type == 'probabilistic' %}
-    <span class="badge badge-attenuation-probabilistic">Probabilistic</span>
-    {% else %}
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    {% endif %}
-    {% if entry.confidence %}
-    <span class="badge badge-confidence-{{ entry.confidence|lower }}">{{ entry.confidence }} Confidence</span>
-    {% endif %}
+    <span class="badge badge-attenuation-{{ entry.evidence_state }}">{{ entry.evidence_state | title }} evidence</span>
+    <span class="badge badge-layer-{{ entry.effect_mode }}">{{ entry.effect_mode | title }}</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
 
+    {% if entry.cvss_vector_impacts %}
     <section>
       <h2>Description</h2>
       <p class="entry-description">{{ entry.description }}</p>
@@ -34,7 +29,7 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            {% if entry.attenuation_type == 'probabilistic' %}
+            {% if entry.evidence_state == 'quantified' %}
             <th>Probability</th>
             {% endif %}
             <th>Rationale</th>
@@ -49,7 +44,7 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">{{ impact.to }}</span>
             </td>
-            {% if entry.attenuation_type == 'probabilistic' %}
+            {% if entry.evidence_state == 'quantified' %}
             <td class="cvss-probability">
               {{ "%.0f%%"|format((impact.probability|default(0.5)) * 100) }}
               {% if impact.evidence_basis %}
@@ -70,6 +65,7 @@
         </tbody>
       </table>
     </section>
+    {% endif %}
 
     {% if entry.cwe_relationships %}
     <section>
@@ -213,7 +209,8 @@
         <li><strong>ID:</strong> {{ entry.cme_id }}</li>
         <li><strong>Tactic:</strong> {{ entry.tactic }}</li>
         <li><strong>Layer:</strong> {{ entry.control_layer }}</li>
-        <li><strong>Attenuation:</strong> {{ entry.attenuation_type | default('deterministic') }}</li>
+        <li><strong>Effect:</strong> {{ entry.effect_mode }}</li>
+        <li><strong>Evidence:</strong> {{ entry.evidence_state }}</li>
         <li><strong>CWEs:</strong> {{ entry.cwe_relationships | default([]) | length }}</li>
         <li><strong>CVSS Mods:</strong> {{ entry.cvss_vector_impacts | length }}</li>
       </ul>

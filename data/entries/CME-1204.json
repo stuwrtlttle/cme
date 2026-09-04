@@ -1,7 +1,7 @@
 {
   "cme_id": "CME-1204",
   "control_name": "Service Watchdog and Automatic Restart (systemd WatchdogSec/Restart)",
-  "description": "Configures systemd service units with watchdog monitoring (WatchdogSec=) and automatic restart policies (Restart=on-failure or Restart=always, RestartSec=) to recover services that become unresponsive or are killed due to resource exhaustion. When a memory leak causes the OOM killer to terminate a service or the process hangs due to resource starvation, systemd automatically restarts the service from a clean state. The watchdog mechanism requires the service to periodically notify systemd (via sd_notify WATCHDOG=1); failure to notify within the WatchdogSec interval triggers a restart. Combined with cgroup memory limits (CME-704), this provides both containment and recovery \u2014 the cgroup bounds the leak, and systemd restarts the service when the bound is hit.",
+  "description": "Configures systemd service units with watchdog monitoring (WatchdogSec=) and automatic restart policies (Restart=on-failure or Restart=always, RestartSec=) to recover services that become unresponsive or are killed due to resource exhaustion. When a memory leak causes the OOM killer to terminate a service or the process hangs due to resource starvation, systemd automatically restarts the service from a clean state. The watchdog mechanism requires the service to periodically notify systemd (via sd_notify WATCHDOG=1); failure to notify within the WatchdogSec interval triggers a restart. Combined with cgroup memory limits (CME-704), this provides both containment and recovery — the cgroup bounds the leak, and systemd restarts the service when the bound is hit.",
   "tactic": "Restore",
   "category": "Recovery Controls",
   "category_id": "recovery-controls",
@@ -50,5 +50,73 @@
     "BCD-12",
     "SEA-07",
     "SEA-07.2"
+  ],
+  "effect_mode": "corrective",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-772",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-401",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-400",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-770",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-835",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/A",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "BCD-12",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "SEA-07",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "SEA-07.2",
+      "relationship_type": "maps_to"
+    }
   ]
 }

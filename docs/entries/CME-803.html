@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-803</div>
   <h1>Account Lockout Policy (pam_faillock)</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-identity">Identity</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
@@ -64,77 +61,78 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            
+
             <td class="cvss-rationale">Brute force limited to N attempts before lockout</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/307.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-307</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Check pam_faillock configuration</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep faillock /etc/pam.d/system-auth
-        
+
         <br><span class="cmd-expected"># Expected: pam_faillock.so</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: rhel</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep deny /etc/security/faillock.conf
-        
+
         <br><span class="cmd-expected"># Expected: deny = 5</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: rhel</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> net accounts | Select-String &#39;Lockout threshold&#39;
-        
+
         <br><span class="cmd-expected"># Expected: Lockout threshold                        5</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: windows</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> net accounts | Select-String &#39;Lockout duration&#39;
-        
-        <br><span class="cmd-expected"># Expected: Lockout duration (minutes)               30</span>
-        
-      </div>
-      
-      <div class="cmd-platform">Platform: windows</div>
-      
-      
-    </section>
-    
 
-    
+        <br><span class="cmd-expected"># Expected: Lockout duration (minutes)               30</span>
+
+      </div>
+
+      <div class="cmd-platform">Platform: windows</div>
+
+
+    </section>
+
+
+
     <section>
       <h2>Applicability (CVE 5.2.0 Schema)</h2>
       <table class="cvss-table">
@@ -148,40 +146,40 @@
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td>microsoft</td>
             <td>windows</td>
             <td class="cpe-cell">
-              
+
               <code class="cpe-string">cpe:2.3:o:microsoft:windows_10:*:*:*:*:*:*:*:*</code><br>
-              
+
               <code class="cpe-string">cpe:2.3:o:microsoft:windows_11:*:*:*:*:*:*:*:*</code><br>
-              
+
               <code class="cpe-string">cpe:2.3:o:microsoft:windows_server_2019:*:*:*:*:*:*:*</code><br>
-              
+
               <code class="cpe-string">cpe:2.3:o:microsoft:windows_server_2022:*:*:*:*:*:*:*</code>
-              
+
             </td>
             <td>All</td>
             <td><span class="badge badge-confidence-high">applicable</span></td>
           </tr>
-          
+
         </tbody>
       </table>
-      
-    </section>
-    
 
-    
+    </section>
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-802.html">&larr; CME-802: Password Quality Enforcement (pwquality)</a>
-      
-      
+
+
       <a href="CME-804.html">CME-804: SSH Key-Only Authentication &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -191,44 +189,44 @@
       <p>Credential Hardening</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">password-policy</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">IAC-22</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>RHEL 9</li>
-        
+
         <li>RHEL 8</li>
-        
+
         <li>Windows 10</li>
-        
+
         <li>Windows 11</li>
-        
+
         <li>Windows Server 2022</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -236,7 +234,8 @@
         <li><strong>ID:</strong> CME-803</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Identity</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 1</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
@@ -247,7 +246,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

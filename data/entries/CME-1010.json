@@ -1,7 +1,7 @@
 {
   "cme_id": "CME-1010",
   "control_name": "cgroup Memory Pressure Monitoring (memory.events / PSI)",
-  "description": "Monitors cgroups v2 memory pressure signals \u2014 memory.events (oom_kill, high, max counters) and Pressure Stall Information (PSI) via /proc/pressure/memory \u2014 to detect resource leaks before they exhaust system memory. When a cgroup approaches its memory limit due to a resource leak, these interfaces provide deterministic signals (memory.high threshold crossings, oom_kill increments, PSI stall percentages) that monitoring systems consume to trigger alerts and automated remediation. Complements cgroup memory limits (CME-704) which contain the leak by adding detection of when containment is being stressed. The memory.events counters are monotonically increasing and per-cgroup, enabling precise attribution of pressure to the leaking workload.",
+  "description": "Monitors cgroups v2 memory pressure signals — memory.events (oom_kill, high, max counters) and Pressure Stall Information (PSI) via /proc/pressure/memory — to detect resource leaks before they exhaust system memory. When a cgroup approaches its memory limit due to a resource leak, these interfaces provide deterministic signals (memory.high threshold crossings, oom_kill increments, PSI stall percentages) that monitoring systems consume to trigger alerts and automated remediation. Complements cgroup memory limits (CME-704) which contain the leak by adding detection of when containment is being stressed. The memory.events counters are monotonically increasing and per-cgroup, enabling precise attribution of pressure to the leaking workload.",
   "tactic": "Detect",
   "category": "Integrity Detection",
   "category_id": "integrity-detection",
@@ -13,7 +13,7 @@
       "metric": "AC",
       "from": "L",
       "to": "H",
-      "rationale": "Compensating control: cgroup memory pressure events (memory.events oom_kill/high counters and PSI stall metrics) provide deterministic early warning of resource leaks before system-wide exhaustion occurs, enabling operators to identify and remediate leaking processes within the monitoring interval \u2014 the attacker must exhaust resources faster than the monitoring and response cycle to achieve sustained denial of service."
+      "rationale": "Compensating control: cgroup memory pressure events (memory.events oom_kill/high counters and PSI stall metrics) provide deterministic early warning of resource leaks before system-wide exhaustion occurs, enabling operators to identify and remediate leaking processes within the monitoring interval — the attacker must exhaust resources faster than the monitoring and response cycle to achieve sustained denial of service."
     }
   ],
   "cwe_relationships": [
@@ -53,5 +53,61 @@
   "scf_identifiers": [
     "MON-01",
     "MON-01.4"
+  ],
+  "effect_mode": "detective",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-772",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-401",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-400",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-770",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "MON-01",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "MON-01.4",
+      "relationship_type": "maps_to"
+    }
   ]
 }

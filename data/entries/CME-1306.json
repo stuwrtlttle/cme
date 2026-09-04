@@ -1,7 +1,7 @@
 {
   "cme_id": "CME-1306",
   "control_name": "XSS Prevention (Context-Aware Output Encoding)",
-  "description": "Application applies context-aware output encoding to all user-controlled data before rendering in HTML, JavaScript, CSS, or URL contexts. Uses framework auto-escaping (Django, Jinja2 autoescape, React JSX) rather than manual sanitization. Combined with CSP headers (CME-905), provides defense-in-depth against XSS.",
+  "description": "Application applies context-aware output encoding to every untrusted value immediately before it reaches an HTML text, HTML attribute, JavaScript, CSS, URL, SVG, or DOM insertion context. The encoder is selected for the final parser context; HTML escaping is not used as a substitute for JavaScript, CSS, URL, or attribute encoding. Framework auto-escaping (such as Django or Jinja2 autoescape and React JSX) is enabled for production templates. Raw or safe rendering APIs, dangerouslySetInnerHTML, innerHTML, document.write, and equivalent DOM sinks are prohibited or independently reviewed and sanitized. This control prevents attacker input from being interpreted as executable markup or script. CSP in CME-905 provides browser-enforced defense in depth, while WAF filtering in CME-904 is probabilistic defense in depth.",
   "tactic": "Harden",
   "category": "Application Input Validation",
   "category_id": "application-input-validation",
@@ -10,39 +10,84 @@
   "attenuation_type": "deterministic",
   "cvss_vector_impacts": [
     {
-      "metric": "AC",
-      "from": "L",
-      "to": "H",
-      "rationale": "XSS payloads are HTML-encoded and rendered as text, not executed"
-    },
-    {
       "metric": "I",
       "from": "H",
       "to": "L",
-      "rationale": "Cannot inject scripts to modify page behavior or steal session tokens"
+      "rationale": "When every untrusted value is encoded for its final output context and dangerous rendering sinks are prohibited or sanitized, attacker input cannot inject script that changes page behavior or performs actions with the victim's authority. Low integrity impact remains possible through the application's intended state-changing operations. This attenuation requires complete source-to-sink coverage, context-correct encoding at insertion time, and review of framework escape hatches and client-side DOM sinks."
     }
   ],
   "cwe_relationships": [
-    "CWE-79"
+    "CWE-79",
+    "CWE-116"
   ],
   "verification": {
-    "method": "Verify template engine auto-escaping is enabled and no raw/safe bypasses for user-controlled data",
+    "method": "Use framework-specific static analysis to trace untrusted values to every server-rendered and client-side sink. Verify that each sink uses the encoder required by its final HTML, attribute, JavaScript, CSS, URL, SVG, or DOM context; that production template auto-escaping is enabled; and that raw or safe rendering APIs, dangerouslySetInnerHTML, innerHTML, document.write, and equivalent sinks are prohibited or independently reviewed and sanitized. Pair source analysis with application-specific dynamic tests covering HTML text, quoted and unquoted attributes, JavaScript strings, CSS, URLs, SVG, DOM insertion, encoded payloads, and mutation-XSS cases. The audit and test commands must cover all production rendering components and emit the exact PASS strings below; set each environment variable to the project's corresponding audit or test command.",
     "commands": [
       {
-        "command": "grep -rn 'autoescape\\|AUTOESCAPE' <app_source>/",
-        "expected": "Auto-escaping enabled in template config",
+        "command": "test -n \"$CME_XSS_SOURCE_AUDIT_COMMAND\" || { echo 'ERROR: set CME_XSS_SOURCE_AUDIT_COMMAND'; exit 2; }; output=$(sh -c \"$CME_XSS_SOURCE_AUDIT_COMMAND\") && test \"$output\" = 'PASS: all untrusted rendering sinks use context-correct encoding' && printf '%s\\n' \"$output\"",
+        "expected": "PASS: all untrusted rendering sinks use context-correct encoding",
+        "platform": "any"
+      },
+      {
+        "command": "test -n \"$CME_XSS_SERVER_TEST_COMMAND\" || { echo 'ERROR: set CME_XSS_SERVER_TEST_COMMAND'; exit 2; }; output=$(sh -c \"$CME_XSS_SERVER_TEST_COMMAND\") && test \"$output\" = 'PASS: server-rendered XSS payloads render as inert data' && printf '%s\\n' \"$output\"",
+        "expected": "PASS: server-rendered XSS payloads render as inert data",
+        "platform": "any"
+      },
+      {
+        "command": "test -n \"$CME_XSS_CLIENT_TEST_COMMAND\" || { echo 'ERROR: set CME_XSS_CLIENT_TEST_COMMAND'; exit 2; }; output=$(sh -c \"$CME_XSS_CLIENT_TEST_COMMAND\") && test \"$output\" = 'PASS: client-side XSS payloads cannot reach executable DOM sinks' && printf '%s\\n' \"$output\"",
+        "expected": "PASS: client-side XSS payloads cannot reach executable DOM sinks",
         "platform": "any"
       }
     ]
   },
   "confidence": "High",
   "platforms": [
-    "Any",
-    "Windows Server 2019",
-    "Windows Server 2022"
+    "Any"
   ],
   "scf_identifiers": [
     "WEB-01.1",
     "WEB-11"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-79",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-116",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/I",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "WEB-01.1",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "WEB-11",
+      "relationship_type": "maps_to"
+    }
   ]
 }

@@ -13,7 +13,7 @@
       "metric": "AC",
       "from": "L",
       "to": "H",
-      "rationale": "The most common filesystem TOCTOU and symlink following pattern \u2014 symlink or hardlink swap in a sticky world-writable directory like /tmp between a privileged process check and use \u2014 is blocked at the kernel level. The attacker must find a TOCTOU target outside of protected directories, exploit a race that does not involve filesystem links, or resort to more complex techniques such as procfs-based redirects. This significantly increases the complexity required for successful exploitation."
+      "rationale": "The most common filesystem TOCTOU and symlink following pattern — symlink or hardlink swap in a sticky world-writable directory like /tmp between a privileged process check and use — is blocked at the kernel level. The attacker must find a TOCTOU target outside of protected directories, exploit a race that does not involve filesystem links, or resort to more complex techniques such as procfs-based redirects. This significantly increases the complexity required for successful exploitation."
     }
   ],
   "cwe_relationships": [
@@ -57,5 +57,61 @@
   "scf_identifiers": [
     "CFG-02",
     "END-02"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-59",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-61",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-367",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-362",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "CFG-02",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "END-02",
+      "relationship_type": "maps_to"
+    }
   ]
 }

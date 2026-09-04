@@ -20,28 +20,25 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-1304</div>
   <h1>SSRF Prevention (Outbound Request Allowlist)</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-application">Application</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-medium">Medium Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
 
+
     <section>
       <h2>Description</h2>
-      <p class="entry-description">Application-level validation that restricts outbound requests and file access to an allowlist of permitted destinations, schemes, and paths. Blocks requests to internal metadata endpoints (169.254.169.254), localhost, private RFC1918 ranges, and file:// or gopher:// schemes. Prevents attackers from using the application as a proxy to access internal resources.</p>
+      <p class="entry-description">Application-level validation that restricts server-initiated requests to an explicit allowlist of permitted schemes, destinations, ports, and paths. The application canonicalizes the URL once, rejects embedded credentials and ambiguous representations, resolves the destination before connecting, validates every resolved IPv4 and IPv6 address, and uses the validated address for the connection to prevent DNS rebinding and time-of-check/time-of-use bypasses. It rejects loopback, link-local, private, unique-local, multicast, and unspecified address ranges; disables unsupported schemes such as file:// and gopher://; revalidates every redirect target; prevents unintended proxy use; and limits response size and duration. This SSRF-specific control specializes the general allowlist pattern in CME-1315. Network egress restriction in CME-208 provides defense in depth when application validation is bypassed.</p>
     </section>
 
     <section>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Confidentiality</strong> (C)</td>
             <td>
@@ -64,68 +61,78 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-            
-            <td class="cvss-rationale">Cannot reach internal services, cloud metadata, or local files via SSRF</td>
+
+            <td class="cvss-rationale">A correctly enforced destination allowlist prevents the application from retrieving high-value data from internal services, cloud metadata endpoints, and local files. Low confidentiality impact remains possible through data exposed by an explicitly permitted destination or through limited information disclosed by rejection and timing behavior. This attenuation applies only when address validation is bound to the connection and repeated for every redirect.</td>
           </tr>
-          
-          <tr>
-            <td><strong>Attack Complexity</strong> (AC)</td>
-            <td>
-              <span class="cvss-from">L</span>
-              <span class="cvss-arrow">&rarr;</span>
-              <span class="cvss-to">H</span>
-            </td>
-            
-            <td class="cvss-rationale">Destination allowlist blocks common SSRF bypass techniques</td>
-          </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/918.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-918</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
-      <p class="verification-method">Test application with SSRF payloads targeting internal endpoints</p>
-      
-      
+
+      <p class="verification-method">Review the outbound request implementation and dynamically test its application-specific SSRF sink. Confirm explicit allowlist enforcement; single-pass canonicalization; validation of every resolved IPv4 and IPv6 address; connection to the validated address; redirect revalidation; rejection of credentials, unsupported schemes, ambiguous address forms, loopback, link-local, private, unique-local, multicast, and unspecified ranges; proxy restrictions; and response size and timeout limits. The test endpoint must accept the candidate destination through a url query parameter; adapt the request wrapper if the application uses a different interface.</p>
+
+
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> curl -s http://app/fetch?url=http://169.254.169.254/latest/meta-data/ -o /dev/null -w &#39;%{http_code}&#39;
-        
-        <br><span class="cmd-expected"># Expected: 400 or 403</span>
-        
+        <span class="cmd-prompt">$</span> test -n &#34;$CME_SSRF_TEST_ENDPOINT&#34; || { echo &#39;ERROR: set CME_SSRF_TEST_ENDPOINT&#39;; exit 2; }; failed=0; for payload in &#39;http://169.254.169.254/latest/meta-data/&#39; &#39;http://127.0.0.1/&#39; &#39;http://[::1]/&#39; &#39;http://10.0.0.1/&#39; &#39;http://172.16.0.1/&#39; &#39;http://192.168.0.1/&#39; &#39;http://[fc00::1]/&#39; &#39;http://[fe80::1]/&#39; &#39;file:///etc/passwd&#39; &#39;gopher://127.0.0.1:11211/_stats&#39; &#39;http://2130706433/&#39; &#39;http://0177.0.0.1/&#39; &#39;http://user@127.0.0.1/&#39;; do code=$(curl -sS --max-time 10 -o /dev/null -w &#39;%{http_code}&#39; -G --data-urlencode &#34;url=$payload&#34; &#34;$CME_SSRF_TEST_ENDPOINT&#34;) || failed=1; case &#34;$code&#34; in 400|403) ;; *) printf &#39;FAIL %s -&gt; %s\n&#39; &#34;$payload&#34; &#34;$code&#34;; failed=1 ;; esac; done; test &#34;$failed&#34; -eq 0 &amp;&amp; echo &#39;PASS: all direct SSRF payloads rejected&#39;
+
+        <br><span class="cmd-expected"># Expected: PASS: all direct SSRF payloads rejected</span>
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> test -n &#34;$CME_SSRF_TEST_ENDPOINT&#34; &amp;&amp; test -n &#34;$CME_SSRF_REDIRECT_URL&#34; &amp;&amp; code=$(curl -sS --max-time 10 -o /dev/null -w &#39;%{http_code}&#39; -G --data-urlencode &#34;url=$CME_SSRF_REDIRECT_URL&#34; &#34;$CME_SSRF_TEST_ENDPOINT&#34;) &amp;&amp; case &#34;$code&#34; in 400|403) echo &#39;PASS: redirect to prohibited destination rejected&#39; ;; *) printf &#39;FAIL: redirect payload returned %s\n&#39; &#34;$code&#34;; exit 1 ;; esac
+
+        <br><span class="cmd-expected"># Expected: PASS: redirect to prohibited destination rejected</span>
+
+      </div>
+
+      <div class="cmd-platform">Platform: any</div>
+
+
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> test -n &#34;$CME_SSRF_TEST_ENDPOINT&#34; &amp;&amp; test -n &#34;$CME_SSRF_REBIND_URL&#34; &amp;&amp; code=$(curl -sS --max-time 10 -o /dev/null -w &#39;%{http_code}&#39; -G --data-urlencode &#34;url=$CME_SSRF_REBIND_URL&#34; &#34;$CME_SSRF_TEST_ENDPOINT&#34;) &amp;&amp; case &#34;$code&#34; in 400|403) echo &#39;PASS: DNS rebinding target rejected&#39; ;; *) printf &#39;FAIL: rebinding payload returned %s\n&#39; &#34;$code&#34;; exit 1 ;; esac
+
+        <br><span class="cmd-expected"># Expected: PASS: DNS rebinding target rejected</span>
+
+      </div>
+
+      <div class="cmd-platform">Platform: any</div>
+
+
     </section>
-    
 
-    
 
-    
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-1303.html">&larr; CME-1303: Application-Level Filesystem Access Confinement</a>
-      
-      
+
+
       <a href="CME-1305.html">CME-1305: SQL Injection Prevention (Parameterized Queries) &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -135,42 +142,38 @@
       <p>Application Input Validation</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">input-validation</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">NET-04.1</span>
-        
+
         <span class="cwe-link">WEB-09</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>Any</li>
-        
-        <li>Windows Server 2019</li>
-        
-        <li>Windows Server 2022</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -178,9 +181,10 @@
         <li><strong>ID:</strong> CME-1304</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Application</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 1</li>
-        <li><strong>CVSS Mods:</strong> 2</li>
+        <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
     </section>
   </aside>
@@ -189,7 +193,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

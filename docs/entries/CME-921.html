@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-921</div>
   <h1>URL Request Path Canonicalization Before Authorization</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-application">Application</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
@@ -64,116 +61,117 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            
+
             <td class="cvss-rationale">Attacker can no longer bypass authorization using non-canonical URL forms (matrix parameters, double encoding, path segment equivalences, trailing characters); exploitation requires finding a bypass that survives full URI canonicalization before the authorization decision evaluates the request</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/551.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-551</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/41.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-41</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/863.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-863</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/696.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-696</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Test that non-canonical URL forms (matrix parameters, dot-segments, encoded path separators) do not bypass authorization on protected endpoints; inspect web server and framework configuration for canonicalization-before-auth settings</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> curl -s -o /dev/null -w &#39;%{http_code}&#39; &#39;http://&lt;target&gt;/admin/;anything&#39;
-        
+
         <br><span class="cmd-expected"># Expected: 401 or 403 — matrix parameter does not bypass auth</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> curl -s -o /dev/null -w &#39;%{http_code}&#39; &#39;http://&lt;target&gt;/./admin/&#39;
-        
+
         <br><span class="cmd-expected"># Expected: 401 or 403 — dot-segment does not bypass auth</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> curl -s -o /dev/null -w &#39;%{http_code}&#39; &#39;http://&lt;target&gt;/%2e/admin/&#39;
-        
+
         <br><span class="cmd-expected"># Expected: 401 or 403 — encoded dot does not bypass auth</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rn &#39;StrictHttpFirewall\|setAllowSemicolon\|setAllowUrlEncodedPercent\|setAllowUrlEncodedSlash&#39; &lt;app_source&gt;/
-        
+
         <br><span class="cmd-expected"># Expected: StrictHttpFirewall configured with restrictive defaults</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -E &#39;merge_slashes|proxy_pass.*\$uri&#39; /etc/nginx/nginx.conf /etc/nginx/conf.d/*.conf 2&gt;/dev/null
-        
+
         <br><span class="cmd-expected"># Expected: merge_slashes on (default); proxy_pass uses normalized $uri</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -i &#39;AllowEncodedSlashes|AllowEncodedPercent&#39; /etc/httpd/conf/*.conf /etc/apache2/*.conf 2&gt;/dev/null
-        
+
         <br><span class="cmd-expected"># Expected: AllowEncodedSlashes NoDecode or absent (default deny)</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-920.html">&larr; CME-920: Database Least-Privilege Access Control</a>
-      
-      
+
+
       <a href="CME-923.html">CME-923: Mass-Assignment Prevention Through Explicit Request Schemas &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -183,40 +181,40 @@
       <p>Application Controls</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">request-filtering</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">WEB-01</span>
-        
+
         <span class="cwe-link">WEB-09</span>
-        
+
         <span class="cwe-link">IAC-20</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>Any</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -224,7 +222,8 @@
         <li><strong>ID:</strong> CME-921</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Application</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 4</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
@@ -235,7 +234,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-402</div>
   <h1>FIPS 140-3 Mode</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-os-kernel">OS/Kernel</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
@@ -64,85 +61,86 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            
+
             <td class="cvss-rationale">All crypto operations use validated, audited implementations</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/327.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-327</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/326.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-326</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/328.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-328</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Verify FIPS mode is enabled</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> fips-mode-setup --check
-        
+
         <br><span class="cmd-expected"># Expected: FIPS mode is enabled</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: rhel</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> cat /proc/sys/crypto/fips_enabled
-        
+
         <br><span class="cmd-expected"># Expected: 1</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h2>References</h2>
       <ul class="sidebar-list">
-        
+
         <li>
           Red Hat Security Hardening Guide
            &mdash; Switching RHEL to FIPS mode
         </li>
-        
+
       </ul>
     </section>
-    
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-401.html">&larr; CME-401: System-wide Crypto Policy (FUTURE)</a>
-      
-      
+
+
       <a href="CME-403.html">CME-403: TLS 1.3 Enforcement &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -152,40 +150,40 @@
       <p>Cryptographic Controls</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">crypto-policy</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">CRY-01</span>
-        
+
         <span class="cwe-link">IAC-12</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>RHEL 9</li>
-        
+
         <li>RHEL 8</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -193,7 +191,8 @@
         <li><strong>ID:</strong> CME-402</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> OS/Kernel</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 3</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
@@ -204,7 +203,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

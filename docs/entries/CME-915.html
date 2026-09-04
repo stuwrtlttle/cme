@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-915</div>
   <h1>Cross-Origin Request Restriction (Reverse Proxy Origin Enforcement)</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-application">Application</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
@@ -64,96 +61,97 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            
+
             <td class="cvss-rationale">The attacker must achieve a same-origin position (e.g., XSS on the allowed domain or social engineering to access a same-origin page) to bypass the proxy-level origin restriction. A simple cross-origin request from an attacker-controlled domain is rejected by the proxy before reaching the application, significantly increasing the complexity required for successful exploitation.</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/346.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-346</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/352.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-352</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/940.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-940</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/942.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-942</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Check reverse proxy configuration for Origin/Referer header validation on state-changing requests. The proxy should reject requests with an Origin not in the trusted allowlist.</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rE &#34;valid_referers|map.*\$http_origin&#34; /etc/nginx/
-        
+
         <br><span class="cmd-expected"># Expected: Non-empty output — nginx origin validation map or valid_referers directive found</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: rhel</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rE &#34;Require expr.*HTTP_ORIGIN|SetEnvIf Origin&#34; /etc/httpd/conf.d/
-        
+
         <br><span class="cmd-expected"># Expected: Non-empty output — Apache Origin validation rules found</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: rhel</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rE &#34;hdr\(Origin\)|req\.hdr\(Origin\)&#34; /etc/haproxy/
-        
+
         <br><span class="cmd-expected"># Expected: Non-empty output — HAProxy Origin ACL rules found</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: rhel</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> curl -s -o /dev/null -w &#34;%{http_code}&#34; -X POST -H &#34;Origin: https://evil.example.com&#34; https://&lt;your-app&gt;/api/endpoint
-        
+
         <br><span class="cmd-expected"># Expected: 403</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-914.html">&larr; CME-914: Strict CORS Origin Allowlist Enforcement</a>
-      
-      
+
+
       <a href="CME-916.html">CME-916: SameSite Cookie Attribute Enforcement &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -163,38 +161,38 @@
       <p>Application Controls</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">origin-cors</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">NET-18</span>
-        
+
         <span class="cwe-link">WEB-03</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>Any</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -202,7 +200,8 @@
         <li><strong>ID:</strong> CME-915</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Application</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 4</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
@@ -213,7 +212,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

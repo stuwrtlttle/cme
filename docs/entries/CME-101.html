@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-101</div>
   <h1>ASLR (Address Space Layout Randomization)</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-os-kernel">OS/Kernel</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
@@ -64,95 +61,96 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            
+
             <td class="cvss-rationale">Attacker must defeat randomization via info leak or brute force</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/119.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-119</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/120.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-120</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/122.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-122</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/787.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-787</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/125.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-125</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/416.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-416</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/415.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-415</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Check kernel randomize_va_space sysctl is set to 2 (full randomization)</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> cat /proc/sys/kernel/randomize_va_space
-        
+
         <br><span class="cmd-expected"># Expected: 2</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> sysctl kernel.randomize_va_space
-        
+
         <br><span class="cmd-expected"># Expected: kernel.randomize_va_space = 2</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> (Get-ProcessMitigation -System).ASLR.ForceRelocateImages
-        
+
         <br><span class="cmd-expected"># Expected: ON</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: windows</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> (Get-ProcessMitigation -System).ASLR.BottomUp
-        
-        <br><span class="cmd-expected"># Expected: ON</span>
-        
-      </div>
-      
-      <div class="cmd-platform">Platform: windows</div>
-      
-      
-    </section>
-    
 
-    
+        <br><span class="cmd-expected"># Expected: ON</span>
+
+      </div>
+
+      <div class="cmd-platform">Platform: windows</div>
+
+
+    </section>
+
+
+
     <section>
       <h2>Applicability (CVE 5.2.0 Schema)</h2>
       <table class="cvss-table">
@@ -166,117 +164,117 @@
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td>redhat</td>
             <td>enterprise_linux</td>
             <td class="cpe-cell">
-              
+
               <code class="cpe-string">cpe:2.3:o:redhat:enterprise_linux:9:*:*:*:*:*:*:*</code><br>
-              
+
               <code class="cpe-string">cpe:2.3:o:redhat:enterprise_linux:8:*:*:*:*:*:*:*</code>
-              
+
             </td>
             <td>x86_64, aarch64, s390x, ppc64le</td>
             <td><span class="badge badge-confidence-high">applicable</span></td>
           </tr>
-          
+
           <tr>
             <td>suse</td>
             <td>sle-module-basesystem</td>
             <td class="cpe-cell">
-              
+
               <code class="cpe-string">cpe:2.3:o:suse:sles:15:*:*:*:*:*:*:*</code>
-              
+
             </td>
             <td>All</td>
             <td><span class="badge badge-confidence-high">applicable</span></td>
           </tr>
-          
+
           <tr>
             <td>canonical</td>
             <td>ubuntu_linux</td>
             <td class="cpe-cell">
-              
+
               <code class="cpe-string">cpe:2.3:o:canonical:ubuntu_linux:24.04:*:*:*:lts:*:*:*</code>
-              
+
             </td>
             <td>All</td>
             <td><span class="badge badge-confidence-high">applicable</span></td>
           </tr>
-          
+
           <tr>
             <td>fedoraproject</td>
             <td>fedora</td>
             <td class="cpe-cell">
-              
+
               <code class="cpe-string">cpe:2.3:o:fedoraproject:fedora:*:*:*:*:*:*:*:*</code>
-              
+
             </td>
             <td>All</td>
             <td><span class="badge badge-confidence-high">applicable</span></td>
           </tr>
-          
+
           <tr>
             <td>microsoft</td>
             <td>windows</td>
             <td class="cpe-cell">
-              
+
               <code class="cpe-string">cpe:2.3:o:microsoft:windows_10:*:*:*:*:*:*:*:*</code><br>
-              
+
               <code class="cpe-string">cpe:2.3:o:microsoft:windows_11:*:*:*:*:*:*:*:*</code><br>
-              
+
               <code class="cpe-string">cpe:2.3:o:microsoft:windows_server_2019:*:*:*:*:*:*:*</code><br>
-              
+
               <code class="cpe-string">cpe:2.3:o:microsoft:windows_server_2022:*:*:*:*:*:*:*</code>
-              
+
             </td>
             <td>All</td>
             <td><span class="badge badge-confidence-high">applicable</span></td>
           </tr>
-          
+
           <tr>
             <td>apple</td>
             <td>macos</td>
             <td class="cpe-cell">
-              
+
               <code class="cpe-string">cpe:2.3:o:apple:macos:*:*:*:*:*:*:*:*</code>
-              
+
             </td>
             <td>All</td>
             <td><span class="badge badge-confidence-high">applicable</span></td>
           </tr>
-          
+
         </tbody>
       </table>
-      
-    </section>
-    
 
-    
+    </section>
+
+
+
     <section>
       <h2>References</h2>
       <ul class="sidebar-list">
-        
+
         <li>
           Red Hat Security Hardening Guide
            &mdash; Protecting against memory-based attacks
         </li>
-        
+
         <li>
           CIS RHEL 9 Benchmark
            &mdash; 1.5.2 Ensure address space layout randomization (ASLR) is enabled
         </li>
-        
+
       </ul>
     </section>
-    
+
 
     <div class="entry-nav">
       <span></span>
-      
+
       <a href="CME-102.html">CME-102: NX/XD Bit (Non-Executable Memory) &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -286,29 +284,29 @@
       <p>Kernel Hardening</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">memory-safety</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">END-02</span>
-        
+
         <span class="cwe-link">SEA-10</span>
-        
+
         <span class="cwe-link">SEA-14.1</span>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h3>D3FEND Mapping</h3>
       <a href="https://d3fend.mitre.org/technique/D3-SAOR/"
@@ -316,32 +314,32 @@
         D3-SAOR &mdash; Segment Address Offset Randomization
       </a>
     </section>
-    
 
-    
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>RHEL 9</li>
-        
+
         <li>RHEL 8</li>
-        
+
         <li>Ubuntu 24.04</li>
-        
+
         <li>SLES 15</li>
-        
+
         <li>Fedora</li>
-        
+
         <li>Windows 10</li>
-        
+
         <li>Windows 11</li>
-        
+
         <li>Windows Server 2022</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -349,7 +347,8 @@
         <li><strong>ID:</strong> CME-101</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> OS/Kernel</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 7</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
@@ -360,7 +359,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

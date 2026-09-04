@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-208</div>
   <h1>Outbound Network Egress Restriction (SSRF Blast Radius Containment)</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-isolate">Isolate</span>
     <span class="badge badge-layer-network">Network</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Confidentiality</strong> (C)</td>
             <td>
@@ -64,10 +61,10 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-            
+
             <td class="cvss-rationale">Network egress rules block the SSRF payload from reaching internal services, cloud metadata, or localhost regardless of application-layer bypass techniques; exfiltration of internal data is prevented at the transport layer</td>
           </tr>
-          
+
           <tr>
             <td><strong>Scope</strong> (S)</td>
             <td>
@@ -75,90 +72,91 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">U</span>
             </td>
-            
+
             <td class="cvss-rationale">SSRF can no longer pivot to affect internal services beyond the vulnerable component; scope change from the application to the internal network is blocked by network-layer isolation</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/918.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-918</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/441.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-441</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Verify that application workloads cannot initiate outbound connections to RFC1918 ranges, link-local addresses, or localhost</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> nft list ruleset | grep -A5 &#39;chain output&#39; | grep -E &#39;10\.0\.0\.0|172\.16\.0\.0|192\.168\.0\.0|169\.254&#39;
-        
+
         <br><span class="cmd-expected"># Expected: Drop/reject rules for RFC1918 and link-local ranges in the output chain</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> kubectl get networkpolicy -n &lt;namespace&gt; -o jsonpath=&#39;{.items[*].spec.egress}&#39;
-        
+
         <br><span class="cmd-expected"># Expected: Egress rules present that restrict destination CIDRs to required external endpoints only</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> curl -s --connect-timeout 3 http://169.254.169.254/latest/meta-data/ -o /dev/null -w &#39;%{http_code}&#39; 2&gt;&amp;1 || echo &#39;blocked&#39;
-        
+
         <br><span class="cmd-expected"># Expected: Connection refused, timed out, or blocked — cloud metadata endpoint unreachable from application workload</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> Get-NetFirewallRule -Direction Outbound | Where-Object { $_.Action -eq &#39;Block&#39; } | Get-NetFirewallAddressFilter | Where-Object { $_.RemoteAddress -match &#39;10\.|172\.16|192\.168|169\.254&#39; }
-        
+
         <br><span class="cmd-expected"># Expected: Outbound block rules present for RFC1918 and link-local ranges</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: windows</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-207.html">&larr; CME-207: DNS Rebinding Protection</a>
-      
-      
+
+
       <a href="CME-301.html">CME-301: SELinux (Enforcing Mode) &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -168,44 +166,44 @@
       <p>Network Isolation</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">network-filtering</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">NET-03.5</span>
-        
+
         <span class="cwe-link">NET-04.1</span>
-        
+
         <span class="cwe-link">NET-18</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>Any</li>
-        
+
         <li>Windows Server 2019</li>
-        
+
         <li>Windows Server 2022</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -213,7 +211,8 @@
         <li><strong>ID:</strong> CME-208</li>
         <li><strong>Tactic:</strong> Isolate</li>
         <li><strong>Layer:</strong> Network</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 2</li>
         <li><strong>CVSS Mods:</strong> 2</li>
       </ul>
@@ -224,7 +223,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

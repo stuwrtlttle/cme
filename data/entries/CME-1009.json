@@ -1,7 +1,7 @@
 {
   "cme_id": "CME-1009",
   "control_name": "Privilege Assignment Monitoring (Role Grant Alerting)",
-  "description": "Continuously monitor the effective set of users holding high-privilege application roles and alert when new grants are detected that do not correspond to an approved change management ticket. A scheduled job or event-driven trigger enumerates users who hold sensitive roles (realm-admin, cluster-admin, org-owner, or equivalent), compares the current membership against a known-good baseline or an allowlist maintained in a change management system, and raises an alert for any additions. Detects privilege escalation after the fact \u2014 even when the escalation mechanism bypasses normal authorization checks \u2014 by monitoring the outcome (a new high-privilege user) rather than the mechanism. Complements preventive RBAC controls by providing a safety net when the authorization enforcement itself is the vulnerable component.",
+  "description": "Continuously monitor the effective set of users holding high-privilege application roles and alert when new grants are detected that do not correspond to an approved change management ticket. A scheduled job or event-driven trigger enumerates users who hold sensitive roles (realm-admin, cluster-admin, org-owner, or equivalent), compares the current membership against a known-good baseline or an allowlist maintained in a change management system, and raises an alert for any additions. Detects privilege escalation after the fact — even when the escalation mechanism bypasses normal authorization checks — by monitoring the outcome (a new high-privilege user) rather than the mechanism. Complements preventive RBAC controls by providing a safety net when the authorization enforcement itself is the vulnerable component.",
   "tactic": "Detect",
   "category": "Runtime Detection",
   "category_id": "runtime-detection",
@@ -19,7 +19,7 @@
       "metric": "C",
       "from": "H",
       "to": "L",
-      "rationale": "The window during which the attacker holds escalated privileges \u2014 and can access confidential resources \u2014 is bounded by the monitoring interval; detection triggers revocation of the unauthorized grant."
+      "rationale": "The window during which the attacker holds escalated privileges — and can access confidential resources — is bounded by the monitoring interval; detection triggers revocation of the unauthorized grant."
     }
   ],
   "cwe_relationships": [
@@ -45,5 +45,66 @@
     "IAC-17",
     "MON-01.15",
     "MON-16.4"
+  ],
+  "effect_mode": "detective",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-266",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-269",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-284",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/C",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "IAC-17",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "MON-01.15",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "MON-16.4",
+      "relationship_type": "maps_to"
+    }
   ]
 }

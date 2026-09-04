@@ -20,7 +20,7 @@
         <th>Category</th>
         <th>Function</th>
         <th>Layer</th>
-        <th>Type</th>
+        <th>Effect / Evidence</th>
         <th>CVSS Modifications</th>
         <th>CWEs</th>
       </tr>
@@ -34,7 +34,7 @@
         <td>{{ entry.category }}</td>
         <td class="function-cell">{{ entry.function_id | default('') }}</td>
         <td><span class="badge badge-layer-{{ entry.control_layer | lower | replace('/', '-') | replace(' ', '') }}">{{ entry.control_layer }}</span></td>
-        <td>{% if entry.attenuation_type == 'probabilistic' %}<span class="badge badge-attenuation-probabilistic">Prob</span>{% else %}<span class="badge badge-attenuation-deterministic">Det</span>{% endif %}</td>
+        <td>{{ entry.effect_mode | title }} / {{ entry.evidence_state | title }}</td>
         <td>
           {% for impact in entry.cvss_vector_impacts %}
           <span class="cvss-from">{{ impact.metric }}:{{ impact['from'] }}</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">{{ impact.to }}</span>{% if not loop.last %}, {% endif %}

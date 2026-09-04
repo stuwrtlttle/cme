@@ -20,7 +20,7 @@
   </header>
 
   <main class="container">
-    
+
 <h1 class="page-title">Search CME Entries</h1>
 <p class="page-subtitle">Search by CME ID, control name, description, CWE ID, or category.</p>
 
@@ -31,7 +31,7 @@
 <div id="search-count" class="page-subtitle"></div>
 
 <ul class="search-results" id="search-results">
-  
+
   <li data-search="cme-101 aslr (address space layout randomization) randomizes memory layout of processes, making memory corruption exploits significantly harder by requiring the attacker to guess or leak addresses. kernel hardening harden os/kernel cwe-119 cwe-120 cwe-122 cwe-787 cwe-125 cwe-416 cwe-415">
     <div>
       <a href="entries/CME-101.html" class="sr-id">CME-101</a>
@@ -41,7 +41,7 @@
     </div>
     <div class="sr-desc">Randomizes memory layout of processes, making memory corruption exploits significantly harder by requiring the attacker to guess or leak addresses.</div>
   </li>
-  
+
   <li data-search="cme-102 nx/xd bit (non-executable memory) hardware-enforced memory page permissions that prevent execution of code in data regions (stack, heap), blocking classic code injection. kernel hardening harden os/kernel cwe-94 cwe-119 cwe-416">
     <div>
       <a href="entries/CME-102.html" class="sr-id">CME-102</a>
@@ -51,7 +51,7 @@
     </div>
     <div class="sr-desc">Hardware-enforced memory page permissions that prevent execution of code in data regions (stack, heap), blocking classic code injection.</div>
   </li>
-  
+
   <li data-search="cme-103 stack canaries (stack protector) compiler-inserted random guard values on the stack that are checked before function return. detects and aborts on stack buffer overflow before attacker gains control. kernel hardening harden os/kernel cwe-121 cwe-122 cwe-120">
     <div>
       <a href="entries/CME-103.html" class="sr-id">CME-103</a>
@@ -61,7 +61,7 @@
     </div>
     <div class="sr-desc">Compiler-inserted random guard values on the stack that are checked before function return. Detects and aborts on stack buffer overflow before attacke...</div>
   </li>
-  
+
   <li data-search="cme-104 kaslr (kernel address space layout randomization) randomizes the kernel base address at each boot, making kernel exploits harder by requiring address leaks to locate kernel functions and data structures. kernel hardening harden os/kernel cwe-119 cwe-269">
     <div>
       <a href="entries/CME-104.html" class="sr-id">CME-104</a>
@@ -71,7 +71,7 @@
     </div>
     <div class="sr-desc">Randomizes the kernel base address at each boot, making kernel exploits harder by requiring address leaks to locate kernel functions and data structur...</div>
   </li>
-  
+
   <li data-search="cme-105 smep (supervisor mode execution prevention) cpu feature preventing the kernel from executing code in userspace pages. blocks ret2usr attacks where kernel exploit redirects execution to attacker-controlled userspace code. kernel hardening harden os/kernel cwe-119 cwe-269">
     <div>
       <a href="entries/CME-105.html" class="sr-id">CME-105</a>
@@ -81,7 +81,7 @@
     </div>
     <div class="sr-desc">CPU feature preventing the kernel from executing code in userspace pages. Blocks ret2usr attacks where kernel exploit redirects execution to attacker-...</div>
   </li>
-  
+
   <li data-search="cme-106 smap (supervisor mode access prevention) cpu feature preventing the kernel from reading/writing userspace memory except through designated copy functions. hardens kernel against data-only attacks using userspace-controlled structures. kernel hardening harden os/kernel cwe-119 cwe-269 cwe-200">
     <div>
       <a href="entries/CME-106.html" class="sr-id">CME-106</a>
@@ -91,7 +91,7 @@
     </div>
     <div class="sr-desc">CPU feature preventing the kernel from reading/writing userspace memory except through designated copy functions. Hardens kernel against data-only att...</div>
   </li>
-  
+
   <li data-search="cme-107 kernel module loading restriction disables dynamic kernel module loading at runtime, preventing insertion of rootkits or malicious kernel code after boot. kernel hardening harden os/kernel cwe-94 cwe-829">
     <div>
       <a href="entries/CME-107.html" class="sr-id">CME-107</a>
@@ -101,7 +101,7 @@
     </div>
     <div class="sr-desc">Disables dynamic kernel module loading at runtime, preventing insertion of rootkits or malicious kernel code after boot.</div>
   </li>
-  
+
   <li data-search="cme-108 kptr_restrict (kernel pointer restriction) hides kernel pointer addresses from unprivileged users, denying the address leaks needed to exploit kernel vulnerabilities when kaslr is active. kernel hardening harden os/kernel cwe-200 cwe-119">
     <div>
       <a href="entries/CME-108.html" class="sr-id">CME-108</a>
@@ -111,7 +111,7 @@
     </div>
     <div class="sr-desc">Hides kernel pointer addresses from unprivileged users, denying the address leaks needed to exploit kernel vulnerabilities when KASLR is active.</div>
   </li>
-  
+
   <li data-search="cme-109 kernel lockdown mode lsm that restricts kernel features allowing arbitrary code execution or direct hardware access from userspace. integrity mode blocks module parameters, acpi tables, and iopl/ioperm. confidentiality mode additionally blocks /dev/mem, kprobes, and bpf reads. kernel hardening harden os/kernel cwe-269 cwe-284">
     <div>
       <a href="entries/CME-109.html" class="sr-id">CME-109</a>
@@ -121,7 +121,7 @@
     </div>
     <div class="sr-desc">LSM that restricts kernel features allowing arbitrary code execution or direct hardware access from userspace. Integrity mode blocks module parameters...</div>
   </li>
-  
+
   <li data-search="cme-110 kexec restriction prevents loading a new kernel at runtime via kexec, blocking a vector for kernel-level persistence and secure boot bypass. kernel hardening harden os/kernel cwe-269">
     <div>
       <a href="entries/CME-110.html" class="sr-id">CME-110</a>
@@ -131,7 +131,7 @@
     </div>
     <div class="sr-desc">Prevents loading a new kernel at runtime via kexec, blocking a vector for kernel-level persistence and Secure Boot bypass.</div>
   </li>
-  
+
   <li data-search="cme-111 secure boot (uefi) firmware-level verification that only signed bootloaders and kernels execute, preventing boot-level rootkits and unauthorized kernel replacement. kernel hardening harden os/kernel cwe-345 cwe-494 cwe-269 cwe-347">
     <div>
       <a href="entries/CME-111.html" class="sr-id">CME-111</a>
@@ -141,7 +141,7 @@
     </div>
     <div class="sr-desc">Firmware-level verification that only signed bootloaders and kernels execute, preventing boot-level rootkits and unauthorized kernel replacement.</div>
   </li>
-  
+
   <li data-search="cme-112 relro and pie (full) compiler/linker hardening that makes the global offset table read-only after relocation (full relro) and builds position-independent executables (pie), working with aslr to randomize all code sections. kernel hardening harden os/kernel cwe-119 cwe-120 cwe-787 cwe-416">
     <div>
       <a href="entries/CME-112.html" class="sr-id">CME-112</a>
@@ -151,7 +151,7 @@
     </div>
     <div class="sr-desc">Compiler/linker hardening that makes the Global Offset Table read-only after relocation (Full RELRO) and builds position-independent executables (PIE)...</div>
   </li>
-  
+
   <li data-search="cme-113 control flow integrity (cfi / shadow call stack) hardware or compiler-enforced control flow integrity that validates indirect branch targets match expected types, blocking rop/jop chains. on arm64, shadow call stack protects return addresses in a separate stack. kernel hardening harden os/kernel cwe-119 cwe-120 cwe-787 cwe-416 cwe-843">
     <div>
       <a href="entries/CME-113.html" class="sr-id">CME-113</a>
@@ -161,7 +161,7 @@
     </div>
     <div class="sr-desc">Hardware or compiler-enforced control flow integrity that validates indirect branch targets match expected types, blocking ROP/JOP chains. On ARM64, s...</div>
   </li>
-  
+
   <li data-search="cme-114 process resource limits (ulimit/prlimit) configures per-process resource limits via ulimit/prlimit to prevent algorithmic complexity attacks, infinite loops, and resource exhaustion from consuming unbounded system resources. key limits include rlimit_cpu (maximum cpu time), rlimit_as (maximum address space), rlimit_nproc (maximum processes), and rlimit_nofile (maximum open files). complements container-level cgroup limits (cme-704) by providing process-granularity controls that apply even outside containers. kernel hardening harden os/kernel cwe-835 cwe-400 cwe-770 cwe-834 cwe-772 cwe-401">
     <div>
       <a href="entries/CME-114.html" class="sr-id">CME-114</a>
@@ -171,7 +171,7 @@
     </div>
     <div class="sr-desc">Configures per-process resource limits via ulimit/prlimit to prevent algorithmic complexity attacks, infinite loops, and resource exhaustion from cons...</div>
   </li>
-  
+
   <li data-search="cme-116 fortify_source (buffer overflow detection) compile-time and runtime detection of buffer overflows in common c library functions (memcpy, strcpy, sprintf, read, etc.). at compile time, the compiler replaces standard library calls with bounds-checked variants when buffer sizes are known. at runtime, remaining checks abort the process when a buffer overflow is detected. fortify_source level 2 checks all detectable overflows; level 3 (gcc 12+) extends coverage to dynamically-sized buffers and flexible array members. catches many integer-overflow-to-buffer-overflow chains where the overflowed size value is passed to a libc copy function. kernel hardening harden os/kernel cwe-119 cwe-120 cwe-122 cwe-787 cwe-190 cwe-130 cwe-681">
     <div>
       <a href="entries/CME-116.html" class="sr-id">CME-116</a>
@@ -181,7 +181,7 @@
     </div>
     <div class="sr-desc">Compile-time and runtime detection of buffer overflows in common C library functions (memcpy, strcpy, sprintf, read, etc.). At compile time, the compi...</div>
   </li>
-  
+
   <li data-search="cme-117 heap allocator hardening (glibc safe-linking and metadata protection) enable and verify glibc heap allocator safety features that specifically target use-after-free and double-free exploitation. modern glibc (2.32+) includes safe-linking, which encrypts singly-linked list pointers in malloc metadata using a per-thread random key xored with the storage location. an attacker who corrupts a freed chunk&#39;s forward pointer must know both the random key and the chunk address to forge a valid pointer, defeating the standard tcache-poisoning technique used in most heap exploitation. tcache key verification detects double-free by storing a per-thread random value in freed tcache entries and checking it on subsequent frees; a second free of the same pointer is detected and the process is aborted. on older glibc (2.28, rhel 8), setting malloc_perturb_ to a nonzero value fills freed memory with a byte pattern, causing use-after-free reads to return garbage instead of previously valid data, breaking exploitation chains that depend on reading stale heap content. kernel hardening harden os/kernel cwe-416 cwe-415 cwe-825 cwe-122">
     <div>
       <a href="entries/CME-117.html" class="sr-id">CME-117</a>
@@ -191,7 +191,7 @@
     </div>
     <div class="sr-desc">Enable and verify glibc heap allocator safety features that specifically target use-after-free and double-free exploitation. Modern glibc (2.32+) incl...</div>
   </li>
-  
+
   <li data-search="cme-118 protected file links (kernel symlink/hardlink protection) enable the kernel filesystem link protection sysctls to prevent exploitation of toctou race conditions and symlink following attacks in world-writable sticky directories. fs.protected_symlinks=1 prevents following symlinks in sticky world-writable directories (e.g., /tmp) unless the follower owns the symlink, the directory owner matches, or the symlink target owner matches. fs.protected_hardlinks=1 prevents creating hardlinks to files not owned by the caller, blocking hardlink-based toctou and privilege escalation attacks. fs.protected_regular=2 and fs.protected_fifos=2 extend protection to regular files and fifos in sticky directories. these sysctls are enabled by default on rhel 7+ but may be modified by administrators or overridden by third-party configurations. kernel hardening harden os/kernel cwe-59 cwe-61 cwe-367 cwe-362">
     <div>
       <a href="entries/CME-118.html" class="sr-id">CME-118</a>
@@ -201,7 +201,7 @@
     </div>
     <div class="sr-desc">Enable the kernel filesystem link protection sysctls to prevent exploitation of TOCTOU race conditions and symlink following attacks in world-writable...</div>
   </li>
-  
+
   <li data-search="cme-119 compiler integer overflow and conversion safety (-ftrapv / ubsan integer) compiler-enforced runtime detection of integer overflow and unsafe numeric type conversions. encompasses: (1) gcc/clang -ftrapv — traps on signed integer overflow at ~2-5% overhead, suitable for production; (2) ubsan integer sanitizers (-fsanitize=signed-integer-overflow, -fsanitize=unsigned-integer-overflow, -fsanitize=implicit-conversion) — detect signed/unsigned overflow and implicit narrowing/sign-change conversions at runtime with configurable abort or logging; (3) msvc /rtcc — detects data loss from runtime type conversions. when enabled, integer conversion errors that would silently produce incorrect values instead terminate the process, converting potential code execution vulnerabilities into denial-of-service conditions (a less severe outcome). particularly effective against the dominant cwe-681 attack pattern where a negative signed value converted to unsigned becomes an enormous positive value that bypasses bounds checks and corrupts memory. complements cme-116 (fortify_source) which catches the buffer overflow consequence of integer conversion errors, while this control catches the conversion error itself at the point of occurrence. kernel hardening harden os/kernel cwe-681 cwe-190 cwe-191 cwe-192 cwe-194 cwe-195 cwe-196 cwe-197">
     <div>
       <a href="entries/CME-119.html" class="sr-id">CME-119</a>
@@ -211,7 +211,7 @@
     </div>
     <div class="sr-desc">Compiler-enforced runtime detection of integer overflow and unsafe numeric type conversions. Encompasses: (1) GCC/Clang -ftrapv — traps on signed inte...</div>
   </li>
-  
+
   <li data-search="cme-201 zero trust gateway / identity-aware proxy all network access requires authenticated identity verification. no implicit trust from network position. every request is authenticated and authorized regardless of source network. network isolation isolate network cwe-284 cwe-306 cwe-287">
     <div>
       <a href="entries/CME-201.html" class="sr-id">CME-201</a>
@@ -221,7 +221,7 @@
     </div>
     <div class="sr-desc">All network access requires authenticated identity verification. No implicit trust from network position. Every request is authenticated and authorize...</div>
   </li>
-  
+
   <li data-search="cme-202 host-based firewall (firewalld/nftables) per-host network access control using firewalld zones or nftables rules. restricts which network sources can reach specific services, reducing attack surface. network isolation isolate network cwe-284">
     <div>
       <a href="entries/CME-202.html" class="sr-id">CME-202</a>
@@ -231,7 +231,7 @@
     </div>
     <div class="sr-desc">Per-host network access control using firewalld zones or nftables rules. Restricts which network sources can reach specific services, reducing attack ...</div>
   </li>
-  
+
   <li data-search="cme-203 network segmentation (vlans/subnets) separates network traffic into isolated segments by trust zone, preventing lateral movement between zones (e.g., dmz, internal, management). network isolation isolate network cwe-284 cwe-668">
     <div>
       <a href="entries/CME-203.html" class="sr-id">CME-203</a>
@@ -241,7 +241,7 @@
     </div>
     <div class="sr-desc">Separates network traffic into isolated segments by trust zone, preventing lateral movement between zones (e.g., DMZ, internal, management).</div>
   </li>
-  
+
   <li data-search="cme-204 ipsec / wireguard (encrypted transport) encrypts all network traffic between hosts using ipsec or wireguard, preventing eavesdropping, injection, and man-in-the-middle attacks on the wire. network isolation isolate network cwe-319 cwe-300 cwe-311">
     <div>
       <a href="entries/CME-204.html" class="sr-id">CME-204</a>
@@ -251,7 +251,7 @@
     </div>
     <div class="sr-desc">Encrypts all network traffic between hosts using IPsec or WireGuard, preventing eavesdropping, injection, and man-in-the-middle attacks on the wire.</div>
   </li>
-  
+
   <li data-search="cme-205 service binding to localhost configures services to listen only on 127.0.0.1/::1, eliminating remote network attack vector entirely. remote access must go through a reverse proxy or tunnel. network isolation isolate network cwe-284 cwe-668">
     <div>
       <a href="entries/CME-205.html" class="sr-id">CME-205</a>
@@ -261,7 +261,7 @@
     </div>
     <div class="sr-desc">Configures services to listen only on 127.0.0.1/::1, eliminating remote network attack vector entirely. Remote access must go through a reverse proxy ...</div>
   </li>
-  
+
   <li data-search="cme-206 network policy (kubernetes) kubernetes networkpolicy resources that restrict pod-to-pod and pod-to-external communication. default-deny ingress/egress with explicit allowlists. network isolation isolate network cwe-284 cwe-668">
     <div>
       <a href="entries/CME-206.html" class="sr-id">CME-206</a>
@@ -271,7 +271,7 @@
     </div>
     <div class="sr-desc">Kubernetes NetworkPolicy resources that restrict pod-to-pod and pod-to-external communication. Default-deny ingress/egress with explicit allowlists.</div>
   </li>
-  
+
   <li data-search="cme-207 dns rebinding protection configure dns resolvers, recursive forwarders, and network firewalls to reject dns responses that resolve public domain names to private ip addresses (rfc 1918: 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16; loopback: 127.0.0.0/8; link-local: 169.254.0.0/16; ipv6: ::1, fc00::/7, fe80::/10). dns rebinding attacks exploit the browser same-origin policy by causing an attacker-controlled domain to resolve to a private ip address after the initial page load, giving the attacker javascript access to localhost-bound services. blocking private ip resolution from public domains prevents this attack at the network layer. network isolation harden network cwe-346 cwe-350">
     <div>
       <a href="entries/CME-207.html" class="sr-id">CME-207</a>
@@ -281,7 +281,7 @@
     </div>
     <div class="sr-desc">Configure DNS resolvers, recursive forwarders, and network firewalls to reject DNS responses that resolve public domain names to private IP addresses ...</div>
   </li>
-  
+
   <li data-search="cme-208 outbound network egress restriction (ssrf blast radius containment) network-layer egress filtering that confines application workloads to only the external destinations they require, blocking outbound connections to internal networks, cloud metadata services, and localhost. implemented via host-based firewall rules (firewalld/nftables), kubernetes networkpolicy egress rules, or cloud security group outbound rules. complements application-level ssrf prevention (cme-1304) by providing defense-in-depth: even if the application&#39;s url validation is bypassed through dns rebinding, ipv6-mapped addresses, url parser differentials, or http redirect chains, the network layer blocks the resulting connection to internal resources. specifically blocks egress to 169.254.0.0/16 (link-local/cloud metadata), 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 (rfc1918), and fd00::/8 (ula ipv6) from application workloads that should only communicate externally. network isolation isolate network cwe-918 cwe-441">
     <div>
       <a href="entries/CME-208.html" class="sr-id">CME-208</a>
@@ -291,7 +291,7 @@
     </div>
     <div class="sr-desc">Network-layer egress filtering that confines application workloads to only the external destinations they require, blocking outbound connections to in...</div>
   </li>
-  
+
   <li data-search="cme-301 selinux (enforcing mode) mandatory access control system that confines processes to least-privilege security domains. even if a process is compromised, it cannot access files, ports, or other processes outside its policy-defined domain. mandatory access control harden os/kernel cwe-269 cwe-284 cwe-732 cwe-653">
     <div>
       <a href="entries/CME-301.html" class="sr-id">CME-301</a>
@@ -301,7 +301,7 @@
     </div>
     <div class="sr-desc">Mandatory access control system that confines processes to least-privilege security domains. Even if a process is compromised, it cannot access files,...</div>
   </li>
-  
+
   <li data-search="cme-302 selinux confined user mapping maps linux login users to selinux confined user types instead of unconfined_u. restricts user-level capabilities like running unconfined applications, accessing network, or executing in /tmp. mandatory access control harden os/kernel cwe-269 cwe-284">
     <div>
       <a href="entries/CME-302.html" class="sr-id">CME-302</a>
@@ -311,7 +311,7 @@
     </div>
     <div class="sr-desc">Maps Linux login users to SELinux confined user types instead of unconfined_u. Restricts user-level capabilities like running unconfined applications,...</div>
   </li>
-  
+
   <li data-search="cme-303 selinux booleans (restrictive) fine-grained selinux policy toggles that disable risky inter-domain interactions. examples: httpd_can_network_connect=off prevents web servers from making outbound connections; container_manage_cgroup=off restricts container cgroup access. mandatory access control harden os/kernel cwe-284">
     <div>
       <a href="entries/CME-303.html" class="sr-id">CME-303</a>
@@ -321,7 +321,7 @@
     </div>
     <div class="sr-desc">Fine-grained SELinux policy toggles that disable risky inter-domain interactions. Examples: httpd_can_network_connect=off prevents web servers from ma...</div>
   </li>
-  
+
   <li data-search="cme-304 apparmor (enforcing profile) path-based mandatory access control that restricts per-application file, network, and capability access. each application runs under a profile defining allowed operations. mandatory access control harden os/kernel cwe-269 cwe-284">
     <div>
       <a href="entries/CME-304.html" class="sr-id">CME-304</a>
@@ -331,7 +331,7 @@
     </div>
     <div class="sr-desc">Path-based mandatory access control that restricts per-application file, network, and capability access. Each application runs under a profile definin...</div>
   </li>
-  
+
   <li data-search="cme-401 system-wide crypto policy (future) centrally enforces minimum cryptographic standards across all system components (openssl, gnutls, nss, openssh, kerberos). future policy disables tls &lt;1.2, sha-1, rsa &lt;3072, all cbc ciphers, and rc4. cryptographic controls harden application cwe-327 cwe-326 cwe-757">
     <div>
       <a href="entries/CME-401.html" class="sr-id">CME-401</a>
@@ -341,7 +341,7 @@
     </div>
     <div class="sr-desc">Centrally enforces minimum cryptographic standards across all system components (OpenSSL, GnuTLS, NSS, OpenSSH, Kerberos). FUTURE policy disables TLS ...</div>
   </li>
-  
+
   <li data-search="cme-402 fips 140-3 mode enables fips-validated cryptographic modules system-wide. only nist-approved algorithms are available for all cryptographic operations. non-compliant operations fail rather than fall back. cryptographic controls harden os/kernel cwe-327 cwe-326 cwe-328">
     <div>
       <a href="entries/CME-402.html" class="sr-id">CME-402</a>
@@ -351,7 +351,7 @@
     </div>
     <div class="sr-desc">Enables FIPS-validated cryptographic modules system-wide. Only NIST-approved algorithms are available for all cryptographic operations. Non-compliant ...</div>
   </li>
-  
+
   <li data-search="cme-403 tls 1.3 enforcement restricts all tls connections to tls 1.3 minimum, eliminating protocol downgrade attacks and leveraging tls 1.3&#39;s reduced handshake, mandatory forward secrecy, and encrypted extensions. cryptographic controls harden network cwe-757 cwe-327">
     <div>
       <a href="entries/CME-403.html" class="sr-id">CME-403</a>
@@ -361,7 +361,7 @@
     </div>
     <div class="sr-desc">Restricts all TLS connections to TLS 1.3 minimum, eliminating protocol downgrade attacks and leveraging TLS 1.3&#39;s reduced handshake, mandatory forward...</div>
   </li>
-  
+
   <li data-search="cme-404 certificate pinning application pins expected tls certificate fingerprints or public keys, preventing mitm attacks using rogue or compromised certificate authorities. cryptographic controls harden application cwe-295">
     <div>
       <a href="entries/CME-404.html" class="sr-id">CME-404</a>
@@ -371,7 +371,7 @@
     </div>
     <div class="sr-desc">Application pins expected TLS certificate fingerprints or public keys, preventing MitM attacks using rogue or compromised certificate authorities.</div>
   </li>
-  
+
   <li data-search="cme-405 dnssec validation validates dns responses using cryptographic signatures, preventing dns spoofing, cache poisoning, and dns-based redirection attacks. cryptographic controls harden network cwe-350">
     <div>
       <a href="entries/CME-405.html" class="sr-id">CME-405</a>
@@ -381,7 +381,7 @@
     </div>
     <div class="sr-desc">Validates DNS responses using cryptographic signatures, preventing DNS spoofing, cache poisoning, and DNS-based redirection attacks.</div>
   </li>
-  
+
   <li data-search="cme-406 signed package enforcement (gpg) rejects installation of unsigned or tampered rpm/deb packages by validating gpg signatures against trusted keys. prevents supply chain attacks via package repositories. cryptographic controls harden os/kernel cwe-345 cwe-494 cwe-347">
     <div>
       <a href="entries/CME-406.html" class="sr-id">CME-406</a>
@@ -391,7 +391,7 @@
     </div>
     <div class="sr-desc">Rejects installation of unsigned or tampered RPM/DEB packages by validating GPG signatures against trusted keys. Prevents supply chain attacks via pac...</div>
   </li>
-  
+
   <li data-search="cme-407 data-at-rest encryption (luks/dm-crypt / bitlocker) encrypts data volumes and partitions at the block device layer using luks2/dm-crypt, ensuring that sensitive data including credentials, tokens, pii, and configuration secrets is encrypted when stored on disk. prevents unauthorized data access through physical media theft, backup exposure, or filesystem-level read vulnerabilities. combined with tpm-backed key sealing, provides boot-time integrity verification and automatic unlocking for authorized systems. cryptographic controls harden data cwe-312 cwe-311 cwe-316">
     <div>
       <a href="entries/CME-407.html" class="sr-id">CME-407</a>
@@ -401,7 +401,7 @@
     </div>
     <div class="sr-desc">Encrypts data volumes and partitions at the block device layer using LUKS2/dm-crypt, ensuring that sensitive data including credentials, tokens, PII, ...</div>
   </li>
-  
+
   <li data-search="cme-408 system-wide tls/crypto policy enforcement enforce minimum tls version and cipher suite requirements system-wide via os-level cryptographic policy. rhel&#39;s update-crypto-policies sets a baseline (default, future, fips) that applies to all tls-using applications linked against system crypto libraries (openssl, gnutls, nss), preventing applications from accepting weak ciphers, expired certificates, or outdated tls versions regardless of individual application configuration. windows equivalent is schannel registry configuration or group policy cipher suite ordering. eliminates an entire class of tls misconfiguration vulnerabilities by moving the trust decision from each application to the os layer. cryptographic controls harden os/kernel cwe-295 cwe-327 cwe-326 cwe-757">
     <div>
       <a href="entries/CME-408.html" class="sr-id">CME-408</a>
@@ -411,7 +411,7 @@
     </div>
     <div class="sr-desc">Enforce minimum TLS version and cipher suite requirements system-wide via OS-level cryptographic policy. RHEL&#39;s update-crypto-policies sets a baseline...</div>
   </li>
-  
+
   <li data-search="cme-501 read-only root filesystem mounts root filesystem as read-only, preventing persistent modification of system binaries, libraries, and configuration. writable areas are confined to specific tmpfs or overlay mounts. filesystem hardening isolate os/kernel cwe-284">
     <div>
       <a href="entries/CME-501.html" class="sr-id">CME-501</a>
@@ -421,7 +421,7 @@
     </div>
     <div class="sr-desc">Mounts root filesystem as read-only, preventing persistent modification of system binaries, libraries, and configuration. Writable areas are confined ...</div>
   </li>
-  
+
   <li data-search="cme-502 noexec on /tmp and /dev/shm mounts /tmp and /dev/shm with noexec option, preventing execution of attacker-dropped binaries or scripts from temporary directories commonly used as staging areas. filesystem hardening harden os/kernel cwe-94 cwe-427">
     <div>
       <a href="entries/CME-502.html" class="sr-id">CME-502</a>
@@ -431,7 +431,7 @@
     </div>
     <div class="sr-desc">Mounts /tmp and /dev/shm with noexec option, preventing execution of attacker-dropped binaries or scripts from temporary directories commonly used as ...</div>
   </li>
-  
+
   <li data-search="cme-503 nosuid on non-root partitions mounts partitions like /tmp, /var, /home with nosuid, preventing suid/sgid binaries from taking effect, blocking a privilege escalation vector. filesystem hardening harden os/kernel cwe-269">
     <div>
       <a href="entries/CME-503.html" class="sr-id">CME-503</a>
@@ -441,7 +441,7 @@
     </div>
     <div class="sr-desc">Mounts partitions like /tmp, /var, /home with nosuid, preventing SUID/SGID binaries from taking effect, blocking a privilege escalation vector.</div>
   </li>
-  
+
   <li data-search="cme-504 dm-verity (verified boot) cryptographic verification of block device integrity using a merkle tree hash. every read from the block device is verified against pre-computed hashes, detecting any tampering at the block level. filesystem hardening harden os/kernel cwe-345 cwe-494 cwe-347">
     <div>
       <a href="entries/CME-504.html" class="sr-id">CME-504</a>
@@ -451,7 +451,7 @@
     </div>
     <div class="sr-desc">Cryptographic verification of block device integrity using a Merkle tree hash. Every read from the block device is verified against pre-computed hashe...</div>
   </li>
-  
+
   <li data-search="cme-505 ima/evm (integrity measurement architecture) kernel subsystem that measures file hashes at access time and optionally enforces an integrity policy. evm extends this with extended attribute protection. creates an audit trail of all executed code. filesystem hardening harden os/kernel cwe-345 cwe-494 cwe-347">
     <div>
       <a href="entries/CME-505.html" class="sr-id">CME-505</a>
@@ -461,7 +461,7 @@
     </div>
     <div class="sr-desc">Kernel subsystem that measures file hashes at access time and optionally enforces an integrity policy. EVM extends this with extended attribute protec...</div>
   </li>
-  
+
   <li data-search="cme-506 landlock lsm (filesystem sandboxing) linux security module that allows unprivileged processes to restrict their own filesystem access. process voluntarily drops access to paths it does not need, reducing impact of compromise. filesystem hardening isolate os/kernel cwe-284 cwe-269">
     <div>
       <a href="entries/CME-506.html" class="sr-id">CME-506</a>
@@ -471,7 +471,7 @@
     </div>
     <div class="sr-desc">Linux Security Module that allows unprivileged processes to restrict their own filesystem access. Process voluntarily drops access to paths it does no...</div>
   </li>
-  
+
   <li data-search="cme-507 secure dynamic linker configuration (ld_preload/path hardening) harden the dynamic linker search path and execution environment to prevent library injection and path manipulation attacks. verify that /etc/ld.so.conf.d/ only references trusted, non-writable library directories. for systemd-managed services, use environment=ld_preload= ld_library_path= to explicitly clear dangerous environment variables, or use environmentfile= with a whitelist of required variables. ensure no world-writable directory appears in any service path. for containers and pods, combine with nonewprivileges (security_context.allow_privilege_escalation: false) to prevent ld_preload exploitation in setuid contexts. the dynamic linker (ld-linux.so) already ignores ld_preload and ld_library_path for setuid/setgid binaries, but this does not protect non-setuid services running as root or elevated users. filesystem hardening harden os/kernel cwe-426 cwe-427">
     <div>
       <a href="entries/CME-507.html" class="sr-id">CME-507</a>
@@ -481,7 +481,7 @@
     </div>
     <div class="sr-desc">Harden the dynamic linker search path and execution environment to prevent library injection and PATH manipulation attacks. Verify that /etc/ld.so.con...</div>
   </li>
-  
+
   <li data-search="cme-508 quoted service path enforcement (windows) ensures all windows service executable paths and scheduled task binaries are enclosed in double quotes when they contain spaces, preventing unquoted search path interception attacks. when a service binary path like c:\program files\my app\service.exe is registered without quotes, windows tries to execute c:\program.exe, then c:\program files\my.exe, then c:\program files\my app\service.exe in order. an attacker who can write to c:\ or c:\program files\ can place a malicious executable that runs as system before the intended service binary. remediation requires auditing all service paths and scheduled task paths, enclosing them in double quotes, and enforcing filesystem acls preventing non-admin writes to path prefix directories. complements cme-507 (secure dynamic linker configuration) which addresses the analogous linux attack surface (ld_preload, rpath injection). filesystem hardening harden os/kernel cwe-428 cwe-426">
     <div>
       <a href="entries/CME-508.html" class="sr-id">CME-508</a>
@@ -491,7 +491,7 @@
     </div>
     <div class="sr-desc">Ensures all Windows service executable paths and scheduled task binaries are enclosed in double quotes when they contain spaces, preventing unquoted s...</div>
   </li>
-  
+
   <li data-search="cme-601 kernel-level syscall filtering (seccomp) restricts the set of system calls a process can make to the kernel. reduces kernel attack surface by blocking syscalls the application doesn&#39;t need, preventing exploitation of kernel vulnerabilities through unused syscall handlers. syscall &amp; bpf controls harden os/kernel cwe-119 cwe-78 cwe-653">
     <div>
       <a href="entries/CME-601.html" class="sr-id">CME-601</a>
@@ -501,7 +501,7 @@
     </div>
     <div class="sr-desc">Restricts the set of system calls a process can make to the kernel. Reduces kernel attack surface by blocking syscalls the application doesn&#39;t need, p...</div>
   </li>
-  
+
   <li data-search="cme-602 seccomp-bpf profile (container default) applies the default oci/docker/podman seccomp-bpf profile which blocks ~44 dangerous syscalls including kexec_load, mount, reboot, and others. basis for container isolation. syscall &amp; bpf controls harden os/kernel cwe-78 cwe-119 cwe-269">
     <div>
       <a href="entries/CME-602.html" class="sr-id">CME-602</a>
@@ -511,7 +511,7 @@
     </div>
     <div class="sr-desc">Applies the default OCI/Docker/Podman seccomp-bpf profile which blocks ~44 dangerous syscalls including kexec_load, mount, reboot, and others. Basis f...</div>
   </li>
-  
+
   <li data-search="cme-603 unprivileged bpf disabled prevents unprivileged users from loading bpf programs into the kernel. bpf programs run in kernel context and vulnerabilities in the bpf verifier have been a frequent source of privilege escalation. syscall &amp; bpf controls harden os/kernel cwe-269 cwe-119">
     <div>
       <a href="entries/CME-603.html" class="sr-id">CME-603</a>
@@ -521,7 +521,7 @@
     </div>
     <div class="sr-desc">Prevents unprivileged users from loading BPF programs into the kernel. BPF programs run in kernel context and vulnerabilities in the BPF verifier have...</div>
   </li>
-  
+
   <li data-search="cme-604 unprivileged user namespaces disabled prevents unprivileged users from creating user namespaces. user namespaces expose kernel attack surface (mount, network, pid operations) to unprivileged users and have been a frequent lpe vector. syscall &amp; bpf controls harden os/kernel cwe-269 cwe-119">
     <div>
       <a href="entries/CME-604.html" class="sr-id">CME-604</a>
@@ -531,7 +531,7 @@
     </div>
     <div class="sr-desc">Prevents unprivileged users from creating user namespaces. User namespaces expose kernel attack surface (mount, network, PID operations) to unprivileg...</div>
   </li>
-  
+
   <li data-search="cme-701 sandboxing / gvisor runtime application-level kernel emulation (gvisor) or vm-based isolation (kata containers) that intercepts syscalls and prevents direct host kernel interaction. provides defense-in-depth for container isolation. container isolation isolate application cwe-269 cwe-119 cwe-653">
     <div>
       <a href="entries/CME-701.html" class="sr-id">CME-701</a>
@@ -541,7 +541,7 @@
     </div>
     <div class="sr-desc">Application-level kernel emulation (gVisor) or VM-based isolation (Kata Containers) that intercepts syscalls and prevents direct host kernel interacti...</div>
   </li>
-  
+
   <li data-search="cme-702 linux namespaces (user, pid, network, mount) kernel namespace isolation providing separate views of system resources per process group. pid namespace hides host processes, mount namespace isolates filesystem, network namespace isolates network stack, user namespace remaps uids. container isolation isolate os/kernel cwe-269">
     <div>
       <a href="entries/CME-702.html" class="sr-id">CME-702</a>
@@ -551,7 +551,7 @@
     </div>
     <div class="sr-desc">Kernel namespace isolation providing separate views of system resources per process group. PID namespace hides host processes, mount namespace isolate...</div>
   </li>
-  
+
   <li data-search="cme-703 rootless containers containers run entirely without root privileges on the host. the container runtime, image pull, and all container processes run as an unprivileged user, eliminating host-level root compromise from container escape. container isolation isolate os/kernel cwe-269 cwe-250">
     <div>
       <a href="entries/CME-703.html" class="sr-id">CME-703</a>
@@ -561,7 +561,7 @@
     </div>
     <div class="sr-desc">Containers run entirely without root privileges on the host. The container runtime, image pull, and all container processes run as an unprivileged use...</div>
   </li>
-  
+
   <li data-search="cme-704 cgroups v2 resource limits constrains cpu, memory, i/o, and pids for process groups using cgroups v2 unified hierarchy. prevents resource exhaustion attacks and limits blast radius of runaway or malicious processes. container isolation isolate os/kernel cwe-400 cwe-770 cwe-772 cwe-401">
     <div>
       <a href="entries/CME-704.html" class="sr-id">CME-704</a>
@@ -571,7 +571,7 @@
     </div>
     <div class="sr-desc">Constrains CPU, memory, I/O, and PIDs for process groups using cgroups v2 unified hierarchy. Prevents resource exhaustion attacks and limits blast rad...</div>
   </li>
-  
+
   <li data-search="cme-705 dropped linux capabilities removes unnecessary posix capabilities from container or process bounding set. default container profiles drop cap_sys_admin, cap_net_raw, cap_sys_ptrace, and others not needed by the workload. container isolation isolate os/kernel cwe-250 cwe-269">
     <div>
       <a href="entries/CME-705.html" class="sr-id">CME-705</a>
@@ -581,7 +581,7 @@
     </div>
     <div class="sr-desc">Removes unnecessary POSIX capabilities from container or process bounding set. Default container profiles drop CAP_SYS_ADMIN, CAP_NET_RAW, CAP_SYS_PTR...</div>
   </li>
-  
+
   <li data-search="cme-706 pod security standards (restricted) kubernetes pod security standards at restricted level: requires non-root, drops all capabilities, blocks privilege escalation, requires seccomp, blocks hostpath/hostnetwork/hostpid. container isolation isolate application cwe-269 cwe-284">
     <div>
       <a href="entries/CME-706.html" class="sr-id">CME-706</a>
@@ -591,7 +591,7 @@
     </div>
     <div class="sr-desc">Kubernetes Pod Security Standards at Restricted level: requires non-root, drops ALL capabilities, blocks privilege escalation, requires seccomp, block...</div>
   </li>
-  
+
   <li data-search="cme-707 nonewprivileges sets the no_new_privs process flag, preventing any child process from gaining new privileges via execve (suid bits, file capabilities, setuid transitions). inherited across fork/exec. privilege isolation isolate os/kernel cwe-269 cwe-250">
     <div>
       <a href="entries/CME-707.html" class="sr-id">CME-707</a>
@@ -601,7 +601,7 @@
     </div>
     <div class="sr-desc">Sets the no_new_privs process flag, preventing any child process from gaining new privileges via execve (SUID bits, file capabilities, setuid transiti...</div>
   </li>
-  
+
   <li data-search="cme-708 least privilege sudo configuration configures sudo to allow specific commands only, rather than unrestricted root access. uses command allowlists, nopasswd only for specific safe commands, and requiretty. privilege isolation isolate os/kernel cwe-269 cwe-250">
     <div>
       <a href="entries/CME-708.html" class="sr-id">CME-708</a>
@@ -611,7 +611,7 @@
     </div>
     <div class="sr-desc">Configures sudo to allow specific commands only, rather than unrestricted root access. Uses command allowlists, NOPASSWD only for specific safe comman...</div>
   </li>
-  
+
   <li data-search="cme-709 systemd service sandboxing (privatedevices, privatetmp, protectsystem) systemd unit directives that sandbox services: privatedevices removes device access, privatetmp isolates /tmp, protectsystem=strict makes / read-only, protecthome=true hides /home. privilege isolation isolate os/kernel cwe-269 cwe-284 cwe-367 cwe-362">
     <div>
       <a href="entries/CME-709.html" class="sr-id">CME-709</a>
@@ -621,7 +621,7 @@
     </div>
     <div class="sr-desc">systemd unit directives that sandbox services: PrivateDevices removes device access, PrivateTmp isolates /tmp, ProtectSystem=strict makes / read-only,...</div>
   </li>
-  
+
   <li data-search="cme-710 dynamicuser (systemd) systemd dynamically allocates a unique uid/gid per service instance. no persistent user account exists; each service restart gets a fresh identity, preventing cross-service data access. privilege isolation isolate os/kernel cwe-269">
     <div>
       <a href="entries/CME-710.html" class="sr-id">CME-710</a>
@@ -631,7 +631,7 @@
     </div>
     <div class="sr-desc">systemd dynamically allocates a unique UID/GID per service instance. No persistent user account exists; each service restart gets a fresh identity, pr...</div>
   </li>
-  
+
   <li data-search="cme-711 admission controller policy enforcement (opa/gatekeeper/kyverno) policy-as-code enforcement at the kubernetes admission gate. admission controllers intercept api requests before persistence and reject workloads that violate security policies: no privileged containers, no host namespace sharing, required labels/annotations, image registry allowlists. provides defense-in-depth on top of pod security standards (cme-706) with custom policy granularity. opa/gatekeeper uses rego policies via constrainttemplate crds; kyverno uses kubernetes-native clusterpolicy resources. openshift securitycontextconstraints serve as a built-in admission control mechanism. container isolation harden application cwe-269 cwe-284 cwe-250">
     <div>
       <a href="entries/CME-711.html" class="sr-id">CME-711</a>
@@ -641,7 +641,7 @@
     </div>
     <div class="sr-desc">Policy-as-code enforcement at the Kubernetes admission gate. Admission controllers intercept API requests before persistence and reject workloads that...</div>
   </li>
-  
+
   <li data-search="cme-712 container image signing and provenance verification (cosign/sigstore) require cryptographic signatures on container images before deployment. cosign/sigstore verify image provenance against a trust policy, ensuring only images from authorized build pipelines are admitted. blocks supply chain attacks where a compromised registry or build system pushes malicious images. verification can be enforced at admission time via policy controllers (kyverno, gatekeeper with cosign) or at pull time via container runtime trust policies (podman policy.json, cri-o). container isolation harden application cwe-345 cwe-494 cwe-829">
     <div>
       <a href="entries/CME-712.html" class="sr-id">CME-712</a>
@@ -651,7 +651,7 @@
     </div>
     <div class="sr-desc">Require cryptographic signatures on container images before deployment. Cosign/Sigstore verify image provenance against a trust policy, ensuring only ...</div>
   </li>
-  
+
   <li data-search="cme-713 read-only root filesystem enforcement mount the container root filesystem as read-only, forcing all writable data into explicitly declared volumes or tmpfs mounts. prevents attackers who achieve code execution inside a container from modifying binaries, planting webshells, or persisting backdoors on the filesystem. combined with nonewprivileges (cme-707) and dropped capabilities (cme-705), eliminates post-exploitation persistence mechanisms within the container layer. container isolation harden os/kernel cwe-269 cwe-94 cwe-506">
     <div>
       <a href="entries/CME-713.html" class="sr-id">CME-713</a>
@@ -661,7 +661,7 @@
     </div>
     <div class="sr-desc">Mount the container root filesystem as read-only, forcing all writable data into explicitly declared volumes or tmpfs mounts. Prevents attackers who a...</div>
   </li>
-  
+
   <li data-search="cme-801 multi-factor authentication (mfa) requires multiple authentication factors (password + totp/fido2/smart card), preventing credential-only compromise. even stolen passwords are insufficient for access. credential hardening harden identity cwe-287 cwe-306 cwe-521 cwe-303 cwe-305">
     <div>
       <a href="entries/CME-801.html" class="sr-id">CME-801</a>
@@ -671,7 +671,7 @@
     </div>
     <div class="sr-desc">Requires multiple authentication factors (password + TOTP/FIDO2/smart card), preventing credential-only compromise. Even stolen passwords are insuffic...</div>
   </li>
-  
+
   <li data-search="cme-802 password quality enforcement (pwquality) enforces minimum password complexity (length, character classes, dictionary checks) via pam_pwquality, making brute force and dictionary attacks impractical. credential hardening harden identity cwe-521">
     <div>
       <a href="entries/CME-802.html" class="sr-id">CME-802</a>
@@ -681,7 +681,7 @@
     </div>
     <div class="sr-desc">Enforces minimum password complexity (length, character classes, dictionary checks) via pam_pwquality, making brute force and dictionary attacks impra...</div>
   </li>
-  
+
   <li data-search="cme-803 account lockout policy (pam_faillock) locks user accounts after a configurable number of failed authentication attempts, preventing online brute force attacks. credential hardening harden identity cwe-307">
     <div>
       <a href="entries/CME-803.html" class="sr-id">CME-803</a>
@@ -691,7 +691,7 @@
     </div>
     <div class="sr-desc">Locks user accounts after a configurable number of failed authentication attempts, preventing online brute force attacks.</div>
   </li>
-  
+
   <li data-search="cme-804 ssh key-only authentication disables password-based ssh login entirely, requiring public key authentication. eliminates remote brute force against ssh as an attack vector. credential hardening harden identity cwe-287 cwe-521">
     <div>
       <a href="entries/CME-804.html" class="sr-id">CME-804</a>
@@ -701,7 +701,7 @@
     </div>
     <div class="sr-desc">Disables password-based SSH login entirely, requiring public key authentication. Eliminates remote brute force against SSH as an attack vector.</div>
   </li>
-  
+
   <li data-search="cme-805 credential rotation policy automated rotation of secrets, api keys, and passwords on schedule. limits the window during which compromised credentials remain valid. credential hardening harden identity cwe-798 cwe-521">
     <div>
       <a href="entries/CME-805.html" class="sr-id">CME-805</a>
@@ -711,7 +711,7 @@
     </div>
     <div class="sr-desc">Automated rotation of secrets, API keys, and passwords on schedule. Limits the window during which compromised credentials remain valid.</div>
   </li>
-  
+
   <li data-search="cme-806 kerberos authentication (gssapi) centralized ticket-based authentication using kerberos. passwords never transmitted over the network; mutual authentication prevents impersonation of either party. credential hardening harden identity cwe-319 cwe-287 cwe-303">
     <div>
       <a href="entries/CME-806.html" class="sr-id">CME-806</a>
@@ -721,7 +721,7 @@
     </div>
     <div class="sr-desc">Centralized ticket-based authentication using Kerberos. Passwords never transmitted over the network; mutual authentication prevents impersonation of ...</div>
   </li>
-  
+
   <li data-search="cme-807 session lifetime and idle timeout enforcement enforce absolute session lifetime limits and idle inactivity timeouts on all authenticated sessions to minimize the window during which a stolen or abandoned session token can be reused. the control requires: (1) an absolute maximum session duration (e.g., 8-12 hours) after which the session is invalidated regardless of activity, forcing re-authentication; (2) an idle timeout (e.g., 15-30 minutes) that invalidates sessions after a period of no activity; (3) server-side session invalidation on explicit logout that destroys the session record rather than merely clearing the client cookie; and (4) session invalidation on security-relevant account changes (password change, privilege escalation, mfa enrollment) to prevent continued use of pre-change session tokens. configuration is enforced via application server session-timeout directives (web.xml, tomcat session-config, django session_cookie_age, rails session_store expire_after), reverse proxy session modules (mod_session maxage), or identity provider token lifetime policies (keycloak/rhsso access token lifespan, sso session idle/max settings). credential hardening harden identity cwe-613 cwe-384 cwe-539">
     <div>
       <a href="entries/CME-807.html" class="sr-id">CME-807</a>
@@ -731,7 +731,7 @@
     </div>
     <div class="sr-desc">Enforce absolute session lifetime limits and idle inactivity timeouts on all authenticated sessions to minimize the window during which a stolen or ab...</div>
   </li>
-  
+
   <li data-search="cme-901 ssh hardening (comprehensive) comprehensive ssh hardening: disable root login, enforce protocol 2, restrict ciphers to aead (chacha20/aes-gcm), disable x11/agent forwarding, set maxauthtries, enable logingracetime. protocol hardening harden network cwe-287 cwe-250">
     <div>
       <a href="entries/CME-901.html" class="sr-id">CME-901</a>
@@ -741,7 +741,7 @@
     </div>
     <div class="sr-desc">Comprehensive SSH hardening: disable root login, enforce Protocol 2, restrict ciphers to AEAD (chacha20/aes-gcm), disable X11/agent forwarding, set Ma...</div>
   </li>
-  
+
   <li data-search="cme-902 disable unused network services disables and masks unnecessary listening services (rpcbind, avahi-daemon, cups, postfix on non-mail servers). each removed service eliminates an attack surface. protocol hardening harden network cwe-284 cwe-668">
     <div>
       <a href="entries/CME-902.html" class="sr-id">CME-902</a>
@@ -751,7 +751,7 @@
     </div>
     <div class="sr-desc">Disables and masks unnecessary listening services (rpcbind, avahi-daemon, cups, postfix on non-mail servers). Each removed service eliminates an attac...</div>
   </li>
-  
+
   <li data-search="cme-903 kernel network hardening (sysctl) kernel network stack hardening via sysctl: enable syn cookies (tcp syn flood protection), disable ip forwarding, reject source-routed packets, ignore icmp redirects, enable reverse path filtering. protocol hardening harden network cwe-284 cwe-940 cwe-350">
     <div>
       <a href="entries/CME-903.html" class="sr-id">CME-903</a>
@@ -761,7 +761,7 @@
     </div>
     <div class="sr-desc">Kernel network stack hardening via sysctl: enable SYN cookies (TCP SYN flood protection), disable IP forwarding, reject source-routed packets, ignore ...</div>
   </li>
-  
+
   <li data-search="cme-904 waf (web application firewall) http-layer filtering that inspects requests for injection, xss, path traversal, and other owasp top 10 patterns. can operate in blocking or detection mode with owasp core rule set. application controls harden application cwe-79 cwe-89 cwe-94 cwe-78 cwe-22">
     <div>
       <a href="entries/CME-904.html" class="sr-id">CME-904</a>
@@ -771,7 +771,7 @@
     </div>
     <div class="sr-desc">HTTP-layer filtering that inspects requests for injection, XSS, path traversal, and other OWASP Top 10 patterns. Can operate in blocking or detection ...</div>
   </li>
-  
+
   <li data-search="cme-905 content security policy (csp) headers browser-enforced http header policy that restricts script sources, prevents inline execution, and blocks mixed content. defense-in-depth against stored/reflected xss that catches output encoding failures. csp&#39;s frame-ancestors directive also mitigates clickjacking. application controls harden application cwe-79 cwe-1021">
     <div>
       <a href="entries/CME-905.html" class="sr-id">CME-905</a>
@@ -781,7 +781,7 @@
     </div>
     <div class="sr-desc">Browser-enforced HTTP header policy that restricts script sources, prevents inline execution, and blocks mixed content. Defense-in-depth against store...</div>
   </li>
-  
+
   <li data-search="cme-906 rate limiting / connection throttling limits request rate per client ip or authenticated identity. mitigates brute force attacks, credential stuffing, and application-level denial of service from single-source attackers. does not protect against distributed attacks across many source ips. application controls harden application cwe-307 cwe-400 cwe-799">
     <div>
       <a href="entries/CME-906.html" class="sr-id">CME-906</a>
@@ -791,7 +791,7 @@
     </div>
     <div class="sr-desc">Limits request rate per client IP or authenticated identity. Mitigates brute force attacks, credential stuffing, and application-level denial of servi...</div>
   </li>
-  
+
   <li data-search="cme-907 application-layer rbac enforcement enforce role-based access control within the application by mapping each user to a set of roles, each role to a set of permissions, and verifying the caller holds the required permission before executing any privileged operation. authorization checks run as middleware or decorators on every privileged api endpoint, evaluated after authentication and before business logic. role assignments follow least privilege — users receive the minimum role needed for their function. prevents authenticated users from accessing administrative functions, modifying data outside their role permissions, or escalating their own privileges through direct api calls. application controls harden application cwe-266 cwe-1220 cwe-862 cwe-863 cwe-285">
     <div>
       <a href="entries/CME-907.html" class="sr-id">CME-907</a>
@@ -801,7 +801,7 @@
     </div>
     <div class="sr-desc">Enforce role-based access control within the application by mapping each user to a set of roles, each role to a set of permissions, and verifying the ...</div>
   </li>
-  
+
   <li data-search="cme-908 object-level authorization checks (idor prevention) enforce per-object ownership and permission verification on every data access operation. before returning, modifying, or deleting any resource, the application verifies the authenticated caller owns the resource or holds explicit permission to access it. object identifiers (database ids, uuids, file paths) in api parameters are never trusted as implicit authorization — the application queries ownership metadata and compares against the caller&#39;s identity. prevents insecure direct object reference (idor) attacks where an attacker enumerates or guesses object identifiers to access resources belonging to other users. application controls harden application cwe-639 cwe-284">
     <div>
       <a href="entries/CME-908.html" class="sr-id">CME-908</a>
@@ -811,7 +811,7 @@
     </div>
     <div class="sr-desc">Enforce per-object ownership and permission verification on every data access operation. Before returning, modifying, or deleting any resource, the ap...</div>
   </li>
-  
+
   <li data-search="cme-909 default-deny api authorization policy all api endpoints require explicit authorization by default — any endpoint without a declared authorization rule returns 403 forbidden. the authorization framework operates as a deny-by-default middleware that intercepts every incoming request and requires an explicit policy match before forwarding to the handler. only explicitly allowlisted endpoints (health checks, public landing pages) bypass authorization. prevents vulnerabilities where new endpoints are deployed without authorization checks, or where legacy endpoints silently allow unauthenticated access to sensitive functionality. application controls harden application cwe-306 cwe-862 cwe-1220 cwe-284">
     <div>
       <a href="entries/CME-909.html" class="sr-id">CME-909</a>
@@ -821,7 +821,7 @@
     </div>
     <div class="sr-desc">All API endpoints require explicit authorization by default — any endpoint without a declared authorization rule returns 403 Forbidden. The authorizat...</div>
   </li>
-  
+
   <li data-search="cme-910 role separation / duty segregation structure application roles around single-responsibility privilege domains, ensuring that capabilities in one domain cannot be leveraged to gain privileges in an unrelated domain. each role governs a bounded set of operations (e.g., user management, deployment, financial operations) and cannot modify its own scope, create tokens with elevated scope, or grant itself additional roles. token and session scopes are minted to the specific capability required for each operation rather than the user&#39;s maximum privilege set. role definitions enforce mutual exclusion where domain separation requires it (e.g., the role that configures authentication policies cannot also be the role that manages user accounts). prevents privilege chaining attacks where compromising one admin capability bootstraps into full system compromise. application controls isolate application cwe-268 cwe-266 cwe-269">
     <div>
       <a href="entries/CME-910.html" class="sr-id">CME-910</a>
@@ -831,7 +831,7 @@
     </div>
     <div class="sr-desc">Structure application roles around single-responsibility privilege domains, ensuring that capabilities in one domain cannot be leveraged to gain privi...</div>
   </li>
-  
+
   <li data-search="cme-911 fine-grained administrative permission scoping decompose coarse-grained administrative roles into fine-grained permission sets and assign each administrator the minimum permission scope required for their operational duties. instead of granting broad management roles that bundle unrelated capabilities, the application defines atomic permissions (view-users, create-idp-mapper, assign-role, modify-client-settings) and composes them into purpose-specific administrative profiles. administrators who manage identity providers receive only idp-configuration permissions without role-assignment capability; administrators who manage user accounts receive user-management permissions without idp access. regular audits compare each administrator is effective permissions against their documented job function and revoke unnecessary grants. reduces the blast radius of compromised or malicious admin accounts by ensuring that exploiting one administrative capability does not grant access to unrelated privileged operations. application controls isolate application cwe-266 cwe-269 cwe-250 cwe-1220">
     <div>
       <a href="entries/CME-911.html" class="sr-id">CME-911</a>
@@ -841,7 +841,7 @@
     </div>
     <div class="sr-desc">Decompose coarse-grained administrative roles into fine-grained permission sets and assign each administrator the minimum permission scope required fo...</div>
   </li>
-  
+
   <li data-search="cme-912 http header normalization and request smuggling prevention enforce strict http header parsing on all http intermediaries (proxies, load balancers, reverse proxies, web servers) to prevent request smuggling via header desynchronization. the control requires: (1) rejecting requests containing both content-length and transfer-encoding headers per rfc 7230 section 3.3.3, (2) rejecting requests with duplicate content-length headers carrying differing values, (3) disabling relaxed header parsing modes that tolerate whitespace or encoding variations in transfer-encoding values, and (4) normalizing or rejecting header values containing illegal characters (bare cr, bare lf, nul bytes). these measures eliminate the primary desynchronization vectors that enable an attacker to inject smuggled requests across the proxy-backend boundary. application controls harden application cwe-444 cwe-113 cwe-436">
     <div>
       <a href="entries/CME-912.html" class="sr-id">CME-912</a>
@@ -851,7 +851,7 @@
     </div>
     <div class="sr-desc">Enforce strict HTTP header parsing on all HTTP intermediaries (proxies, load balancers, reverse proxies, web servers) to prevent request smuggling via...</div>
   </li>
-  
+
   <li data-search="cme-913 csrf protection (anti-csrf token &amp; samesite cookie enforcement) server-side enforcement of anti-csrf tokens (synchronizer tokens or double-submit cookies) combined with samesite=strict or samesite=lax cookie attributes on session cookies. for every state-changing http request (post, put, delete, patch), the server generates a cryptographically random token bound to the user&#39;s session, embeds it in forms or response headers, and rejects requests that do not present a valid token. the samesite cookie attribute provides defense-in-depth by instructing the browser not to send cookies with cross-origin requests. together, these controls prevent cross-site request forgery by ensuring that state-changing requests originate from the application&#39;s own pages, not from attacker-controlled sites. application controls harden application cwe-352 cwe-940 cwe-1275">
     <div>
       <a href="entries/CME-913.html" class="sr-id">CME-913</a>
@@ -861,7 +861,7 @@
     </div>
     <div class="sr-desc">Server-side enforcement of anti-CSRF tokens (synchronizer tokens or double-submit cookies) combined with SameSite=Strict or SameSite=Lax cookie attrib...</div>
   </li>
-  
+
   <li data-search="cme-914 strict cors origin allowlist enforcement server-side enforcement of a strict, explicitly enumerated origin allowlist for cross-origin resource sharing (cors). the server validates the origin header of every cross-origin request against a fixed allowlist and only responds with access-control-allow-origin for approved origins. critically, the server never reflects the request&#39;s origin header verbatim, never uses wildcard (*) with access-control-allow-credentials: true, and never relies on partial string matching or regex patterns that can be bypassed with attacker-controlled subdomains. for endpoints that handle credentials or session-sensitive data, access-control-allow-credentials is only set when the origin is explicitly trusted. this prevents cross-origin javascript from reading authenticated responses, exfiltrating session tokens, or making credentialed api calls from attacker-controlled pages. application controls harden application cwe-940 cwe-346 cwe-942">
     <div>
       <a href="entries/CME-914.html" class="sr-id">CME-914</a>
@@ -871,7 +871,7 @@
     </div>
     <div class="sr-desc">Server-side enforcement of a strict, explicitly enumerated origin allowlist for Cross-Origin Resource Sharing (CORS). The server validates the Origin ...</div>
   </li>
-  
+
   <li data-search="cme-915 cross-origin request restriction (reverse proxy origin enforcement) configure the reverse proxy or load balancer (nginx, apache httpd, haproxy) to validate the origin and referer headers on state-changing requests (post, put, delete, patch, and websocket upgrade) against an explicit allowlist of trusted origins. requests with an origin that does not match the allowlist are rejected with 403 before reaching the backend application. this provides defense-in-depth for applications that fail to validate cross-origin requests internally — the proxy enforces the same-origin boundary at the infrastructure layer. application controls harden application cwe-346 cwe-352 cwe-940 cwe-942">
     <div>
       <a href="entries/CME-915.html" class="sr-id">CME-915</a>
@@ -881,7 +881,7 @@
     </div>
     <div class="sr-desc">Configure the reverse proxy or load balancer (nginx, Apache httpd, HAProxy) to validate the Origin and Referer headers on state-changing requests (POS...</div>
   </li>
-  
+
   <li data-search="cme-916 samesite cookie attribute enforcement configure the web server or reverse proxy to enforce the samesite attribute (lax or strict) on all set-cookie response headers. when samesite=lax is set, browsers do not include the cookie in cross-site post, put, delete, or other state-changing requests initiated from a different origin. when samesite=strict is set, cookies are not included in any cross-site navigation. this prevents csrf attacks because the attacker cross-origin request arrives without the victim session cookie, making it unauthenticated. modern browsers default to samesite=lax for cookies that omit samesite, but applications that explicitly set samesite=none (for cross-origin api use) or legacy applications that predate the default bypass this protection. admin enforcement at the proxy layer overrides the application cookie attributes. application controls harden application cwe-346 cwe-352 cwe-1275">
     <div>
       <a href="entries/CME-916.html" class="sr-id">CME-916</a>
@@ -891,7 +891,7 @@
     </div>
     <div class="sr-desc">Configure the web server or reverse proxy to enforce the SameSite attribute (Lax or Strict) on all Set-Cookie response headers. When SameSite=Lax is s...</div>
   </li>
-  
+
   <li data-search="cme-917 worker process recycling (maxconnectionsperchild / max_requests) configures application servers to periodically recycle worker processes after handling a fixed number of requests, bounding the cumulative impact of per-request memory leaks. when a worker reaches its request limit, it is gracefully terminated and replaced with a fresh process, releasing all leaked memory. applicable to apache http server (maxconnectionsperchild), php-fpm (pm.max_requests), gunicorn (--max-requests with --max-requests-jitter for staggered recycling), puma (worker_timeout), and unicorn (after_fork with request counting). the recycling threshold should be set low enough to prevent oom conditions but high enough to avoid excessive process churn — typical values range from 500 to 10000 requests per worker depending on application memory profile. application controls harden application cwe-772 cwe-401">
     <div>
       <a href="entries/CME-917.html" class="sr-id">CME-917</a>
@@ -901,7 +901,7 @@
     </div>
     <div class="sr-desc">Configures application servers to periodically recycle worker processes after handling a fixed number of requests, bounding the cumulative impact of p...</div>
   </li>
-  
+
   <li data-search="cme-918 url path authorization enforcement (forced browsing prevention) enforce url-pattern-based authorization at the web server or reverse proxy layer so that restricted paths (administrative consoles, debug endpoints, configuration panels, internal apis, backup files, and deployment artifacts) are denied to unauthorized requesters before the request reaches application code. the control operates as a default-deny url filter: only explicitly permitted url patterns are accessible to each authenticated role, and any request to an undefined or restricted path returns 403 forbidden. this complements application-layer authorization (cme-907, cme-909) by providing infrastructure-level defense-in-depth against forced browsing, where an attacker discovers and directly requests urls that bypass application navigation and menu-driven access control. configuration is enforced via web server directives (apache httpd location/directory with require, nginx location blocks with deny/allow, iis url authorization rules) or java ee security-constraint elements in web.xml with deny-uncovered-http-methods enabled. application controls harden application cwe-425 cwe-862 cwe-306 cwe-284">
     <div>
       <a href="entries/CME-918.html" class="sr-id">CME-918</a>
@@ -911,7 +911,7 @@
     </div>
     <div class="sr-desc">Enforce URL-pattern-based authorization at the web server or reverse proxy layer so that restricted paths (administrative consoles, debug endpoints, c...</div>
   </li>
-  
+
   <li data-search="cme-919 jit compiler hardening (jit restriction / v8 sandbox) restricts or hardens just-in-time compilation in language runtimes and browser engines to prevent type confusion exploitation. encompasses three postures: (1) jit disabling — turning off jit compilation entirely via flags (--jitless in v8, javascript.options.ion in firefox) which eliminates jit-spraying and jit-based type confusion at the cost of performance; (2) v8 sandbox enforcement — a hardware-backed memory cage that isolates jit-compiled code and v8 heap objects from the rest of the process address space, requiring an additional sandbox escape even after achieving type confusion; (3) jit tiering restrictions — limiting optimization tiers to reduce the surface of speculative type assumptions that can be violated. applicable to chromium-based browsers, node.js, electron applications, and spidermonkey-based runtimes. complements cme-113 (cfi/shadow call stack) which prevents type-confused pointers from redirecting control flow in native code. application controls harden application cwe-843 cwe-119 cwe-787">
     <div>
       <a href="entries/CME-919.html" class="sr-id">CME-919</a>
@@ -921,7 +921,7 @@
     </div>
     <div class="sr-desc">Restricts or hardens Just-In-Time compilation in language runtimes and browser engines to prevent type confusion exploitation. Encompasses three postu...</div>
   </li>
-  
+
   <li data-search="cme-920 database least-privilege access control enforce database-level access control by assigning each application service a dedicated database account with grant-limited permissions. app accounts receive only select, insert, update, delete on specific tables — never create, drop, alter, grant, or dba/superuser roles. prevents sql injection from escalating to schema modification, cross-database access, or os command execution via xp_cmdshell/copy/load_file. each microservice or application component should use a separate credential with the minimum privilege set required for its operations. application controls harden application cwe-89 cwe-250 cwe-862 cwe-269">
     <div>
       <a href="entries/CME-920.html" class="sr-id">CME-920</a>
@@ -931,7 +931,7 @@
     </div>
     <div class="sr-desc">Enforce database-level access control by assigning each application service a dedicated database account with GRANT-limited permissions. App accounts ...</div>
   </li>
-  
+
   <li data-search="cme-921 url request path canonicalization before authorization ensure the web server, reverse proxy, or application framework canonicalizes request uris — resolving path equivalences (., ..), stripping matrix parameters (;param=value), normalizing percent-encoding, collapsing duplicate slashes, and standardizing trailing slashes — before the authorization module evaluates access control rules. the root cause of cwe-551 is a behavior ordering defect where authorization sees a raw uri form that does not match configured security constraints, but the routing/dispatch layer later normalizes the uri and matches a protected resource. canonicalization-first ensures the authorization decision and the routing decision operate on the same resolved path. implementation varies by stack: spring security&#39;s stricthttpfirewall rejects non-normalized requests; tomcat&#39;s encodedsolidushandling and allowbackslash settings control normalization; nginx&#39;s merge_slashes and location matching normalize by default; apache&#39;s allowencodedslashes and mod_rewrite handle encoding normalization. reverse proxies should be configured to normalize before forwarding to backends, and frameworks should reject requests containing path-equivalent sequences rather than silently normalizing them. application controls harden application cwe-551 cwe-41 cwe-863 cwe-696">
     <div>
       <a href="entries/CME-921.html" class="sr-id">CME-921</a>
@@ -941,7 +941,7 @@
     </div>
     <div class="sr-desc">Ensure the web server, reverse proxy, or application framework canonicalizes request URIs — resolving path equivalences (., ..), stripping matrix para...</div>
   </li>
-  
+
   <li data-search="cme-923 mass-assignment prevention through explicit request schemas application create and update handlers use explicit, per-operation request schemas that accept only client-controlled fields and reject or ignore server-managed attributes such as tenant, workspace, owner, role, visibility, and deployment state. the allowed fields are maintained independently for each endpoint, preventing automatic model binding or generic object merging from persisting attacker-supplied privileged attributes. this control addresses mass-assignment weaknesses; object-level authorization remains a separate complementary control under cme-908. application controls harden application cwe-915">
     <div>
       <a href="entries/CME-923.html" class="sr-id">CME-923</a>
@@ -951,7 +951,7 @@
     </div>
     <div class="sr-desc">Application create and update handlers use explicit, per-operation request schemas that accept only client-controlled fields and reject or ignore serv...</div>
   </li>
-  
+
   <li data-search="cme-1001 edr agent (endpoint detection &amp; response) real-time behavioral detection and automated response agent on endpoints. detects exploit patterns, lateral movement, and persistence mechanisms. can kill processes, isolate hosts, and quarantine files automatically. runtime detection detect application ">
     <div>
       <a href="entries/CME-1001.html" class="sr-id">CME-1001</a>
@@ -961,7 +961,7 @@
     </div>
     <div class="sr-desc">Real-time behavioral detection and automated response agent on endpoints. Detects exploit patterns, lateral movement, and persistence mechanisms. Can ...</div>
   </li>
-  
+
   <li data-search="cme-1002 audit subsystem (auditd) linux kernel audit framework that logs syscalls, file access, authentication events, and security-relevant operations. provides forensic trail and can trigger alerts. runtime detection detect os/kernel cwe-778">
     <div>
       <a href="entries/CME-1002.html" class="sr-id">CME-1002</a>
@@ -971,7 +971,7 @@
     </div>
     <div class="sr-desc">Linux kernel audit framework that logs syscalls, file access, authentication events, and security-relevant operations. Provides forensic trail and can...</div>
   </li>
-  
+
   <li data-search="cme-1003 falco / ebpf runtime security kernel-level runtime security using ebpf or kernel modules to detect anomalous behavior: unexpected shell spawns, sensitive file reads, network connections from unusual processes. runtime detection detect os/kernel ">
     <div>
       <a href="entries/CME-1003.html" class="sr-id">CME-1003</a>
@@ -981,7 +981,7 @@
     </div>
     <div class="sr-desc">Kernel-level runtime security using eBPF or kernel modules to detect anomalous behavior: unexpected shell spawns, sensitive file reads, network connec...</div>
   </li>
-  
+
   <li data-search="cme-1004 aide / file integrity monitoring detects unauthorized modifications to critical system files by comparing against a known-good baseline database. scheduled or continuous monitoring of /etc, /bin, /sbin, /usr. integrity detection detect os/kernel cwe-345">
     <div>
       <a href="entries/CME-1004.html" class="sr-id">CME-1004</a>
@@ -991,7 +991,7 @@
     </div>
     <div class="sr-desc">Detects unauthorized modifications to critical system files by comparing against a known-good baseline database. Scheduled or continuous monitoring of...</div>
   </li>
-  
+
   <li data-search="cme-1005 runtime memory error detection (kasan/hwasan) kernel addresssanitizer (kasan) and hardware-assisted addresssanitizer (hwasan) detect memory safety violations at runtime including use-after-free, out-of-bounds access, buffer size miscalculations, and null pointer dereferences. kasan instruments kernel memory allocations with redzones and quarantine zones to detect invalid accesses. hwasan uses arm memory tagging for lower-overhead production deployments. when a violation is detected, the kernel logs a detailed report and can be configured to panic, preventing silent exploitation. runtime detection detect os/kernel cwe-416 cwe-131 cwe-193 cwe-476 cwe-787 cwe-125 cwe-120 cwe-805">
     <div>
       <a href="entries/CME-1005.html" class="sr-id">CME-1005</a>
@@ -1001,7 +1001,7 @@
     </div>
     <div class="sr-desc">Kernel AddressSanitizer (KASAN) and Hardware-assisted AddressSanitizer (HWASan) detect memory safety violations at runtime including use-after-free, o...</div>
   </li>
-  
+
   <li data-search="cme-1006 privilege change audit logging application-level audit trail that records every modification to user roles, permissions, and authorization policies. each log entry captures the actor (who made the change), the target (whose privileges changed), the before and after state (e.g., role viewer to admin), the timestamp, and the request context (ip, session, endpoint). logs authorization decision denials with sufficient context to identify privilege escalation attempts. distinct from os-level audit (cme-1002) in that it operates within the application&#39;s authorization domain and captures semantically meaningful privilege transitions invisible to syscall-level logging. enables real-time alerting on anomalous patterns such as self-promotion, bulk role changes, or privilege changes from unexpected sources. runtime detection detect application cwe-778 cwe-223">
     <div>
       <a href="entries/CME-1006.html" class="sr-id">CME-1006</a>
@@ -1011,7 +1011,7 @@
     </div>
     <div class="sr-desc">Application-level audit trail that records every modification to user roles, permissions, and authorization policies. Each log entry captures the acto...</div>
   </li>
-  
+
   <li data-search="cme-1007 application configuration drift detection (iac enforcement) continuously monitor application-managed configuration objects — stored in databases, apis, or runtime registries rather than filesystem files — against a declared baseline, and alert or auto-remediate when unauthorized changes appear. configuration baselines are maintained in version-controlled infrastructure-as-code repositories (terraform, ansible, helm values, keycloak realm exports). a reconciliation loop periodically exports the live application state via its management api, diffs it against the iac baseline, and either reverts the drift automatically or raises an alert for human review. prevents attackers from persisting unauthorized configuration changes — such as adding a malicious identity provider mapper, injecting a rogue oauth client, or modifying authorization policies — by ensuring that any manual change not committed to the iac repository is detected and reported within the reconciliation interval. integrity detection detect application cwe-266 cwe-284 cwe-1220 cwe-16">
     <div>
       <a href="entries/CME-1007.html" class="sr-id">CME-1007</a>
@@ -1021,7 +1021,7 @@
     </div>
     <div class="sr-desc">Continuously monitor application-managed configuration objects — stored in databases, APIs, or runtime registries rather than filesystem files — again...</div>
   </li>
-  
+
   <li data-search="cme-1008 application admin event logging (siem integration) record every administrative action performed through the application management interface into a structured, tamper-evident audit log, and forward events in real time to a centralized siem for correlation and alerting. each log entry captures the authenticated actor, the operation performed, the target resource, a before/after state diff, the source ip, and a timestamp. the siem ingests these events and evaluates them against detection rules tuned to the application threat model — for example, alerting when an identity provider mapper of type hardcoded-role-mapper is created targeting a high-privilege role, or when an oauth client redirect uri is modified. distinct from os-level audit logging (auditd, falco) which operates below the application and cannot interpret application-domain semantics such as role names, policy changes, or resource ownership. prevents attackers from making undetected administrative changes by ensuring that every privileged operation is recorded with sufficient context for security analysts to distinguish legitimate administration from exploitation. runtime detection detect application cwe-266 cwe-269 cwe-284 cwe-778">
     <div>
       <a href="entries/CME-1008.html" class="sr-id">CME-1008</a>
@@ -1031,7 +1031,7 @@
     </div>
     <div class="sr-desc">Record every administrative action performed through the application management interface into a structured, tamper-evident audit log, and forward eve...</div>
   </li>
-  
+
   <li data-search="cme-1009 privilege assignment monitoring (role grant alerting) continuously monitor the effective set of users holding high-privilege application roles and alert when new grants are detected that do not correspond to an approved change management ticket. a scheduled job or event-driven trigger enumerates users who hold sensitive roles (realm-admin, cluster-admin, org-owner, or equivalent), compares the current membership against a known-good baseline or an allowlist maintained in a change management system, and raises an alert for any additions. detects privilege escalation after the fact — even when the escalation mechanism bypasses normal authorization checks — by monitoring the outcome (a new high-privilege user) rather than the mechanism. complements preventive rbac controls by providing a safety net when the authorization enforcement itself is the vulnerable component. runtime detection detect application cwe-266 cwe-269 cwe-284">
     <div>
       <a href="entries/CME-1009.html" class="sr-id">CME-1009</a>
@@ -1041,7 +1041,7 @@
     </div>
     <div class="sr-desc">Continuously monitor the effective set of users holding high-privilege application roles and alert when new grants are detected that do not correspond...</div>
   </li>
-  
+
   <li data-search="cme-1010 cgroup memory pressure monitoring (memory.events / psi) monitors cgroups v2 memory pressure signals — memory.events (oom_kill, high, max counters) and pressure stall information (psi) via /proc/pressure/memory — to detect resource leaks before they exhaust system memory. when a cgroup approaches its memory limit due to a resource leak, these interfaces provide deterministic signals (memory.high threshold crossings, oom_kill increments, psi stall percentages) that monitoring systems consume to trigger alerts and automated remediation. complements cgroup memory limits (cme-704) which contain the leak by adding detection of when containment is being stressed. the memory.events counters are monotonically increasing and per-cgroup, enabling precise attribution of pressure to the leaking workload. integrity detection detect os/kernel cwe-772 cwe-401 cwe-400 cwe-770">
     <div>
       <a href="entries/CME-1010.html" class="sr-id">CME-1010</a>
@@ -1051,7 +1051,7 @@
     </div>
     <div class="sr-desc">Monitors cgroups v2 memory pressure signals — memory.events (oom_kill, high, max counters) and Pressure Stall Information (PSI) via /proc/pressure/mem...</div>
   </li>
-  
+
   <li data-search="cme-1011 kubernetes api server audit policy configures the kubernetes api server audit policy to log security-relevant events including authentication failures, rbac denials, sensitive resource access (secrets, configmaps), privileged pod creation, and exec/attach to running containers. provides detection capability for lateral movement, privilege escalation attempts, and unauthorized api access within the cluster. audit logs can feed siem systems for alerting and forensic analysis. openshift provides built-in audit profiles (default, writerequestbodies, allrequestbodies) configurable via the apiserver resource. runtime detection detect application cwe-778 cwe-223">
     <div>
       <a href="entries/CME-1011.html" class="sr-id">CME-1011</a>
@@ -1061,7 +1061,7 @@
     </div>
     <div class="sr-desc">Configures the Kubernetes API server audit policy to log security-relevant events including authentication failures, RBAC denials, sensitive resource ...</div>
   </li>
-  
+
   <li data-search="cme-1012 pre-commit secrets detection (gitleaks/trufflehog) automated scanning of code commits for embedded secrets (api keys, passwords, private keys, tokens, connection strings) using pattern-based and entropy-based detection. runs as a git pre-commit hook or ci pipeline gate to prevent hard-coded credentials from reaching repositories where they can be harvested by attackers or leaked in public forks. tools include gitleaks, trufflehog, and git-secrets. complements credential rotation and vault-based secret management by catching secrets that bypass those controls at the source code layer. integrity detection detect application cwe-798 cwe-312 cwe-316">
     <div>
       <a href="entries/CME-1012.html" class="sr-id">CME-1012</a>
@@ -1071,7 +1071,7 @@
     </div>
     <div class="sr-desc">Automated scanning of code commits for embedded secrets (API keys, passwords, private keys, tokens, connection strings) using pattern-based and entrop...</div>
   </li>
-  
+
   <li data-search="cme-1101 automated patch management (dnf-automatic) automatically downloads and applies security updates on schedule. reduces the window between vulnerability disclosure and patch application from days/weeks to hours. patch management evict os/kernel ">
     <div>
       <a href="entries/CME-1101.html" class="sr-id">CME-1101</a>
@@ -1081,7 +1081,7 @@
     </div>
     <div class="sr-desc">Automatically downloads and applies security updates on schedule. Reduces the window between vulnerability disclosure and patch application from days/...</div>
   </li>
-  
+
   <li data-search="cme-1102 live kernel patching (kpatch/livepatch) applies critical kernel security fixes without system reboot, eliminating the patch-reboot delay that leaves systems vulnerable. patches are applied to the running kernel in memory. patch management evict os/kernel cwe-119">
     <div>
       <a href="entries/CME-1102.html" class="sr-id">CME-1102</a>
@@ -1091,7 +1091,7 @@
     </div>
     <div class="sr-desc">Applies critical kernel security fixes without system reboot, eliminating the patch-reboot delay that leaves systems vulnerable. Patches are applied t...</div>
   </li>
-  
+
   <li data-search="cme-1103 automated container image rebuilds ci/cd pipeline automatically rebuilds and redeploys container images when base image cves are published. running containers are replaced with patched versions without manual intervention. patch management evict application ">
     <div>
       <a href="entries/CME-1103.html" class="sr-id">CME-1103</a>
@@ -1101,7 +1101,7 @@
     </div>
     <div class="sr-desc">CI/CD pipeline automatically rebuilds and redeploys container images when base image CVEs are published. Running containers are replaced with patched ...</div>
   </li>
-  
+
   <li data-search="cme-1201 immutable infrastructure servers are replaced rather than patched in place. golden images are built in ci/cd, deployed fresh, and destroyed on replacement. compromised instances are terminated and redeployed from known-good state. recovery controls restore application ">
     <div>
       <a href="entries/CME-1201.html" class="sr-id">CME-1201</a>
@@ -1111,7 +1111,7 @@
     </div>
     <div class="sr-desc">Servers are replaced rather than patched in place. Golden images are built in CI/CD, deployed fresh, and destroyed on replacement. Compromised instanc...</div>
   </li>
-  
+
   <li data-search="cme-1202 automated backup with integrity verification regular automated backups with cryptographic integrity verification and tested restore procedures. enables point-in-time recovery after ransomware, data corruption, or destructive attacks. recovery controls restore data cwe-345">
     <div>
       <a href="entries/CME-1202.html" class="sr-id">CME-1202</a>
@@ -1121,7 +1121,7 @@
     </div>
     <div class="sr-desc">Regular automated backups with cryptographic integrity verification and tested restore procedures. Enables point-in-time recovery after ransomware, da...</div>
   </li>
-  
+
   <li data-search="cme-1203 disaster recovery / multi-region failover active-passive or active-active multi-region deployment enabling failover when primary site is compromised or unavailable. automated failover with defined rto/rpo. recovery controls restore application ">
     <div>
       <a href="entries/CME-1203.html" class="sr-id">CME-1203</a>
@@ -1131,7 +1131,7 @@
     </div>
     <div class="sr-desc">Active-passive or active-active multi-region deployment enabling failover when primary site is compromised or unavailable. Automated failover with def...</div>
   </li>
-  
+
   <li data-search="cme-1204 service watchdog and automatic restart (systemd watchdogsec/restart) configures systemd service units with watchdog monitoring (watchdogsec=) and automatic restart policies (restart=on-failure or restart=always, restartsec=) to recover services that become unresponsive or are killed due to resource exhaustion. when a memory leak causes the oom killer to terminate a service or the process hangs due to resource starvation, systemd automatically restarts the service from a clean state. the watchdog mechanism requires the service to periodically notify systemd (via sd_notify watchdog=1); failure to notify within the watchdogsec interval triggers a restart. combined with cgroup memory limits (cme-704), this provides both containment and recovery — the cgroup bounds the leak, and systemd restarts the service when the bound is hit. recovery controls restore os/kernel cwe-772 cwe-401 cwe-400 cwe-770 cwe-835">
     <div>
       <a href="entries/CME-1204.html" class="sr-id">CME-1204</a>
@@ -1141,7 +1141,7 @@
     </div>
     <div class="sr-desc">Configures systemd service units with watchdog monitoring (WatchdogSec=) and automatic restart policies (Restart=on-failure or Restart=always, Restart...</div>
   </li>
-  
+
   <li data-search="cme-1301 path traversal prevention (canonicalization) application-level path validation that canonicalizes user-supplied paths (resolving symlinks, ../, and relative references) and verifies the resolved path falls within an allowed base directory. rejects absolute path injection and directory traversal sequences before any filesystem operation. prevents attackers from reading or writing files outside intended directories. application input validation harden application cwe-22 cwe-23 cwe-36 cwe-59 cwe-73">
     <div>
       <a href="entries/CME-1301.html" class="sr-id">CME-1301</a>
@@ -1151,7 +1151,7 @@
     </div>
     <div class="sr-desc">Application-level path validation that canonicalizes user-supplied paths (resolving symlinks, ../, and relative references) and verifies the resolved ...</div>
   </li>
-  
+
   <li data-search="cme-1302 deserialization allowlist (safe loading) restricts deserialization to an explicit allowlist of permitted types, classes, or functions. prevents attacker-controlled serialized data from instantiating arbitrary objects, invoking dangerous functions, or triggering unintended code paths. applies to json schema validation, yaml safe_load, pickle restrictions, and custom deserialization frameworks. application input validation harden application cwe-470 cwe-502 cwe-1188">
     <div>
       <a href="entries/CME-1302.html" class="sr-id">CME-1302</a>
@@ -1161,7 +1161,7 @@
     </div>
     <div class="sr-desc">Restricts deserialization to an explicit allowlist of permitted types, classes, or functions. Prevents attacker-controlled serialized data from instan...</div>
   </li>
-  
+
   <li data-search="cme-1303 application-level filesystem access confinement application enforces its own filesystem access boundaries independent of os-level controls. uses chroot-like path scoping, virtual filesystem abstraction, or explicit directory allowlists within the application code. ensures that even if an attacker controls a file path parameter, operations are confined to the application data directory. application input validation isolate application cwe-22 cwe-73 cwe-284">
     <div>
       <a href="entries/CME-1303.html" class="sr-id">CME-1303</a>
@@ -1171,37 +1171,37 @@
     </div>
     <div class="sr-desc">Application enforces its own filesystem access boundaries independent of OS-level controls. Uses chroot-like path scoping, virtual filesystem abstract...</div>
   </li>
-  
-  <li data-search="cme-1304 ssrf prevention (outbound request allowlist) application-level validation that restricts outbound requests and file access to an allowlist of permitted destinations, schemes, and paths. blocks requests to internal metadata endpoints (169.254.169.254), localhost, private rfc1918 ranges, and file:// or gopher:// schemes. prevents attackers from using the application as a proxy to access internal resources. application input validation harden application cwe-918">
+
+  <li data-search="cme-1304 ssrf prevention (outbound request allowlist) application-level validation that restricts server-initiated requests to an explicit allowlist of permitted schemes, destinations, ports, and paths. the application canonicalizes the url once, rejects embedded credentials and ambiguous representations, resolves the destination before connecting, validates every resolved ipv4 and ipv6 address, and uses the validated address for the connection to prevent dns rebinding and time-of-check/time-of-use bypasses. it rejects loopback, link-local, private, unique-local, multicast, and unspecified address ranges; disables unsupported schemes such as file:// and gopher://; revalidates every redirect target; prevents unintended proxy use; and limits response size and duration. this ssrf-specific control specializes the general allowlist pattern in cme-1315. network egress restriction in cme-208 provides defense in depth when application validation is bypassed. application input validation harden application cwe-918">
     <div>
       <a href="entries/CME-1304.html" class="sr-id">CME-1304</a>
       <a href="entries/CME-1304.html">SSRF Prevention (Outbound Request Allowlist)</a>
       <span class="badge badge-tactic-harden">Harden</span>
       <span class="badge badge-layer-application">Application</span>
     </div>
-    <div class="sr-desc">Application-level validation that restricts outbound requests and file access to an allowlist of permitted destinations, schemes, and paths. Blocks re...</div>
+    <div class="sr-desc">Application-level validation that restricts server-initiated requests to an explicit allowlist of permitted schemes, destinations, ports, and paths. T...</div>
   </li>
-  
-  <li data-search="cme-1305 sql injection prevention (parameterized queries) application exclusively uses parameterized queries or prepared statements for all database operations. user input is never concatenated into sql strings. orms with parameterized backends qualify. prevents attackers from injecting sql syntax to read, modify, or delete database contents. application input validation harden application cwe-89">
+
+  <li data-search="cme-1305 sql injection prevention (parameterized queries) application uses parameterized queries or prepared statements at every database boundary, including direct driver calls, orm query apis, stored procedure invocations, and legacy data-access code. untrusted values are passed only through binding apis and are never concatenated, interpolated, or formatted into sql text. sql elements that drivers cannot bind, including table names, column names, sort directions, keywords, and query fragments, are selected through fixed mappings or strict allowlists. raw-query and literal-expression escape hatches are prohibited or independently reviewed. this separation of sql structure from data prevents attackers from injecting statements that read, modify, or delete database contents. database least privilege in cme-920 limits residual impact, while waf filtering in cme-904 provides probabilistic defense in depth. application input validation harden application cwe-89">
     <div>
       <a href="entries/CME-1305.html" class="sr-id">CME-1305</a>
       <a href="entries/CME-1305.html">SQL Injection Prevention (Parameterized Queries)</a>
       <span class="badge badge-tactic-harden">Harden</span>
       <span class="badge badge-layer-application">Application</span>
     </div>
-    <div class="sr-desc">Application exclusively uses parameterized queries or prepared statements for all database operations. User input is never concatenated into SQL strin...</div>
+    <div class="sr-desc">Application uses parameterized queries or prepared statements at every database boundary, including direct driver calls, ORM query APIs, stored proced...</div>
   </li>
-  
-  <li data-search="cme-1306 xss prevention (context-aware output encoding) application applies context-aware output encoding to all user-controlled data before rendering in html, javascript, css, or url contexts. uses framework auto-escaping (django, jinja2 autoescape, react jsx) rather than manual sanitization. combined with csp headers (cme-905), provides defense-in-depth against xss. application input validation harden application cwe-79">
+
+  <li data-search="cme-1306 xss prevention (context-aware output encoding) application applies context-aware output encoding to every untrusted value immediately before it reaches an html text, html attribute, javascript, css, url, svg, or dom insertion context. the encoder is selected for the final parser context; html escaping is not used as a substitute for javascript, css, url, or attribute encoding. framework auto-escaping (such as django or jinja2 autoescape and react jsx) is enabled for production templates. raw or safe rendering apis, dangerouslysetinnerhtml, innerhtml, document.write, and equivalent dom sinks are prohibited or independently reviewed and sanitized. this control prevents attacker input from being interpreted as executable markup or script. csp in cme-905 provides browser-enforced defense in depth, while waf filtering in cme-904 is probabilistic defense in depth. application input validation harden application cwe-79 cwe-116">
     <div>
       <a href="entries/CME-1306.html" class="sr-id">CME-1306</a>
       <a href="entries/CME-1306.html">XSS Prevention (Context-Aware Output Encoding)</a>
       <span class="badge badge-tactic-harden">Harden</span>
       <span class="badge badge-layer-application">Application</span>
     </div>
-    <div class="sr-desc">Application applies context-aware output encoding to all user-controlled data before rendering in HTML, JavaScript, CSS, or URL contexts. Uses framewo...</div>
+    <div class="sr-desc">Application applies context-aware output encoding to every untrusted value immediately before it reaches an HTML text, HTML attribute, JavaScript, CSS...</div>
   </li>
-  
+
   <li data-search="cme-1307 command injection prevention (no shell invocation) application avoids invoking shell commands with user-controlled input. uses direct process execution (subprocess with list args, no shell=true) or purpose-built libraries instead of shell pipelines. when shell interaction is unavoidable, uses strict allowlist validation on inputs. application input validation harden application cwe-78 cwe-77">
     <div>
       <a href="entries/CME-1307.html" class="sr-id">CME-1307</a>
@@ -1211,7 +1211,7 @@
     </div>
     <div class="sr-desc">Application avoids invoking shell commands with user-controlled input. Uses direct process execution (subprocess with list args, no shell=True) or pur...</div>
   </li>
-  
+
   <li data-search="cme-1308 origin and cors validation enforcement enforces strict cross-origin resource sharing (cors) policies and origin header validation to prevent cross-origin attacks. configures cors headers (access-control-allow-origin, access-control-allow-methods, access-control-allow-credentials) with explicit domain allowlists rather than wildcards. validates the origin and referer headers on all state-changing requests, rejecting requests from unlisted origins. prevents csrf and cross-origin data leakage attacks that rely on permissive or absent origin checks. application input validation harden application cwe-346 cwe-352">
     <div>
       <a href="entries/CME-1308.html" class="sr-id">CME-1308</a>
@@ -1221,7 +1221,7 @@
     </div>
     <div class="sr-desc">Enforces strict Cross-Origin Resource Sharing (CORS) policies and Origin header validation to prevent cross-origin attacks. Configures CORS headers (A...</div>
   </li>
-  
+
   <li data-search="cme-1309 script engine restriction (sandbox / disable) restricts or disables application-embedded scripting and expression language engines to prevent arbitrary code execution. covers three postures: (1) disable unnecessary script consoles and evaluation endpoints entirely (e.g., jenkins script console, debug repls), (2) enforce a language-level sandbox that blocks dangerous operations such as file i/o, process execution, classloading, and reflection while permitting safe computation (e.g., jenkins groovy sandbox, java securitymanager for scripting), and (3) restrict expression language evaluation to a safe subset by disabling type resolution, method invocation, and class instantiation in el/template contexts. applies to groovy, ognl, spel, mvel, jinja2, el 3.0, freemarker, and similar engines embedded in java ee, ci/cd platforms, and web frameworks. application input validation harden application cwe-94 cwe-95 cwe-96 cwe-917">
     <div>
       <a href="entries/CME-1309.html" class="sr-id">CME-1309</a>
@@ -1231,7 +1231,7 @@
     </div>
     <div class="sr-desc">Restricts or disables application-embedded scripting and expression language engines to prevent arbitrary code execution. Covers three postures: (1) d...</div>
   </li>
-  
+
   <li data-search="cme-1310 file upload validation (content inspection and extension allowlist) server-side validation of uploaded files using content inspection (magic byte verification), extension allowlisting, and size limits before the file is written to storage or processed. rejects uploads whose actual content type does not match the declared mime type, whose extension is not on the allowlist, or whose size exceeds configured limits. files are stored outside the web root with randomized names to prevent direct execution. this prevents attackers from uploading executable payloads (web shells, scripts, malicious binaries) disguised as benign file types. application input validation harden application cwe-434 cwe-20 cwe-641 cwe-646 cwe-1286">
     <div>
       <a href="entries/CME-1310.html" class="sr-id">CME-1310</a>
@@ -1241,7 +1241,7 @@
     </div>
     <div class="sr-desc">Server-side validation of uploaded files using content inspection (magic byte verification), extension allowlisting, and size limits before the file i...</div>
   </li>
-  
+
   <li data-search="cme-1311 input size and quantity bounds enforcement validation that user-supplied quantities — sizes, counts, lengths, offsets, indices, and repetition factors — fall within expected bounds before they are used in memory allocation, loop iteration, or buffer operations. rejects values that are negative, zero when unexpected, or exceed a configured maximum. applied at the protocol parsing layer before data reaches processing logic. this prevents integer overflow chains (where an oversized count wraps to a small value and bypasses bounds checks) and resource exhaustion attacks (where an unbounded count causes excessive allocation or iteration). the root cause control for vulnerabilities where the attacker controls a size or count field in a binary protocol, serialized format, or api parameter. application input validation harden application cwe-1284 cwe-20 cwe-1285 cwe-190 cwe-131 cwe-130 cwe-681">
     <div>
       <a href="entries/CME-1311.html" class="sr-id">CME-1311</a>
@@ -1251,7 +1251,7 @@
     </div>
     <div class="sr-desc">Validation that user-supplied quantities — sizes, counts, lengths, offsets, indices, and repetition factors — fall within expected bounds before they ...</div>
   </li>
-  
+
   <li data-search="cme-1312 argument injection prevention (downstream input delimiter sanitization) prevents injection of unintended arguments, options, or directives into downstream cli tools, external processes, and structured input files by sanitizing delimiter characters (newlines, option-prefix dashes, null bytes) in user-controlled input before subprocess invocation. enforces the -- end-of-options separator when passing variable input as positional arguments, uses array-based argument construction to preserve argument boundaries, and validates that input destined for downstream tool input files does not contain format-breaking delimiters. distinct from command injection prevention (cme-1307) which addresses shell metacharacter injection: this control addresses injection into the argument parser or input file format of the downstream tool itself, even when no shell is involved. application input validation harden application cwe-88 cwe-74">
     <div>
       <a href="entries/CME-1312.html" class="sr-id">CME-1312</a>
@@ -1261,7 +1261,7 @@
     </div>
     <div class="sr-desc">Prevents injection of unintended arguments, options, or directives into downstream CLI tools, external processes, and structured input files by saniti...</div>
   </li>
-  
+
   <li data-search="cme-1313 crlf / line injection prevention (newline sanitization for structured formats) prevents injection of carriage return (cr, \r) and line feed (lf, \n) characters into structured text formats where newlines serve as record or field delimiters. enforces single-line invariants on input fields used to construct http headers, log entries, configuration files, git refs, email headers, and protocol messages. strips or rejects input containing cr/lf before it reaches format-sensitive output contexts, preventing http response splitting, log forging, configuration file injection, and git ref manipulation. complements http header normalization (cme-912) by operating at the application input layer rather than the protocol proxy layer. application input validation harden application cwe-93 cwe-113">
     <div>
       <a href="entries/CME-1313.html" class="sr-id">CME-1313</a>
@@ -1271,7 +1271,7 @@
     </div>
     <div class="sr-desc">Prevents injection of carriage return (CR, \r) and line feed (LF, \n) characters into structured text formats where newlines serve as record or field ...</div>
   </li>
-  
+
   <li data-search="cme-1314 input canonicalization before security decision normalize and canonicalize all user-supplied structured input (urls, ip addresses, domain names, file paths, type identifiers, protocol schemes) to a standard form before applying any security decision such as allowlist matching, denylist checking, or policy evaluation. decoding, case folding, unicode normalization, ip address format unification (dotted-decimal, hex, octal, ipv4-mapped ipv6), and scheme normalization must occur before the security check — not after. this prevents attackers from using encoding variants, aliasing, or alternate representations to bypass list-based security controls. the canonicalization order must be: decode all layers → normalize → validate against security policy → sanitize. application input validation harden application cwe-184 cwe-183 cwe-20 cwe-180 cwe-1289">
     <div>
       <a href="entries/CME-1314.html" class="sr-id">CME-1314</a>
@@ -1281,7 +1281,7 @@
     </div>
     <div class="sr-desc">Normalize and canonicalize all user-supplied structured input (URLs, IP addresses, domain names, file paths, type identifiers, protocol schemes) to a ...</div>
   </li>
-  
+
   <li data-search="cme-1315 allowlist-preferred input validation (deny-by-default filtering) structure all security-sensitive input validation as allowlists (explicit permit lists with default-deny) rather than denylists (explicit block lists with default-permit). denylists are inherently incomplete — every new input format, encoding variant, or aliasing technique the denylist does not cover becomes a bypass vector. allowlists reject unknown or unexpected inputs by default, requiring the attacker to find an input that both matches the allowlist pattern and achieves the malicious objective. when allowlists are impractical (e.g., html sanitization where the set of safe elements is large but finite), combine a denylist with input canonicalization (cme-1314) and output encoding to create defense in depth. this control applies to ssrf destination validation, deserialization type validation, sandbox capability restrictions, application security policies, and any context where a list determines whether an input is permitted. application input validation harden application cwe-184 cwe-183 cwe-693 cwe-20 cwe-1286 cwe-601">
     <div>
       <a href="entries/CME-1315.html" class="sr-id">CME-1315</a>
@@ -1291,7 +1291,7 @@
     </div>
     <div class="sr-desc">Structure all security-sensitive input validation as allowlists (explicit permit lists with default-deny) rather than denylists (explicit block lists ...</div>
   </li>
-  
+
   <li data-search="cme-1316 algorithmic complexity safeguards (pattern/regex execution limits) enforces computational budgets on pattern matching, regular expression evaluation, and recursive parsing operations to prevent algorithmic complexity denial-of-service attacks. encompasses three complementary techniques: (1) execution limits — regex step counts, match timeouts, and recursion depth caps that terminate runaway computations before they exhaust cpu or block event loops; (2) safe engine selection — mandating linear-time regex engines (re2, rust regex crate, .net nonbacktracking mode) or equivalent guaranteed-polynomial parsers instead of backtracking nfa engines susceptible to catastrophic backtracking; (3) pattern compilation guards — never compiling user-controlled input directly into regex or pattern language without escaping metacharacters or using literal-match apis, and pre-screening pattern structure for known dangerous constructs (nested quantifiers, overlapping alternations, unbounded repetition groups). complements cme-114 (os-level process resource limits) by providing application-level, per-operation granularity — a regex timeout kills the match attempt while keeping the service alive, whereas ulimit kills the entire process. application input validation harden application cwe-1333 cwe-407 cwe-405 cwe-834 cwe-730">
     <div>
       <a href="entries/CME-1316.html" class="sr-id">CME-1316</a>
@@ -1301,7 +1301,7 @@
     </div>
     <div class="sr-desc">Enforces computational budgets on pattern matching, regular expression evaluation, and recursive parsing operations to prevent algorithmic complexity ...</div>
   </li>
-  
+
   <li data-search="cme-1317 xml external entity prevention (secure xml parser configuration) configures xml parsers to disable external entity resolution, dtd processing, and xinclude expansion, preventing xxe attacks that exploit default-permissive xml parser behavior to read local files, perform ssrf, or cause denial of service via entity expansion (billion laughs). covers all major xml parsing apis: java (documentbuilderfactory, saxparserfactory, xmlinputfactory with feature_secure_processing and disallow-doctype-decl), python (defusedxml, lxml with resolve_entities=false), .net (xmlreadersettings with dtdprocessing.prohibit), php (libxml_disable_entity_loader), c/c++ (libxml2 without xml_parse_noent), and go (xml.decoder with strict mode). the control must be applied at parser instantiation — not as post-parse validation — because entity resolution occurs during parsing. when xml input is required but dtds are needed for schema validation, use catalog-based resolution with a local-only catalog that rejects network fetches. application input validation harden application cwe-611 cwe-776 cwe-827">
     <div>
       <a href="entries/CME-1317.html" class="sr-id">CME-1317</a>
@@ -1311,7 +1311,7 @@
     </div>
     <div class="sr-desc">Configures XML parsers to disable external entity resolution, DTD processing, and XInclude expansion, preventing XXE attacks that exploit default-perm...</div>
   </li>
-  
+
 </ul>
 
 <script>
@@ -1338,7 +1338,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

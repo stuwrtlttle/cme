@@ -37,6 +37,9 @@ def init_db(conn: sqlite3.Connection) -> None:
             category_id     TEXT NOT NULL,
             function_id     TEXT REFERENCES functions(function_id),
             control_layer   TEXT CHECK(control_layer IN ('Network','OS/Kernel','Application','Data','Identity')),
+            effect_mode     TEXT NOT NULL CHECK(effect_mode IN ('preventive','detective','corrective')),
+            evidence_state  TEXT NOT NULL CHECK(evidence_state IN ('deterministic','quantified','unquantified')),
+            efficacy_json   TEXT,
             attenuation_type TEXT DEFAULT 'deterministic' CHECK(attenuation_type IN ('deterministic','probabilistic')),
             confidence      TEXT CHECK(confidence IN ('High','Medium','Low')),
             platforms_json  TEXT,   -- JSON array
@@ -62,6 +65,31 @@ def init_db(conn: sqlite3.Connection) -> None:
             id      INTEGER PRIMARY KEY AUTOINCREMENT,
             cme_id  TEXT NOT NULL REFERENCES cme_entries(cme_id) ON DELETE CASCADE,
             cwe_id  TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS relationships (
+            id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+            cme_id              TEXT NOT NULL REFERENCES cme_entries(cme_id) ON DELETE CASCADE,
+            target_namespace    TEXT NOT NULL,
+            target_id           TEXT NOT NULL,
+            relationship_type   TEXT NOT NULL,
+            method              TEXT,
+            properties_json     TEXT,
+            rationale           TEXT,
+            evidence_state      TEXT
+        );
+
+        CREATE TABLE IF NOT EXISTS framework_bindings (
+            id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+            cme_id              TEXT NOT NULL REFERENCES cme_entries(cme_id) ON DELETE CASCADE,
+            namespace           TEXT NOT NULL,
+            version             TEXT,
+            identifier          TEXT NOT NULL,
+            value               TEXT,
+            relationship_type   TEXT NOT NULL,
+            rationale           TEXT,
+            conditions_json     TEXT,
+            evidence_basis      TEXT
         );
 
         CREATE TABLE IF NOT EXISTS verification_commands (
@@ -93,12 +121,32 @@ def init_db(conn: sqlite3.Connection) -> None:
         CREATE INDEX IF NOT EXISTS idx_entries_category_id ON cme_entries(category_id);
         CREATE INDEX IF NOT EXISTS idx_entries_function ON cme_entries(function_id);
         CREATE INDEX IF NOT EXISTS idx_entries_attenuation ON cme_entries(attenuation_type);
+        CREATE INDEX IF NOT EXISTS idx_entries_evidence_state ON cme_entries(evidence_state);
         CREATE INDEX IF NOT EXISTS idx_cvss_cme ON cvss_vector_impacts(cme_id);
         CREATE INDEX IF NOT EXISTS idx_cwe_cme ON cwe_relationships(cme_id);
         CREATE INDEX IF NOT EXISTS idx_cwe_id ON cwe_relationships(cwe_id);
+        CREATE INDEX IF NOT EXISTS idx_relationships_target ON relationships(target_namespace, target_id);
+        CREATE INDEX IF NOT EXISTS idx_bindings_namespace ON framework_bindings(namespace, identifier);
         CREATE INDEX IF NOT EXISTS idx_scf_cme ON scf_identifiers(cme_id);
         CREATE INDEX IF NOT EXISTS idx_scf_id ON scf_identifiers(scf_id);
     """)
+    columns = {row["name"] for row in conn.execute("PRAGMA table_info(cme_entries)")}
+    for name, definition in {
+        "effect_mode": "TEXT",
+        "evidence_state": "TEXT",
+        "efficacy_json": "TEXT",
+    }.items():
+        if name not in columns:
+            conn.execute(f"ALTER TABLE cme_entries ADD COLUMN {name} {definition}")
+    conn.execute(
+        """UPDATE cme_entries
+           SET effect_mode = COALESCE(effect_mode, CASE
+               WHEN tactic = 'Detect' THEN 'detective'
+               WHEN tactic IN ('Evict', 'Restore') THEN 'corrective'
+               ELSE 'preventive' END),
+               evidence_state = COALESCE(evidence_state, 'unquantified'),
+               efficacy_json = COALESCE(efficacy_json, '{"conditions":["Legacy database row migrated pending evidence review."]}')"""
+    )
 
 
 def insert_function(conn: sqlite3.Connection, function_id: str, func: dict) -> None:
@@ -123,10 +171,10 @@ def insert_entry(conn: sqlite3.Connection, entry: dict) -> None:
     conn.execute(
         """INSERT OR REPLACE INTO cme_entries
            (cme_id, control_name, description, tactic, category, category_id,
-            function_id, control_layer, attenuation_type,
+            function_id, control_layer, effect_mode, evidence_state, efficacy_json, attenuation_type,
             confidence, platforms_json, d3fend_technique_id, d3fend_technique_name,
             cve_schema_version, cve_affected_json)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (
             entry["cme_id"],
             entry["control_name"],
@@ -136,7 +184,10 @@ def insert_entry(conn: sqlite3.Connection, entry: dict) -> None:
             entry["category_id"],
             entry.get("function_id"),
             entry.get("control_layer"),
-            entry.get("attenuation_type", "deterministic"),
+            entry["effect_mode"],
+            entry["evidence_state"],
+            json.dumps(entry.get("efficacy")) if entry.get("efficacy") else None,
+            entry.get("attenuation_type"),
             entry.get("confidence"),
             json.dumps(entry.get("platforms", [])),
             entry.get("d3fend_mapping", {}).get("technique_id"),
@@ -147,7 +198,7 @@ def insert_entry(conn: sqlite3.Connection, entry: dict) -> None:
     )
 
     # Clear child rows for upsert
-    for table in ("cvss_vector_impacts", "cwe_relationships", "scf_identifiers", "verification_commands", "references_"):
+    for table in ("cvss_vector_impacts", "cwe_relationships", "relationships", "framework_bindings", "scf_identifiers", "verification_commands", "references_"):
         conn.execute(f"DELETE FROM {table} WHERE cme_id = ?", (entry["cme_id"],))
 
     for impact in entry.get("cvss_vector_impacts", []):
@@ -167,6 +218,28 @@ def insert_entry(conn: sqlite3.Connection, entry: dict) -> None:
         conn.execute(
             "INSERT INTO cwe_relationships (cme_id, cwe_id) VALUES (?, ?)",
             (entry["cme_id"], cwe),
+        )
+
+    for relationship in entry.get("relationships", []):
+        conn.execute(
+            """INSERT INTO relationships
+               (cme_id, target_namespace, target_id, relationship_type, method, properties_json, rationale, evidence_state)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+            (entry["cme_id"], relationship["target_namespace"], relationship["target_id"],
+             relationship["relationship_type"], relationship.get("method"),
+             json.dumps(relationship["properties"]) if relationship.get("properties") else None,
+             relationship.get("rationale"), relationship.get("evidence_state")),
+        )
+
+    for binding in entry.get("framework_bindings", []):
+        conn.execute(
+            """INSERT INTO framework_bindings
+               (cme_id, namespace, version, identifier, value, relationship_type, rationale, conditions_json, evidence_basis)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (entry["cme_id"], binding["namespace"], binding.get("version"), binding["identifier"],
+             binding.get("value"), binding["relationship_type"], binding.get("rationale"),
+             json.dumps(binding["conditions"]) if binding.get("conditions") else None,
+             binding.get("evidence_basis")),
         )
 
     verification = entry.get("verification", {})
@@ -259,7 +332,7 @@ def get_attenuation_for_cve(
         return []
     placeholders = ",".join("?" for _ in active_cme_ids)
     rows = conn.execute(
-        f"""SELECT e.cme_id, e.control_name, e.attenuation_type,
+        f"""SELECT e.cme_id, e.control_name, e.evidence_state,
                    v.metric, v.from_value, v.to_value, v.rationale,
                    v.probability, v.evidence_basis, v.conditions_json
             FROM cme_entries e
@@ -408,6 +481,9 @@ def get_entries_with_cve_affected(conn: sqlite3.Connection) -> list[dict]:
 def _hydrate(conn: sqlite3.Connection, entry: dict) -> dict:
     cme_id = entry["cme_id"]
     entry["platforms"] = json.loads(entry.pop("platforms_json") or "[]")
+    efficacy_raw = entry.pop("efficacy_json", None)
+    if efficacy_raw:
+        entry["efficacy"] = json.loads(efficacy_raw)
 
     cve_affected_raw = entry.pop("cve_affected_json", None)
     if cve_affected_raw:
@@ -434,6 +510,28 @@ def _hydrate(conn: sqlite3.Connection, entry: dict) -> dict:
 
     cwes = conn.execute("SELECT cwe_id FROM cwe_relationships WHERE cme_id = ?", (cme_id,)).fetchall()
     entry["cwe_relationships"] = [r["cwe_id"] for r in cwes]
+
+    relationships = conn.execute(
+        "SELECT target_namespace, target_id, relationship_type, method, properties_json, rationale, evidence_state FROM relationships WHERE cme_id = ?",
+        (cme_id,),
+    ).fetchall()
+    if relationships:
+        entry["relationships"] = [
+            {**{k: r[k] for k in ("target_namespace", "target_id", "relationship_type", "method", "rationale", "evidence_state") if r[k] is not None},
+             **({"properties": json.loads(r["properties_json"])} if r["properties_json"] else {})}
+            for r in relationships
+        ]
+
+    bindings = conn.execute(
+        "SELECT namespace, version, identifier, value, relationship_type, rationale, conditions_json, evidence_basis FROM framework_bindings WHERE cme_id = ?",
+        (cme_id,),
+    ).fetchall()
+    if bindings:
+        entry["framework_bindings"] = [
+            {**{k: r[k] for k in ("namespace", "version", "identifier", "value", "relationship_type", "rationale", "evidence_basis") if r[k] is not None},
+             **({"conditions": json.loads(r["conditions_json"])} if r["conditions_json"] else {})}
+            for r in bindings
+        ]
 
     scfs = conn.execute("SELECT scf_id FROM scf_identifiers WHERE cme_id = ?", (cme_id,)).fetchall()
     if scfs:

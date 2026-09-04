@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-911</div>
   <h1>Fine-Grained Administrative Permission Scoping</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-isolate">Isolate</span>
     <span class="badge badge-layer-application">Application</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Confidentiality</strong> (C)</td>
             <td>
@@ -64,10 +61,10 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-            
+
             <td class="cvss-rationale">A compromised administrative account can only access resources within its scoped permission set; data outside the administrator is designated domain is inaccessible, limiting confidentiality impact to the attacker is authorized scope.</td>
           </tr>
-          
+
           <tr>
             <td><strong>Integrity</strong> (I)</td>
             <td>
@@ -75,66 +72,67 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-            
+
             <td class="cvss-rationale">Write operations are confined to the administrator is scoped permission domain; cross-domain modifications — such as an IdP admin assigning realm-level roles — are rejected by the fine-grained permission model, limiting integrity impact to the attacker is authorized scope.</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/266.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-266</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/269.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-269</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/250.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-250</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/1220.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-1220</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Verify that administrative roles are decomposed into atomic permissions and each admin account holds only the permissions required for their role. Attempt a cross-domain action (e.g., IdP admin trying to assign a realm-admin role) and confirm it is rejected.</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> kcadm.sh get ui-ext/brute-force/realms/master/admin-permissions
-        
+
         <br><span class="cmd-expected"># Expected: Shows fine-grained permission policies; no admin should hold permissions outside their designated scope</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-910.html">&larr; CME-910: Role Separation / Duty Segregation</a>
-      
-      
+
+
       <a href="CME-912.html">CME-912: HTTP Header Normalization and Request Smuggling Prevention &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -144,44 +142,44 @@
       <p>Application Controls</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">authorization-controls</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">IAC-16</span>
-        
+
         <span class="cwe-link">IAC-16.1</span>
-        
+
         <span class="cwe-link">IAC-21</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>any</li>
-        
+
         <li>Windows Server 2019</li>
-        
+
         <li>Windows Server 2022</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -189,7 +187,8 @@
         <li><strong>ID:</strong> CME-911</li>
         <li><strong>Tactic:</strong> Isolate</li>
         <li><strong>Layer:</strong> Application</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 4</li>
         <li><strong>CVSS Mods:</strong> 2</li>
       </ul>
@@ -200,7 +199,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

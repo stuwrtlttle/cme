@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-1010</div>
   <h1>cgroup Memory Pressure Monitoring (memory.events / PSI)</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-detect">Detect</span>
     <span class="badge badge-layer-os-kernel">OS/Kernel</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-detective">Detective</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
@@ -64,86 +61,87 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            
+
             <td class="cvss-rationale">Compensating control: cgroup memory pressure events (memory.events oom_kill/high counters and PSI stall metrics) provide deterministic early warning of resource leaks before system-wide exhaustion occurs, enabling operators to identify and remediate leaking processes within the monitoring interval — the attacker must exhaust resources faster than the monitoring and response cycle to achieve sustained denial of service.</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/772.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-772</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/401.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-401</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/400.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-400</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/770.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-770</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Check that cgroup memory.events is accessible and PSI is enabled in the kernel</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> cat /sys/fs/cgroup/system.slice/memory.events
-        
+
         <br><span class="cmd-expected"># Expected: Non-zero counters if pressure has occurred; file existence confirms cgroup v2 memory accounting is active</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> cat /proc/pressure/memory
-        
+
         <br><span class="cmd-expected"># Expected: PSI metrics present (some/full avg10/avg60/avg300 values); confirms CONFIG_PSI=y</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -c CONFIG_PSI=y /boot/config-$(uname -r)
-        
+
         <br><span class="cmd-expected"># Expected: 1</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-1009.html">&larr; CME-1009: Privilege Assignment Monitoring (Role Grant Alerting)</a>
-      
-      
+
+
       <a href="CME-1011.html">CME-1011: Kubernetes API Server Audit Policy &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -153,46 +151,46 @@
       <p>Integrity Detection</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">integrity-monitoring</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">MON-01</span>
-        
+
         <span class="cwe-link">MON-01.4</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>RHEL 9</li>
-        
+
         <li>RHEL 10</li>
-        
+
         <li>Ubuntu 24.04</li>
-        
+
         <li>Fedora</li>
-        
+
         <li>Kubernetes</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -200,7 +198,8 @@
         <li><strong>ID:</strong> CME-1010</li>
         <li><strong>Tactic:</strong> Detect</li>
         <li><strong>Layer:</strong> OS/Kernel</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> detective</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 4</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
@@ -211,7 +210,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

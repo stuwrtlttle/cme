@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-1007</div>
   <h1>Application Configuration Drift Detection (IaC Enforcement)</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-detect">Detect</span>
     <span class="badge badge-layer-application">Application</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-detective">Detective</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
@@ -64,10 +61,10 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            
+
             <td class="cvss-rationale">Compensating control: unauthorized configuration changes are detected within the reconciliation interval and may be automatically reverted, requiring the attacker to re-exploit during each cycle or to compromise the IaC pipeline itself — significantly increasing attack complexity.</td>
           </tr>
-          
+
           <tr>
             <td><strong>Integrity</strong> (I)</td>
             <td>
@@ -75,76 +72,77 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-            
+
             <td class="cvss-rationale">Persistent configuration modifications are reverted to the declared baseline on each reconciliation cycle; integrity impact is limited to the window between drift introduction and the next reconciliation run.</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/266.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-266</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/284.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-284</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/1220.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-1220</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/16.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-16</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Verify that application configuration is managed via IaC and that drift detection runs on a schedule. Introduce a test configuration change via the application admin API and confirm it is detected or reverted within the expected interval.</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> terraform plan -detailed-exitcode
-        
+
         <br><span class="cmd-expected"># Expected: Exit code 2 indicates drift detected between live state and IaC definition</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> ansible-playbook site.yml --check --diff
-        
+
         <br><span class="cmd-expected"># Expected: Reports changes that would be made to reconcile drift</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-1006.html">&larr; CME-1006: Privilege Change Audit Logging</a>
-      
-      
+
+
       <a href="CME-1008.html">CME-1008: Application Admin Event Logging (SIEM Integration) &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -154,40 +152,40 @@
       <p>Integrity Detection</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">integrity-monitoring</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">CFG-02.8</span>
-        
+
         <span class="cwe-link">CFG-06.1</span>
-        
+
         <span class="cwe-link">MON-01.7</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>any</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -195,7 +193,8 @@
         <li><strong>ID:</strong> CME-1007</li>
         <li><strong>Tactic:</strong> Detect</li>
         <li><strong>Layer:</strong> Application</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> detective</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 4</li>
         <li><strong>CVSS Mods:</strong> 2</li>
       </ul>
@@ -206,7 +205,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

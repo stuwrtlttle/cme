@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-1012</div>
   <h1>Pre-commit Secrets Detection (gitleaks/trufflehog)</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-detect">Detect</span>
     <span class="badge badge-layer-application">Application</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-detective">Detective</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
@@ -64,83 +61,84 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            
+
             <td class="cvss-rationale">Hard-coded credentials are detected and blocked before they reach the repository; the attacker must find credentials through an alternative channel (vault compromise, memory dump, network intercept) rather than simply reading source code or commit history</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/798.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-798</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/312.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-312</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/316.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-316</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Verify that a secrets scanning tool is configured as a git pre-commit hook or CI pipeline stage and reports no findings</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> test -f .git/hooks/pre-commit &amp;&amp; grep -l &#39;gitleaks\|trufflehog\|git-secrets\|detect-secrets&#39; .git/hooks/pre-commit
-        
+
         <br><span class="cmd-expected"># Expected: Pre-commit hook exists and references a secrets scanning tool</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> gitleaks detect --source . --no-git 2&gt;&amp;1 | tail -1
-        
+
         <br><span class="cmd-expected"># Expected: no leaks found</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> trufflehog filesystem . --no-update 2&gt;&amp;1 | grep -c &#39;Found verified result&#39;
-        
+
         <br><span class="cmd-expected"># Expected: 0 — no verified secrets found</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-1011.html">&larr; CME-1011: Kubernetes API Server Audit Policy</a>
-      
-      
+
+
       <a href="CME-1101.html">CME-1101: Automated Patch Management (dnf-automatic) &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -150,38 +148,38 @@
       <p>Integrity Detection</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">integrity-monitoring</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">CFG-02</span>
-        
+
         <span class="cwe-link">IAC-15</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>Any</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -189,7 +187,8 @@
         <li><strong>ID:</strong> CME-1012</li>
         <li><strong>Tactic:</strong> Detect</li>
         <li><strong>Layer:</strong> Application</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> detective</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 3</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
@@ -200,7 +199,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

@@ -1,7 +1,7 @@
 {
   "cme_id": "CME-1305",
   "control_name": "SQL Injection Prevention (Parameterized Queries)",
-  "description": "Application exclusively uses parameterized queries or prepared statements for all database operations. User input is never concatenated into SQL strings. ORMs with parameterized backends qualify. Prevents attackers from injecting SQL syntax to read, modify, or delete database contents.",
+  "description": "Application uses parameterized queries or prepared statements at every database boundary, including direct driver calls, ORM query APIs, stored procedure invocations, and legacy data-access code. Untrusted values are passed only through binding APIs and are never concatenated, interpolated, or formatted into SQL text. SQL elements that drivers cannot bind, including table names, column names, sort directions, keywords, and query fragments, are selected through fixed mappings or strict allowlists. Raw-query and literal-expression escape hatches are prohibited or independently reviewed. This separation of SQL structure from data prevents attackers from injecting statements that read, modify, or delete database contents. Database least privilege in CME-920 limits residual impact, while WAF filtering in CME-904 provides probabilistic defense in depth.",
   "tactic": "Harden",
   "category": "Application Input Validation",
   "category_id": "application-input-validation",
@@ -10,45 +10,89 @@
   "attenuation_type": "deterministic",
   "cvss_vector_impacts": [
     {
-      "metric": "AC",
-      "from": "L",
-      "to": "H",
-      "rationale": "SQL injection payloads treated as data, not code; parameterization enforced"
-    },
-    {
       "metric": "C",
       "from": "H",
       "to": "L",
-      "rationale": "Cannot extract data via UNION/blind SQL injection"
+      "rationale": "When every database boundary binds untrusted values and strictly maps non-bindable SQL elements, attacker input cannot alter query structure to perform UNION, error-based, stacked, or blind extraction. Low confidentiality impact remains possible through data returned by the application's intended query behavior. This attenuation requires complete coverage of direct queries, ORM escape hatches, stored procedures, and legacy data-access paths."
     },
     {
       "metric": "I",
       "from": "H",
       "to": "L",
-      "rationale": "Cannot modify or delete database records via injection"
+      "rationale": "When every database boundary binds untrusted values and strictly maps non-bindable SQL elements, attacker input cannot inject UPDATE, DELETE, DDL, or stacked statements. Low integrity impact remains possible through modifications permitted by the application's intended operations. This attenuation requires complete coverage of direct queries, ORM escape hatches, stored procedures, and legacy data-access paths."
     }
   ],
   "cwe_relationships": [
     "CWE-89"
   ],
   "verification": {
-    "method": "Verify all database queries use parameterized statements; no string formatting for SQL",
+    "method": "Use language- and framework-specific static analysis to inventory every database boundary and fail on SQL built through concatenation, interpolation, formatting, raw-query APIs, literal-expression APIs, or dynamically constructed stored procedures. Review every non-bindable identifier or fragment for a fixed mapping or strict allowlist. Pair source analysis with application-specific dynamic tests that exercise representative read and write sinks using boolean, UNION, stacked-query, error-based, time-based, encoded, and second-order payloads. The audit and test commands must cover all production data-access components and emit the exact PASS strings below; set each environment variable to the project's corresponding audit or test command.",
     "commands": [
       {
-        "command": "grep -rn 'execute.*%s\\|execute.*format\\|execute.*f\"' <app_source>/ | grep -v 'execute.*,.*params'",
-        "expected": "No string-formatted SQL queries",
+        "command": "test -n \"$CME_SQL_SOURCE_AUDIT_COMMAND\" || { echo 'ERROR: set CME_SQL_SOURCE_AUDIT_COMMAND'; exit 2; }; output=$(sh -c \"$CME_SQL_SOURCE_AUDIT_COMMAND\") && test \"$output\" = 'PASS: all database boundaries use parameter binding or strict mappings' && printf '%s\\n' \"$output\"",
+        "expected": "PASS: all database boundaries use parameter binding or strict mappings",
+        "platform": "any"
+      },
+      {
+        "command": "test -n \"$CME_SQLI_READ_TEST_COMMAND\" || { echo 'ERROR: set CME_SQLI_READ_TEST_COMMAND'; exit 2; }; output=$(sh -c \"$CME_SQLI_READ_TEST_COMMAND\") && test \"$output\" = 'PASS: SQL injection read payloads cannot alter query structure' && printf '%s\\n' \"$output\"",
+        "expected": "PASS: SQL injection read payloads cannot alter query structure",
+        "platform": "any"
+      },
+      {
+        "command": "test -n \"$CME_SQLI_WRITE_TEST_COMMAND\" || { echo 'ERROR: set CME_SQLI_WRITE_TEST_COMMAND'; exit 2; }; output=$(sh -c \"$CME_SQLI_WRITE_TEST_COMMAND\") && test \"$output\" = 'PASS: SQL injection write payloads cannot modify database state' && printf '%s\\n' \"$output\"",
+        "expected": "PASS: SQL injection write payloads cannot modify database state",
         "platform": "any"
       }
     ]
   },
   "confidence": "High",
   "platforms": [
-    "Any",
-    "Windows Server 2019",
-    "Windows Server 2022"
+    "Any"
   ],
   "scf_identifiers": [
     "WEB-07",
     "WEB-09"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-89",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/C",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/I",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "WEB-07",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "WEB-09",
+      "relationship_type": "maps_to"
+    }
   ]
 }

@@ -1,7 +1,7 @@
 {
   "cme_id": "CME-907",
   "control_name": "Application-Layer RBAC Enforcement",
-  "description": "Enforce role-based access control within the application by mapping each user to a set of roles, each role to a set of permissions, and verifying the caller holds the required permission before executing any privileged operation. Authorization checks run as middleware or decorators on every privileged API endpoint, evaluated after authentication and before business logic. Role assignments follow least privilege \u2014 users receive the minimum role needed for their function. Prevents authenticated users from accessing administrative functions, modifying data outside their role permissions, or escalating their own privileges through direct API calls.",
+  "description": "Enforce role-based access control within the application by mapping each user to a set of roles, each role to a set of permissions, and verifying the caller holds the required permission before executing any privileged operation. Authorization checks run as middleware or decorators on every privileged API endpoint, evaluated after authentication and before business logic. Role assignments follow least privilege — users receive the minimum role needed for their function. Prevents authenticated users from accessing administrative functions, modifying data outside their role permissions, or escalating their own privileges through direct API calls.",
   "tactic": "Harden",
   "category": "Application Controls",
   "category_id": "application-controls",
@@ -52,5 +52,80 @@
     "IAC-08",
     "IAC-20",
     "IAC-21"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-266",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-1220",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-862",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-863",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-285",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/PR",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/I",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "IAC-08",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "IAC-20",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "IAC-21",
+      "relationship_type": "maps_to"
+    }
   ]
 }

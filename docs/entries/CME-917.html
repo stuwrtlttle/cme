@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-917</div>
   <h1>Worker Process Recycling (MaxConnectionsPerChild / max_requests)</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-application">Application</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Availability</strong> (A)</td>
             <td>
@@ -64,80 +61,81 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-            
+
             <td class="cvss-rationale">Per-request memory leaks are bounded by the worker lifecycle; each worker is recycled after a fixed number of requests, releasing accumulated leaked memory before it can cause resource exhaustion. The application experiences brief per-worker restart latency rather than system-wide memory starvation.</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/772.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-772</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/401.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-401</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Check that application server worker recycling is configured with a finite request limit</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -i MaxConnectionsPerChild /etc/httpd/conf/*.conf /etc/httpd/conf.d/*.conf 2&gt;/dev/null
-        
+
         <br><span class="cmd-expected"># Expected: Non-empty output with a positive integer (not 0, which disables recycling)</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: rhel</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep pm.max_requests /etc/php-fpm.d/*.conf /etc/php/*/fpm/pool.d/*.conf 2&gt;/dev/null
-        
+
         <br><span class="cmd-expected"># Expected: Non-empty output with a positive integer (not 0, which disables recycling)</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> ps aux | grep &#39;[g]unicorn&#39; | grep -oE &#39;\-\-max-requests[= ][0-9]+&#39;
-        
+
         <br><span class="cmd-expected"># Expected: Non-empty output — --max-requests flag present on running Gunicorn workers</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: linux</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-916.html">&larr; CME-916: SameSite Cookie Attribute Enforcement</a>
-      
-      
+
+
       <a href="CME-918.html">CME-918: URL Path Authorization Enforcement (Forced Browsing Prevention) &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -147,36 +145,36 @@
       <p>Application Controls</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">runtime-hardening</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">SEA-07</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>Any</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -184,7 +182,8 @@
         <li><strong>ID:</strong> CME-917</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Application</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 2</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
@@ -195,7 +194,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

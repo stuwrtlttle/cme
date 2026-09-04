@@ -1,7 +1,7 @@
 {
   "cme_id": "CME-909",
   "control_name": "Default-Deny API Authorization Policy",
-  "description": "All API endpoints require explicit authorization by default \u2014 any endpoint without a declared authorization rule returns 403 Forbidden. The authorization framework operates as a deny-by-default middleware that intercepts every incoming request and requires an explicit policy match before forwarding to the handler. Only explicitly allowlisted endpoints (health checks, public landing pages) bypass authorization. Prevents vulnerabilities where new endpoints are deployed without authorization checks, or where legacy endpoints silently allow unauthenticated access to sensitive functionality.",
+  "description": "All API endpoints require explicit authorization by default — any endpoint without a declared authorization rule returns 403 Forbidden. The authorization framework operates as a deny-by-default middleware that intercepts every incoming request and requires an explicit policy match before forwarding to the handler. Only explicitly allowlisted endpoints (health checks, public landing pages) bypass authorization. Prevents vulnerabilities where new endpoints are deployed without authorization checks, or where legacy endpoints silently allow unauthenticated access to sensitive functionality.",
   "tactic": "Harden",
   "category": "Application Controls",
   "category_id": "application-controls",
@@ -50,5 +50,68 @@
   "scf_identifiers": [
     "IAC-20",
     "IAC-26"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-306",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-862",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-1220",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-284",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/PR",
+      "value": "N->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "IAC-20",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "IAC-26",
+      "relationship_type": "maps_to"
+    }
   ]
 }

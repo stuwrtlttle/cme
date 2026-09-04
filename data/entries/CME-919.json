@@ -1,7 +1,7 @@
 {
   "cme_id": "CME-919",
   "control_name": "JIT Compiler Hardening (JIT Restriction / V8 Sandbox)",
-  "description": "Restricts or hardens Just-In-Time compilation in language runtimes and browser engines to prevent type confusion exploitation. Encompasses three postures: (1) JIT disabling \u2014 turning off JIT compilation entirely via flags (--jitless in V8, javascript.options.ion in Firefox) which eliminates JIT-spraying and JIT-based type confusion at the cost of performance; (2) V8 Sandbox enforcement \u2014 a hardware-backed memory cage that isolates JIT-compiled code and V8 heap objects from the rest of the process address space, requiring an additional sandbox escape even after achieving type confusion; (3) JIT tiering restrictions \u2014 limiting optimization tiers to reduce the surface of speculative type assumptions that can be violated. Applicable to Chromium-based browsers, Node.js, Electron applications, and SpiderMonkey-based runtimes. Complements CME-113 (CFI/Shadow Call Stack) which prevents type-confused pointers from redirecting control flow in native code.",
+  "description": "Restricts or hardens Just-In-Time compilation in language runtimes and browser engines to prevent type confusion exploitation. Encompasses three postures: (1) JIT disabling — turning off JIT compilation entirely via flags (--jitless in V8, javascript.options.ion in Firefox) which eliminates JIT-spraying and JIT-based type confusion at the cost of performance; (2) V8 Sandbox enforcement — a hardware-backed memory cage that isolates JIT-compiled code and V8 heap objects from the rest of the process address space, requiring an additional sandbox escape even after achieving type confusion; (3) JIT tiering restrictions — limiting optimization tiers to reduce the surface of speculative type assumptions that can be violated. Applicable to Chromium-based browsers, Node.js, Electron applications, and SpiderMonkey-based runtimes. Complements CME-113 (CFI/Shadow Call Stack) which prevents type-confused pointers from redirecting control flow in native code.",
   "tactic": "Harden",
   "category": "Application Controls",
   "category_id": "application-controls",
@@ -62,5 +62,61 @@
   "scf_identifiers": [
     "SEA-10",
     "WEB-01.1"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-843",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-119",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-787",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/S",
+      "value": "C->U",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "SEA-10",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "WEB-01.1",
+      "relationship_type": "maps_to"
+    }
   ]
 }

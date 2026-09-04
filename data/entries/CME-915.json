@@ -1,7 +1,7 @@
 {
   "cme_id": "CME-915",
   "control_name": "Cross-Origin Request Restriction (Reverse Proxy Origin Enforcement)",
-  "description": "Configure the reverse proxy or load balancer (nginx, Apache httpd, HAProxy) to validate the Origin and Referer headers on state-changing requests (POST, PUT, DELETE, PATCH, and WebSocket Upgrade) against an explicit allowlist of trusted origins. Requests with an Origin that does not match the allowlist are rejected with 403 before reaching the backend application. This provides defense-in-depth for applications that fail to validate cross-origin requests internally \u2014 the proxy enforces the same-origin boundary at the infrastructure layer.",
+  "description": "Configure the reverse proxy or load balancer (nginx, Apache httpd, HAProxy) to validate the Origin and Referer headers on state-changing requests (POST, PUT, DELETE, PATCH, and WebSocket Upgrade) against an explicit allowlist of trusted origins. Requests with an Origin that does not match the allowlist are rejected with 403 before reaching the backend application. This provides defense-in-depth for applications that fail to validate cross-origin requests internally — the proxy enforces the same-origin boundary at the infrastructure layer.",
   "tactic": "Harden",
   "category": "Application Controls",
   "category_id": "application-controls",
@@ -54,5 +54,61 @@
   "scf_identifiers": [
     "NET-18",
     "WEB-03"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-346",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-352",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-940",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-942",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "NET-18",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "WEB-03",
+      "relationship_type": "maps_to"
+    }
   ]
 }

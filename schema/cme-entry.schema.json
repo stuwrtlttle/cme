@@ -2,9 +2,9 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cmetaxonomy.org/schema/cme-entry.schema.json",
   "title": "Common Mitigation Enumeration (CME) Entry",
-  "description": "A structured defensive control entry in the CME taxonomy, designed to complement CVE/CWE by identifying mitigations and mapping their deterministic impact on CVSS environmental scoring.",
+  "description": "A structured, verifiable defensive control entry that records its effect, evidence state, relationships, and optional framework bindings.",
   "type": "object",
-  "required": ["cme_id", "control_name", "description", "tactic", "category", "category_id", "cvss_vector_impacts"],
+  "required": ["cme_id", "control_name", "description", "tactic", "category", "category_id", "effect_mode", "evidence_state"],
   "if": {
     "not": { "required": ["function_id"] }
   },
@@ -14,6 +14,20 @@
   "dependentRequired": {
     "cve_affected": ["cve_schema_version"]
   },
+  "allOf": [
+    {
+      "if": { "properties": { "evidence_state": { "const": "deterministic" } } },
+      "then": { "required": ["verification"], "properties": { "effect_mode": { "const": "preventive" } } }
+    },
+    {
+      "if": { "properties": { "evidence_state": { "const": "quantified" } } },
+      "then": { "required": ["efficacy"], "properties": { "efficacy": { "required": ["probability", "evidence_basis", "conditions"] } } }
+    },
+    {
+      "if": { "properties": { "evidence_state": { "const": "unquantified" } } },
+      "then": { "required": ["efficacy"] }
+    }
+  ],
   "properties": {
     "cme_id": {
       "type": "string",
@@ -52,19 +66,44 @@
       "enum": ["Network", "OS/Kernel", "Application", "Data", "Identity"],
       "description": "Technology stack layer where the control resides. Required when function_id is absent; inherited from function when present."
     },
+    "effect_mode": {
+      "type": "string",
+      "enum": ["preventive", "detective", "corrective"],
+      "description": "Primary control effect: prevent an attack, detect it, or correct its consequences."
+    },
+    "evidence_state": {
+      "type": "string",
+      "enum": ["deterministic", "quantified", "unquantified"],
+      "description": "Evidence maturity. Deterministic effects are automatically credited only when verified; quantified effects require measured efficacy; unquantified effects are surfaced but never automatically credited."
+    },
+    "efficacy": {
+      "type": "object",
+      "properties": {
+        "probability": { "type": "number", "minimum": 0, "maximum": 1 },
+        "evidence_basis": { "type": "string", "minLength": 1 },
+        "conditions": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }
+      },
+      "required": ["conditions"],
+      "allOf": [
+        {
+          "if": { "required": ["probability"] },
+          "then": { "required": ["evidence_basis"] }
+        }
+      ],
+      "description": "Evidence and conditions for quantified or unquantified control efficacy. Quantified entries require probability and evidence_basis."
+    },
     "attenuation_type": {
       "type": "string",
       "enum": ["deterministic", "probabilistic"],
-      "default": "deterministic",
-      "description": "Whether this control provides guaranteed (deterministic) or evidence-based (probabilistic) CVSS attenuation"
+      "deprecated": true,
+      "description": "Legacy compatibility field. Use evidence_state."
     },
     "cvss_vector_impacts": {
       "type": "array",
       "items": {
         "$ref": "#/$defs/cvss_vector_impact"
       },
-      "minItems": 1,
-      "description": "One or more CVSS base metric modifications this control provides"
+      "description": "Optional CVSS environmental metric modifications. CVSS is a framework binding, not a CME membership requirement."
     },
     "cwe_relationships": {
       "type": "array",
@@ -72,7 +111,17 @@
         "type": "string",
         "pattern": "^CWE-\\d+$"
       },
-      "description": "CWE weakness classes this control mitigates"
+      "description": "Legacy compatibility index of CWE IDs. Use relationships for typed mappings."
+    },
+    "relationships": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/relationship" },
+      "description": "Typed relationships to CWE, controls, or external-framework objects."
+    },
+    "framework_bindings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/framework_binding" },
+      "description": "Optional bindings to external frameworks such as CVSS, SSVC, ATT&CK, ATLAS, ICS, D3FEND, and SCF."
     },
     "scf_identifiers": {
       "type": "array",
@@ -145,7 +194,8 @@
     "confidence": {
       "type": "string",
       "enum": ["High", "Medium", "Low"],
-      "description": "Confidence level that the CVSS attenuation is deterministic and verifiable"
+      "deprecated": true,
+      "description": "Legacy editorial confidence. Use evidence_state and evidence fields for scoring."
     },
     "platforms": {
       "type": "array",
@@ -169,6 +219,33 @@
     }
   },
   "$defs": {
+    "relationship": {
+      "type": "object",
+      "required": ["target_namespace", "target_id", "relationship_type"],
+      "properties": {
+        "target_namespace": { "type": "string", "minLength": 1 },
+        "target_id": { "type": "string", "minLength": 1 },
+        "relationship_type": { "type": "string", "enum": ["mitigates", "supports", "supported_by", "identical", "equivalent", "contrary", "no_relationship", "requires", "enables", "strengthens"] },
+        "method": { "type": "string", "enum": ["supportive", "structural", "crosswalk", "set_theory"] },
+        "properties": { "type": "array", "items": { "type": "string", "enum": ["example_of", "integral_to", "precedes"] } },
+        "rationale": { "type": "string" },
+        "evidence_state": { "type": "string", "enum": ["deterministic", "quantified", "unquantified"] }
+      }
+    },
+    "framework_binding": {
+      "type": "object",
+      "required": ["namespace", "identifier", "relationship_type"],
+      "properties": {
+        "namespace": { "type": "string", "enum": ["CVSS", "SSVC", "ATT&CK", "ATLAS", "ICS", "D3FEND", "SCF"] },
+        "version": { "type": "string" },
+        "identifier": { "type": "string", "minLength": 1 },
+        "value": { "type": "string" },
+        "relationship_type": { "type": "string", "enum": ["maps_to", "mitigates", "supports", "informs"] },
+        "rationale": { "type": "string" },
+        "conditions": { "type": "array", "items": { "type": "string" } },
+        "evidence_basis": { "type": "string" }
+      }
+    },
     "cvss_vector_impact": {
       "type": "object",
       "required": ["metric", "from", "to"],

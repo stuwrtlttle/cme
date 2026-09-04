@@ -2,6 +2,8 @@
 
 A structured taxonomy of defensive security controls mapped to CVSS vector attenuation, served via an MCP (Model Context Protocol) server backed by SQLite (single-user) or PostgreSQL (multi-user). Controls are organized in a hierarchical Function/Control structure and support both deterministic (guaranteed metric shifts) and probabilistic (evidence-based, conditional) attenuation.
 
+See the [MCP server reference](docs/mcp-reference.md) for the complete tool, resource, and connection guide.
+
 ---
 
 ## Table of Contents
@@ -53,7 +55,7 @@ A structured taxonomy of defensive security controls mapped to CVSS vector atten
 
 While **CVE** identifies specific vulnerabilities and **CWE** identifies classes of weaknesses, **CME** identifies the **defensive controls** that mitigate them. 
 
-A CME entry names a security control (a safeguard protecting confidentiality, integrity, or availability — the NIST sense) and declares, for an identified class of weaknesses on an identified set of products: (1) its effect mode — Preventive / Detective / Corrective; (2) the magnitude of the effect — a deterministic CVSS-vector shift where the mode supports one, a probabilistic/time-based effect where it doesn't — and its confidence/efficacy (first-class but optional: expected where the effect is probabilistic, omittable where deterministic); (3) the conditions under which it holds; (4) a machine-checkable verification that it's active; and (5) its composition with other controls (enables / requires / strengthens).
+A CME entry names a verifiable defensive control for an identified class of weaknesses and products. It records the control's primary effect (preventive, detective, or corrective), evidence maturity, operating conditions, verification, and typed relationships to other controls and frameworks. CVSS is CME's flagship scoring binding where applicable, not the membership test for a control.
 
 Each CME entry carries:
 
@@ -61,8 +63,8 @@ Each CME entry carries:
 - The D3FEND-aligned tactic it belongs to (Harden, Isolate, Detect, Evict, Restore)
 - An optional **function grouping** (e.g., `selinux`, `seccomp`) linking related controls under a broad capability
 - The technology layer it operates at (Network, OS/Kernel, Application, Data, Identity) — inherited from the function when grouped
-- An **attenuation type**: `deterministic` (default — guaranteed metric shifts) or `probabilistic` (evidence-based, conditional attenuation with quantified confidence)
-- Specific CVSS base metrics it modifies (e.g., `S:C → S:U`, `AC:L → AC:H`), with optional probability, evidence basis, and conditions for probabilistic controls
+- An **evidence state**: `deterministic` (verified preventive effect), `quantified` (measured efficacy with probability and evidence), or `unquantified` (relevant but not automatically credited)
+- Optional framework bindings, including CVSS Environmental and Temporal, SSVC, ATT&CK, ATLAS, ICS, D3FEND, and SCF
 - CWE weakness classes it mitigates (e.g., CWE-119, CWE-78)
 - Machine-executable verification commands a scanner or agent can run to confirm the control is active
 - Confidence level, platform applicability, and external references
@@ -71,7 +73,7 @@ Each CME entry carries:
 
 CVSS Environmental Scoring is rarely used because it requires manual, subjective judgment. A security analyst looks at a 9.8 Critical CVE and thinks *"I think our sandbox is pretty good, so I'll mark Confidentiality as Low."* This is a guess.
 
-CME replaces guesswork with a lookup table. Instead of subjective assessment, the process becomes:
+CME replaces guesswork with evidence-backed control records. For CVSS-compatible preventive controls, the process becomes:
 
 > "Asset `Server-01` has **CME-301 (SELinux Enforcing)** and **CME-601 (seccomp)** active. The taxonomy defines CME-301 as reducing `S:C → S:U` and `C:H → C:L`. The taxonomy defines CME-601 as reducing `S:C → S:U` and `I:H → I:L`. The Environmental Score is recalculated deterministically."
 
@@ -87,14 +89,14 @@ MITRE D3FEND is the structural inspiration for the CME taxonomy, but CME diverge
 
 | | D3FEND | CME |
 |---|---|---|
-| **Purpose** | Catalog defensive techniques generically | Map controls to *deterministic CVSS attenuation* |
+| **Purpose** | Catalog defensive techniques generically | Catalog verifiable controls with optional scoring-framework bindings |
 | **Granularity** | Technique-level (e.g., "File Encryption") | Control-level with specific CVSS vector impact |
 | **Output** | Knowledge graph of defenses | Lookup table for environmental scoring |
 | **Relationship** | Mapped to ATT&CK offensively | Mapped to CWE root causes + CVSS metrics |
 | **Control Layer** | Not a primary dimension | Core attribute (Network, OS/Kernel, App, Data, Identity) |
 | **Verification** | Not included | Machine-executable commands per entry |
 
-D3FEND's 5 tactic categories (Harden, Detect, Isolate, Deceive, Evict) are used as the organizational backbone, with Restore added and Deceive excluded (deception doesn't deterministically attenuate CVSS scores).
+D3FEND's 5 tactic categories (Harden, Detect, Isolate, Deceive, Evict) are used as the organizational backbone, with Restore added and Deceive currently excluded because it has no defined CME effect model.
 
 D3FEND mappings are preserved where they exist (e.g., CME-101 ASLR maps to D3FEND D3-SAOR Segment Address Offset Randomization), allowing cross-referencing between the two frameworks.
 
@@ -430,26 +432,29 @@ How CME entries modify CVSS v4.0 Environmental metrics:
 | Reduce Integrity Impact | MI: H → L/N | CME-504 (dm-verity), CME-601 (seccomp) |
 | Reduce Availability Impact | MA: H → L | CME-704 (cgroups), CME-1201 (Immutable Infra) |
 
-### Two-Tier Attenuation Model
+### Evidence-State Scoring Model
 
-CME supports two types of CVSS attenuation:
+CME distinguishes three evidence states. Only the first two can affect an automated score:
 
-**Deterministic core** (default) — Binary verification, guaranteed effect. If a scanner confirms the control is active, the CVSS metric shift is unconditional. Examples: ASLR enabled (`AC:L→H`), SELinux enforcing (`S:C→U`), noexec mount.
+**Deterministic** — A verified preventive control whose conditions hold and whose CVSS-compatible effect is guaranteed. Examples include a correctly enforced noexec mount or a complete protocol disablement.
 
-**Probabilistic ring** — Evidence-based, conditional effectiveness. The control is verified as *deployed*, but its attenuation depends on configuration quality, rule coverage, or detection capability. These carry additional fields:
+**Quantified** — Evidence-based, conditional effectiveness with a measured probability. These controls carry:
 
 | Field | Type | Description |
 |---|---|---|
-| `probability` | number (0-1) | Estimated likelihood the metric shift applies |
+| `probability` | number (0-1) | Measured likelihood the metric shift applies |
 | `evidence_basis` | string | Citation for the probability (vendor benchmark, study, test methodology) |
 | `conditions` | string[] | Prerequisites for the probability to hold (rule set versions, thresholds) |
 
-The `simulate_cve_risk` and `calculate_attenuation` tools use **two-pass scoring**:
+**Unquantified** — A relevant control with declared conditions but no measured efficacy. It is returned to humans and agents, but never changes an automated score.
+
+The `simulate_cve_risk` and `calculate_attenuation` tools use conservative scoring:
 
 1. **Deterministic pass** — apply all guaranteed metric shifts (same as before)
-2. **Probabilistic adjustment** — for metrics not already shifted by deterministic controls, compute combined probability from independent probabilistic controls: `P(effective) = 1 - Π(1 - Pᵢ)`
+2. **Quantified adjustment** — for metrics not already shifted by deterministic controls, compute combined probability from independently evidenced controls: `P(effective) = 1 - Π(1 - Pᵢ)`
+3. **Unquantified context** — surface controls without changing the score.
 
-Output separates the two tiers: a hard deterministic score plus a conditional range.
+EPSS is intentionally not a framework binding: an asset's local controls do not change a global exploitation prediction.
 
 ---
 

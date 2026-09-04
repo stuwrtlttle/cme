@@ -1,7 +1,7 @@
 {
   "cme_id": "CME-1316",
   "control_name": "Algorithmic Complexity Safeguards (Pattern/Regex Execution Limits)",
-  "description": "Enforces computational budgets on pattern matching, regular expression evaluation, and recursive parsing operations to prevent algorithmic complexity denial-of-service attacks. Encompasses three complementary techniques: (1) execution limits \u2014 regex step counts, match timeouts, and recursion depth caps that terminate runaway computations before they exhaust CPU or block event loops; (2) safe engine selection \u2014 mandating linear-time regex engines (RE2, Rust regex crate, .NET NonBacktracking mode) or equivalent guaranteed-polynomial parsers instead of backtracking NFA engines susceptible to catastrophic backtracking; (3) pattern compilation guards \u2014 never compiling user-controlled input directly into regex or pattern language without escaping metacharacters or using literal-match APIs, and pre-screening pattern structure for known dangerous constructs (nested quantifiers, overlapping alternations, unbounded repetition groups). Complements CME-114 (OS-level process resource limits) by providing application-level, per-operation granularity \u2014 a regex timeout kills the match attempt while keeping the service alive, whereas ulimit kills the entire process.",
+  "description": "Enforces computational budgets on pattern matching, regular expression evaluation, and recursive parsing operations to prevent algorithmic complexity denial-of-service attacks. Encompasses three complementary techniques: (1) execution limits — regex step counts, match timeouts, and recursion depth caps that terminate runaway computations before they exhaust CPU or block event loops; (2) safe engine selection — mandating linear-time regex engines (RE2, Rust regex crate, .NET NonBacktracking mode) or equivalent guaranteed-polynomial parsers instead of backtracking NFA engines susceptible to catastrophic backtracking; (3) pattern compilation guards — never compiling user-controlled input directly into regex or pattern language without escaping metacharacters or using literal-match APIs, and pre-screening pattern structure for known dangerous constructs (nested quantifiers, overlapping alternations, unbounded repetition groups). Complements CME-114 (OS-level process resource limits) by providing application-level, per-operation granularity — a regex timeout kills the match attempt while keeping the service alive, whereas ulimit kills the entire process.",
   "tactic": "Harden",
   "category": "Application Input Validation",
   "category_id": "application-input-validation",
@@ -27,17 +27,17 @@
     "method": "Verify that the application uses linear-time regex engines or enforces execution budgets on pattern operations. Check for RE2 bindings, regex timeout configuration, recursion depth limits, and that user-controlled input is never compiled directly into regex patterns without escaping.",
     "commands": [
       {
-        "command": "node -e \"try { require('re2'); console.log('RE2 available') } catch(e) { console.log('RE2 NOT installed \u2014 using backtracking engine') }\"",
+        "command": "node -e \"try { require('re2'); console.log('RE2 available') } catch(e) { console.log('RE2 NOT installed — using backtracking engine') }\"",
         "expected": "RE2 available",
         "platform": "any"
       },
       {
-        "command": "python3 -c \"import google.re2; print('google-re2 available')\" 2>/dev/null || python3 -c \"import re; print('WARNING: using backtracking re module \u2014 consider google-re2 or regex with timeout')\"",
+        "command": "python3 -c \"import google.re2; print('google-re2 available')\" 2>/dev/null || python3 -c \"import re; print('WARNING: using backtracking re module — consider google-re2 or regex with timeout')\"",
         "expected": "google-re2 available",
         "platform": "any"
       },
       {
-        "command": "powershell -Command \"try { [System.Text.RegularExpressions.RegexOptions]::NonBacktracking; Write-Host 'NonBacktracking mode available (.NET 7+)' } catch { Write-Host 'WARNING: NonBacktracking not available \u2014 requires .NET 7+' }\"",
+        "command": "powershell -Command \"try { [System.Text.RegularExpressions.RegexOptions]::NonBacktracking; Write-Host 'NonBacktracking mode available (.NET 7+)' } catch { Write-Host 'WARNING: NonBacktracking not available — requires .NET 7+' }\"",
         "expected": "NonBacktracking mode available (.NET 7+)",
         "platform": "windows"
       },
@@ -62,5 +62,68 @@
   "scf_identifiers": [
     "NET-02.1",
     "WEB-09"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-1333",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-407",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-405",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-834",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-730",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/A",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "NET-02.1",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "WEB-09",
+      "relationship_type": "maps_to"
+    }
   ]
 }

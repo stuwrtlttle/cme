@@ -1,7 +1,7 @@
 {
   "cme_id": "CME-1304",
   "control_name": "SSRF Prevention (Outbound Request Allowlist)",
-  "description": "Application-level validation that restricts outbound requests and file access to an allowlist of permitted destinations, schemes, and paths. Blocks requests to internal metadata endpoints (169.254.169.254), localhost, private RFC1918 ranges, and file:// or gopher:// schemes. Prevents attackers from using the application as a proxy to access internal resources.",
+  "description": "Application-level validation that restricts server-initiated requests to an explicit allowlist of permitted schemes, destinations, ports, and paths. The application canonicalizes the URL once, rejects embedded credentials and ambiguous representations, resolves the destination before connecting, validates every resolved IPv4 and IPv6 address, and uses the validated address for the connection to prevent DNS rebinding and time-of-check/time-of-use bypasses. It rejects loopback, link-local, private, unique-local, multicast, and unspecified address ranges; disables unsupported schemes such as file:// and gopher://; revalidates every redirect target; prevents unintended proxy use; and limits response size and duration. This SSRF-specific control specializes the general allowlist pattern in CME-1315. Network egress restriction in CME-208 provides defense in depth when application validation is bypassed.",
   "tactic": "Harden",
   "category": "Application Input Validation",
   "category_id": "application-input-validation",
@@ -13,36 +13,73 @@
       "metric": "C",
       "from": "H",
       "to": "L",
-      "rationale": "Cannot reach internal services, cloud metadata, or local files via SSRF"
-    },
-    {
-      "metric": "AC",
-      "from": "L",
-      "to": "H",
-      "rationale": "Destination allowlist blocks common SSRF bypass techniques"
+      "rationale": "A correctly enforced destination allowlist prevents the application from retrieving high-value data from internal services, cloud metadata endpoints, and local files. Low confidentiality impact remains possible through data exposed by an explicitly permitted destination or through limited information disclosed by rejection and timing behavior. This attenuation applies only when address validation is bound to the connection and repeated for every redirect."
     }
   ],
   "cwe_relationships": [
     "CWE-918"
   ],
   "verification": {
-    "method": "Test application with SSRF payloads targeting internal endpoints",
+    "method": "Review the outbound request implementation and dynamically test its application-specific SSRF sink. Confirm explicit allowlist enforcement; single-pass canonicalization; validation of every resolved IPv4 and IPv6 address; connection to the validated address; redirect revalidation; rejection of credentials, unsupported schemes, ambiguous address forms, loopback, link-local, private, unique-local, multicast, and unspecified ranges; proxy restrictions; and response size and timeout limits. The test endpoint must accept the candidate destination through a url query parameter; adapt the request wrapper if the application uses a different interface.",
     "commands": [
       {
-        "command": "curl -s http://app/fetch?url=http://169.254.169.254/latest/meta-data/ -o /dev/null -w '%{http_code}'",
-        "expected": "400 or 403",
+        "command": "test -n \"$CME_SSRF_TEST_ENDPOINT\" || { echo 'ERROR: set CME_SSRF_TEST_ENDPOINT'; exit 2; }; failed=0; for payload in 'http://169.254.169.254/latest/meta-data/' 'http://127.0.0.1/' 'http://[::1]/' 'http://10.0.0.1/' 'http://172.16.0.1/' 'http://192.168.0.1/' 'http://[fc00::1]/' 'http://[fe80::1]/' 'file:///etc/passwd' 'gopher://127.0.0.1:11211/_stats' 'http://2130706433/' 'http://0177.0.0.1/' 'http://user@127.0.0.1/'; do code=$(curl -sS --max-time 10 -o /dev/null -w '%{http_code}' -G --data-urlencode \"url=$payload\" \"$CME_SSRF_TEST_ENDPOINT\") || failed=1; case \"$code\" in 400|403) ;; *) printf 'FAIL %s -> %s\\n' \"$payload\" \"$code\"; failed=1 ;; esac; done; test \"$failed\" -eq 0 && echo 'PASS: all direct SSRF payloads rejected'",
+        "expected": "PASS: all direct SSRF payloads rejected",
+        "platform": "any"
+      },
+      {
+        "command": "test -n \"$CME_SSRF_TEST_ENDPOINT\" && test -n \"$CME_SSRF_REDIRECT_URL\" && code=$(curl -sS --max-time 10 -o /dev/null -w '%{http_code}' -G --data-urlencode \"url=$CME_SSRF_REDIRECT_URL\" \"$CME_SSRF_TEST_ENDPOINT\") && case \"$code\" in 400|403) echo 'PASS: redirect to prohibited destination rejected' ;; *) printf 'FAIL: redirect payload returned %s\\n' \"$code\"; exit 1 ;; esac",
+        "expected": "PASS: redirect to prohibited destination rejected",
+        "platform": "any"
+      },
+      {
+        "command": "test -n \"$CME_SSRF_TEST_ENDPOINT\" && test -n \"$CME_SSRF_REBIND_URL\" && code=$(curl -sS --max-time 10 -o /dev/null -w '%{http_code}' -G --data-urlencode \"url=$CME_SSRF_REBIND_URL\" \"$CME_SSRF_TEST_ENDPOINT\") && case \"$code\" in 400|403) echo 'PASS: DNS rebinding target rejected' ;; *) printf 'FAIL: rebinding payload returned %s\\n' \"$code\"; exit 1 ;; esac",
+        "expected": "PASS: DNS rebinding target rejected",
         "platform": "any"
       }
     ]
   },
   "confidence": "Medium",
   "platforms": [
-    "Any",
-    "Windows Server 2019",
-    "Windows Server 2022"
+    "Any"
   ],
   "scf_identifiers": [
     "NET-04.1",
     "WEB-09"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-918",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/C",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "NET-04.1",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "WEB-09",
+      "relationship_type": "maps_to"
+    }
   ]
 }

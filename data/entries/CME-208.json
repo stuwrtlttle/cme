@@ -41,7 +41,7 @@
       },
       {
         "command": "curl -s --connect-timeout 3 http://169.254.169.254/latest/meta-data/ -o /dev/null -w '%{http_code}' 2>&1 || echo 'blocked'",
-        "expected": "Connection refused, timed out, or blocked \u2014 cloud metadata endpoint unreachable from application workload",
+        "expected": "Connection refused, timed out, or blocked — cloud metadata endpoint unreachable from application workload",
         "platform": "any"
       },
       {
@@ -61,5 +61,59 @@
     "NET-03.5",
     "NET-04.1",
     "NET-18"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-918",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-441",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/C",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/S",
+      "value": "C->U",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "NET-03.5",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "NET-04.1",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "NET-18",
+      "relationship_type": "maps_to"
+    }
   ]
 }

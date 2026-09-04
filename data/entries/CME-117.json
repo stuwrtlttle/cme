@@ -13,7 +13,7 @@
       "metric": "AC",
       "from": "L",
       "to": "H",
-      "rationale": "Safe-linking forces the attacker to defeat pointer encryption (requires both the per-thread random key and the chunk address) before they can redirect allocation to a controlled location via tcache poisoning; tcache key verification detects double-free attempts and aborts the process before the attacker achieves heap corruption \u2014 exploitation requires discovering a bypass for the allocator's integrity checks"
+      "rationale": "Safe-linking forces the attacker to defeat pointer encryption (requires both the per-thread random key and the chunk address) before they can redirect allocation to a controlled location via tcache poisoning; tcache key verification detects double-free attempts and aborts the process before the attacker achieves heap corruption — exploitation requires discovering a bypass for the allocator's integrity checks"
     }
   ],
   "cwe_relationships": [
@@ -52,5 +52,56 @@
   },
   "scf_identifiers": [
     "SEA-10"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-416",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-415",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-825",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-122",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "SEA-10",
+      "relationship_type": "maps_to"
+    }
   ]
 }

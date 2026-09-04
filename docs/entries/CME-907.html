@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-907</div>
   <h1>Application-Layer RBAC Enforcement</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-application">Application</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Privileges Required</strong> (PR)</td>
             <td>
@@ -64,10 +61,10 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            
+
             <td class="cvss-rationale">An attacker with any authenticated session is blocked from privileged operations; exploitation requires compromise of a specifically privileged role. The mechanism is the per-endpoint role verification gate that rejects requests from insufficiently privileged callers before business logic executes.</td>
           </tr>
-          
+
           <tr>
             <td><strong>Integrity</strong> (I)</td>
             <td>
@@ -75,79 +72,80 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-            
+
             <td class="cvss-rationale">Write operations are confined to the caller&#39;s authorized scope; modification of resources outside the caller&#39;s role permissions is rejected before execution, limiting integrity impact to the attacker&#39;s own authorized data.</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/266.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-266</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/1220.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-1220</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/862.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-862</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/863.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-863</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/285.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-285</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Inspect application source for role-based authorization checks on privileged endpoints; test that unprivileged authenticated users receive 403 on admin endpoints</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rn &#39;@require_role\|@permission_required\|authorize!\|has_permission\|check_permission\|rbac\|@roles_required\|@PreAuthorize\|@Secured\|@RolesAllowed\|\[Authorize\]&#39; &lt;app_source&gt;/
-        
+
         <br><span class="cmd-expected"># Expected: Non-empty output — authorization annotations found on endpoint handlers</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> curl -s -o /dev/null -w &#39;%{http_code}&#39; -H &#39;Authorization: Bearer &lt;unprivileged_token&gt;&#39; http://localhost:8080/api/v1/admin/users
-        
+
         <br><span class="cmd-expected"># Expected: 403</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-906.html">&larr; CME-906: Rate Limiting / Connection Throttling</a>
-      
-      
+
+
       <a href="CME-908.html">CME-908: Object-Level Authorization Checks (IDOR Prevention) &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -157,40 +155,40 @@
       <p>Application Controls</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">authorization-controls</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">IAC-08</span>
-        
+
         <span class="cwe-link">IAC-20</span>
-        
+
         <span class="cwe-link">IAC-21</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>Any</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -198,7 +196,8 @@
         <li><strong>ID:</strong> CME-907</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Application</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 5</li>
         <li><strong>CVSS Mods:</strong> 2</li>
       </ul>
@@ -209,7 +208,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

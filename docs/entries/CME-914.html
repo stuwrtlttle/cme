@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-914</div>
   <h1>Strict CORS Origin Allowlist Enforcement</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-application">Application</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
@@ -64,10 +61,10 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            
+
             <td class="cvss-rationale">Cross-origin credentialed reads go from trivially possible (wildcard or reflected-origin CORS) to requiring the attacker to compromise an explicitly allowed origin or find a CORS bypass. The mechanism is the server-side origin validation gate that rejects unapproved origins before including permissive CORS headers.</td>
           </tr>
-          
+
           <tr>
             <td><strong>Confidentiality</strong> (C)</td>
             <td>
@@ -75,83 +72,84 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-            
+
             <td class="cvss-rationale">The primary attack vector for CORS-based CWE-940 vulnerabilities is cross-origin data exfiltration via credentialed fetch/XHR. Strict CORS blocks the browser from delivering authenticated response data to the attacker&#39;s JavaScript, limiting confidentiality impact to data obtainable without credentials.</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/940.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-940</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/346.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-346</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/942.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-942</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Test that the server rejects unapproved origins and does not reflect arbitrary Origin headers in CORS response headers</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> curl -sI -H &#39;Origin: https://evil.example.com&#39; http://localhost:8080/api/v1/user | grep -i &#39;access-control-allow&#39;
-        
+
         <br><span class="cmd-expected"># Expected: Empty output (no CORS headers returned for untrusted origin)</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> curl -sI -H &#39;Origin: https://trusted.example.com&#39; http://localhost:8080/api/v1/user | grep -i &#39;access-control-allow&#39;
-        
+
         <br><span class="cmd-expected"># Expected: Access-Control-Allow-Origin: https://trusted.example.com</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rn &#39;Access-Control-Allow-Origin.*\*\|cors_allow_all\|CORS_ORIGIN_ALLOW_ALL\|allowedOrigins.*\*\|req\.headers\[.origin.\]\|\$_SERVER.*HTTP_ORIGIN&#39; &lt;app_source&gt;/
-        
+
         <br><span class="cmd-expected"># Expected: Empty output (no wildcard CORS or origin reflection patterns found)</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-913.html">&larr; CME-913: CSRF Protection (Anti-CSRF Token &amp; SameSite Cookie Enforcement)</a>
-      
-      
+
+
       <a href="CME-915.html">CME-915: Cross-Origin Request Restriction (Reverse Proxy Origin Enforcement) &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -161,38 +159,38 @@
       <p>Application Controls</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">origin-cors</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">WEB-04</span>
-        
+
         <span class="cwe-link">WEB-07</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>Any</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -200,7 +198,8 @@
         <li><strong>ID:</strong> CME-914</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Application</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 3</li>
         <li><strong>CVSS Mods:</strong> 2</li>
       </ul>
@@ -211,7 +210,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

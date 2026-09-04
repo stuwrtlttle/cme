@@ -20,24 +20,21 @@
   </header>
 
   <main class="container">
-    
+
 <div class="entry-header">
   <div class="entry-id">CME-1314</div>
   <h1>Input Canonicalization Before Security Decision</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-application">Application</span>
-    
-    <span class="badge badge-attenuation-deterministic">Deterministic</span>
-    
-    
-    <span class="badge badge-confidence-high">High Confidence</span>
-    
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
 
 <div class="entry-body">
   <div class="entry-main">
+
 
     <section>
       <h2>Description</h2>
@@ -51,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-            
+
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-          
+
           <tr>
             <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
@@ -64,79 +61,80 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-            
+
             <td class="cvss-rationale">The attacker must find an input representation that survives full canonicalization while still bypassing the security check — encoding tricks (URL-encoding, Unicode homoglyphs, octal IP notation, mixed-case evasion) are neutralized before the security decision is made, requiring the attacker to discover a novel bypass that operates at the semantic level rather than the syntactic level</td>
           </tr>
-          
+
         </tbody>
       </table>
     </section>
 
-    
+
+
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-        
+
         <a href="https://cwe.mitre.org/data/definitions/184.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-184</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/183.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-183</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/20.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-20</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/180.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-180</a>
-        
+
         <a href="https://cwe.mitre.org/data/definitions/1289.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-1289</a>
-        
+
       </div>
     </section>
-    
 
-    
+
+
     <section>
       <h2>Verification</h2>
-      
+
       <p class="verification-method">Review application source code for canonicalization/normalization calls that execute before security-relevant comparisons (allowlist checks, denylist checks, policy evaluations). Verify that the canonicalized form — not the raw input — is used in all subsequent security decisions.</p>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rn &#39;urllib.parse\|urlparse\|URL.parse\|new URL\|InetAddress.getByName\|normalize\|canonicalize\|realpath\|resolve&#39; &lt;app_source&gt;/
-        
+
         <br><span class="cmd-expected"># Expected: Canonicalization calls present before security-relevant comparisons</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rn &#39;allowlist\|blocklist\|denylist\|whitelist\|blacklist&#39; &lt;app_source&gt;/ | head -20
-        
+
         <br><span class="cmd-expected"># Expected: Security list checks should reference canonicalized/normalized values, not raw input</span>
-        
+
       </div>
-      
+
       <div class="cmd-platform">Platform: any</div>
-      
-      
+
+
     </section>
-    
 
-    
 
-    
+
+
+
 
     <div class="entry-nav">
-      
+
       <a href="CME-1313.html">&larr; CME-1313: CRLF / Line Injection Prevention (Newline Sanitization for Structured Formats)</a>
-      
-      
+
+
       <a href="CME-1315.html">CME-1315: Allowlist-Preferred Input Validation (Deny-by-Default Filtering) &rarr;</a>
-      
+
     </div>
   </div>
 
@@ -146,40 +144,40 @@
       <p>Application Input Validation</p>
     </section>
 
-    
+
     <section>
       <h3>Function</h3>
       <p class="function-id">input-validation</p>
     </section>
-    
 
-    
+
+
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-        
+
         <span class="cwe-link">WEB-09</span>
-        
+
       </div>
     </section>
-    
 
-    
 
-    
+
+
+
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-        
+
         <li>Any</li>
-        
+
         <li>Windows Server 2019</li>
-        
+
         <li>Windows Server 2022</li>
-        
+
       </ul>
     </section>
-    
+
 
     <section>
       <h3>Quick Reference</h3>
@@ -187,7 +185,8 @@
         <li><strong>ID:</strong> CME-1314</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Application</li>
-        <li><strong>Attenuation:</strong> deterministic</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 5</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
@@ -198,7 +197,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
+    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>
