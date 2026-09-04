@@ -123,6 +123,12 @@ def main():
         tmpl.render(active_page="search", root="", all_entries=entries, **common)
     )
 
+    # MCP reference
+    tmpl = env.get_template("mcp_reference.html")
+    (OUTPUT_DIR / "mcp-reference.html").write_text(
+        tmpl.render(active_page="mcp-reference", root="", **common)
+    )
+
     # Individual entries
     tmpl = env.get_template("entry.html")
     for i, entry in enumerate(entries):
@@ -142,7 +148,7 @@ def main():
     # Copy CSS
     shutil.copy(TEMPLATES_DIR / "static" / "style.css", OUTPUT_DIR / "style.css")
 
-    print(f"Built {len(entries)} entry pages + 4 index pages -> {OUTPUT_DIR}/")
+    print(f"Built {len(entries)} entry pages + 5 index pages -> {OUTPUT_DIR}/")
 
 
 if __name__ == "__main__":

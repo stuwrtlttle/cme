@@ -2,7 +2,7 @@
 
 A structured taxonomy of defensive security controls mapped to CVSS vector attenuation, served via an MCP (Model Context Protocol) server backed by SQLite (single-user) or PostgreSQL (multi-user). Controls are organized in a hierarchical Function/Control structure and support both deterministic (guaranteed metric shifts) and probabilistic (evidence-based, conditional) attenuation.
 
-See the [MCP server reference](docs/mcp-reference.md) for the complete tool, resource, and connection guide.
+See the [MCP server reference](https://cmetaxonomy.org/mcp-reference.html) for the complete tool, resource, and connection guide.
 
 ---
 

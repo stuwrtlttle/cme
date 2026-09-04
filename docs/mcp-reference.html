@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCP Server Reference — Common Mitigation Enumeration</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="index.html" class="logo">CME <span>Common Mitigation Enumeration</span></a>
+      <nav>
+        <a href="index.html" >Home</a>
+        <a href="by-tactic.html" >By Tactic</a>
+        <a href="by-cwe.html" >By CWE</a>
+        <a href="search.html" >Search</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+
+<h1 class="page-title">CME MCP Server Reference</h1>
+<p class="page-subtitle">Connect to and query the Common Mitigation Enumeration taxonomy through MCP.</p>
+
+<section>
+  <h2>Connect</h2>
+  <p>Public endpoint: <code>https://cmetaxonomy.org/mcp</code></p>
+  <p>For local use, run <code>uv run python -m src.server</code>. For shared HTTP deployment, set <code>CME_TRANSPORT=streamable-http</code>; use <code>CME_DB_BACKEND=postgres</code> for PostgreSQL.</p>
+</section>
+
+<section>
+  <h2>Evidence model</h2>
+  <table class="cvss-table">
+    <thead><tr><th>State</th><th>Meaning</th><th>Scoring behavior</th></tr></thead>
+    <tbody>
+      <tr><td><code>deterministic</code></td><td>Verified preventive effect.</td><td>Eligible for a guaranteed CVSS environmental metric shift.</td></tr>
+      <tr><td><code>quantified</code></td><td>Measured conditional effect, with probability and evidence.</td><td>Returned as a conditional adjustment, never a guaranteed shift.</td></tr>
+      <tr><td><code>unquantified</code></td><td>Plausible effect with incomplete evidence.</td><td>Discoverable, but never changes a score automatically.</td></tr>
+    </tbody>
+  </table>
+  <p>Every entry also identifies its primary effect as <code>preventive</code>, <code>detective</code>, or <code>corrective</code>. CVSS is optional; EPSS is not a control mapping.</p>
+</section>
+
+<section>
+  <h2>Query tools</h2>
+  <table class="cvss-table">
+    <thead><tr><th>Tool</th><th>Required inputs</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><code>get_cme_entry</code></td><td><code>cme_id</code></td><td>Return one full CME entry.</td></tr>
+      <tr><td><code>search_cme</code></td><td>None</td><td>Search by tactic, category, category ID, control layer, or keyword.</td></tr>
+      <tr><td><code>get_mitigations_for_weakness</code></td><td><code>cwe_id</code></td><td>Find controls for a CWE, including applicable ancestor-CWE coverage.</td></tr>
+      <tr><td><code>get_coverage_assessments</code></td><td><code>namespace</code>, <code>target_id</code></td><td>Return evidence-backed coverage assessments for a CWE, CVE, or capability.</td></tr>
+      <tr><td><code>get_mitigations_for_cvss_vector</code></td><td><code>cvss_vector</code></td><td>Discover controls with transitions matching a CVSS vector.</td></tr>
+      <tr><td><code>get_mitigations_for_product</code></td><td>One product filter</td><td>Match controls by CPE, PURL, vendor/product, or platform.</td></tr>
+      <tr><td><code>get_mitigations_for_scf</code></td><td><code>scf_id</code></td><td>Find controls mapped to an SCF control or domain.</td></tr>
+      <tr><td><code>list_cme_taxonomy</code></td><td>None</td><td>Return tactics, categories, and function registry data.</td></tr>
+      <tr><td><code>get_cme_coverage_summary</code></td><td>None</td><td>Return aggregate CWE, CVSS-transition, tactic, and category coverage.</td></tr>
+      <tr><td><code>get_verification_commands</code></td><td><code>cme_id</code></td><td>Return attached target verification instructions.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>Risk analysis tools</h2>
+  <table class="cvss-table">
+    <thead><tr><th>Tool</th><th>Required inputs</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><code>calculate_attenuation</code></td><td><code>active_cme_ids</code></td><td>Aggregate effects of verified active controls. Separates deterministic attenuation, quantified adjustments, and unquantified effects.</td></tr>
+      <tr><td><code>simulate_cve_risk</code></td><td><code>base_score</code>, <code>base_vector</code>, <code>active_cme_ids</code></td><td>Apply applicable effects to a vector. The base score is retained for context; CME does not numerically recalculate CVSS.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>Curation tools</h2>
+  <table class="cvss-table">
+    <thead><tr><th>Tool</th><th>Required inputs</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><code>propose_cme_entry</code></td><td><code>control_name</code>, <code>description</code>, <code>tactic</code>, <code>effect_mode</code>, <code>evidence_state</code>, <code>efficacy_json</code>, and a category or category ID</td><td>Validate and save a proposal; it does not modify the live taxonomy.</td></tr>
+      <tr><td><code>list_proposals</code></td><td>None</td><td>List proposals awaiting review.</td></tr>
+      <tr><td><code>approve_cme_proposal</code></td><td><code>cme_id</code></td><td>Publish a proposal, load it into the database, and rebuild the static site.</td></tr>
+    </tbody>
+  </table>
+  <p>For <code>propose_cme_entry</code>, quantified evidence requires probability, an evidence basis, and conditions. Unquantified evidence requires conditions. Optional data includes CVSS impacts, CWE IDs, verification instructions, platforms, and external framework bindings.</p>
+</section>
+
+<section>
+  <h2>Resources</h2>
+  <table class="cvss-table">
+    <thead><tr><th>URI</th><th>Contents</th></tr></thead>
+    <tbody>
+      <tr><td><code>cme://taxonomy</code></td><td>Full taxonomy structure.</td></tr>
+      <tr><td><code>cme://entry/{cme_id}</code></td><td>Full entry by CME ID.</td></tr>
+      <tr><td><code>cme://schema</code></td><td>Current CME JSON Schema.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>Operational notes</h2>
+  <ul>
+    <li>Review verification commands for platform and privilege requirements before executing them.</li>
+    <li>Negative coverage conclusions require an assessment that records considered candidates and supporting evidence.</li>
+    <li>Runtime configuration uses <code>CME_TRANSPORT</code>, <code>CME_DB_BACKEND</code>, <code>CME_HTTP_HOST</code>, and <code>CME_HTTP_PORT</code>.</li>
+  </ul>
+</section>
+
+  </main>
+
+  <footer class="site-footer">
+    Generated 2026-09-04 20:38 UTC &middot; 128 entries &middot;
+    Common Mitigation Enumeration (CME)
+  </footer>
+</body>
+</html>
