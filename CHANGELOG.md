@@ -14,7 +14,21 @@ All notable changes to the CME (Common Mitigation Enumeration) project are docum
 - `17c685b` Add CME-923 mass-assignment prevention
 
 
-### Auto-generated changelog
+### CME evidence model and framework-neutral taxonomy (Issue #2)
+
+This migration implements the recommendations in [issue #2, comment 5520782141](https://github.com/stuwrtlttle/cme/issues/2#issuecomment-5520782141).
+
+- Made CME framework-neutral: CVSS is now an optional external binding rather than the membership test for a CME control. The model can represent CVSS, SSVC, ATT&CK, ATLAS, ICS, D3FEND, and SCF bindings; it explicitly does not map local controls to EPSS.
+- Replaced overlapping attenuation/confidence semantics with `effect_mode` (`preventive`, `detective`, `corrective`) and `evidence_state` (`deterministic`, `quantified`, `unquantified`). Legacy fields remain for compatibility.
+- Added the `efficacy` evidence object. Quantified effects require a probability, evidence basis, and operating conditions; unquantified effects require stated conditions.
+- Migrated all 128 existing entries to `unquantified` pending evidence review. They remain discoverable, but receive no automatic scoring credit until promoted with evidence.
+- Restricted deterministic CVSS metric shifts to verified preventive controls. Risk tools now return deterministic attenuation, conditional quantified adjustments, and surfaced-but-unscored unquantified effects separately.
+- Added typed relationships alongside the legacy CWE index, using `mitigates` / `supportive` relationships and preserving the structural hierarchy for future NIST IR 8477-aligned crosswalks.
+- Added evidence-backed coverage assessments for CWE, CVE, and capability targets. Negative findings require candidate controls considered and evidence supporting their rejection; absence of an assessment returns `coverage_unknown`.
+- Extended SQLite and PostgreSQL persistence, MCP query/proposal workflows, JSON Schema validation, static-site evidence display, and automated tests to support the new model.
+- Added framework-binding support without asserting a bulk ATT&CK, ATLAS, or ICS crosswalk; those mappings remain future evidence-backed work.
+
+### Superseded auto-generated summary
 
 - `324ffd8` Update 128 CME entries (CME-1001,CME-1002,CME-1003,CME-1004,CME-1005,CME-1006,CME-1007,CME-1008,CME-1009,CME-101,CME-1010,CME-1011,CME-1012,CME-102,CME-103,CME-104,CME-105,CME-106,CME-107,CME-108,CME-109,CME-110,CME-1101,CME-1102,CME-1103,CME-111,CME-112,CME-113,CME-114,CME-116,CME-117,CME-118,CME-119,CME-1201,CME-1202,CME-1203,CME-1204,CME-1301,CME-1302,CME-1303,CME-1304,CME-1305,CME-1306,CME-1307,CME-1308,CME-1309,CME-1310,CME-1311,CME-1312,CME-1313,CME-1314,CME-1315,CME-1316,CME-1317,CME-201,CME-202,CME-203,CME-204,CME-205,CME-206,CME-207,CME-208,CME-301,CME-302,CME-303,CME-304,CME-401,CME-402,CME-403,CME-404,CME-405,CME-406,CME-407,CME-408,CME-501,CME-502,CME-503,CME-504,CME-505,CME-506,CME-507,CME-508,CME-601,CME-602,CME-603,CME-604,CME-701,CME-702,CME-703,CME-704,CME-705,CME-706,CME-707,CME-708,CME-709,CME-710,CME-711,CME-712,CME-713,CME-801,CME-802,CME-803,CME-804,CME-805,CME-806,CME-807,CME-901,CME-902,CME-903,CME-904,CME-905,CME-906,CME-907,CME-908,CME-909,CME-910,CME-911,CME-912,CME-913,CME-914,CME-915,CME-916,CME-917,CME-918,CME-919,CME-920,CME-921,CME-923);Update README.md,docs/by-cwe.html,docs/by-tactic.html
 
