@@ -1,0 +1,49 @@
+{
+  "cme_id": "CME-923",
+  "control_name": "Mass-Assignment Prevention Through Explicit Request Schemas",
+  "description": "Application create and update handlers use explicit, per-operation request schemas that accept only client-controlled fields and reject or ignore server-managed attributes such as tenant, workspace, owner, role, visibility, and deployment state. The allowed fields are maintained independently for each endpoint, preventing automatic model binding or generic object merging from persisting attacker-supplied privileged attributes. This control addresses mass-assignment weaknesses; object-level authorization remains a separate complementary control under CME-908.",
+  "tactic": "Harden",
+  "category": "Application Controls",
+  "category_id": "application-controls",
+  "function_id": "request-filtering",
+  "control_layer": "Application",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "A trivial request-body modification no longer reaches server-managed fields. To achieve the same unauthorized state change, an attacker must find an unprotected create or update path, bypass the explicit request schema, or exploit a separate serialization or authorization defect.",
+      "conditions": [
+        "Every create and update endpoint for the affected resource type uses an explicit allowlist of client-controlled fields and rejects or ignores server-managed fields."
+      ]
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-915"
+  ],
+  "verification": {
+    "method": "For every create and update endpoint, run authenticated negative tests that supply a foreign tenant, workspace, owner, role, or other server-managed field. Each request must be rejected or the supplied field must be ignored; a subsequent read must confirm that the persisted object retains its original server-managed state.",
+    "commands": [
+      {
+        "command": "curl -sS -o /dev/null -w '%{http_code}\\n' -X PATCH 'https://<app>/api/<resource>/<id>' -H 'Authorization: Bearer <low_privilege_token>' -H 'Content-Type: application/json' --data '{\"workspaceId\":\"<foreign_workspace_id>\"}'",
+        "expected": "^(400|403|404)$",
+        "platform": "any"
+      },
+      {
+        "command": "curl -sS 'https://<app>/api/<resource>/<id>' -H 'Authorization: Bearer <low_privilege_token>' | jq -e '.workspaceId != \"<foreign_workspace_id>\"'",
+        "expected": "^true$",
+        "platform": "linux"
+      },
+      {
+        "command": "curl -sS -o /dev/null -w '%{http_code}\\n' -X POST 'https://<app>/api/<resource>' -H 'Authorization: Bearer <low_privilege_token>' -H 'Content-Type: application/json' --data '{\"role\":\"admin\",\"ownerId\":\"<other_user_id>\"}'",
+        "expected": "^(400|403)$",
+        "platform": "any"
+      }
+    ]
+  },
+  "confidence": "Medium",
+  "platforms": [
+    "Any"
+  ]
+}

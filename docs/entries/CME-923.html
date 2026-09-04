@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CME-905: Content Security Policy (CSP) Headers — Common Mitigation Enumeration</title>
+  <title>CME-923: Mass-Assignment Prevention Through Explicit Request Schemas — Common Mitigation Enumeration</title>
   <link rel="stylesheet" href="../style.css">
 </head>
 <body>
@@ -22,8 +22,8 @@
   <main class="container">
     
 <div class="entry-header">
-  <div class="entry-id">CME-905</div>
-  <h1>Content Security Policy (CSP) Headers</h1>
+  <div class="entry-id">CME-923</div>
+  <h1>Mass-Assignment Prevention Through Explicit Request Schemas</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-application">Application</span>
@@ -41,7 +41,7 @@
 
     <section>
       <h2>Description</h2>
-      <p class="entry-description">Browser-enforced HTTP header policy that restricts script sources, prevents inline execution, and blocks mixed content. Defense-in-depth against stored/reflected XSS that catches output encoding failures. CSP&#39;s frame-ancestors directive also mitigates clickjacking.</p>
+      <p class="entry-description">Application create and update handlers use explicit, per-operation request schemas that accept only client-controlled fields and reject or ignore server-managed attributes such as tenant, workspace, owner, role, visibility, and deployment state. The allowed fields are maintained independently for each endpoint, preventing automatic model binding or generic object merging from persisting attacker-supplied privileged attributes. This control addresses mass-assignment weaknesses; object-level authorization remains a separate complementary control under CME-908.</p>
     </section>
 
     <section>
@@ -65,7 +65,7 @@
               <span class="cvss-to">H</span>
             </td>
             
-            <td class="cvss-rationale">CSP script-src directive restricts script execution to enumerated origins; injected inline scripts are blocked by the browser&#39;s enforcement engine regardless of payload encoding or obfuscation</td>
+            <td class="cvss-rationale">A trivial request-body modification no longer reaches server-managed fields. To achieve the same unauthorized state change, an attacker must find an unprotected create or update path, bypass the explicit request schema, or exploit a separate serialization or authorization defect.</td>
           </tr>
           
         </tbody>
@@ -77,11 +77,8 @@
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
         
-        <a href="https://cwe.mitre.org/data/definitions/79.html"
-           class="cwe-link" target="_blank" rel="noopener">CWE-79</a>
-        
-        <a href="https://cwe.mitre.org/data/definitions/1021.html"
-           class="cwe-link" target="_blank" rel="noopener">CWE-1021</a>
+        <a href="https://cwe.mitre.org/data/definitions/915.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-915</a>
         
       </div>
     </section>
@@ -91,13 +88,13 @@
     <section>
       <h2>Verification</h2>
       
-      <p class="verification-method">Verify CSP header is present with effective script restrictions</p>
+      <p class="verification-method">For every create and update endpoint, run authenticated negative tests that supply a foreign tenant, workspace, owner, role, or other server-managed field. Each request must be rejected or the supplied field must be ignored; a subsequent read must confirm that the persisted object retains its original server-managed state.</p>
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> curl -sI http://&lt;target&gt;/ | grep -i content-security-policy
+        <span class="cmd-prompt">$</span> curl -sS -o /dev/null -w &#39;%{http_code}\n&#39; -X PATCH &#39;https://&lt;app&gt;/api/&lt;resource&gt;/&lt;id&gt;&#39; -H &#39;Authorization: Bearer &lt;low_privilege_token&gt;&#39; -H &#39;Content-Type: application/json&#39; --data &#39;{&#34;workspaceId&#34;:&#34;&lt;foreign_workspace_id&gt;&#34;}&#39;
         
-        <br><span class="cmd-expected"># Expected: Content-Security-Policy:</span>
+        <br><span class="cmd-expected"># Expected: ^(400|403|404)$</span>
         
       </div>
       
@@ -105,19 +102,19 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> curl -sI http://&lt;target&gt;/ | grep -i content-security-policy | grep -ic &#39;unsafe-inline&#39;
+        <span class="cmd-prompt">$</span> curl -sS &#39;https://&lt;app&gt;/api/&lt;resource&gt;/&lt;id&gt;&#39; -H &#39;Authorization: Bearer &lt;low_privilege_token&gt;&#39; | jq -e &#39;.workspaceId != &#34;&lt;foreign_workspace_id&gt;&#34;&#39;
         
-        <br><span class="cmd-expected"># Expected: 0</span>
+        <br><span class="cmd-expected"># Expected: ^true$</span>
         
       </div>
       
-      <div class="cmd-platform">Platform: any</div>
+      <div class="cmd-platform">Platform: linux</div>
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> curl -sI http://&lt;target&gt;/ | grep -i content-security-policy | grep -ic &#39;unsafe-eval&#39;
+        <span class="cmd-prompt">$</span> curl -sS -o /dev/null -w &#39;%{http_code}\n&#39; -X POST &#39;https://&lt;app&gt;/api/&lt;resource&gt;&#39; -H &#39;Authorization: Bearer &lt;low_privilege_token&gt;&#39; -H &#39;Content-Type: application/json&#39; --data &#39;{&#34;role&#34;:&#34;admin&#34;,&#34;ownerId&#34;:&#34;&lt;other_user_id&gt;&#34;}&#39;
         
-        <br><span class="cmd-expected"># Expected: 0</span>
+        <br><span class="cmd-expected"># Expected: ^(400|403)$</span>
         
       </div>
       
@@ -133,10 +130,10 @@
 
     <div class="entry-nav">
       
-      <a href="CME-904.html">&larr; CME-904: WAF (Web Application Firewall)</a>
+      <a href="CME-921.html">&larr; CME-921: URL Request Path Canonicalization Before Authorization</a>
       
       
-      <a href="CME-906.html">CME-906: Rate Limiting / Connection Throttling &rarr;</a>
+      <a href="CME-1001.html">CME-1001: EDR Agent (Endpoint Detection &amp; Response) &rarr;</a>
       
     </div>
   </div>
@@ -150,21 +147,10 @@
     
     <section>
       <h3>Function</h3>
-      <p class="function-id">runtime-hardening</p>
+      <p class="function-id">request-filtering</p>
     </section>
     
 
-    
-    <section>
-      <h3>SCF Controls</h3>
-      <div class="cwe-list">
-        
-        <span class="cwe-link">WEB-01.1</span>
-        
-        <span class="cwe-link">WEB-12</span>
-        
-      </div>
-    </section>
     
 
     
@@ -183,11 +169,11 @@
     <section>
       <h3>Quick Reference</h3>
       <ul class="sidebar-list">
-        <li><strong>ID:</strong> CME-905</li>
+        <li><strong>ID:</strong> CME-923</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> Application</li>
         <li><strong>Attenuation:</strong> deterministic</li>
-        <li><strong>CWEs:</strong> 2</li>
+        <li><strong>CWEs:</strong> 1</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
     </section>

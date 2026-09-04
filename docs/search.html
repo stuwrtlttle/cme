@@ -932,6 +932,26 @@
     <div class="sr-desc">Enforce database-level access control by assigning each application service a dedicated database account with GRANT-limited permissions. App accounts ...</div>
   </li>
   
+  <li data-search="cme-921 url request path canonicalization before authorization ensure the web server, reverse proxy, or application framework canonicalizes request uris — resolving path equivalences (., ..), stripping matrix parameters (;param=value), normalizing percent-encoding, collapsing duplicate slashes, and standardizing trailing slashes — before the authorization module evaluates access control rules. the root cause of cwe-551 is a behavior ordering defect where authorization sees a raw uri form that does not match configured security constraints, but the routing/dispatch layer later normalizes the uri and matches a protected resource. canonicalization-first ensures the authorization decision and the routing decision operate on the same resolved path. implementation varies by stack: spring security&#39;s stricthttpfirewall rejects non-normalized requests; tomcat&#39;s encodedsolidushandling and allowbackslash settings control normalization; nginx&#39;s merge_slashes and location matching normalize by default; apache&#39;s allowencodedslashes and mod_rewrite handle encoding normalization. reverse proxies should be configured to normalize before forwarding to backends, and frameworks should reject requests containing path-equivalent sequences rather than silently normalizing them. application controls harden application cwe-551 cwe-41 cwe-863 cwe-696">
+    <div>
+      <a href="entries/CME-921.html" class="sr-id">CME-921</a>
+      <a href="entries/CME-921.html">URL Request Path Canonicalization Before Authorization</a>
+      <span class="badge badge-tactic-harden">Harden</span>
+      <span class="badge badge-layer-application">Application</span>
+    </div>
+    <div class="sr-desc">Ensure the web server, reverse proxy, or application framework canonicalizes request URIs — resolving path equivalences (., ..), stripping matrix para...</div>
+  </li>
+  
+  <li data-search="cme-923 mass-assignment prevention through explicit request schemas application create and update handlers use explicit, per-operation request schemas that accept only client-controlled fields and reject or ignore server-managed attributes such as tenant, workspace, owner, role, visibility, and deployment state. the allowed fields are maintained independently for each endpoint, preventing automatic model binding or generic object merging from persisting attacker-supplied privileged attributes. this control addresses mass-assignment weaknesses; object-level authorization remains a separate complementary control under cme-908. application controls harden application cwe-915">
+    <div>
+      <a href="entries/CME-923.html" class="sr-id">CME-923</a>
+      <a href="entries/CME-923.html">Mass-Assignment Prevention Through Explicit Request Schemas</a>
+      <span class="badge badge-tactic-harden">Harden</span>
+      <span class="badge badge-layer-application">Application</span>
+    </div>
+    <div class="sr-desc">Application create and update handlers use explicit, per-operation request schemas that accept only client-controlled fields and reject or ignore serv...</div>
+  </li>
+  
   <li data-search="cme-1001 edr agent (endpoint detection &amp; response) real-time behavioral detection and automated response agent on endpoints. detects exploit patterns, lateral movement, and persistence mechanisms. can kill processes, isolate hosts, and quarantine files automatically. runtime detection detect application ">
     <div>
       <a href="entries/CME-1001.html" class="sr-id">CME-1001</a>
@@ -972,7 +992,7 @@
     <div class="sr-desc">Detects unauthorized modifications to critical system files by comparing against a known-good baseline database. Scheduled or continuous monitoring of...</div>
   </li>
   
-  <li data-search="cme-1005 runtime memory error detection (kasan/hwasan) kernel addresssanitizer (kasan) and hardware-assisted addresssanitizer (hwasan) detect memory safety violations at runtime including use-after-free, out-of-bounds access, buffer size miscalculations, and null pointer dereferences. kasan instruments kernel memory allocations with redzones and quarantine zones to detect invalid accesses. hwasan uses arm memory tagging for lower-overhead production deployments. when a violation is detected, the kernel logs a detailed report and can be configured to panic, preventing silent exploitation. runtime detection detect os/kernel cwe-416 cwe-131 cwe-193 cwe-476 cwe-787 cwe-125 cwe-120">
+  <li data-search="cme-1005 runtime memory error detection (kasan/hwasan) kernel addresssanitizer (kasan) and hardware-assisted addresssanitizer (hwasan) detect memory safety violations at runtime including use-after-free, out-of-bounds access, buffer size miscalculations, and null pointer dereferences. kasan instruments kernel memory allocations with redzones and quarantine zones to detect invalid accesses. hwasan uses arm memory tagging for lower-overhead production deployments. when a violation is detected, the kernel logs a detailed report and can be configured to panic, preventing silent exploitation. runtime detection detect os/kernel cwe-416 cwe-131 cwe-193 cwe-476 cwe-787 cwe-125 cwe-120 cwe-805">
     <div>
       <a href="entries/CME-1005.html" class="sr-id">CME-1005</a>
       <a href="entries/CME-1005.html">Runtime Memory Error Detection (KASAN/HWASan)</a>
@@ -1318,7 +1338,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-08-24 01:58 UTC &middot; 126 entries &middot;
+    Generated 2026-09-04 18:02 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>
