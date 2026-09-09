@@ -4,9 +4,21 @@ All notable changes to the CME (Common Mitigation Enumeration) project are docum
 
 ## 2026-09-09
 
+### ATT&CK crosswalks and discovery-skill update
+
+- Added ATT&CK-aware CME crosswalk support:
+  - ATT&CK mitigation bindings (`Mxxxx`) on existing CME entries
+  - ATT&CK technique coverage support in coverage assessments via `target.namespace: "ATT&CK"`
+  - Curated mapping seeds in `data/attack_mitigations_mappings.json`
+  - Initial ATT&CK Remote Services coverage assessments for `T1021` and `T0886`
+- Added ATT&CK technique crosswalk metadata on existing remote-access and segmentation controls instead of creating duplicate CME entries.
+- Updated the static site generator and entry/search templates so ATT&CK mitigation bindings and technique crosswalks render in generated `docs/`.
+- Updated the `cme-discovery` skill to use the local repository as the authority, check ATT&CK-aware schema and reference files during discovery, distinguish crosswalk gaps from true control gaps, and use the correct verification platform enums (`kubernetes`, `linux`, `windows`, `macos`, `rhel`, `debian`, `any`).
+
 ### Auto-generated changelog
 
 - `a891bcc` Update 6 CME entries (CME-201,CME-202,CME-203,CME-206,CME-801,CME-806);Update README.md,schema/coverage-assessment.schema.json,src/server.py,tests/test_evidence_model.py,data/.DS_Store
+- `57e7b5a` Update cme-discovery skill for ATT&CK-aware discovery
 
 ## 2026-09-04
 
