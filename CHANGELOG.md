@@ -13,6 +13,11 @@ All notable changes to the CME (Common Mitigation Enumeration) project are docum
 
 - `c9f1e96` Update build_site.py,docs/.DS_Store,docs/by-cwe.html
 
+
+### Auto-generated changelog
+
+- `52955f1` Fix push-and-merge helper ignore handling
+
 ## 2026-09-04
 
 ### Auto-generated changelog
