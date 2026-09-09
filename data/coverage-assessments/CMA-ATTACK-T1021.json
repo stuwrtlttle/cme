@@ -1,0 +1,48 @@
+{
+  "assessment_id": "CMA-ATTACK-T1021",
+  "target": {
+    "namespace": "ATT&CK",
+    "id": "T1021",
+    "description": "ATT&CK Enterprise technique Remote Services"
+  },
+  "taxonomy_version": "0.1.0",
+  "method": "Reviewed ATT&CK Enterprise Remote Services coverage against CME network isolation and authentication controls. Accepted only concrete controls that directly restrict, segment, or strongly authenticate remote service access rather than generic hardening measures.",
+  "candidates_considered": [
+    {
+      "cme_id": "CME-201",
+      "decision": "accepted",
+      "rationale": "Identity-aware gateways place remote service access behind authenticated and authorized enforcement."
+    },
+    {
+      "cme_id": "CME-202",
+      "decision": "accepted",
+      "rationale": "Host-based firewall rules restrict which sources can reach remote services."
+    },
+    {
+      "cme_id": "CME-203",
+      "decision": "accepted",
+      "rationale": "Segmentation limits lateral movement through remote services across trust zones."
+    },
+    {
+      "cme_id": "CME-206",
+      "decision": "accepted",
+      "rationale": "Kubernetes NetworkPolicy constrains pod-level remote service reachability."
+    },
+    {
+      "cme_id": "CME-801",
+      "decision": "accepted",
+      "rationale": "Multi-factor authentication blocks credential-only abuse of remote services."
+    },
+    {
+      "cme_id": "CME-204",
+      "decision": "rejected",
+      "rationale": "Encrypted transport protects confidentiality and integrity in transit but does not by itself restrict who can use the remote service."
+    }
+  ],
+  "conclusion": "coverage_exists",
+  "evidence": [
+    "CME has concrete controls for network-path restriction, trust-zone separation, and strong authentication applicable to remote service abuse.",
+    "Accepted entries were chosen from the existing network isolation and credential hardening categories because they directly affect remote service reachability or authentication outcomes."
+  ],
+  "reviewed_at": "2026-09-09"
+}

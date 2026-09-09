@@ -67,6 +67,14 @@
       "relationship_type": "mitigates",
       "method": "supportive",
       "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "ATT&CK",
+      "target_id": "T0886",
+      "relationship_type": "mitigates",
+      "method": "crosswalk",
+      "rationale": "Derived from ATT&CK mitigation M0930 mapped to CME-203; segmentation limits ICS remote service movement across zones.",
+      "evidence_state": "unquantified"
     }
   ],
   "framework_bindings": [
@@ -83,6 +91,20 @@
       "identifier": "Environmental/S",
       "value": "C->U",
       "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "ATT&CK",
+      "identifier": "M1030",
+      "value": "Network Segmentation",
+      "relationship_type": "maps_to",
+      "rationale": "Concrete network-zone implementation of ATT&CK Network Segmentation."
+    },
+    {
+      "namespace": "ATT&CK",
+      "identifier": "M0930",
+      "value": "Network Segmentation",
+      "relationship_type": "maps_to",
+      "rationale": "Concrete VLAN/subnet implementation of ATT&CK ICS Network Segmentation."
     },
     {
       "namespace": "SCF",

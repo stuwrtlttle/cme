@@ -1,0 +1,48 @@
+{
+  "assessment_id": "CMA-ATTACK-T0886",
+  "target": {
+    "namespace": "ATT&CK",
+    "id": "T0886",
+    "description": "ATT&CK ICS technique Remote Services"
+  },
+  "taxonomy_version": "0.1.0",
+  "method": "Reviewed ATT&CK ICS Remote Services coverage against CME controls that govern remote-service authentication, authorization, and network segmentation for OT and adjacent systems. Accepted only controls that concretely enforce the ATT&CK ICS mitigations listed for T0886.",
+  "candidates_considered": [
+    {
+      "cme_id": "CME-201",
+      "decision": "accepted",
+      "rationale": "Identity-aware gateways concretely implement access management for remote service entry points."
+    },
+    {
+      "cme_id": "CME-202",
+      "decision": "accepted",
+      "rationale": "Host-level filtering can block unauthorized remote service sources and protocols."
+    },
+    {
+      "cme_id": "CME-203",
+      "decision": "accepted",
+      "rationale": "Segmentation limits movement between business, management, and OT network zones."
+    },
+    {
+      "cme_id": "CME-801",
+      "decision": "accepted",
+      "rationale": "Multi-factor authentication raises the bar for remote human access to ICS-adjacent services."
+    },
+    {
+      "cme_id": "CME-806",
+      "decision": "accepted",
+      "rationale": "Kerberos/GSSAPI provides concrete mutual authentication for supported remote service workflows."
+    },
+    {
+      "cme_id": "CME-204",
+      "decision": "rejected",
+      "rationale": "Encrypted transport alone does not provide the ATT&CK ICS access-control guarantees needed to mitigate remote service abuse."
+    }
+  ],
+  "conclusion": "coverage_exists",
+  "evidence": [
+    "CME covers the ATT&CK ICS remote-service mitigation theme through controls for access management, traffic filtering, segmentation, and strong authentication.",
+    "Rejected entries were excluded when they protected confidentiality in transit but did not directly constrain remote service access or authorization."
+  ],
+  "reviewed_at": "2026-09-09"
+}

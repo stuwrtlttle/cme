@@ -71,6 +71,14 @@
       "relationship_type": "mitigates",
       "method": "supportive",
       "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "ATT&CK",
+      "target_id": "T0886",
+      "relationship_type": "mitigates",
+      "method": "crosswalk",
+      "rationale": "Derived from ATT&CK mitigation M0937 mapped to CME-202; host-level filtering constrains ICS remote service activity.",
+      "evidence_state": "unquantified"
     }
   ],
   "framework_bindings": [
@@ -87,6 +95,20 @@
       "identifier": "Environmental/S",
       "value": "C->U",
       "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "ATT&CK",
+      "identifier": "M1037",
+      "value": "Filter Network Traffic",
+      "relationship_type": "maps_to",
+      "rationale": "Host-level implementation of ATT&CK Filter Network Traffic."
+    },
+    {
+      "namespace": "ATT&CK",
+      "identifier": "M0937",
+      "value": "Filter Network Traffic",
+      "relationship_type": "maps_to",
+      "rationale": "Host-level implementation of ATT&CK ICS Filter Network Traffic."
     },
     {
       "namespace": "SCF",

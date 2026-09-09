@@ -74,6 +74,14 @@
       "relationship_type": "mitigates",
       "method": "supportive",
       "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "ATT&CK",
+      "target_id": "T0886",
+      "relationship_type": "mitigates",
+      "method": "crosswalk",
+      "rationale": "Derived from ATT&CK mitigation M0813 mapped to CME-806; mutual authentication constrains unauthorized ICS remote service access.",
+      "evidence_state": "unquantified"
     }
   ],
   "framework_bindings": [
@@ -83,6 +91,13 @@
       "identifier": "Environmental/AC",
       "value": "L->H",
       "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "ATT&CK",
+      "identifier": "M0813",
+      "value": "Software Process and Device Authentication",
+      "relationship_type": "maps_to",
+      "rationale": "Concrete mutual-authentication implementation of ATT&CK ICS Software Process and Device Authentication."
     },
     {
       "namespace": "SCF",

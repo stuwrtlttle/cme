@@ -664,6 +664,48 @@ Using distinct string values (not reinterpreting "affected") prevents accidental
 
 The legacy `platforms` string array (e.g., `["RHEL 9", "Ubuntu 24.04"]`) remains for backward compatibility. `cve_affected` is the structured successor — entries without it continue to work in all query paths.
 
+### ATT&CK Crosswalk Convention
+
+Use ATT&CK as an external crosswalk, not as a replacement for CME controls.
+
+- **ATT&CK mitigations (`Mxxxx`)** belong in `framework_bindings`
+- **ATT&CK techniques (`Txxxx`)** belong in coverage assessments or carefully reviewed `relationships`
+- **CME remains the source of truth** for concrete, verifiable, platform-specific controls
+
+ATT&CK mitigation bindings should look like:
+
+```json
+{
+  "namespace": "ATT&CK",
+  "identifier": "M1030",
+  "value": "Network Segmentation",
+  "relationship_type": "maps_to",
+  "rationale": "CME-203 is a concrete VLAN/subnet implementation of ATT&CK Network Segmentation."
+}
+```
+
+Technique-level coverage should be recorded separately from entry identity. Use `data/coverage-assessments/` when the claim is "CME covers ATT&CK technique `Txxxx` under these assumptions" rather than "this CME entry is itself an ATT&CK object." Coverage assessments now accept `target.namespace: "ATT&CK"` alongside `CWE`, `CVE`, and `CAPABILITY`.
+
+The repository includes:
+
+- `data/attack_mitigations_mappings.json` — curated ATT&CK-to-CME mapping seeds
+- `scripts/attack_mitigations_to_cme.py` — reads ATT&CK STIX and emits binding suggestions for curator review
+- `data/coverage-assessments/CMA-ATTACK-T1021.json` and `CMA-ATTACK-T0886.json` — first technique-level coverage assessments for Remote Services
+
+Example usage:
+
+```bash
+uv run python scripts/attack_mitigations_to_cme.py \
+  --domain enterprise \
+  --bundle https://raw.githubusercontent.com/mitre-attack/attack-stix-data/master/enterprise-attack/enterprise-attack.json
+```
+
+```bash
+uv run python scripts/attack_mitigations_to_cme.py \
+  --domain ics \
+  --bundle https://raw.githubusercontent.com/mitre-attack/attack-stix-data/master/ics-attack/ics-attack.json
+```
+
 #### Structural join with CVE records
 
 The `get_mitigations_for_product` MCP tool performs the structural join. Given a product identifier from a CVE record, it finds all CME entries whose `cve_affected[]` matches:
