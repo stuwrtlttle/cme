@@ -68,6 +68,22 @@
       "relationship_type": "mitigates",
       "method": "supportive",
       "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "ATT&CK",
+      "target_id": "T1021",
+      "relationship_type": "mitigates",
+      "method": "crosswalk",
+      "rationale": "Derived from ATT&CK mitigation M1035 mapped to CME-201; identity-aware gateways directly constrain Enterprise remote service access.",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "ATT&CK",
+      "target_id": "T0886",
+      "relationship_type": "mitigates",
+      "method": "crosswalk",
+      "rationale": "Derived from ATT&CK mitigation M0801 mapped to CME-201; identity-aware gateways directly constrain ICS remote service access.",
+      "evidence_state": "unquantified"
     }
   ],
   "framework_bindings": [
@@ -77,6 +93,20 @@
       "identifier": "Environmental/AV",
       "value": "N->L",
       "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "ATT&CK",
+      "identifier": "M1035",
+      "value": "Limit Access to Resource Over Network",
+      "relationship_type": "maps_to",
+      "rationale": "Concrete identity-aware gateway implementation of ATT&CK's broader network resource access restriction mitigation."
+    },
+    {
+      "namespace": "ATT&CK",
+      "identifier": "M0801",
+      "value": "Access Management",
+      "relationship_type": "maps_to",
+      "rationale": "Concrete access-management enforcement point for ATT&CK ICS remote-service access control."
     },
     {
       "namespace": "SCF",

@@ -119,6 +119,13 @@
       "relationship_type": "maps_to"
     },
     {
+      "namespace": "ATT&CK",
+      "identifier": "M1037",
+      "value": "Filter Network Traffic",
+      "relationship_type": "maps_to",
+      "rationale": "Kubernetes-native traffic-filtering implementation of ATT&CK Filter Network Traffic."
+    },
+    {
       "namespace": "SCF",
       "identifier": "CLD-03",
       "relationship_type": "maps_to"

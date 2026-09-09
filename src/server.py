@@ -160,7 +160,7 @@ async def get_coverage_assessments(namespace: str, target_id: str) -> str:
     candidates considered and the evidence supporting their rejection.
     """
     namespace = namespace.upper()
-    target_id = target_id.upper() if namespace in {"CWE", "CVE"} else target_id
+    target_id = target_id.upper() if namespace in {"CWE", "CVE", "ATT&CK"} else target_id
     assessments = []
     for path in sorted(COVERAGE_ASSESSMENTS_DIR.glob("CMA-*.json")):
         with open(path) as f:

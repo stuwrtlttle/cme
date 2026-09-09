@@ -94,6 +94,14 @@
       "relationship_type": "mitigates",
       "method": "supportive",
       "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "ATT&CK",
+      "target_id": "T1021",
+      "relationship_type": "mitigates",
+      "method": "crosswalk",
+      "rationale": "Derived from ATT&CK mitigation M1032 mapped to CME-801; MFA raises the bar for Enterprise remote service abuse.",
+      "evidence_state": "unquantified"
     }
   ],
   "framework_bindings": [
@@ -110,6 +118,20 @@
       "identifier": "Environmental/PR",
       "value": "N->H",
       "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "ATT&CK",
+      "identifier": "M1032",
+      "value": "Multi-factor Authentication",
+      "relationship_type": "maps_to",
+      "rationale": "Concrete ATT&CK Multi-factor Authentication control with verification guidance."
+    },
+    {
+      "namespace": "ATT&CK",
+      "identifier": "M0932",
+      "value": "Multi-factor Authentication",
+      "relationship_type": "maps_to",
+      "rationale": "Concrete ATT&CK ICS Multi-factor Authentication control."
     },
     {
       "namespace": "SCF",

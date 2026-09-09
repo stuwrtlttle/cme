@@ -34,6 +34,18 @@ def test_cvss_binding_is_optional() -> None:
     assert not errors(entry())
 
 
+def test_attack_framework_binding_is_accepted() -> None:
+    assert not errors(entry(framework_bindings=[
+        {
+            "namespace": "ATT&CK",
+            "identifier": "M1030",
+            "value": "Network Segmentation",
+            "relationship_type": "maps_to",
+            "rationale": "Concrete implementation of the broader ATT&CK mitigation.",
+        }
+    ]))
+
+
 def test_unquantified_requires_declared_conditions() -> None:
     assert errors(entry(efficacy={}))
 
@@ -66,3 +78,18 @@ def test_negative_coverage_requires_reviewed_candidates() -> None:
         "evidence": ["Taxonomy review"],
     }
     assert list(COVERAGE_SCHEMA.iter_errors(assessment))
+
+
+def test_attack_coverage_namespace_is_accepted() -> None:
+    assessment = {
+        "assessment_id": "CMA-ATTACK-T1021",
+        "target": {"namespace": "ATT&CK", "id": "T1021"},
+        "taxonomy_version": "0.2.0",
+        "method": "Reviewed ATT&CK technique coverage.",
+        "candidates_considered": [
+            {"cme_id": "CME-201", "decision": "accepted", "rationale": "Restricts remote access paths."}
+        ],
+        "conclusion": "coverage_exists",
+        "evidence": ["ATT&CK remote-services review"],
+    }
+    assert not list(COVERAGE_SCHEMA.iter_errors(assessment))

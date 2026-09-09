@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "description": "Curated ATT&CK mitigation to CME crosswalks. ATT&CK objects stay external; CME remains the source of truth for concrete, verifiable controls.",
+  "mappings": [
+    {
+      "cme_id": "CME-201",
+      "attack_bindings": [
+        {
+          "domain": "enterprise-attack",
+          "mitigation_id": "M1035",
+          "rationale": "CME-201 is a concrete identity-aware gateway implementation of ATT&CK's broader network resource access restriction mitigation.",
+          "focus_technique_ids": ["T1021"]
+        },
+        {
+          "domain": "ics-attack",
+          "mitigation_id": "M0801",
+          "rationale": "CME-201 is a concrete access-management enforcement point for ATT&CK ICS remote-service access control.",
+          "focus_technique_ids": ["T0886"]
+        }
+      ]
+    },
+    {
+      "cme_id": "CME-202",
+      "attack_bindings": [
+        {
+          "domain": "enterprise-attack",
+          "mitigation_id": "M1037",
+          "rationale": "CME-202 is a host-level implementation of ATT&CK Filter Network Traffic.",
+          "focus_technique_ids": ["T1021"]
+        },
+        {
+          "domain": "ics-attack",
+          "mitigation_id": "M0937",
+          "rationale": "CME-202 is a host-level implementation of ATT&CK ICS Filter Network Traffic.",
+          "focus_technique_ids": ["T0886"]
+        }
+      ]
+    },
+    {
+      "cme_id": "CME-203",
+      "attack_bindings": [
+        {
+          "domain": "enterprise-attack",
+          "mitigation_id": "M1030",
+          "rationale": "CME-203 is a concrete network-zone implementation of ATT&CK Network Segmentation.",
+          "focus_technique_ids": ["T1021"]
+        },
+        {
+          "domain": "ics-attack",
+          "mitigation_id": "M0930",
+          "rationale": "CME-203 is a concrete VLAN/subnet implementation of ATT&CK ICS Network Segmentation.",
+          "focus_technique_ids": ["T0886"]
+        }
+      ]
+    },
+    {
+      "cme_id": "CME-206",
+      "attack_bindings": [
+        {
+          "domain": "enterprise-attack",
+          "mitigation_id": "M1037",
+          "rationale": "CME-206 is a Kubernetes-native traffic-filtering implementation of ATT&CK Filter Network Traffic.",
+          "focus_technique_ids": ["T1021"]
+        }
+      ]
+    },
+    {
+      "cme_id": "CME-801",
+      "attack_bindings": [
+        {
+          "domain": "enterprise-attack",
+          "mitigation_id": "M1032",
+          "rationale": "CME-801 is a concrete ATT&CK Multi-factor Authentication control with verification guidance.",
+          "focus_technique_ids": ["T1021"]
+        },
+        {
+          "domain": "ics-attack",
+          "mitigation_id": "M0932",
+          "rationale": "CME-801 is a concrete ATT&CK ICS Multi-factor Authentication control.",
+          "focus_technique_ids": ["T0886"]
+        }
+      ]
+    },
+    {
+      "cme_id": "CME-806",
+      "attack_bindings": [
+        {
+          "domain": "ics-attack",
+          "mitigation_id": "M0813",
+          "rationale": "CME-806 is a concrete mutual-authentication implementation of ATT&CK ICS Software Process and Device Authentication.",
+          "focus_technique_ids": ["T0886"]
+        }
+      ]
+    }
+  ]
+}
