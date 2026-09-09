@@ -30,6 +30,12 @@ All notable changes to the CME (Common Mitigation Enumeration) project are docum
 
 - `52955f1` Fix push-and-merge helper ignore handling
 
+
+### Auto-generated changelog
+
+- `b16e72d` Update changelog for ATT&CK crosswalks and skill changes
+- `57e7b5a` Update cme-discovery skill for ATT&CK-aware discovery
+
 ## 2026-09-04
 
 ### Auto-generated changelog
