@@ -3,7 +3,7 @@
 
 {% block content %}
 <h1 class="page-title">Search CME Entries</h1>
-<p class="page-subtitle">Search by CME ID, control name, description, CWE ID, or category.</p>
+<p class="page-subtitle">Search by CME ID, control name, description, CWE ID, ATT&amp;CK ID, or category.</p>
 
 <div class="search-box">
   <input type="text" id="search-input" placeholder="e.g. ASLR, CWE-119, Kernel Hardening, CME-301..." autofocus>
@@ -13,7 +13,7 @@
 
 <ul class="search-results" id="search-results">
   {% for entry in all_entries | sort(attribute='cme_num') %}
-  <li data-search="{{ entry.cme_id | lower }} {{ entry.control_name | lower }} {{ entry.description | lower }} {{ entry.category | lower }} {{ entry.tactic | lower }} {{ entry.control_layer | lower }} {{ (entry.cwe_relationships | default([]) | join(' ')) | lower }}">
+  <li data-search="{{ entry.search_text }}">
     <div>
       <a href="entries/{{ entry.cme_id }}.html" class="sr-id">{{ entry.cme_id }}</a>
       <a href="entries/{{ entry.cme_id }}.html">{{ entry.control_name }}</a>

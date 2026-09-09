@@ -20,7 +20,7 @@
   </header>
 
   <main class="container">
-
+    
 <div class="entry-header">
   <div class="entry-id">CME-1009</div>
   <h1>Privilege Assignment Monitoring (Role Grant Alerting)</h1>
@@ -35,7 +35,7 @@
 <div class="entry-body">
   <div class="entry-main">
 
-
+    
     <section>
       <h2>Description</h2>
       <p class="entry-description">Continuously monitor the effective set of users holding high-privilege application roles and alert when new grants are detected that do not correspond to an approved change management ticket. A scheduled job or event-driven trigger enumerates users who hold sensitive roles (realm-admin, cluster-admin, org-owner, or equivalent), compares the current membership against a known-good baseline or an allowlist maintained in a change management system, and raises an alert for any additions. Detects privilege escalation after the fact — even when the escalation mechanism bypasses normal authorization checks — by monitoring the outcome (a new high-privilege user) rather than the mechanism. Complements preventive RBAC controls by providing a safety net when the authorization enforcement itself is the vulnerable component.</p>
@@ -48,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-
+            
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-
+          
           <tr>
             <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
@@ -61,10 +61,10 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-
+            
             <td class="cvss-rationale">Compensating control: unauthorized privilege grants are detected by outcome monitoring regardless of the escalation mechanism, forcing the attacker to also evade the membership audit or accept detection within the monitoring interval.</td>
           </tr>
-
+          
           <tr>
             <td><strong>Confidentiality</strong> (C)</td>
             <td>
@@ -72,64 +72,66 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-
+            
             <td class="cvss-rationale">The window during which the attacker holds escalated privileges — and can access confidential resources — is bounded by the monitoring interval; detection triggers revocation of the unauthorized grant.</td>
           </tr>
-
+          
         </tbody>
       </table>
     </section>
+    
 
-
-
+    
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-
+        
         <a href="https://cwe.mitre.org/data/definitions/266.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-266</a>
-
+        
         <a href="https://cwe.mitre.org/data/definitions/269.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-269</a>
-
+        
         <a href="https://cwe.mitre.org/data/definitions/284.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-284</a>
-
+        
       </div>
     </section>
+    
 
+    
 
-
+    
     <section>
       <h2>Verification</h2>
-
+      
       <p class="verification-method">Verify that a scheduled job or event-driven monitor tracks high-privilege role membership and alerts on unauthorized additions. Grant a test user a high-privilege role and confirm an alert fires within the expected interval.</p>
-
-
+      
+      
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> kcadm.sh get roles/realm-admin/users -r master --fields username
-
+        
         <br><span class="cmd-expected"># Expected: Lists all users with realm-admin role; compare against approved baseline</span>
-
+        
       </div>
-
+      
       <div class="cmd-platform">Platform: any</div>
-
-
+      
+      
     </section>
+    
 
+    
 
-
-
-
+    
 
     <div class="entry-nav">
-
+      
       <a href="CME-1008.html">&larr; CME-1008: Application Admin Event Logging (SIEM Integration)</a>
-
-
+      
+      
       <a href="CME-1010.html">CME-1010: cgroup Memory Pressure Monitoring (memory.events / PSI) &rarr;</a>
-
+      
     </div>
   </div>
 
@@ -139,40 +141,42 @@
       <p>Runtime Detection</p>
     </section>
 
-
+    
     <section>
       <h3>Function</h3>
       <p class="function-id">application-monitoring</p>
     </section>
+    
 
-
-
+    
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-
+        
         <span class="cwe-link">IAC-17</span>
-
+        
         <span class="cwe-link">MON-01.15</span>
-
+        
         <span class="cwe-link">MON-16.4</span>
-
+        
       </div>
     </section>
+    
 
+    
 
+    
 
-
-
+    
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-
+        
         <li>any</li>
-
+        
       </ul>
     </section>
-
+    
 
     <section>
       <h3>Quick Reference</h3>
@@ -183,6 +187,7 @@
         <li><strong>Effect:</strong> detective</li>
         <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 3</li>
+        <li><strong>ATT&amp;CK Mappings:</strong> 0</li>
         <li><strong>CVSS Mods:</strong> 2</li>
       </ul>
     </section>
@@ -192,7 +197,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
+    Generated 2026-09-09 22:49 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

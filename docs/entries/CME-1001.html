@@ -20,7 +20,7 @@
   </header>
 
   <main class="container">
-
+    
 <div class="entry-header">
   <div class="entry-id">CME-1001</div>
   <h1>EDR Agent (Endpoint Detection &amp; Response)</h1>
@@ -35,7 +35,7 @@
 <div class="entry-body">
   <div class="entry-main">
 
-
+    
     <section>
       <h2>Description</h2>
       <p class="entry-description">Real-time behavioral detection and automated response agent on endpoints. Detects exploit patterns, lateral movement, and persistence mechanisms. Can kill processes, isolate hosts, and quarantine files automatically.</p>
@@ -48,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-
+            
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-
+          
           <tr>
             <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
@@ -61,58 +61,60 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-
+            
             <td class="cvss-rationale">Compensating control: exploit behavior patterns are detected and may be blocked in real-time</td>
           </tr>
-
+          
         </tbody>
       </table>
     </section>
+    
 
+    
 
+    
 
-
-
+    
     <section>
       <h2>Verification</h2>
-
+      
       <p class="verification-method">Verify EDR agent is running and connected to management console</p>
-
-
+      
+      
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> systemctl is-active falcon-sensor 2&gt;/dev/null || systemctl is-active mdatp 2&gt;/dev/null
-
+        
         <br><span class="cmd-expected"># Expected: active</span>
-
+        
       </div>
-
+      
       <div class="cmd-platform">Platform: linux</div>
-
-
+      
+      
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> Get-Service &#39;Sense&#39; -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Status
-
+        
         <br><span class="cmd-expected"># Expected: Running</span>
-
+        
       </div>
-
+      
       <div class="cmd-platform">Platform: windows</div>
-
-
+      
+      
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> (Get-MpComputerStatus).RealTimeProtectionEnabled
-
+        
         <br><span class="cmd-expected"># Expected: True</span>
-
+        
       </div>
-
+      
       <div class="cmd-platform">Platform: windows</div>
-
-
+      
+      
     </section>
+    
 
-
-
+    
     <section>
       <h2>Applicability (CVE 5.2.0 Schema)</h2>
       <table class="cvss-table">
@@ -126,40 +128,40 @@
           </tr>
         </thead>
         <tbody>
-
+          
           <tr>
             <td>microsoft</td>
             <td>windows</td>
             <td class="cpe-cell">
-
+              
               <code class="cpe-string">cpe:2.3:o:microsoft:windows_10:*:*:*:*:*:*:*:*</code><br>
-
+              
               <code class="cpe-string">cpe:2.3:o:microsoft:windows_11:*:*:*:*:*:*:*:*</code><br>
-
+              
               <code class="cpe-string">cpe:2.3:o:microsoft:windows_server_2019:*:*:*:*:*:*:*</code><br>
-
+              
               <code class="cpe-string">cpe:2.3:o:microsoft:windows_server_2022:*:*:*:*:*:*:*</code>
-
+              
             </td>
             <td>All</td>
             <td><span class="badge badge-confidence-high">applicable</span></td>
           </tr>
-
+          
         </tbody>
       </table>
-
+      
     </section>
+    
 
-
-
+    
 
     <div class="entry-nav">
-
+      
       <a href="CME-923.html">&larr; CME-923: Mass-Assignment Prevention Through Explicit Request Schemas</a>
-
-
+      
+      
       <a href="CME-1002.html">CME-1002: Audit Subsystem (auditd) &rarr;</a>
-
+      
     </div>
   </div>
 
@@ -169,42 +171,44 @@
       <p>Runtime Detection</p>
     </section>
 
-
+    
     <section>
       <h3>Function</h3>
       <p class="function-id">host-monitoring</p>
     </section>
+    
 
-
-
+    
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-
+        
         <span class="cwe-link">END-04</span>
-
+        
         <span class="cwe-link">END-06.2</span>
-
+        
         <span class="cwe-link">END-06.8</span>
-
+        
         <span class="cwe-link">MON-01.6</span>
-
+        
       </div>
     </section>
+    
 
+    
 
+    
 
-
-
+    
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-
+        
         <li>Any</li>
-
+        
       </ul>
     </section>
-
+    
 
     <section>
       <h3>Quick Reference</h3>
@@ -215,6 +219,7 @@
         <li><strong>Effect:</strong> detective</li>
         <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 0</li>
+        <li><strong>ATT&amp;CK Mappings:</strong> 0</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
     </section>
@@ -224,7 +229,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
+    Generated 2026-09-09 22:49 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

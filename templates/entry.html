@@ -79,6 +79,23 @@
     </section>
     {% endif %}
 
+    {% if entry.attack_relationships %}
+    <section>
+      <h2>ATT&amp;CK Technique Crosswalks</h2>
+      <ul class="sidebar-list">
+        {% for rel in entry.attack_relationships %}
+        <li>
+          <strong>{{ rel.target_id }}</strong>
+          {% if rel.relationship_type %} — {{ rel.relationship_type }}{% endif %}
+          {% if rel.rationale %}
+          <div class="framework-detail">{{ rel.rationale }}</div>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+
     {% if entry.verification %}
     <section>
       <h2>Verification</h2>
@@ -182,6 +199,23 @@
     </section>
     {% endif %}
 
+    {% if entry.attack_bindings %}
+    <section>
+      <h3>ATT&amp;CK Mitigations</h3>
+      <ul class="sidebar-list">
+        {% for binding in entry.attack_bindings %}
+        <li>
+          <strong>{{ binding.identifier }}</strong>
+          {% if binding.value %} — {{ binding.value }}{% endif %}
+          {% if binding.rationale %}
+          <div class="framework-detail">{{ binding.rationale }}</div>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+
     {% if entry.d3fend_mapping %}
     <section>
       <h3>D3FEND Mapping</h3>
@@ -212,6 +246,7 @@
         <li><strong>Effect:</strong> {{ entry.effect_mode }}</li>
         <li><strong>Evidence:</strong> {{ entry.evidence_state }}</li>
         <li><strong>CWEs:</strong> {{ entry.cwe_relationships | default([]) | length }}</li>
+        <li><strong>ATT&amp;CK Mappings:</strong> {{ entry.attack_bindings | default([]) | length }}</li>
         <li><strong>CVSS Mods:</strong> {{ entry.cvss_vector_impacts | length }}</li>
       </ul>
     </section>

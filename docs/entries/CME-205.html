@@ -20,7 +20,7 @@
   </header>
 
   <main class="container">
-
+    
 <div class="entry-header">
   <div class="entry-id">CME-205</div>
   <h1>Service Binding to Localhost</h1>
@@ -35,7 +35,7 @@
 <div class="entry-body">
   <div class="entry-main">
 
-
+    
     <section>
       <h2>Description</h2>
       <p class="entry-description">Configures services to listen only on 127.0.0.1/::1, eliminating remote network attack vector entirely. Remote access must go through a reverse proxy or tunnel.</p>
@@ -48,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-
+            
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-
+          
           <tr>
             <td><strong>Attack Vector</strong> (AV)</td>
             <td>
@@ -61,61 +61,63 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-
+            
             <td class="cvss-rationale">Service not reachable from network; requires local access</td>
           </tr>
-
+          
         </tbody>
       </table>
     </section>
+    
 
-
-
+    
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-
+        
         <a href="https://cwe.mitre.org/data/definitions/284.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-284</a>
-
+        
         <a href="https://cwe.mitre.org/data/definitions/668.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-668</a>
-
+        
       </div>
     </section>
+    
 
+    
 
-
+    
     <section>
       <h2>Verification</h2>
-
+      
       <p class="verification-method">Check service listen address is localhost only</p>
-
-
+      
+      
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> ss -tlnp | grep &#39;:8080&#39;
-
+        
         <br><span class="cmd-expected"># Expected: 127.0.0.1:8080</span>
-
+        
       </div>
-
+      
       <div class="cmd-platform">Platform: linux</div>
-
-
+      
+      
     </section>
+    
 
+    
 
-
-
-
+    
 
     <div class="entry-nav">
-
+      
       <a href="CME-204.html">&larr; CME-204: IPsec / WireGuard (Encrypted Transport)</a>
-
-
+      
+      
       <a href="CME-206.html">CME-206: Network Policy (Kubernetes) &rarr;</a>
-
+      
     </div>
   </div>
 
@@ -125,38 +127,40 @@
       <p>Network Isolation</p>
     </section>
 
-
+    
     <section>
       <h3>Function</h3>
       <p class="function-id">network-filtering</p>
     </section>
+    
 
-
-
+    
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-
+        
         <span class="cwe-link">CFG-03</span>
-
+        
         <span class="cwe-link">NET-03.3</span>
-
+        
       </div>
     </section>
+    
 
+    
 
+    
 
-
-
+    
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-
+        
         <li>Any</li>
-
+        
       </ul>
     </section>
-
+    
 
     <section>
       <h3>Quick Reference</h3>
@@ -167,6 +171,7 @@
         <li><strong>Effect:</strong> preventive</li>
         <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 2</li>
+        <li><strong>ATT&amp;CK Mappings:</strong> 0</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
     </section>
@@ -176,7 +181,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
+    Generated 2026-09-09 22:49 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

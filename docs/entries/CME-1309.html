@@ -20,7 +20,7 @@
   </header>
 
   <main class="container">
-
+    
 <div class="entry-header">
   <div class="entry-id">CME-1309</div>
   <h1>Script Engine Restriction (Sandbox / Disable)</h1>
@@ -35,7 +35,7 @@
 <div class="entry-body">
   <div class="entry-main">
 
-
+    
     <section>
       <h2>Description</h2>
       <p class="entry-description">Restricts or disables application-embedded scripting and expression language engines to prevent arbitrary code execution. Covers three postures: (1) disable unnecessary script consoles and evaluation endpoints entirely (e.g., Jenkins Script Console, debug REPLs), (2) enforce a language-level sandbox that blocks dangerous operations such as file I/O, process execution, classloading, and reflection while permitting safe computation (e.g., Jenkins Groovy Sandbox, Java SecurityManager for scripting), and (3) restrict expression language evaluation to a safe subset by disabling type resolution, method invocation, and class instantiation in EL/template contexts. Applies to Groovy, OGNL, SpEL, MVEL, Jinja2, EL 3.0, Freemarker, and similar engines embedded in Java EE, CI/CD platforms, and web frameworks.</p>
@@ -48,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-
+            
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-
+          
           <tr>
             <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
@@ -61,10 +61,10 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-
+            
             <td class="cvss-rationale">Direct code execution via the scripting engine is blocked; exploitation requires discovering a sandbox bypass or an unrestricted evaluation path, which demands vulnerability-specific research rather than trivial payload submission</td>
           </tr>
-
+          
           <tr>
             <td><strong>Integrity</strong> (I)</td>
             <td>
@@ -72,10 +72,10 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-
+            
             <td class="cvss-rationale">Sandboxed script engine cannot invoke arbitrary system commands, modify files, or alter application state outside the permitted API surface; integrity impact is confined to the script&#39;s authorized scope</td>
           </tr>
-
+          
           <tr>
             <td><strong>Confidentiality</strong> (C)</td>
             <td>
@@ -83,87 +83,89 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-
+            
             <td class="cvss-rationale">Script engine cannot read arbitrary files, access credentials, or exfiltrate data from the host; information disclosure is limited to data the script is explicitly permitted to access</td>
           </tr>
-
+          
         </tbody>
       </table>
     </section>
+    
 
-
-
+    
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-
+        
         <a href="https://cwe.mitre.org/data/definitions/94.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-94</a>
-
+        
         <a href="https://cwe.mitre.org/data/definitions/95.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-95</a>
-
+        
         <a href="https://cwe.mitre.org/data/definitions/96.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-96</a>
-
+        
         <a href="https://cwe.mitre.org/data/definitions/917.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-917</a>
-
+        
       </div>
     </section>
+    
 
+    
 
-
+    
     <section>
       <h2>Verification</h2>
-
+      
       <p class="verification-method">Verify script consoles are disabled or sandboxed, and expression language evaluation is restricted</p>
-
-
+      
+      
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> curl -s -o /dev/null -w &#39;%{http_code}&#39; -X POST http://localhost:8080/jenkins/script --data &#39;script=println(1)&#39;
-
+        
         <br><span class="cmd-expected"># Expected: 403 or 404 (Script Console disabled or access-restricted to administrators only)</span>
-
+        
       </div>
-
+      
       <div class="cmd-platform">Platform: any</div>
-
-
+      
+      
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rn &#39;GroovySandbox\|SecureGroovyScript\|sandbox(true)&#39; &lt;app_source&gt;/
-
+        
         <br><span class="cmd-expected"># Expected: Groovy sandbox enforcement present in pipeline/script execution paths</span>
-
+        
       </div>
-
+      
       <div class="cmd-platform">Platform: any</div>
-
-
+      
+      
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rn &#39;SimpleEvaluationContext\|StandardEvaluationContext&#39; &lt;app_source&gt;/ | grep -c SimpleEvaluationContext
-
+        
         <br><span class="cmd-expected"># Expected: SimpleEvaluationContext used instead of StandardEvaluationContext for user-controlled SpEL</span>
-
+        
       </div>
-
+      
       <div class="cmd-platform">Platform: any</div>
-
-
+      
+      
     </section>
+    
 
+    
 
-
-
-
+    
 
     <div class="entry-nav">
-
+      
       <a href="CME-1308.html">&larr; CME-1308: Origin and CORS Validation Enforcement</a>
-
-
+      
+      
       <a href="CME-1310.html">CME-1310: File Upload Validation (Content Inspection and Extension Allowlist) &rarr;</a>
-
+      
     </div>
   </div>
 
@@ -173,42 +175,44 @@
       <p>Application Input Validation</p>
     </section>
 
-
+    
     <section>
       <h3>Function</h3>
       <p class="function-id">input-validation</p>
     </section>
+    
 
-
-
+    
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-
+        
         <span class="cwe-link">SEA-06</span>
-
+        
         <span class="cwe-link">WEB-09</span>
-
+        
       </div>
     </section>
+    
 
+    
 
+    
 
-
-
+    
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-
+        
         <li>Any</li>
-
+        
         <li>Windows Server 2019</li>
-
+        
         <li>Windows Server 2022</li>
-
+        
       </ul>
     </section>
-
+    
 
     <section>
       <h3>Quick Reference</h3>
@@ -219,6 +223,7 @@
         <li><strong>Effect:</strong> preventive</li>
         <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 4</li>
+        <li><strong>ATT&amp;CK Mappings:</strong> 0</li>
         <li><strong>CVSS Mods:</strong> 3</li>
       </ul>
     </section>
@@ -228,7 +233,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
+    Generated 2026-09-09 22:49 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

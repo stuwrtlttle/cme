@@ -20,7 +20,7 @@
   </header>
 
   <main class="container">
-
+    
 <div class="entry-header">
   <div class="entry-id">CME-1306</div>
   <h1>XSS Prevention (Context-Aware Output Encoding)</h1>
@@ -35,7 +35,7 @@
 <div class="entry-body">
   <div class="entry-main">
 
-
+    
     <section>
       <h2>Description</h2>
       <p class="entry-description">Application applies context-aware output encoding to every untrusted value immediately before it reaches an HTML text, HTML attribute, JavaScript, CSS, URL, SVG, or DOM insertion context. The encoder is selected for the final parser context; HTML escaping is not used as a substitute for JavaScript, CSS, URL, or attribute encoding. Framework auto-escaping (such as Django or Jinja2 autoescape and React JSX) is enabled for production templates. Raw or safe rendering APIs, dangerouslySetInnerHTML, innerHTML, document.write, and equivalent DOM sinks are prohibited or independently reviewed and sanitized. This control prevents attacker input from being interpreted as executable markup or script. CSP in CME-905 provides browser-enforced defense in depth, while WAF filtering in CME-904 is probabilistic defense in depth.</p>
@@ -48,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-
+            
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-
+          
           <tr>
             <td><strong>Integrity</strong> (I)</td>
             <td>
@@ -61,81 +61,83 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-
+            
             <td class="cvss-rationale">When every untrusted value is encoded for its final output context and dangerous rendering sinks are prohibited or sanitized, attacker input cannot inject script that changes page behavior or performs actions with the victim&#39;s authority. Low integrity impact remains possible through the application&#39;s intended state-changing operations. This attenuation requires complete source-to-sink coverage, context-correct encoding at insertion time, and review of framework escape hatches and client-side DOM sinks.</td>
           </tr>
-
+          
         </tbody>
       </table>
     </section>
+    
 
-
-
+    
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-
+        
         <a href="https://cwe.mitre.org/data/definitions/79.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-79</a>
-
+        
         <a href="https://cwe.mitre.org/data/definitions/116.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-116</a>
-
+        
       </div>
     </section>
+    
 
+    
 
-
+    
     <section>
       <h2>Verification</h2>
-
+      
       <p class="verification-method">Use framework-specific static analysis to trace untrusted values to every server-rendered and client-side sink. Verify that each sink uses the encoder required by its final HTML, attribute, JavaScript, CSS, URL, SVG, or DOM context; that production template auto-escaping is enabled; and that raw or safe rendering APIs, dangerouslySetInnerHTML, innerHTML, document.write, and equivalent sinks are prohibited or independently reviewed and sanitized. Pair source analysis with application-specific dynamic tests covering HTML text, quoted and unquoted attributes, JavaScript strings, CSS, URLs, SVG, DOM insertion, encoded payloads, and mutation-XSS cases. The audit and test commands must cover all production rendering components and emit the exact PASS strings below; set each environment variable to the project&#39;s corresponding audit or test command.</p>
-
-
+      
+      
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> test -n &#34;$CME_XSS_SOURCE_AUDIT_COMMAND&#34; || { echo &#39;ERROR: set CME_XSS_SOURCE_AUDIT_COMMAND&#39;; exit 2; }; output=$(sh -c &#34;$CME_XSS_SOURCE_AUDIT_COMMAND&#34;) &amp;&amp; test &#34;$output&#34; = &#39;PASS: all untrusted rendering sinks use context-correct encoding&#39; &amp;&amp; printf &#39;%s\n&#39; &#34;$output&#34;
-
+        
         <br><span class="cmd-expected"># Expected: PASS: all untrusted rendering sinks use context-correct encoding</span>
-
+        
       </div>
-
+      
       <div class="cmd-platform">Platform: any</div>
-
-
+      
+      
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> test -n &#34;$CME_XSS_SERVER_TEST_COMMAND&#34; || { echo &#39;ERROR: set CME_XSS_SERVER_TEST_COMMAND&#39;; exit 2; }; output=$(sh -c &#34;$CME_XSS_SERVER_TEST_COMMAND&#34;) &amp;&amp; test &#34;$output&#34; = &#39;PASS: server-rendered XSS payloads render as inert data&#39; &amp;&amp; printf &#39;%s\n&#39; &#34;$output&#34;
-
+        
         <br><span class="cmd-expected"># Expected: PASS: server-rendered XSS payloads render as inert data</span>
-
+        
       </div>
-
+      
       <div class="cmd-platform">Platform: any</div>
-
-
+      
+      
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> test -n &#34;$CME_XSS_CLIENT_TEST_COMMAND&#34; || { echo &#39;ERROR: set CME_XSS_CLIENT_TEST_COMMAND&#39;; exit 2; }; output=$(sh -c &#34;$CME_XSS_CLIENT_TEST_COMMAND&#34;) &amp;&amp; test &#34;$output&#34; = &#39;PASS: client-side XSS payloads cannot reach executable DOM sinks&#39; &amp;&amp; printf &#39;%s\n&#39; &#34;$output&#34;
-
+        
         <br><span class="cmd-expected"># Expected: PASS: client-side XSS payloads cannot reach executable DOM sinks</span>
-
+        
       </div>
-
+      
       <div class="cmd-platform">Platform: any</div>
-
-
+      
+      
     </section>
+    
 
+    
 
-
-
-
+    
 
     <div class="entry-nav">
-
+      
       <a href="CME-1305.html">&larr; CME-1305: SQL Injection Prevention (Parameterized Queries)</a>
-
-
+      
+      
       <a href="CME-1307.html">CME-1307: Command Injection Prevention (No Shell Invocation) &rarr;</a>
-
+      
     </div>
   </div>
 
@@ -145,38 +147,40 @@
       <p>Application Input Validation</p>
     </section>
 
-
+    
     <section>
       <h3>Function</h3>
       <p class="function-id">injection-prevention</p>
     </section>
+    
 
-
-
+    
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-
+        
         <span class="cwe-link">WEB-01.1</span>
-
+        
         <span class="cwe-link">WEB-11</span>
-
+        
       </div>
     </section>
+    
 
+    
 
+    
 
-
-
+    
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-
+        
         <li>Any</li>
-
+        
       </ul>
     </section>
-
+    
 
     <section>
       <h3>Quick Reference</h3>
@@ -187,6 +191,7 @@
         <li><strong>Effect:</strong> preventive</li>
         <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 2</li>
+        <li><strong>ATT&amp;CK Mappings:</strong> 0</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
     </section>
@@ -196,7 +201,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
+    Generated 2026-09-09 22:49 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

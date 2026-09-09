@@ -37,6 +37,27 @@ def load_entries():
         with open(path) as f:
             entry = json.load(f)
         entry["cme_num"] = int(entry["cme_id"].split("-")[1])
+        entry["attack_bindings"] = [
+            binding for binding in entry.get("framework_bindings", [])
+            if binding.get("namespace") == "ATT&CK"
+        ]
+        entry["attack_relationships"] = [
+            rel for rel in entry.get("relationships", [])
+            if rel.get("target_namespace") == "ATT&CK"
+        ]
+        search_parts = [
+            entry.get("cme_id", ""),
+            entry.get("control_name", ""),
+            entry.get("description", ""),
+            entry.get("category", ""),
+            entry.get("tactic", ""),
+            entry.get("control_layer", ""),
+            " ".join(entry.get("cwe_relationships", [])),
+            " ".join(binding.get("identifier", "") for binding in entry["attack_bindings"]),
+            " ".join(binding.get("value", "") for binding in entry["attack_bindings"]),
+            " ".join(rel.get("target_id", "") for rel in entry["attack_relationships"]),
+        ]
+        entry["search_text"] = " ".join(part for part in search_parts if part).lower()
         entries.append(entry)
     entries.sort(key=lambda e: e["cme_num"])
     return entries

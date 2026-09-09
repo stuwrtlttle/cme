@@ -20,7 +20,7 @@
   </header>
 
   <main class="container">
-
+    
 <div class="entry-header">
   <div class="entry-id">CME-1302</div>
   <h1>Deserialization Allowlist (Safe Loading)</h1>
@@ -35,7 +35,7 @@
 <div class="entry-body">
   <div class="entry-main">
 
-
+    
     <section>
       <h2>Description</h2>
       <p class="entry-description">Restricts deserialization to an explicit allowlist of permitted types, classes, or functions. Prevents attacker-controlled serialized data from instantiating arbitrary objects, invoking dangerous functions, or triggering unintended code paths. Applies to JSON schema validation, YAML safe_load, pickle restrictions, and custom deserialization frameworks.</p>
@@ -48,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-
+            
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-
+          
           <tr>
             <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
@@ -61,10 +61,10 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-
+            
             <td class="cvss-rationale">Only allowlisted types can be deserialized; attacker must find an exploitable gadget chain using only permitted types, which is fundamentally harder than exploiting unrestricted deserialization</td>
           </tr>
-
+          
           <tr>
             <td><strong>Confidentiality</strong> (C)</td>
             <td>
@@ -72,10 +72,10 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-
+            
             <td class="cvss-rationale">Arbitrary code execution via gadget chains blocked; attacker cannot exfiltrate data beyond what allowlisted types expose</td>
           </tr>
-
+          
           <tr>
             <td><strong>Integrity</strong> (I)</td>
             <td>
@@ -83,94 +83,96 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-
+            
             <td class="cvss-rationale">Cannot invoke arbitrary functions or modify state via deserialized objects; modifications limited to intended domain of allowlisted types</td>
           </tr>
-
+          
         </tbody>
       </table>
     </section>
+    
 
-
-
+    
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-
+        
         <a href="https://cwe.mitre.org/data/definitions/470.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-470</a>
-
+        
         <a href="https://cwe.mitre.org/data/definitions/502.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-502</a>
-
+        
         <a href="https://cwe.mitre.org/data/definitions/1188.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-1188</a>
-
+        
       </div>
     </section>
+    
 
+    
 
-
+    
     <section>
       <h2>Verification</h2>
-
+      
       <p class="verification-method">Verify deserialization uses safe loading or allowlist enforcement across all application languages</p>
-
-
+      
+      
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rn &#39;yaml.safe_load\|SafeLoader\|RestrictedUnpickler\|ObjectInputFilter\|JsonSerializer&#39; &lt;app_source&gt;/
-
+        
         <br><span class="cmd-expected"># Expected: safe_load|SafeLoader|RestrictedUnpickler|ObjectInputFilter|JsonSerializer</span>
-
+        
       </div>
-
+      
       <div class="cmd-platform">Platform: any</div>
-
-
+      
+      
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rn &#39;yaml.load\|pickle.load\|marshal.load&#39; &lt;app_source&gt;/ | grep -v &#39;safe_load\|SafeLoader&#39;
-
+        
         <br><span class="cmd-expected"># Expected: No output</span>
-
+        
       </div>
-
+      
       <div class="cmd-platform">Platform: any</div>
-
-
+      
+      
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rn &#39;jdk.serialFilter\|ObjectInputFilter\|serialFilter&#39; /etc/java/ /usr/lib/jvm/*/conf/ 2&gt;/dev/null || java -XshowSettings 2&gt;&amp;1 | grep serialFilter
-
+        
         <br><span class="cmd-expected"># Expected: serialFilter</span>
-
+        
       </div>
-
+      
       <div class="cmd-platform">Platform: linux</div>
-
-
+      
+      
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -rn &#39;TypeNameHandling\.None\|TypeNameHandling\.Auto\|BinaryFormatter&#39; &lt;app_source&gt;/ | grep -v None
-
+        
         <br><span class="cmd-expected"># Expected: No output</span>
-
+        
       </div>
-
+      
       <div class="cmd-platform">Platform: any</div>
-
-
+      
+      
     </section>
+    
 
+    
 
-
-
-
+    
 
     <div class="entry-nav">
-
+      
       <a href="CME-1301.html">&larr; CME-1301: Path Traversal Prevention (Canonicalization)</a>
-
-
+      
+      
       <a href="CME-1303.html">CME-1303: Application-Level Filesystem Access Confinement &rarr;</a>
-
+      
     </div>
   </div>
 
@@ -180,38 +182,40 @@
       <p>Application Input Validation</p>
     </section>
 
-
+    
     <section>
       <h3>Function</h3>
       <p class="function-id">input-validation</p>
     </section>
+    
 
-
-
+    
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-
+        
         <span class="cwe-link">WEB-07</span>
-
+        
         <span class="cwe-link">WEB-09</span>
-
+        
       </div>
     </section>
+    
 
+    
 
+    
 
-
-
+    
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-
+        
         <li>Any</li>
-
+        
       </ul>
     </section>
-
+    
 
     <section>
       <h3>Quick Reference</h3>
@@ -222,6 +226,7 @@
         <li><strong>Effect:</strong> preventive</li>
         <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 3</li>
+        <li><strong>ATT&amp;CK Mappings:</strong> 0</li>
         <li><strong>CVSS Mods:</strong> 3</li>
       </ul>
     </section>
@@ -231,7 +236,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
+    Generated 2026-09-09 22:49 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

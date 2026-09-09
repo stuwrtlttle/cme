@@ -20,7 +20,7 @@
   </header>
 
   <main class="container">
-
+    
 <div class="entry-header">
   <div class="entry-id">CME-1201</div>
   <h1>Immutable Infrastructure</h1>
@@ -35,7 +35,7 @@
 <div class="entry-body">
   <div class="entry-main">
 
-
+    
     <section>
       <h2>Description</h2>
       <p class="entry-description">Servers are replaced rather than patched in place. Golden images are built in CI/CD, deployed fresh, and destroyed on replacement. Compromised instances are terminated and redeployed from known-good state.</p>
@@ -48,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-
+            
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-
+          
           <tr>
             <td><strong>Availability</strong> (A)</td>
             <td>
@@ -61,10 +61,10 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-
+            
             <td class="cvss-rationale">Compromised instance replaced from known-good image; minimal downtime</td>
           </tr>
-
+          
           <tr>
             <td><strong>Integrity</strong> (I)</td>
             <td>
@@ -72,38 +72,40 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">L</span>
             </td>
-
+            
             <td class="cvss-rationale">Persistent modifications eliminated on next deployment cycle</td>
           </tr>
-
+          
         </tbody>
       </table>
     </section>
+    
 
+    
 
+    
 
-
-
+    
     <section>
       <h2>Verification</h2>
-
+      
       <p class="verification-method">Verify deployment pipeline builds from golden images</p>
-
-
+      
+      
     </section>
+    
 
+    
 
-
-
-
+    
 
     <div class="entry-nav">
-
+      
       <a href="CME-1103.html">&larr; CME-1103: Automated Container Image Rebuilds</a>
-
-
+      
+      
       <a href="CME-1202.html">CME-1202: Automated Backup with Integrity Verification &rarr;</a>
-
+      
     </div>
   </div>
 
@@ -113,40 +115,42 @@
       <p>Recovery Controls</p>
     </section>
 
-
+    
     <section>
       <h3>Function</h3>
       <p class="function-id">system-recovery</p>
     </section>
+    
 
-
-
+    
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-
+        
         <span class="cwe-link">BCD-11.3</span>
-
+        
         <span class="cwe-link">BCD-12</span>
-
+        
         <span class="cwe-link">SEA-08</span>
-
+        
       </div>
     </section>
+    
 
+    
 
+    
 
-
-
+    
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-
+        
         <li>Any</li>
-
+        
       </ul>
     </section>
-
+    
 
     <section>
       <h3>Quick Reference</h3>
@@ -157,6 +161,7 @@
         <li><strong>Effect:</strong> corrective</li>
         <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 0</li>
+        <li><strong>ATT&amp;CK Mappings:</strong> 0</li>
         <li><strong>CVSS Mods:</strong> 2</li>
       </ul>
     </section>
@@ -166,7 +171,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
+    Generated 2026-09-09 22:49 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

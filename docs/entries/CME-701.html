@@ -20,7 +20,7 @@
   </header>
 
   <main class="container">
-
+    
 <div class="entry-header">
   <div class="entry-id">CME-701</div>
   <h1>Sandboxing / gVisor Runtime</h1>
@@ -35,7 +35,7 @@
 <div class="entry-body">
   <div class="entry-main">
 
-
+    
     <section>
       <h2>Description</h2>
       <p class="entry-description">Application-level kernel emulation (gVisor) or VM-based isolation (Kata Containers) that intercepts syscalls and prevents direct host kernel interaction. Provides defense-in-depth for container isolation.</p>
@@ -48,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-
+            
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-
+          
           <tr>
             <td><strong>Scope</strong> (S)</td>
             <td>
@@ -61,74 +61,76 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">U</span>
             </td>
-
+            
             <td class="cvss-rationale">Container interacts with gVisor sentry, not host kernel; container escape requires breaking through gVisor first</td>
           </tr>
-
+          
         </tbody>
       </table>
     </section>
+    
 
-
-
+    
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-
+        
         <a href="https://cwe.mitre.org/data/definitions/269.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-269</a>
-
+        
         <a href="https://cwe.mitre.org/data/definitions/119.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-119</a>
-
+        
         <a href="https://cwe.mitre.org/data/definitions/653.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-653</a>
-
+        
       </div>
     </section>
+    
 
+    
 
-
+    
     <section>
       <h2>Verification</h2>
-
+      
       <p class="verification-method">Check container runtime class</p>
-
-
+      
+      
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> kubectl get pod &lt;pod&gt; -o jsonpath=&#39;{.spec.runtimeClassName}&#39;
-
+        
         <br><span class="cmd-expected"># Expected: gvisor</span>
-
+        
       </div>
-
+      
       <div class="cmd-platform">Platform: kubernetes</div>
-
-
+      
+      
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> podman inspect &lt;container&gt; | grep runtime
-
+        
         <br><span class="cmd-expected"># Expected: runsc|kata</span>
-
+        
       </div>
-
+      
       <div class="cmd-platform">Platform: linux</div>
-
-
+      
+      
     </section>
+    
 
+    
 
-
-
-
+    
 
     <div class="entry-nav">
-
+      
       <a href="CME-604.html">&larr; CME-604: Unprivileged User Namespaces Disabled</a>
-
-
+      
+      
       <a href="CME-702.html">CME-702: Linux Namespaces (User, PID, Network, Mount) &rarr;</a>
-
+      
     </div>
   </div>
 
@@ -138,42 +140,44 @@
       <p>Container Isolation</p>
     </section>
 
-
+    
     <section>
       <h3>Function</h3>
       <p class="function-id">container-runtime</p>
     </section>
+    
 
-
-
+    
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-
+        
         <span class="cwe-link">CLD-06</span>
-
+        
         <span class="cwe-link">SEA-04</span>
-
+        
         <span class="cwe-link">SEA-21</span>
-
+        
       </div>
     </section>
+    
 
+    
 
+    
 
-
-
+    
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-
+        
         <li>Kubernetes</li>
-
+        
         <li>GKE</li>
-
+        
       </ul>
     </section>
-
+    
 
     <section>
       <h3>Quick Reference</h3>
@@ -184,6 +188,7 @@
         <li><strong>Effect:</strong> preventive</li>
         <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 3</li>
+        <li><strong>ATT&amp;CK Mappings:</strong> 0</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
     </section>
@@ -193,7 +198,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
+    Generated 2026-09-09 22:49 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

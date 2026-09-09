@@ -366,6 +366,12 @@ nav a.active { color: #fff; border-bottom-color: #fff; }
   margin-top: 4px;
 }
 
+.framework-detail {
+  color: var(--text-muted);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
 /* --- Sidebar --- */
 
 .entry-sidebar section {

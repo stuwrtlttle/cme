@@ -20,7 +20,7 @@
   </header>
 
   <main class="container">
-
+    
 <div class="entry-header">
   <div class="entry-id">CME-105</div>
   <h1>SMEP (Supervisor Mode Execution Prevention)</h1>
@@ -35,7 +35,7 @@
 <div class="entry-body">
   <div class="entry-main">
 
-
+    
     <section>
       <h2>Description</h2>
       <p class="entry-description">CPU feature preventing the kernel from executing code in userspace pages. Blocks ret2usr attacks where kernel exploit redirects execution to attacker-controlled userspace code.</p>
@@ -48,12 +48,12 @@
           <tr>
             <th>Metric</th>
             <th>Transition</th>
-
+            
             <th>Rationale</th>
           </tr>
         </thead>
         <tbody>
-
+          
           <tr>
             <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
@@ -61,10 +61,10 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
-
+            
             <td class="cvss-rationale">Kernel exploit cannot simply jump to userspace shellcode</td>
           </tr>
-
+          
           <tr>
             <td><strong>Scope</strong> (S)</td>
             <td>
@@ -72,61 +72,63 @@
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">U</span>
             </td>
-
+            
             <td class="cvss-rationale">Prevents trivial kernel-to-userspace execution boundary crossing</td>
           </tr>
-
+          
         </tbody>
       </table>
     </section>
+    
 
-
-
+    
     <section>
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
-
+        
         <a href="https://cwe.mitre.org/data/definitions/119.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-119</a>
-
+        
         <a href="https://cwe.mitre.org/data/definitions/269.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-269</a>
-
+        
       </div>
     </section>
+    
 
+    
 
-
+    
     <section>
       <h2>Verification</h2>
-
+      
       <p class="verification-method">Check CPU flags for smep support</p>
-
-
+      
+      
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> grep -o smep /proc/cpuinfo | head -1
-
+        
         <br><span class="cmd-expected"># Expected: smep</span>
-
+        
       </div>
-
+      
       <div class="cmd-platform">Platform: linux</div>
-
-
+      
+      
     </section>
+    
 
+    
 
-
-
-
+    
 
     <div class="entry-nav">
-
+      
       <a href="CME-104.html">&larr; CME-104: KASLR (Kernel Address Space Layout Randomization)</a>
-
-
+      
+      
       <a href="CME-106.html">CME-106: SMAP (Supervisor Mode Access Prevention) &rarr;</a>
-
+      
     </div>
   </div>
 
@@ -136,42 +138,44 @@
       <p>Kernel Hardening</p>
     </section>
 
-
+    
     <section>
       <h3>Function</h3>
       <p class="function-id">kernel-attack-surface</p>
     </section>
+    
 
-
-
+    
     <section>
       <h3>SCF Controls</h3>
       <div class="cwe-list">
-
+        
         <span class="cwe-link">SEA-04</span>
-
+        
         <span class="cwe-link">SEA-10</span>
-
+        
       </div>
     </section>
+    
 
+    
 
+    
 
-
-
+    
     <section>
       <h3>Platforms</h3>
       <ul class="sidebar-list">
-
+        
         <li>RHEL 9</li>
-
+        
         <li>RHEL 8</li>
-
+        
         <li>Ubuntu 24.04</li>
-
+        
       </ul>
     </section>
-
+    
 
     <section>
       <h3>Quick Reference</h3>
@@ -182,6 +186,7 @@
         <li><strong>Effect:</strong> preventive</li>
         <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 2</li>
+        <li><strong>ATT&amp;CK Mappings:</strong> 0</li>
         <li><strong>CVSS Mods:</strong> 2</li>
       </ul>
     </section>
@@ -191,7 +196,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-04 20:29 UTC &middot; 128 entries &middot;
+    Generated 2026-09-09 22:49 UTC &middot; 128 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>
