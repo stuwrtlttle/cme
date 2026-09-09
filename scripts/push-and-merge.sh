@@ -68,8 +68,14 @@ MAIN_BRANCH="main"
 echo "Creating branch: ${BRANCH}"
 git checkout -b "$BRANCH"
 
-echo "Staging changes (excluding .DS_Store)..."
-git add --all -- ':!.DS_Store' ':!data/.DS_Store'
+echo "Staging changes..."
+git add -A
+
+if git diff --cached --quiet; then
+  echo "Nothing to commit after excluding .DS_Store and ignored files."
+  echo "Tip: if you only changed generated docs or entry JSON locally, verify those files are still present and unstaged with 'git status'."
+  exit 0
+fi
 
 echo "Committing: ${COMMIT_MSG}"
 git commit -m "$COMMIT_MSG"
