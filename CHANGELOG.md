@@ -8,6 +8,11 @@ All notable changes to the CME (Common Mitigation Enumeration) project are docum
 
 - `a891bcc` Update 6 CME entries (CME-201,CME-202,CME-203,CME-206,CME-801,CME-806);Update README.md,schema/coverage-assessment.schema.json,src/server.py,tests/test_evidence_model.py,data/.DS_Store
 
+
+### Auto-generated changelog
+
+- `c9f1e96` Update build_site.py,docs/.DS_Store,docs/by-cwe.html
+
 ## 2026-09-04
 
 ### Auto-generated changelog
