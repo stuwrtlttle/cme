@@ -8,6 +8,11 @@ All notable changes to the CME (Common Mitigation Enumeration) project are docum
 
 - `70d1407` Delete skills/cve-to-cme.zip
 
+
+### Auto-generated changelog
+
+- `90c715e` Add files via upload
+
 ## 2026-09-09
 
 ### ATT&CK crosswalks and discovery-skill update
