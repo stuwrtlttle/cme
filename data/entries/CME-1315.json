@@ -1,7 +1,7 @@
 {
   "cme_id": "CME-1315",
   "control_name": "Allowlist-Preferred Input Validation (Deny-by-Default Filtering)",
-  "description": "Structure all security-sensitive input validation as allowlists (explicit permit lists with default-deny) rather than denylists (explicit block lists with default-permit). Denylists are inherently incomplete — every new input format, encoding variant, or aliasing technique the denylist does not cover becomes a bypass vector. Allowlists reject unknown or unexpected inputs by default, requiring the attacker to find an input that both matches the allowlist pattern and achieves the malicious objective. When allowlists are impractical (e.g., HTML sanitization where the set of safe elements is large but finite), combine a denylist with input canonicalization (CME-1314) and output encoding to create defense in depth. This control applies to SSRF destination validation, deserialization type validation, sandbox capability restrictions, application security policies, and any context where a list determines whether an input is permitted.",
+  "description": "Structure all security-sensitive input validation as allowlists (explicit permit lists with default-deny) rather than denylists (explicit block lists with default-permit). Denylists are inherently incomplete — every new input format, encoding variant, or aliasing technique the denylist does not cover becomes a bypass vector. Allowlists reject unknown or unexpected inputs by default, requiring the attacker to find an input that both matches the allowlist pattern and achieves the malicious objective. When allowlists are impractical (e.g., HTML sanitization where the set of safe elements is large but finite), combine a denylist with input canonicalization (CME-1314) and output encoding to create defense in depth. This control applies to SSRF destination validation, deserialization type validation, sandbox capability restrictions, application security policies, and any context where a list determines whether an input is permitted. For data written to resources that an interpreter might execute, such as templates, include files, interpreter configuration, libraries, or generated code, allowlist the complete permitted data grammar and reject directives or executable syntax. Store untrusted data outside executable resources whenever possible; when it must be written to an executable context, apply context-appropriate output encoding or neutralization before the write.",
   "tactic": "Harden",
   "category": "Application Input Validation",
   "category_id": "application-input-validation",
@@ -28,10 +28,11 @@
     "CWE-693",
     "CWE-20",
     "CWE-1286",
-    "CWE-601"
+    "CWE-601",
+    "CWE-96"
   ],
   "verification": {
-    "method": "Review application source code and configuration to verify that security-sensitive input validation uses explicit allowlists with default-deny semantics rather than denylists with default-permit. Check SSRF filters, deserialization type validators, sandbox capability lists, and application security policy files.",
+    "method": "Review application source code and configuration to verify that security-sensitive input validation uses explicit allowlists with default-deny semantics rather than denylists with default-permit. Check SSRF filters, deserialization type validators, sandbox capability lists, application security policy files, and all write paths to templates, include files, interpreter configuration, libraries, or generated code. Verify that untrusted data is rejected unless it matches the complete permitted grammar and that it cannot introduce executable directives.",
     "commands": [
       {
         "command": "grep -rn 'allowlist\\|whitelist\\|permitted\\|allowed_types\\|SAFE_' <app_source>/ | head -20",
@@ -100,6 +101,13 @@
     {
       "target_namespace": "CWE",
       "target_id": "CWE-601",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-96",
       "relationship_type": "mitigates",
       "method": "supportive",
       "evidence_state": "unquantified"
