@@ -13,6 +13,11 @@ All notable changes to the CME (Common Mitigation Enumeration) project are docum
 
 - `90c715e` Add files via upload
 
+
+### Auto-generated changelog
+
+- `cc18e1d` Update 1 CME entries (CME-1315);Update .tmp/CVE-2026-86218.md,.tmp/claude-cve-to-cme-SKILL.md,.tmp/cve-to-cme-SKILL.md
+
 ## 2026-09-09
 
 ### ATT&CK crosswalks and discovery-skill update
