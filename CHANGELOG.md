@@ -2,6 +2,12 @@
 
 All notable changes to the CME (Common Mitigation Enumeration) project are documented here.
 
+## 2026-09-10
+
+### Auto-generated changelog
+
+- `70d1407` Delete skills/cve-to-cme.zip
+
 ## 2026-09-09
 
 ### ATT&CK crosswalks and discovery-skill update
