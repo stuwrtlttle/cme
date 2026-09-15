@@ -1,0 +1,152 @@
+name: Accept CME Proposals
+
+# Automatically accepts proposals when a PR is merged to main.
+# Moves data/proposals/*.json → data/entries/, rebuilds static site,
+# and commits the changes back to main.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'data/proposals/CME-*.json'
+
+jobs:
+  accept-proposals:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Check for proposals to accept
+        id: check
+        run: |
+          if ls data/proposals/CME-*.json 1>/dev/null 2>&1; then
+            echo "has_proposals=true" >> "$GITHUB_OUTPUT"
+            PROPOSALS=$(ls data/proposals/CME-*.json | wc -l)
+            echo "count=$PROPOSALS" >> "$GITHUB_OUTPUT"
+            echo "Found $PROPOSALS proposal(s) to accept"
+          else
+            echo "has_proposals=false" >> "$GITHUB_OUTPUT"
+            echo "No proposals found"
+          fi
+
+      - name: Install uv
+        if: steps.check.outputs.has_proposals == 'true'
+        uses: astral-sh/setup-uv@v8.1.0
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        if: steps.check.outputs.has_proposals == 'true'
+        run: uv sync
+
+      - name: Validate proposals before acceptance
+        if: steps.check.outputs.has_proposals == 'true'
+        run: |
+          echo "Validating proposals against schema..."
+          for proposal in data/proposals/CME-*.json; do
+            echo "Validating $proposal"
+            uv run python -c "
+          import json
+          import sys
+          from pathlib import Path
+
+          schema_path = Path('schema/cme-entry.schema.json')
+          proposal_path = Path('$proposal')
+
+          # Basic JSON validation
+          try:
+              with open(proposal_path) as f:
+                  data = json.load(f)
+
+              # Check required fields
+              required = ['cme_id', 'control_name', 'description', 'tactic',
+                         'category', 'category_id', 'effect_mode', 'evidence_state']
+              missing = [f for f in required if f not in data]
+
+              if missing:
+                  print(f'Missing required fields: {missing}', file=sys.stderr)
+                  sys.exit(1)
+
+              print(f'✓ Valid: {data[\"cme_id\"]} - {data[\"control_name\"]}')
+          except Exception as e:
+              print(f'✗ Invalid: {e}', file=sys.stderr)
+              sys.exit(1)
+          "
+          done
+
+      - name: Move proposals to entries
+        if: steps.check.outputs.has_proposals == 'true'
+        id: accept
+        run: |
+          ACCEPTED=""
+          for proposal in data/proposals/CME-*.json; do
+            filename=$(basename "$proposal")
+            echo "Accepting: $filename"
+            mv "$proposal" "data/entries/$filename"
+
+            # Extract CME ID for commit message
+            CME_ID=$(jq -r '.cme_id' "data/entries/$filename")
+            CME_NAME=$(jq -r '.control_name' "data/entries/$filename")
+            ACCEPTED="$ACCEPTED\n- $CME_ID: $CME_NAME"
+          done
+
+          echo "accepted<<EOF" >> "$GITHUB_OUTPUT"
+          echo -e "$ACCEPTED" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Rebuild static site
+        if: steps.check.outputs.has_proposals == 'true'
+        run: |
+          echo "Rebuilding static site with new entries..."
+          uv run python build_site.py
+
+          # Count total entries
+          TOTAL=$(ls data/entries/CME-*.json | wc -l)
+          echo "Built static site with $TOTAL entries"
+          echo "total_entries=$TOTAL" >> "$GITHUB_ENV"
+
+      - name: Commit accepted entries and rebuilt site
+        if: steps.check.outputs.has_proposals == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add data/entries/
+          git add docs/
+          git rm -f data/proposals/CME-*.json 2>/dev/null || true
+
+          # Check if there are changes to commit
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          # Create detailed commit message
+          cat << EOF > /tmp/commit_msg.txt
+          Accept ${{ steps.check.outputs.count }} CME proposal(s) and rebuild site
+
+          Accepted entries:
+          ${{ steps.accept.outputs.accepted }}
+
+          - Moved data/proposals/*.json → data/entries/
+          - Rebuilt static site (${{ env.total_entries }} total entries)
+          - Updated all index pages and cross-references
+
+          [skip changelog]
+          EOF
+
+          git commit -F /tmp/commit_msg.txt
+          git push
+
+      - name: Create release tag (optional)
+        if: steps.check.outputs.has_proposals == 'true'
+        run: |
+          # Tag with date and entry count
+          TAG="release-$(date -u +%Y%m%d)-${{ env.total_entries }}-entries"
+          git tag -a "$TAG" -m "CME Taxonomy release: ${{ env.total_entries }} entries"
+          git push origin "$TAG"
+        continue-on-error: true
