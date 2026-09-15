@@ -1,0 +1,121 @@
+{
+  "cme_id": "CME-1012",
+  "control_name": "USBGuard — USB Device Access Control",
+  "description": "Kernel-level USB device authorization framework that enforces allow/deny/block policies for USB peripheral attachment. Prevents BadUSB attacks (malicious USB devices that emulate keyboards/network adapters), DMA-based attacks via Thunderbolt/USB-C, and unauthorized data exfiltration via USB storage. Integrates with udev and auditd for USB event logging and policy enforcement. Policies can be defined per device class, vendor ID, product ID, or serial number.",
+  "tactic": "Detect",
+  "category": "Runtime Detection",
+  "category_id": "runtime-detection",
+  "function_id": "host-monitoring",
+  "effect_mode": "preventive",
+  "evidence_state": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AV",
+      "from": "P",
+      "to": "L",
+      "rationale": "Physical access required but mitigated; unauthorized USB devices blocked at kernel level"
+    },
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Requires authorized USB device matching policy; rogue devices auto-blocked"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-1299",
+    "CWE-1188"
+  ],
+  "verification": {
+    "method": "Verify USBGuard daemon running and policy enforcement active",
+    "commands": [
+      {
+        "command": "systemctl is-active usbguard",
+        "expected": "active",
+        "platform": "linux"
+      },
+      {
+        "command": "usbguard list-devices | head -5",
+        "expected": "Lists devices with allow/block/reject policy",
+        "platform": "linux"
+      },
+      {
+        "command": "usbguard get-parameter InsertedDevicePolicy",
+        "expected": "block (or apply-policy)",
+        "platform": "linux"
+      },
+      {
+        "command": "usbguard get-parameter ImplicitPolicyTarget",
+        "expected": "block (or reject)",
+        "platform": "linux"
+      }
+    ]
+  },
+  "references": [
+    {
+      "source": "USBGuard Documentation",
+      "url": "https://usbguard.github.io/"
+    },
+    {
+      "source": "RHEL 10 Security Hardening Guide",
+      "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/security_hardening/index",
+      "section": "Chapter 11 - Protecting Systems Against Intrusive USB Devices"
+    }
+  ],
+  "platforms": [
+    "RHEL 8+",
+    "Fedora",
+    "Debian 10+",
+    "Ubuntu 20.04+"
+  ],
+  "scf_identifiers": [
+    "PES-02",
+    "PES-02.1"
+  ],
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-1299",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "Hardware protection mechanism that enforces USB device authorization at kernel level",
+      "evidence_state": "deterministic"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-1188",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "rationale": "Prevents insecure default initialization by blocking unauthorized USB devices",
+      "evidence_state": "deterministic"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AV",
+      "value": "P->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "PES-02",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "ATT&CK",
+      "identifier": "M1034",
+      "value": "Limit Hardware Installation",
+      "relationship_type": "maps_to",
+      "rationale": "USBGuard implements ATT&CK mitigation M1034"
+    }
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "cme_id": "CME-924",
+  "control_name": "Arbitrary Code Guard (ACG)",
+  "description": "Windows exploit protection mitigation that prevents allocating memory pages as executable. Enforces W^X (write XOR execute) policy at runtime by blocking dynamic code generation and preventing RWX page allocations. Blocks JIT-spray attacks, code injection, and return-oriented programming (ROP) by ensuring that memory pages are either writable or executable, never both. Applications must opt-in via SetProcessMitigationPolicy or inherit from system-wide policy.",
+  "tactic": "Harden",
+  "category": "Application Controls",
+  "category_id": "application-controls",
+  "function_id": "runtime-hardening",
+  "effect_mode": "preventive",
+  "evidence_state": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Memory corruption exploitation requires bypassing W^X; cannot inject executable code"
+    },
+    {
+      "metric": "I",
+      "from": "H",
+      "to": "L",
+      "rationale": "Prevents arbitrary code execution after memory write; ROP/JIT spray attacks blocked"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-94",
+    "CWE-119",
+    "CWE-787",
+    "CWE-1188"
+  ],
+  "verification": {
+    "method": "Check ACG mitigation status for process or system-wide",
+    "commands": [
+      {
+        "command": "Get-ProcessMitigation -Name <process>.exe | Select-Object -ExpandProperty ACG | Select-Object -ExpandProperty Enable",
+        "expected": "ON",
+        "platform": "windows"
+      },
+      {
+        "command": "Get-ProcessMitigation -System | Select-Object -ExpandProperty ACG | Select-Object -ExpandProperty Enable",
+        "expected": "ON (for system-wide enforcement)",
+        "platform": "windows"
+      },
+      {
+        "command": "Get-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\kernel' -Name MitigationOptions | Select-Object -ExpandProperty MitigationOptions",
+        "expected": "ACG enabled in bitmask",
+        "platform": "windows"
+      }
+    ]
+  },
+  "references": [
+    {
+      "source": "Microsoft Exploit Protection Reference",
+      "url": "https://learn.microsoft.com/en-us/defender-endpoint/exploit-protection-reference"
+    },
+    {
+      "source": "Windows Security Baselines",
+      "url": "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/windows-security-baselines"
+    }
+  ],
+  "platforms": [
+    "Windows 10 1703+",
+    "Windows 11",
+    "Windows Server 2016+"
+  ],
+  "scf_identifiers": [
+    "STA-02",
+    "STA-02.1"
+  ],
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-94",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "Prevents code injection by blocking RWX pages; injected code cannot execute",
+      "evidence_state": "deterministic"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-119",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "rationale": "Reduces exploitability of memory corruption bugs by preventing code execution from corrupted memory",
+      "evidence_state": "deterministic"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-787",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "rationale": "Out-of-bounds write cannot lead to code execution without executable pages",
+      "evidence_state": "deterministic"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-1188",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "Enforces W^X (Insecure Default Initialization of Resource)",
+      "evidence_state": "deterministic"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/I",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "STA-02",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

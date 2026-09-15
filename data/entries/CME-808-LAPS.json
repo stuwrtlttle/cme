@@ -1,0 +1,140 @@
+{
+  "cme_id": "CME-808",
+  "control_name": "Local Administrator Password Solution (LAPS)",
+  "description": "Automated rotation of local administrator account passwords on Windows endpoints. LAPS generates unique, randomly-generated passwords per machine and stores them in Active Directory with ACL-protected access. Prevents lateral movement attacks that rely on shared or default local admin credentials by ensuring each machine has a cryptographically random password that rotates on a defined schedule.",
+  "tactic": "Harden",
+  "category": "Credential Hardening",
+  "category_id": "credential-hardening",
+  "function_id": "password-policy",
+  "effect_mode": "preventive",
+  "evidence_state": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "C",
+      "from": "H",
+      "to": "L",
+      "rationale": "Credential theft yields only single-machine access; password unique per endpoint and rotated"
+    },
+    {
+      "metric": "PR",
+      "from": "H",
+      "to": "L",
+      "rationale": "Limits privilege escalation from compromised admin hash; cannot reuse across machines"
+    },
+    {
+      "metric": "S",
+      "from": "C",
+      "to": "U",
+      "rationale": "Lateral movement prevented; compromised local admin cannot authenticate to other systems"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-1392",
+    "CWE-798",
+    "CWE-521",
+    "CWE-257"
+  ],
+  "verification": {
+    "method": "Verify LAPS policy enforcement and password storage in AD",
+    "commands": [
+      {
+        "command": "Get-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft Services\\AdmPwd' -Name AdmPwdEnabled -ErrorAction SilentlyContinue | Select-Object -ExpandProperty AdmPwdEnabled",
+        "expected": "1",
+        "platform": "windows"
+      },
+      {
+        "command": "Get-AdmPwdPassword -ComputerName $env:COMPUTERNAME | Select-Object -ExpandProperty Password",
+        "expected": "<non-empty random password string>",
+        "platform": "windows"
+      },
+      {
+        "command": "Get-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft Services\\AdmPwd' -Name PasswordComplexity -ErrorAction SilentlyContinue | Select-Object -ExpandProperty PasswordComplexity",
+        "expected": "4",
+        "platform": "windows"
+      }
+    ]
+  },
+  "references": [
+    {
+      "source": "Microsoft LAPS Documentation",
+      "url": "https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-overview"
+    },
+    {
+      "source": "MITRE ATT&CK Mitigation",
+      "url": "https://attack.mitre.org/mitigations/M1015/"
+    }
+  ],
+  "platforms": [
+    "Windows Server 2012+",
+    "Windows 10+",
+    "Windows 11+"
+  ],
+  "scf_identifiers": [
+    "IAC-01",
+    "IAC-01.2"
+  ],
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-1392",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "LAPS directly prevents use of default credentials by enforcing unique, auto-generated passwords per endpoint",
+      "evidence_state": "deterministic"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-798",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "Eliminates hardcoded/embedded credentials by rotating passwords automatically",
+      "evidence_state": "deterministic"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-521",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "rationale": "Enforces strong password requirements (complexity, length, randomness)",
+      "evidence_state": "deterministic"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/C",
+      "value": "H->L",
+      "relationship_type": "maps_to",
+      "rationale": "Password unique per machine, rotated on schedule"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/PR",
+      "value": "H->L",
+      "relationship_type": "maps_to",
+      "rationale": "Privilege escalation limited to single endpoint"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/S",
+      "value": "C->U",
+      "relationship_type": "maps_to",
+      "rationale": "Lateral movement blocked by unique credentials"
+    },
+    {
+      "namespace": "ATT&CK",
+      "identifier": "M1015",
+      "value": "Active Directory Configuration",
+      "relationship_type": "maps_to",
+      "rationale": "LAPS is explicitly mentioned as ATT&CK mitigation M1015"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "IAC-01",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

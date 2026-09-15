@@ -1,0 +1,128 @@
+{
+  "cme_id": "CME-925",
+  "control_name": "Windows Defender Application Control (WDAC)",
+  "description": "Windows application allowlisting framework that enforces code integrity policies at the kernel level. WDAC prevents execution of unauthorized binaries, scripts, and drivers by validating digital signatures, file hashes, or file paths against a deployed policy. Operates in user-mode and kernel-mode, blocking unsigned or untrusted code before it executes. Supports multiple policy modes: Audit (logging only), Enforced (blocking), and Intelligent Security Graph (ISG) integration for cloud-based reputation checks. Successor to AppLocker with kernel-level enforcement.",
+  "tactic": "Harden",
+  "category": "Application Controls",
+  "category_id": "application-controls",
+  "function_id": "runtime-hardening",
+  "effect_mode": "preventive",
+  "evidence_state": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Unsigned/untrusted binaries blocked at kernel level; requires trusted publisher signature or hash"
+    },
+    {
+      "metric": "I",
+      "from": "H",
+      "to": "L",
+      "rationale": "Prevents execution of malicious code; attackers cannot run unsigned payloads"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-494",
+    "CWE-829",
+    "CWE-345"
+  ],
+  "verification": {
+    "method": "Verify WDAC policy deployed and enforced",
+    "commands": [
+      {
+        "command": "Get-CimInstance -ClassName Win32_DeviceGuard -Namespace root\\Microsoft\\Windows\\DeviceGuard | Select-Object -ExpandProperty CodeIntegrityPolicyEnforcementStatus",
+        "expected": "1 (Enforced) or 2 (Audit)",
+        "platform": "windows"
+      },
+      {
+        "command": "Get-CimInstance -ClassName Win32_DeviceGuard -Namespace root\\Microsoft\\Windows\\DeviceGuard | Select-Object -ExpandProperty UsermodeCodeIntegrityPolicyEnforcementStatus",
+        "expected": "1 (Enforced) or 2 (Audit)",
+        "platform": "windows"
+      },
+      {
+        "command": "Get-ChildItem -Path C:\\Windows\\System32\\CodeIntegrity\\CiPolicies\\Active\\*.cip",
+        "expected": "At least one .cip policy file present",
+        "platform": "windows"
+      },
+      {
+        "command": "Get-WinEvent -FilterHashtable @{LogName='Microsoft-Windows-CodeIntegrity/Operational'; ID=3076} -MaxEvents 10",
+        "expected": "Recent policy load events (ID 3076)",
+        "platform": "windows"
+      }
+    ]
+  },
+  "references": [
+    {
+      "source": "Microsoft WDAC Documentation",
+      "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/wdac"
+    },
+    {
+      "source": "Windows Security Baselines",
+      "url": "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/windows-security-baselines"
+    }
+  ],
+  "platforms": [
+    "Windows 10 1903+",
+    "Windows 11",
+    "Windows Server 2016+"
+  ],
+  "scf_identifiers": [
+    "STA-02",
+    "STA-02.2"
+  ],
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-494",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "Prevents download of code without integrity check by validating signatures/hashes",
+      "evidence_state": "deterministic"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-829",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "Blocks inclusion of functionality from untrusted control sphere (unsigned binaries)",
+      "evidence_state": "deterministic"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-345",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "rationale": "Enforces signature verification; insufficient data authentication blocked",
+      "evidence_state": "deterministic"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/I",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "STA-02",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "ATT&CK",
+      "identifier": "M1038",
+      "value": "Execution Prevention",
+      "relationship_type": "maps_to",
+      "rationale": "WDAC implements ATT&CK mitigation M1038 via application allowlisting"
+    }
+  ]
+}
