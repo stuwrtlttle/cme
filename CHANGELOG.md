@@ -13,6 +13,11 @@ All notable changes to the CME (Common Mitigation Enumeration) project are docum
 
 - `f0f6339` Rebuild static site with 136 entries
 
+
+### Auto-generated changelog
+
+- `e6e832c` Add GitOps CI/CD pipeline for CME proposals
+
 ## 2026-09-10
 
 ### Auto-generated changelog
