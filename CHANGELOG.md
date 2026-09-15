@@ -8,6 +8,11 @@ All notable changes to the CME (Common Mitigation Enumeration) project are docum
 
 - `d595e49` Add 8 CME entries: Windows/macOS/K8s platform expansion
 
+
+### Auto-generated changelog
+
+- `f0f6339` Rebuild static site with 136 entries
+
 ## 2026-09-10
 
 ### Auto-generated changelog
