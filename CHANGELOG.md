@@ -2,6 +2,12 @@
 
 All notable changes to the CME (Common Mitigation Enumeration) project are documented here.
 
+## 2026-09-15
+
+### Auto-generated changelog
+
+- `d595e49` Add 8 CME entries: Windows/macOS/K8s platform expansion
+
 ## 2026-09-10
 
 ### Auto-generated changelog
