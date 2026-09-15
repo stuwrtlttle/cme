@@ -38,7 +38,7 @@
     
     <section>
       <h2>Description</h2>
-      <p class="entry-description">Structure all security-sensitive input validation as allowlists (explicit permit lists with default-deny) rather than denylists (explicit block lists with default-permit). Denylists are inherently incomplete — every new input format, encoding variant, or aliasing technique the denylist does not cover becomes a bypass vector. Allowlists reject unknown or unexpected inputs by default, requiring the attacker to find an input that both matches the allowlist pattern and achieves the malicious objective. When allowlists are impractical (e.g., HTML sanitization where the set of safe elements is large but finite), combine a denylist with input canonicalization (CME-1314) and output encoding to create defense in depth. This control applies to SSRF destination validation, deserialization type validation, sandbox capability restrictions, application security policies, and any context where a list determines whether an input is permitted.</p>
+      <p class="entry-description">Structure all security-sensitive input validation as allowlists (explicit permit lists with default-deny) rather than denylists (explicit block lists with default-permit). Denylists are inherently incomplete — every new input format, encoding variant, or aliasing technique the denylist does not cover becomes a bypass vector. Allowlists reject unknown or unexpected inputs by default, requiring the attacker to find an input that both matches the allowlist pattern and achieves the malicious objective. When allowlists are impractical (e.g., HTML sanitization where the set of safe elements is large but finite), combine a denylist with input canonicalization (CME-1314) and output encoding to create defense in depth. This control applies to SSRF destination validation, deserialization type validation, sandbox capability restrictions, application security policies, and any context where a list determines whether an input is permitted. For data written to resources that an interpreter might execute, such as templates, include files, interpreter configuration, libraries, or generated code, allowlist the complete permitted data grammar and reject directives or executable syntax. Store untrusted data outside executable resources whenever possible; when it must be written to an executable context, apply context-appropriate output encoding or neutralization before the write.</p>
     </section>
 
     <section>
@@ -104,6 +104,9 @@
         <a href="https://cwe.mitre.org/data/definitions/601.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-601</a>
         
+        <a href="https://cwe.mitre.org/data/definitions/96.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-96</a>
+        
       </div>
     </section>
     
@@ -114,7 +117,7 @@
     <section>
       <h2>Verification</h2>
       
-      <p class="verification-method">Review application source code and configuration to verify that security-sensitive input validation uses explicit allowlists with default-deny semantics rather than denylists with default-permit. Check SSRF filters, deserialization type validators, sandbox capability lists, and application security policy files.</p>
+      <p class="verification-method">Review application source code and configuration to verify that security-sensitive input validation uses explicit allowlists with default-deny semantics rather than denylists with default-permit. Check SSRF filters, deserialization type validators, sandbox capability lists, application security policy files, and all write paths to templates, include files, interpreter configuration, libraries, or generated code. Verify that untrusted data is rejected unless it matches the complete permitted grammar and that it cannot introduce executable directives.</p>
       
       
       <div class="verification-cmd">
@@ -205,7 +208,7 @@
         <li><strong>Layer:</strong> Application</li>
         <li><strong>Effect:</strong> preventive</li>
         <li><strong>Evidence:</strong> unquantified</li>
-        <li><strong>CWEs:</strong> 6</li>
+        <li><strong>CWEs:</strong> 7</li>
         <li><strong>ATT&amp;CK Mappings:</strong> 0</li>
         <li><strong>CVSS Mods:</strong> 2</li>
       </ul>
@@ -216,7 +219,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-09 22:49 UTC &middot; 128 entries &middot;
+    Generated 2026-09-15 15:58 UTC &middot; 136 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

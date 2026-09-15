@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CME-209: Kubernetes NetworkPolicy Enforcement — Common Mitigation Enumeration</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="../index.html" class="logo">CME <span>Common Mitigation Enumeration</span></a>
+      <nav>
+        <a href="../index.html" >Home</a>
+        <a href="../by-tactic.html" >By Tactic</a>
+        <a href="../by-cwe.html" >By CWE</a>
+        <a href="../search.html" >Search</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    
+<div class="entry-header">
+  <div class="entry-id">CME-209</div>
+  <h1>Kubernetes NetworkPolicy Enforcement</h1>
+  <div class="entry-meta">
+    <span class="badge badge-tactic-isolate">Isolate</span>
+    <span class="badge badge-layer-"></span>
+    <span class="badge badge-attenuation-deterministic">Deterministic evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
+  </div>
+</div>
+
+<div class="entry-body">
+  <div class="entry-main">
+
+    
+    <section>
+      <h2>Description</h2>
+      <p class="entry-description">Kubernetes-native network segmentation via NetworkPolicy resources that define pod-level ingress and egress rules. Enforces default-deny network posture and explicit allow rules based on pod selectors, namespace selectors, and IP blocks. Prevents lateral movement within cluster by restricting pod-to-pod communication to explicitly allowed paths. Requires CNI plugin support (Calico, Cilium, Weave, Antrea). Policies are namespace-scoped and stack additively.</p>
+    </section>
+
+    <section>
+      <h2>CVSS Vector Impacts</h2>
+      <table class="cvss-table">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Transition</th>
+            
+            <th>Rationale</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td><strong>Attack Vector</strong> (AV)</td>
+            <td>
+              <span class="cvss-from">N</span>
+              <span class="cvss-arrow">&rarr;</span>
+              <span class="cvss-to">A</span>
+            </td>
+            
+            <td class="cvss-rationale">Network attack vector restricted to adjacent pods/namespaces; default-deny blocks lateral movement</td>
+          </tr>
+          
+          <tr>
+            <td><strong>Scope</strong> (S)</td>
+            <td>
+              <span class="cvss-from">C</span>
+              <span class="cvss-arrow">&rarr;</span>
+              <span class="cvss-to">U</span>
+            </td>
+            
+            <td class="cvss-rationale">Scope change prevented; compromised pod cannot reach other namespaces without explicit policy</td>
+          </tr>
+          
+        </tbody>
+      </table>
+    </section>
+    
+
+    
+    <section>
+      <h2>CWE Relationships</h2>
+      <div class="cwe-list">
+        
+        <a href="https://cwe.mitre.org/data/definitions/284.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-284</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/923.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-923</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/669.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-669</a>
+        
+      </div>
+    </section>
+    
+
+    
+
+    
+    <section>
+      <h2>Verification</h2>
+      
+      <p class="verification-method">Verify NetworkPolicy resources exist and CNI enforces them</p>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> kubectl get networkpolicy -A
+        
+        <br><span class="cmd-expected"># Expected: NetworkPolicy resources exist for sensitive namespaces</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: kubernetes</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> kubectl describe networkpolicy &lt;policy-name&gt; -n &lt;namespace&gt; | grep -E &#39;policyTypes|Ingress|Egress&#39;
+        
+        <br><span class="cmd-expected"># Expected: policyTypes includes Ingress and/or Egress with rules defined</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: kubernetes</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> kubectl get networkpolicy -n &lt;namespace&gt; -o jsonpath=&#39;{.items[?(@.spec.podSelector.matchLabels=={})].metadata.name}&#39;
+        
+        <br><span class="cmd-expected"># Expected: default-deny policy exists (empty podSelector = all pods)</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: kubernetes</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> kubectl get pods -n kube-system -l &#39;k8s-app in (calico-node, cilium, weave-net, antrea-agent)&#39; | grep -c Running
+        
+        <br><span class="cmd-expected"># Expected: &gt;0 (CNI plugin running)</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: kubernetes</div>
+      
+      
+    </section>
+    
+
+    
+
+    
+    <section>
+      <h2>References</h2>
+      <ul class="sidebar-list">
+        
+        <li>
+          <a href="https://kubernetes.io/docs/concepts/services-networking/network-policies/" target="_blank" rel="noopener">Kubernetes NetworkPolicy Documentation</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://github.com/ahmetb/kubernetes-network-policy-recipes" target="_blank" rel="noopener">Kubernetes Network Policy Recipes</a>
+          
+        </li>
+        
+      </ul>
+    </section>
+    
+
+    <div class="entry-nav">
+      
+      <a href="CME-208.html">&larr; CME-208: Outbound Network Egress Restriction (SSRF Blast Radius Containment)</a>
+      
+      
+      <a href="CME-301.html">CME-301: SELinux (Enforcing Mode) &rarr;</a>
+      
+    </div>
+  </div>
+
+  <aside class="entry-sidebar">
+    <section>
+      <h3>Category</h3>
+      <p>Network Isolation</p>
+    </section>
+
+    
+    <section>
+      <h3>Function</h3>
+      <p class="function-id">network-filtering</p>
+    </section>
+    
+
+    
+    <section>
+      <h3>SCF Controls</h3>
+      <div class="cwe-list">
+        
+        <span class="cwe-link">NET-04</span>
+        
+        <span class="cwe-link">NET-04.1</span>
+        
+        <span class="cwe-link">CLD-02</span>
+        
+      </div>
+    </section>
+    
+
+    
+
+    
+
+    
+    <section>
+      <h3>Platforms</h3>
+      <ul class="sidebar-list">
+        
+        <li>Kubernetes with CNI plugin (Calico, Cilium, Weave, Antrea)</li>
+        
+        <li>OpenShift 4.x</li>
+        
+      </ul>
+    </section>
+    
+
+    <section>
+      <h3>Quick Reference</h3>
+      <ul class="sidebar-list">
+        <li><strong>ID:</strong> CME-209</li>
+        <li><strong>Tactic:</strong> Isolate</li>
+        <li><strong>Layer:</strong> </li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> deterministic</li>
+        <li><strong>CWEs:</strong> 3</li>
+        <li><strong>ATT&amp;CK Mappings:</strong> 0</li>
+        <li><strong>CVSS Mods:</strong> 2</li>
+      </ul>
+    </section>
+  </aside>
+</div>
+
+  </main>
+
+  <footer class="site-footer">
+    Generated 2026-09-15 15:58 UTC &middot; 136 entries &middot;
+    Common Mitigation Enumeration (CME)
+  </footer>
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CME-808: Local Administrator Password Solution (LAPS) — Common Mitigation Enumeration</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="../index.html" class="logo">CME <span>Common Mitigation Enumeration</span></a>
+      <nav>
+        <a href="../index.html" >Home</a>
+        <a href="../by-tactic.html" >By Tactic</a>
+        <a href="../by-cwe.html" >By CWE</a>
+        <a href="../search.html" >Search</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    
+<div class="entry-header">
+  <div class="entry-id">CME-808</div>
+  <h1>Local Administrator Password Solution (LAPS)</h1>
+  <div class="entry-meta">
+    <span class="badge badge-tactic-harden">Harden</span>
+    <span class="badge badge-layer-"></span>
+    <span class="badge badge-attenuation-deterministic">Deterministic evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
+  </div>
+</div>
+
+<div class="entry-body">
+  <div class="entry-main">
+
+    
+    <section>
+      <h2>Description</h2>
+      <p class="entry-description">Automated rotation of local administrator account passwords on Windows endpoints. LAPS generates unique, randomly-generated passwords per machine and stores them in Active Directory with ACL-protected access. Prevents lateral movement attacks that rely on shared or default local admin credentials by ensuring each machine has a cryptographically random password that rotates on a defined schedule.</p>
+    </section>
+
+    <section>
+      <h2>CVSS Vector Impacts</h2>
+      <table class="cvss-table">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Transition</th>
+            
+            <th>Rationale</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td><strong>Confidentiality</strong> (C)</td>
+            <td>
+              <span class="cvss-from">H</span>
+              <span class="cvss-arrow">&rarr;</span>
+              <span class="cvss-to">L</span>
+            </td>
+            
+            <td class="cvss-rationale">Credential theft yields only single-machine access; password unique per endpoint and rotated</td>
+          </tr>
+          
+          <tr>
+            <td><strong>Privileges Required</strong> (PR)</td>
+            <td>
+              <span class="cvss-from">H</span>
+              <span class="cvss-arrow">&rarr;</span>
+              <span class="cvss-to">L</span>
+            </td>
+            
+            <td class="cvss-rationale">Limits privilege escalation from compromised admin hash; cannot reuse across machines</td>
+          </tr>
+          
+          <tr>
+            <td><strong>Scope</strong> (S)</td>
+            <td>
+              <span class="cvss-from">C</span>
+              <span class="cvss-arrow">&rarr;</span>
+              <span class="cvss-to">U</span>
+            </td>
+            
+            <td class="cvss-rationale">Lateral movement prevented; compromised local admin cannot authenticate to other systems</td>
+          </tr>
+          
+        </tbody>
+      </table>
+    </section>
+    
+
+    
+    <section>
+      <h2>CWE Relationships</h2>
+      <div class="cwe-list">
+        
+        <a href="https://cwe.mitre.org/data/definitions/1392.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-1392</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/798.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-798</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/521.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-521</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/257.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-257</a>
+        
+      </div>
+    </section>
+    
+
+    
+
+    
+    <section>
+      <h2>Verification</h2>
+      
+      <p class="verification-method">Verify LAPS policy enforcement and password storage in AD</p>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> Get-ItemProperty -Path &#39;HKLM:\SOFTWARE\Policies\Microsoft Services\AdmPwd&#39; -Name AdmPwdEnabled -ErrorAction SilentlyContinue | Select-Object -ExpandProperty AdmPwdEnabled
+        
+        <br><span class="cmd-expected"># Expected: 1</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: windows</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> Get-AdmPwdPassword -ComputerName $env:COMPUTERNAME | Select-Object -ExpandProperty Password
+        
+        <br><span class="cmd-expected"># Expected: &lt;non-empty random password string&gt;</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: windows</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> Get-ItemProperty -Path &#39;HKLM:\SOFTWARE\Policies\Microsoft Services\AdmPwd&#39; -Name PasswordComplexity -ErrorAction SilentlyContinue | Select-Object -ExpandProperty PasswordComplexity
+        
+        <br><span class="cmd-expected"># Expected: 4</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: windows</div>
+      
+      
+    </section>
+    
+
+    
+
+    
+    <section>
+      <h2>References</h2>
+      <ul class="sidebar-list">
+        
+        <li>
+          <a href="https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-overview" target="_blank" rel="noopener">Microsoft LAPS Documentation</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://attack.mitre.org/mitigations/M1015/" target="_blank" rel="noopener">MITRE ATT&amp;CK Mitigation</a>
+          
+        </li>
+        
+      </ul>
+    </section>
+    
+
+    <div class="entry-nav">
+      
+      <a href="CME-807.html">&larr; CME-807: Session Lifetime and Idle Timeout Enforcement</a>
+      
+      
+      <a href="CME-901.html">CME-901: SSH Hardening (Comprehensive) &rarr;</a>
+      
+    </div>
+  </div>
+
+  <aside class="entry-sidebar">
+    <section>
+      <h3>Category</h3>
+      <p>Credential Hardening</p>
+    </section>
+
+    
+    <section>
+      <h3>Function</h3>
+      <p class="function-id">password-policy</p>
+    </section>
+    
+
+    
+    <section>
+      <h3>SCF Controls</h3>
+      <div class="cwe-list">
+        
+        <span class="cwe-link">IAC-01</span>
+        
+        <span class="cwe-link">IAC-01.2</span>
+        
+      </div>
+    </section>
+    
+
+    
+    <section>
+      <h3>ATT&amp;CK Mitigations</h3>
+      <ul class="sidebar-list">
+        
+        <li>
+          <strong>M1015</strong>
+           — Active Directory Configuration
+          
+          <div class="framework-detail">LAPS is explicitly mentioned as ATT&amp;CK mitigation M1015</div>
+          
+        </li>
+        
+      </ul>
+    </section>
+    
+
+    
+
+    
+    <section>
+      <h3>Platforms</h3>
+      <ul class="sidebar-list">
+        
+        <li>Windows Server 2012+</li>
+        
+        <li>Windows 10+</li>
+        
+        <li>Windows 11+</li>
+        
+      </ul>
+    </section>
+    
+
+    <section>
+      <h3>Quick Reference</h3>
+      <ul class="sidebar-list">
+        <li><strong>ID:</strong> CME-808</li>
+        <li><strong>Tactic:</strong> Harden</li>
+        <li><strong>Layer:</strong> </li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> deterministic</li>
+        <li><strong>CWEs:</strong> 4</li>
+        <li><strong>ATT&amp;CK Mappings:</strong> 1</li>
+        <li><strong>CVSS Mods:</strong> 3</li>
+      </ul>
+    </section>
+  </aside>
+</div>
+
+  </main>
+
+  <footer class="site-footer">
+    Generated 2026-09-15 15:58 UTC &middot; 136 entries &middot;
+    Common Mitigation Enumeration (CME)
+  </footer>
+</body>
+</html>

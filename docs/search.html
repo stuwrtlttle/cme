@@ -292,6 +292,16 @@
     <div class="sr-desc">Network-layer egress filtering that confines application workloads to only the external destinations they require, blocking outbound connections to in...</div>
   </li>
   
+  <li data-search="cme-209 kubernetes networkpolicy enforcement kubernetes-native network segmentation via networkpolicy resources that define pod-level ingress and egress rules. enforces default-deny network posture and explicit allow rules based on pod selectors, namespace selectors, and ip blocks. prevents lateral movement within cluster by restricting pod-to-pod communication to explicitly allowed paths. requires cni plugin support (calico, cilium, weave, antrea). policies are namespace-scoped and stack additively. network isolation isolate cwe-284 cwe-923 cwe-669">
+    <div>
+      <a href="entries/CME-209.html" class="sr-id">CME-209</a>
+      <a href="entries/CME-209.html">Kubernetes NetworkPolicy Enforcement</a>
+      <span class="badge badge-tactic-isolate">Isolate</span>
+      <span class="badge badge-layer-"></span>
+    </div>
+    <div class="sr-desc">Kubernetes-native network segmentation via NetworkPolicy resources that define pod-level ingress and egress rules. Enforces default-deny network postu...</div>
+  </li>
+  
   <li data-search="cme-301 selinux (enforcing mode) mandatory access control system that confines processes to least-privilege security domains. even if a process is compromised, it cannot access files, ports, or other processes outside its policy-defined domain. mandatory access control harden os/kernel cwe-269 cwe-284 cwe-732 cwe-653">
     <div>
       <a href="entries/CME-301.html" class="sr-id">CME-301</a>
@@ -330,6 +340,16 @@
       <span class="badge badge-layer-os-kernel">OS/Kernel</span>
     </div>
     <div class="sr-desc">Path-based mandatory access control that restricts per-application file, network, and capability access. Each application runs under a profile definin...</div>
+  </li>
+  
+  <li data-search="cme-305 macos system integrity protection (sip) kernel-enforced protection that restricts root-level modification of protected system paths, kernel extensions, and system processes. even processes running as root cannot modify /system, /usr (excluding /usr/local), pre-installed apple applications, or inject code into system processes. prevents rootkit installation, system file tampering, and kernel extension abuse. sip is enforced by the kernel and cannot be disabled from within macos; requires recovery mode boot to disable. mandatory access control harden cwe-732 cwe-669 cwe-250">
+    <div>
+      <a href="entries/CME-305.html" class="sr-id">CME-305</a>
+      <a href="entries/CME-305.html">macOS System Integrity Protection (SIP)</a>
+      <span class="badge badge-tactic-harden">Harden</span>
+      <span class="badge badge-layer-"></span>
+    </div>
+    <div class="sr-desc">Kernel-enforced protection that restricts root-level modification of protected system paths, kernel extensions, and system processes. Even processes r...</div>
   </li>
   
   <li data-search="cme-401 system-wide crypto policy (future) centrally enforces minimum cryptographic standards across all system components (openssl, gnutls, nss, openssh, kerberos). future policy disables tls &lt;1.2, sha-1, rsa &lt;3072, all cbc ciphers, and rc4. cryptographic controls harden application cwe-327 cwe-326 cwe-757">
@@ -732,6 +752,16 @@
     <div class="sr-desc">Enforce absolute session lifetime limits and idle inactivity timeouts on all authenticated sessions to minimize the window during which a stolen or ab...</div>
   </li>
   
+  <li data-search="cme-808 local administrator password solution (laps) automated rotation of local administrator account passwords on windows endpoints. laps generates unique, randomly-generated passwords per machine and stores them in active directory with acl-protected access. prevents lateral movement attacks that rely on shared or default local admin credentials by ensuring each machine has a cryptographically random password that rotates on a defined schedule. credential hardening harden cwe-1392 cwe-798 cwe-521 cwe-257 m1015 active directory configuration">
+    <div>
+      <a href="entries/CME-808.html" class="sr-id">CME-808</a>
+      <a href="entries/CME-808.html">Local Administrator Password Solution (LAPS)</a>
+      <span class="badge badge-tactic-harden">Harden</span>
+      <span class="badge badge-layer-"></span>
+    </div>
+    <div class="sr-desc">Automated rotation of local administrator account passwords on Windows endpoints. LAPS generates unique, randomly-generated passwords per machine and ...</div>
+  </li>
+  
   <li data-search="cme-901 ssh hardening (comprehensive) comprehensive ssh hardening: disable root login, enforce protocol 2, restrict ciphers to aead (chacha20/aes-gcm), disable x11/agent forwarding, set maxauthtries, enable logingracetime. protocol hardening harden network cwe-287 cwe-250">
     <div>
       <a href="entries/CME-901.html" class="sr-id">CME-901</a>
@@ -952,6 +982,26 @@
     <div class="sr-desc">Application create and update handlers use explicit, per-operation request schemas that accept only client-controlled fields and reject or ignore serv...</div>
   </li>
   
+  <li data-search="cme-924 arbitrary code guard (acg) windows exploit protection mitigation that prevents allocating memory pages as executable. enforces w^x (write xor execute) policy at runtime by blocking dynamic code generation and preventing rwx page allocations. blocks jit-spray attacks, code injection, and return-oriented programming (rop) by ensuring that memory pages are either writable or executable, never both. applications must opt-in via setprocessmitigationpolicy or inherit from system-wide policy. application controls harden cwe-94 cwe-119 cwe-787 cwe-1188">
+    <div>
+      <a href="entries/CME-924.html" class="sr-id">CME-924</a>
+      <a href="entries/CME-924.html">Arbitrary Code Guard (ACG)</a>
+      <span class="badge badge-tactic-harden">Harden</span>
+      <span class="badge badge-layer-"></span>
+    </div>
+    <div class="sr-desc">Windows exploit protection mitigation that prevents allocating memory pages as executable. Enforces W^X (write XOR execute) policy at runtime by block...</div>
+  </li>
+  
+  <li data-search="cme-925 windows defender application control (wdac) windows application allowlisting framework that enforces code integrity policies at the kernel level. wdac prevents execution of unauthorized binaries, scripts, and drivers by validating digital signatures, file hashes, or file paths against a deployed policy. operates in user-mode and kernel-mode, blocking unsigned or untrusted code before it executes. supports multiple policy modes: audit (logging only), enforced (blocking), and intelligent security graph (isg) integration for cloud-based reputation checks. successor to applocker with kernel-level enforcement. application controls harden cwe-494 cwe-829 cwe-345 m1038 execution prevention">
+    <div>
+      <a href="entries/CME-925.html" class="sr-id">CME-925</a>
+      <a href="entries/CME-925.html">Windows Defender Application Control (WDAC)</a>
+      <span class="badge badge-tactic-harden">Harden</span>
+      <span class="badge badge-layer-"></span>
+    </div>
+    <div class="sr-desc">Windows application allowlisting framework that enforces code integrity policies at the kernel level. WDAC prevents execution of unauthorized binaries...</div>
+  </li>
+  
   <li data-search="cme-1001 edr agent (endpoint detection &amp; response) real-time behavioral detection and automated response agent on endpoints. detects exploit patterns, lateral movement, and persistence mechanisms. can kill processes, isolate hosts, and quarantine files automatically. runtime detection detect application">
     <div>
       <a href="entries/CME-1001.html" class="sr-id">CME-1001</a>
@@ -1060,6 +1110,16 @@
       <span class="badge badge-layer-application">Application</span>
     </div>
     <div class="sr-desc">Configures the Kubernetes API server audit policy to log security-relevant events including authentication failures, RBAC denials, sensitive resource ...</div>
+  </li>
+  
+  <li data-search="cme-1012 usbguard — usb device access control kernel-level usb device authorization framework that enforces allow/deny/block policies for usb peripheral attachment. prevents badusb attacks (malicious usb devices that emulate keyboards/network adapters), dma-based attacks via thunderbolt/usb-c, and unauthorized data exfiltration via usb storage. integrates with udev and auditd for usb event logging and policy enforcement. policies can be defined per device class, vendor id, product id, or serial number. runtime detection detect cwe-1299 cwe-1188 m1034 limit hardware installation">
+    <div>
+      <a href="entries/CME-1012.html" class="sr-id">CME-1012</a>
+      <a href="entries/CME-1012.html">USBGuard — USB Device Access Control</a>
+      <span class="badge badge-tactic-detect">Detect</span>
+      <span class="badge badge-layer-"></span>
+    </div>
+    <div class="sr-desc">Kernel-level USB device authorization framework that enforces allow/deny/block policies for USB peripheral attachment. Prevents BadUSB attacks (malici...</div>
   </li>
   
   <li data-search="cme-1012 pre-commit secrets detection (gitleaks/trufflehog) automated scanning of code commits for embedded secrets (api keys, passwords, private keys, tokens, connection strings) using pattern-based and entropy-based detection. runs as a git pre-commit hook or ci pipeline gate to prevent hard-coded credentials from reaching repositories where they can be harvested by attackers or leaked in public forks. tools include gitleaks, trufflehog, and git-secrets. complements credential rotation and vault-based secret management by catching secrets that bypass those controls at the source code layer. integrity detection detect application cwe-798 cwe-312 cwe-316">
@@ -1282,7 +1342,7 @@
     <div class="sr-desc">Normalize and canonicalize all user-supplied structured input (URLs, IP addresses, domain names, file paths, type identifiers, protocol schemes) to a ...</div>
   </li>
   
-  <li data-search="cme-1315 allowlist-preferred input validation (deny-by-default filtering) structure all security-sensitive input validation as allowlists (explicit permit lists with default-deny) rather than denylists (explicit block lists with default-permit). denylists are inherently incomplete — every new input format, encoding variant, or aliasing technique the denylist does not cover becomes a bypass vector. allowlists reject unknown or unexpected inputs by default, requiring the attacker to find an input that both matches the allowlist pattern and achieves the malicious objective. when allowlists are impractical (e.g., html sanitization where the set of safe elements is large but finite), combine a denylist with input canonicalization (cme-1314) and output encoding to create defense in depth. this control applies to ssrf destination validation, deserialization type validation, sandbox capability restrictions, application security policies, and any context where a list determines whether an input is permitted. application input validation harden application cwe-184 cwe-183 cwe-693 cwe-20 cwe-1286 cwe-601">
+  <li data-search="cme-1315 allowlist-preferred input validation (deny-by-default filtering) structure all security-sensitive input validation as allowlists (explicit permit lists with default-deny) rather than denylists (explicit block lists with default-permit). denylists are inherently incomplete — every new input format, encoding variant, or aliasing technique the denylist does not cover becomes a bypass vector. allowlists reject unknown or unexpected inputs by default, requiring the attacker to find an input that both matches the allowlist pattern and achieves the malicious objective. when allowlists are impractical (e.g., html sanitization where the set of safe elements is large but finite), combine a denylist with input canonicalization (cme-1314) and output encoding to create defense in depth. this control applies to ssrf destination validation, deserialization type validation, sandbox capability restrictions, application security policies, and any context where a list determines whether an input is permitted. for data written to resources that an interpreter might execute, such as templates, include files, interpreter configuration, libraries, or generated code, allowlist the complete permitted data grammar and reject directives or executable syntax. store untrusted data outside executable resources whenever possible; when it must be written to an executable context, apply context-appropriate output encoding or neutralization before the write. application input validation harden application cwe-184 cwe-183 cwe-693 cwe-20 cwe-1286 cwe-601 cwe-96">
     <div>
       <a href="entries/CME-1315.html" class="sr-id">CME-1315</a>
       <a href="entries/CME-1315.html">Allowlist-Preferred Input Validation (Deny-by-Default Filtering)</a>
@@ -1312,6 +1372,26 @@
     <div class="sr-desc">Configures XML parsers to disable external entity resolution, DTD processing, and XInclude expansion, preventing XXE attacks that exploit default-perm...</div>
   </li>
   
+  <li data-search="cme-1318 ldap injection prevention prevention of ldap injection attacks through parameterized ldap queries, input sanitization of special characters (*, (, ), \, nul, |, &amp;), and use of ldap filter escaping functions. prevents attackers from manipulating ldap search filters to bypass authentication, escalate privileges, or extract unauthorized directory data. applies dn escaping for distinguished names and filter escaping for search filter values. application input validation harden cwe-90 cwe-943 cwe-20">
+    <div>
+      <a href="entries/CME-1318.html" class="sr-id">CME-1318</a>
+      <a href="entries/CME-1318.html">LDAP Injection Prevention</a>
+      <span class="badge badge-tactic-harden">Harden</span>
+      <span class="badge badge-layer-"></span>
+    </div>
+    <div class="sr-desc">Prevention of LDAP injection attacks through parameterized LDAP queries, input sanitization of special characters (*, (, ), \, NUL, |, &amp;), and use of ...</div>
+  </li>
+  
+  <li data-search="cme-1319 deserialization type allowlisting prevention of deserialization attacks through type allowlisting, signature verification of serialized data, and use of safe deserialization libraries. restricts deserialization to explicitly allowed classes and validates object graphs before reconstruction. applies to java (objectinputstream with objectinputfilter), python (restricted pickle with custom unpickler), .net (datacontractserializer, avoiding binaryformatter), ruby (safe marshal alternatives), and php (json over unserialize). prevents remote code execution via crafted serialized payloads by blocking gadget chain instantiation. application input validation harden cwe-502 cwe-915 cwe-20 m1048 application isolation and sandboxing">
+    <div>
+      <a href="entries/CME-1319.html" class="sr-id">CME-1319</a>
+      <a href="entries/CME-1319.html">Deserialization Type Allowlisting</a>
+      <span class="badge badge-tactic-harden">Harden</span>
+      <span class="badge badge-layer-"></span>
+    </div>
+    <div class="sr-desc">Prevention of deserialization attacks through type allowlisting, signature verification of serialized data, and use of safe deserialization libraries....</div>
+  </li>
+  
 </ul>
 
 <script>
@@ -1338,7 +1418,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-09 22:49 UTC &middot; 128 entries &middot;
+    Generated 2026-09-15 15:58 UTC &middot; 136 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

@@ -29,7 +29,7 @@
 <div class="tactic-section">
   <h2>
     <span class="badge badge-tactic-harden">Harden</span>
-    Harden (87)
+    Harden (93)
   </h2>
   <table class="data-table">
     <thead>
@@ -320,6 +320,40 @@
         <td>1</td>
       </tr>
       
+      <tr>
+        <td class="cme-id-cell"><a href="entries/CME-924.html">CME-924</a></td>
+        <td><a href="entries/CME-924.html">Arbitrary Code Guard (ACG)</a></td>
+        <td>Application Controls</td>
+        <td class="function-cell">runtime-hardening</td>
+        <td><span class="badge badge-layer-"></span></td>
+        <td>Preventive / Deterministic</td>
+        <td>
+          
+          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
+          
+          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
+          
+        </td>
+        <td>4</td>
+      </tr>
+      
+      <tr>
+        <td class="cme-id-cell"><a href="entries/CME-925.html">CME-925</a></td>
+        <td><a href="entries/CME-925.html">Windows Defender Application Control (WDAC)</a></td>
+        <td>Application Controls</td>
+        <td class="function-cell">runtime-hardening</td>
+        <td><span class="badge badge-layer-"></span></td>
+        <td>Preventive / Deterministic</td>
+        <td>
+          
+          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
+          
+          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
+          
+        </td>
+        <td>3</td>
+      </tr>
+      
       
       
       <tr>
@@ -557,7 +591,7 @@
           <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
           
         </td>
-        <td>6</td>
+        <td>7</td>
       </tr>
       
       <tr>
@@ -587,6 +621,44 @@
           <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">N</span>, 
           
           <span class="cvss-from">A:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">N</span>
+          
+        </td>
+        <td>3</td>
+      </tr>
+      
+      <tr>
+        <td class="cme-id-cell"><a href="entries/CME-1318.html">CME-1318</a></td>
+        <td><a href="entries/CME-1318.html">LDAP Injection Prevention</a></td>
+        <td>Application Input Validation</td>
+        <td class="function-cell">injection-prevention</td>
+        <td><span class="badge badge-layer-"></span></td>
+        <td>Preventive / Deterministic</td>
+        <td>
+          
+          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
+          
+          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>, 
+          
+          <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
+          
+        </td>
+        <td>3</td>
+      </tr>
+      
+      <tr>
+        <td class="cme-id-cell"><a href="entries/CME-1319.html">CME-1319</a></td>
+        <td><a href="entries/CME-1319.html">Deserialization Type Allowlisting</a></td>
+        <td>Application Input Validation</td>
+        <td class="function-cell">injection-prevention</td>
+        <td><span class="badge badge-layer-"></span></td>
+        <td>Preventive / Deterministic</td>
+        <td>
+          
+          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
+          
+          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>, 
+          
+          <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
           
         </td>
         <td>3</td>
@@ -756,6 +828,25 @@
           
         </td>
         <td>3</td>
+      </tr>
+      
+      <tr>
+        <td class="cme-id-cell"><a href="entries/CME-808.html">CME-808</a></td>
+        <td><a href="entries/CME-808.html">Local Administrator Password Solution (LAPS)</a></td>
+        <td>Credential Hardening</td>
+        <td class="function-cell">password-policy</td>
+        <td><span class="badge badge-layer-"></span></td>
+        <td>Preventive / Deterministic</td>
+        <td>
+          
+          <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>, 
+          
+          <span class="cvss-from">PR:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>, 
+          
+          <span class="cvss-from">S:C</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">U</span>
+          
+        </td>
+        <td>4</td>
       </tr>
       
       
@@ -1324,6 +1415,25 @@
         <td>2</td>
       </tr>
       
+      <tr>
+        <td class="cme-id-cell"><a href="entries/CME-305.html">CME-305</a></td>
+        <td><a href="entries/CME-305.html">macOS System Integrity Protection (SIP)</a></td>
+        <td>Mandatory Access Control</td>
+        <td class="function-cell">kernel-attack-surface</td>
+        <td><span class="badge badge-layer-"></span></td>
+        <td>Preventive / Deterministic</td>
+        <td>
+          
+          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
+          
+          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">N</span>, 
+          
+          <span class="cvss-from">PR:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
+          
+        </td>
+        <td>3</td>
+      </tr>
+      
       
       
       <tr>
@@ -1468,7 +1578,7 @@
 <div class="tactic-section">
   <h2>
     <span class="badge badge-tactic-isolate">Isolate</span>
-    Isolate (22)
+    Isolate (23)
   </h2>
   <table class="data-table">
     <thead>
@@ -1790,6 +1900,23 @@
         <td>2</td>
       </tr>
       
+      <tr>
+        <td class="cme-id-cell"><a href="entries/CME-209.html">CME-209</a></td>
+        <td><a href="entries/CME-209.html">Kubernetes NetworkPolicy Enforcement</a></td>
+        <td>Network Isolation</td>
+        <td class="function-cell">network-filtering</td>
+        <td><span class="badge badge-layer-"></span></td>
+        <td>Preventive / Deterministic</td>
+        <td>
+          
+          <span class="cvss-from">AV:N</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">A</span>, 
+          
+          <span class="cvss-from">S:C</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">U</span>
+          
+        </td>
+        <td>3</td>
+      </tr>
+      
       
       
       <tr>
@@ -1866,7 +1993,7 @@
 <div class="tactic-section">
   <h2>
     <span class="badge badge-tactic-detect">Detect</span>
-    Detect (12)
+    Detect (13)
   </h2>
   <table class="data-table">
     <thead>
@@ -2070,6 +2197,23 @@
         <td>2</td>
       </tr>
       
+      <tr>
+        <td class="cme-id-cell"><a href="entries/CME-1012.html">CME-1012</a></td>
+        <td><a href="entries/CME-1012.html">USBGuard — USB Device Access Control</a></td>
+        <td>Runtime Detection</td>
+        <td class="function-cell">host-monitoring</td>
+        <td><span class="badge badge-layer-"></span></td>
+        <td>Preventive / Deterministic</td>
+        <td>
+          
+          <span class="cvss-from">AV:P</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>, 
+          
+          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
+          
+        </td>
+        <td>2</td>
+      </tr>
+      
       
     </tbody>
   </table>
@@ -2243,7 +2387,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-09 22:49 UTC &middot; 128 entries &middot;
+    Generated 2026-09-15 15:58 UTC &middot; 136 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>
