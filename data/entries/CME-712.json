@@ -31,19 +31,34 @@
     "method": "Verify image signature verification is enforced at admission or runtime level",
     "commands": [
       {
-        "command": "kubectl get clusterimagepolicy --no-headers 2>/dev/null || kubectl get policy.sigstore.dev --no-headers 2>/dev/null",
-        "expected": "Image policy resources present",
+        "command": "kubectl get clusterimagepolicy --no-headers 2>/dev/null | wc -l || kubectl get policy.sigstore.dev --no-headers 2>/dev/null | wc -l",
+        "expected": ">=1",
         "platform": "kubernetes"
       },
       {
-        "command": "podman image trust show",
-        "expected": "Trust policy configured with signature requirements for production registries",
+        "command": "kubectl get clusterpolicy -o jsonpath='{range .items[*]}{.spec.rules[*].verifyImages}{end}' 2>/dev/null | grep -c 'image'",
+        "expected": ">=1",
+        "platform": "kubernetes"
+      },
+      {
+        "command": "podman image trust show 2>/dev/null | grep -c 'signedBy'",
+        "expected": ">=1",
         "platform": "linux"
       },
       {
-        "command": "cosign verify --key /path/to/cosign.pub <image> 2>&1 | head -1",
-        "expected": "Verification for <image> -- The following checks were performed",
+        "command": "cat /etc/containers/policy.json 2>/dev/null | grep -c 'signedBy'",
+        "expected": ">=1",
+        "platform": "linux"
+      },
+      {
+        "command": "cosign verify --key <cosign_public_key> <image> 2>&1 | grep -c 'The following checks were performed'",
+        "expected": "1",
         "platform": "any"
+      },
+      {
+        "command": "kubectl run cme-unsigned-test --image=docker.io/library/busybox:latest --restart=Never --dry-run=server 2>&1 | grep -c -i 'denied\\|forbidden\\|failed.*verif\\|signature'",
+        "expected": ">=1",
+        "platform": "kubernetes"
       }
     ]
   },

@@ -21,28 +21,32 @@
     "CWE-183",
     "CWE-20",
     "CWE-180",
-    "CWE-1289"
+    "CWE-1289",
+    "CWE-176"
   ],
   "verification": {
     "method": "Review application source code for canonicalization/normalization calls that execute before security-relevant comparisons (allowlist checks, denylist checks, policy evaluations). Verify that the canonicalized form — not the raw input — is used in all subsequent security decisions.",
     "commands": [
       {
-        "command": "grep -rn 'urllib.parse\\|urlparse\\|URL.parse\\|new URL\\|InetAddress.getByName\\|normalize\\|canonicalize\\|realpath\\|resolve' <app_source>/",
-        "expected": "Canonicalization calls present before security-relevant comparisons",
+        "command": "grep -rn 'urllib.parse\\|urlparse\\|URL.parse\\|new URL\\|InetAddress.getByName\\|canonicalize\\|NFC\\|NFKC\\|unicodedata.normalize\\|Normalizer.normalize\\|os.path.realpath\\|Path.*resolve' <app_source>/ | grep -i 'input\\|request\\|param\\|user\\|url\\|path\\|host\\|addr'",
+        "expected": "Canonicalization/normalization calls present in input-handling code paths that feed into security decisions",
         "platform": "any"
       },
       {
-        "command": "grep -rn 'allowlist\\|blocklist\\|denylist\\|whitelist\\|blacklist' <app_source>/ | head -20",
-        "expected": "Security list checks should reference canonicalized/normalized values, not raw input",
+        "command": "grep -rn 'allowlist\\|blocklist\\|denylist\\|whitelist\\|blacklist' <app_source>/ | grep -i 'request\\|req\\.\\|params\\|raw\\|input\\|getParameter' | head -10",
+        "expected": "Zero matches — security list checks should operate on canonicalized values, not raw request parameters",
+        "platform": "any"
+      },
+      {
+        "command": "curl -s -o /dev/null -w '%{http_code}' '<app_endpoint>/%2e%2e/%2e%2e/etc/passwd' && echo ' ' && curl -s -o /dev/null -w '%{http_code}' '<app_endpoint>/../../etc/passwd'",
+        "expected": "Both requests return identical response codes (both blocked or both canonicalized and rejected)",
         "platform": "any"
       }
     ]
   },
   "confidence": "High",
   "platforms": [
-    "Any",
-    "Windows Server 2019",
-    "Windows Server 2022"
+    "Any"
   ],
   "scf_identifiers": [
     "WEB-09"
@@ -86,6 +90,13 @@
     {
       "target_namespace": "CWE",
       "target_id": "CWE-1289",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-176",
       "relationship_type": "mitigates",
       "method": "supportive",
       "evidence_state": "unquantified"

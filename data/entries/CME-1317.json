@@ -31,8 +31,8 @@
     "method": "Verify that XML parsers are configured to disable external entities and DTD processing across all application languages in use",
     "commands": [
       {
-        "command": "grep -rn 'FEATURE_SECURE_PROCESSING\\|disallow-doctype-decl\\|XMLConstants\\|setFeature.*external' <app_source>/",
-        "expected": "Secure XML parsing features enabled in Java XML parser configuration",
+        "command": "grep -rn 'FEATURE_SECURE_PROCESSING\\|disallow-doctype-decl\\|ACCESS_EXTERNAL_DTD\\|ACCESS_EXTERNAL_SCHEMA\\|IS_SUPPORTING_EXTERNAL_ENTITIES\\|SUPPORT_DTD' <app_source>/",
+        "expected": "Java XML parser configured with XXE-prevention features (external DTD/schema access disabled, entity support disabled)",
         "platform": "any"
       },
       {
@@ -41,22 +41,35 @@
         "platform": "any"
       },
       {
-        "command": "grep -rn 'DtdProcessing.Prohibit\\|ProhibitDtd.*true\\|XmlReaderSettings' <app_source>/",
-        "expected": ".NET XML parsing prohibits DTD processing",
+        "command": "grep -rn 'DtdProcessing.Prohibit\\|ProhibitDtd.*true\\|XmlResolver.*null' <app_source>/",
+        "expected": ".NET XML parsing prohibits DTD processing or sets XmlResolver to null",
         "platform": "any"
       },
       {
-        "command": "grep -rn 'libxml_disable_entity_loader\\|LIBXML_NOENT\\|XML_PARSE_NOENT' <app_source>/",
-        "expected": "PHP/C XML parsing has external entity loading disabled",
+        "command": "grep -rn 'libxml_disable_entity_loader' <app_source>/",
+        "expected": "PHP XML parsing has external entity loading disabled via libxml_disable_entity_loader(true)",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'LIBXML_NOENT\\|XML_PARSE_NOENT' <app_source>/",
+        "expected": "Zero matches — LIBXML_NOENT/XML_PARSE_NOENT enables entity substitution (misleading name) and is a vulnerability indicator, not a safety control",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'xml\\.NewDecoder\\|xml\\.Decoder\\|encoding/xml' <app_source>/ | head -10",
+        "expected": "Go XML parsing present — verify no external entity resolution configuration (Go xml.Decoder does not resolve external entities by default)",
+        "platform": "any"
+      },
+      {
+        "command": "printf '<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///etc/hostname\">]><root>&xxe;</root>' | curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/xml' -d @- <app_endpoint>",
+        "expected": "^(400|403|422)$",
         "platform": "any"
       }
     ]
   },
   "confidence": "High",
   "platforms": [
-    "Any",
-    "Windows Server 2019",
-    "Windows Server 2022"
+    "Any"
   ],
   "scf_identifiers": [
     "WEB-07",

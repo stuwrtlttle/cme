@@ -10,16 +10,10 @@
   "attenuation_type": "deterministic",
   "cvss_vector_impacts": [
     {
-      "metric": "PR",
-      "from": "N",
-      "to": "L",
-      "rationale": "Unauthorized workloads cannot be deployed without policy exemption; admission controller rejects API requests that violate security constraints before the workload is persisted"
-    },
-    {
       "metric": "AC",
       "from": "L",
       "to": "H",
-      "rationale": "Attacker must bypass the policy engine to deploy a malicious or privileged workload; simply having API access is insufficient without a policy-compliant manifest"
+      "rationale": "Attacker must bypass the policy engine to deploy a malicious or privileged workload; simply having API access is insufficient without a policy-compliant manifest — the attacker must find a policy gap, exempt namespace, or webhook bypass"
     }
   ],
   "cwe_relationships": [
@@ -32,17 +26,27 @@
     "commands": [
       {
         "command": "kubectl get constraint --no-headers 2>/dev/null | wc -l",
-        "expected": "One or more constraints active (OPA/Gatekeeper)",
+        "expected": ">=1",
         "platform": "kubernetes"
       },
       {
         "command": "kubectl get clusterpolicy --no-headers 2>/dev/null | wc -l",
-        "expected": "One or more cluster policies active (Kyverno)",
+        "expected": ">=1",
         "platform": "kubernetes"
       },
       {
-        "command": "oc get scc --no-headers | wc -l",
-        "expected": "SecurityContextConstraints present (OpenShift built-in admission)",
+        "command": "oc get scc --no-headers 2>/dev/null | wc -l",
+        "expected": ">=1",
+        "platform": "kubernetes"
+      },
+      {
+        "command": "kubectl get constraint -o jsonpath='{range .items[*]}{.spec.enforcementAction}{\"\\n\"}{end}' 2>/dev/null | grep -c -i 'deny'",
+        "expected": ">=1",
+        "platform": "kubernetes"
+      },
+      {
+        "command": "kubectl run cme-test --image=busybox --restart=Never --dry-run=server --overrides='{\"spec\":{\"containers\":[{\"name\":\"test\",\"image\":\"busybox\",\"securityContext\":{\"privileged\":true}}]}}' 2>&1 | grep -c -i 'denied\\|forbidden\\|violated'",
+        "expected": ">=1",
         "platform": "kubernetes"
       }
     ]
@@ -87,13 +91,6 @@
     }
   ],
   "framework_bindings": [
-    {
-      "namespace": "CVSS",
-      "version": "4.0",
-      "identifier": "Environmental/PR",
-      "value": "N->L",
-      "relationship_type": "maps_to"
-    },
     {
       "namespace": "CVSS",
       "version": "4.0",

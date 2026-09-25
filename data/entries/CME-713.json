@@ -19,7 +19,7 @@
       "metric": "AC",
       "from": "L",
       "to": "H",
-      "rationale": "Exploitation chain requires identifying a writable volume mount to stage payloads; the default filesystem is immutable"
+      "rationale": "Root filesystem modification is blocked; exploitation chain requires identifying a writable volume mount (tmpfs, emptyDir, PVC) to stage payloads — complexity increase is strongest when writable mounts are minimized to essential paths only"
     }
   ],
   "cwe_relationships": [
@@ -31,8 +31,8 @@
     "method": "Verify container root filesystem is mounted read-only",
     "commands": [
       {
-        "command": "kubectl get pod <pod> -o jsonpath='{.spec.containers[*].securityContext.readOnlyRootFilesystem}'",
-        "expected": "true",
+        "command": "kubectl get pod <pod> -o jsonpath='{range .spec.containers[*]}{\"ro=\"}{.securityContext.readOnlyRootFilesystem}{\"\\n\"}{end}' 2>/dev/null | grep 'ro=' | grep -c -v 'ro=true'",
+        "expected": "0",
         "platform": "kubernetes"
       },
       {
@@ -44,6 +44,21 @@
         "command": "docker inspect <ctr> --format '{{.HostConfig.ReadonlyRootfs}}'",
         "expected": "true",
         "platform": "linux"
+      },
+      {
+        "command": "kubectl get pod <pod> -o jsonpath='{range .spec.containers[*].volumeMounts[*]}{.mountPath}{\"\\t\"}{.readOnly}{\"\\n\"}{end}' 2>/dev/null | grep -v 'true$' | grep -c -E '^/(usr|bin|sbin|lib|etc|opt|srv|var/www)'",
+        "expected": "0",
+        "platform": "kubernetes"
+      },
+      {
+        "command": "kubectl get clusterpolicy,constrainttemplate -o json 2>/dev/null | grep -c -i 'readOnlyRootFilesystem'",
+        "expected": ">=1",
+        "platform": "kubernetes"
+      },
+      {
+        "command": "kubectl exec <pod> -c <ctr> -- sh -c 'touch /cme-write-test 2>&1' | grep -c -i 'read-only'",
+        "expected": "1",
+        "platform": "kubernetes"
       }
     ]
   },

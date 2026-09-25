@@ -14,6 +14,12 @@
       "from": "L",
       "to": "H",
       "rationale": "Malicious size or count values are rejected before reaching allocation or copy operations; the attacker must find a quantity field that bypasses validation or an alternative code path that does not enforce bounds"
+    },
+    {
+      "metric": "A",
+      "from": "H",
+      "to": "L",
+      "rationale": "Bounds enforcement rejects allocation and iteration requests that exceed configured maximums, preventing unbounded resource consumption from attacker-controlled size or count fields; low availability impact remains possible from repeated bounded-but-large operations within limits"
     }
   ],
   "cwe_relationships": [
@@ -23,29 +29,30 @@
     "CWE-190",
     "CWE-131",
     "CWE-130",
-    "CWE-681"
+    "CWE-681",
+    "CWE-789"
   ],
   "confidence": "High",
   "platforms": [
-    "RHEL 9",
-    "RHEL 10",
-    "Ubuntu 24.04",
-    "Fedora",
-    "Windows Server 2019",
-    "Windows Server 2022"
+    "Any"
   ],
   "verification": {
     "method": "Verify that the application enforces maximum size limits on user-supplied quantity fields and rejects values outside expected ranges",
     "commands": [
       {
-        "command": "curl -s -o /dev/null -w \"%{http_code}\" -H \"Content-Length: 999999999\" -d @/dev/null https://app/api/upload",
-        "expected": "413 (Payload Too Large)",
-        "platform": "linux"
+        "command": "grep -rn 'check_mul\\|__builtin_mul_overflow\\|__builtin_add_overflow\\|SafeInt\\|checked_mul\\|Math\\.multiplyExact\\|Math\\.addExact\\|Integer\\.MAX_VALUE\\|SIZE_MAX\\|SSIZE_MAX' <app_source>/",
+        "expected": "Safe integer arithmetic or size limit constants used before allocation operations",
+        "platform": "any"
       },
       {
-        "command": "grep -r \"max_.*size\\|MAX_.*SIZE\\|max_.*length\\|MAX_.*LEN\\|max_.*count\\|MAX_.*COUNT\" /etc/nginx/nginx.conf /etc/httpd/conf/httpd.conf 2>/dev/null | head -5",
-        "expected": "configured size limits present",
-        "platform": "linux"
+        "command": "grep -rn 'MAX_.*SIZE\\|MAX_.*COUNT\\|MAX_.*LENGTH\\|MAX_.*ELEMENTS\\|LIMIT_.*SIZE\\|max_.*elements\\|kMax' <app_source>/",
+        "expected": "Application-defined maximum bounds for user-supplied quantity fields",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'if.*size.*>\\|if.*count.*>\\|if.*length.*>\\|if.*len.*>.*MAX\\|if.*n\\b.*>.*MAX' <app_source>/ | head -10",
+        "expected": "Bounds checks on size/count/length variables before allocation or iteration",
+        "platform": "any"
       }
     ]
   },
@@ -109,6 +116,13 @@
       "relationship_type": "mitigates",
       "method": "supportive",
       "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-789",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
     }
   ],
   "framework_bindings": [
@@ -117,6 +131,13 @@
       "version": "4.0",
       "identifier": "Environmental/AC",
       "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/A",
+      "value": "H->L",
       "relationship_type": "maps_to"
     },
     {
