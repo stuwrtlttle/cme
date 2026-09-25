@@ -2,6 +2,12 @@
 
 All notable changes to the CME (Common Mitigation Enumeration) project are documented here.
 
+## 2026-09-25
+
+### Auto-generated changelog
+
+- `d2d1807` Add 2 CME entries (CME-1318,CME-1319);Update 15 CME entries (CME-1308,CME-1309,CME-1310,CME-1311,CME-1312,CME-1313,CME-1314,CME-1316,CME-1317,CME-1318-LDAP-Injection,CME-1319-Deserialization-Enhanced,CME-711,CME-712,CME-713,CME-914);Update software-lineage-service-timeline.md
+
 ## 2026-09-15
 
 ### Auto-generated changelog
