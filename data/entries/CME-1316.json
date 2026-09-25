@@ -42,22 +42,25 @@
         "platform": "windows"
       },
       {
-        "command": "grep -rn 'RegexOptions\\.NonBacktracking\\|RegexOptions\\.MatchTimeout\\|Regex\\.IsMatch.*TimeSpan' <app_source>/ | head -10",
-        "expected": "Regex operations use NonBacktracking mode (.NET 7+) or explicit MatchTimeout",
+        "command": "grep -rn 'RegexOptions\\.NonBacktracking\\|MatchTimeout\\|Regex\\.IsMatch.*TimeSpan\\|Pattern\\.compile.*CANON_EQ\\|re2j\\.Pattern\\|regex\\.timeout\\|re\\.set_timeout' <app_source>/ | head -10",
+        "expected": "Regex operations use NonBacktracking mode, explicit timeout, or safe engine bindings",
         "platform": "any"
       },
       {
-        "command": "grep -rn 'new RegExp(\\|RegExp(.*\\buser\\|RegExp(.*\\breq\\.' <app_source>/ | head -10",
-        "expected": "No instances of user-controlled input compiled into RegExp without escaping",
+        "command": "grep -rn 'new RegExp(.*req\\.\\|new RegExp(.*user\\|re\\.compile(.*request\\|re\\.compile(.*input\\|re\\.compile(.*user\\|Pattern\\.compile(.*request\\|Pattern\\.compile(.*getParameter' <app_source>/ | head -10",
+        "expected": "Zero matches — user-controlled input must not be compiled into regex without escaping or literal-match API",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'require.*re2\\|import re2\\|from google.re2\\|from google import re2\\|import com.google.re2j\\|regex::Regex' <app_source>/",
+        "expected": "Application imports safe regex engine (RE2, re2j, Rust regex) instead of or alongside the default backtracking engine",
         "platform": "any"
       }
     ]
   },
   "confidence": "High",
   "platforms": [
-    "Any",
-    "Windows Server 2019",
-    "Windows Server 2022"
+    "Any"
   ],
   "scf_identifiers": [
     "NET-02.1",

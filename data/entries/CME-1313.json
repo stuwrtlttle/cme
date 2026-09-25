@@ -24,7 +24,8 @@
   ],
   "cwe_relationships": [
     "CWE-93",
-    "CWE-113"
+    "CWE-113",
+    "CWE-117"
   ],
   "verification": {
     "method": "Verify that input handling code strips or rejects CR/LF characters before constructing multi-line format outputs",
@@ -35,17 +36,25 @@
         "platform": "any"
       },
       {
-        "command": "grep -rn 'set-cookie\\|Set-Header\\|add_header\\|setHeader' <app_source>/ | head -20",
-        "expected": "Header-setting code validates input values do not contain CR/LF",
+        "command": "grep -rn 'setHeader\\|set_header\\|add_header\\|response\\.header\\|Set-Cookie' <app_source>/ | head -20",
+        "expected": "Header-setting code uses framework APIs that reject CR/LF or applies upstream sanitization",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'log\\.\\|logger\\.\\|logging\\.\\|syslog\\|console\\.log' <app_source>/ | grep -i 'user\\|input\\|param\\|request\\|req\\.' | head -10",
+        "expected": "Log statements that include user input apply newline sanitization before writing",
+        "platform": "any"
+      },
+      {
+        "command": "curl -s -o /dev/null -w '%{http_code}' -H 'X-Test: value%0d%0aInjected-Header: true' <app_endpoint>",
+        "expected": "^(400|403)$",
         "platform": "any"
       }
     ]
   },
   "confidence": "High",
   "platforms": [
-    "Any",
-    "Windows Server 2019",
-    "Windows Server 2022"
+    "Any"
   ],
   "references": [
     {
@@ -86,6 +95,13 @@
     {
       "target_namespace": "CWE",
       "target_id": "CWE-113",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-117",
       "relationship_type": "mitigates",
       "method": "supportive",
       "evidence_state": "unquantified"

@@ -6,8 +6,9 @@
   "category": "Application Input Validation",
   "category_id": "application-input-validation",
   "function_id": "injection-prevention",
+  "control_layer": "Application",
   "effect_mode": "preventive",
-  "evidence_state": "deterministic",
+  "evidence_state": "unquantified",
   "cvss_vector_impacts": [
     {
       "metric": "AC",
@@ -37,18 +38,18 @@
     "method": "Code review for LDAP filter escaping and parameterized queries",
     "commands": [
       {
-        "command": "grep -r 'ldap_search' /path/to/app | grep -v -E '(ldap_escape|escapeLdapFilter|Filter.escape)'",
-        "expected": "No matches (all queries use escaping)",
-        "platform": "linux"
+        "command": "grep -rn 'ldap_escape\\|escapeLdapFilter\\|Filter\\.escape\\|LdapFilterEncode\\|escape_filter_chars\\|ldap_escape_filter' <app_source>/",
+        "expected": "LDAP filter escaping functions present in code paths that construct LDAP queries",
+        "platform": "any"
       },
       {
-        "command": "grep -r 'DirectorySearcher' /path/to/app/*.cs | grep 'Filter\\s*=' | grep -v 'Encoder.LdapFilterEncode'",
-        "expected": "No matches (all .NET LDAP queries use encoding)",
-        "platform": "windows"
+        "command": "grep -rn 'ldap_search\\|search_s\\|ldap\\.search\\|DirectorySearcher\\|LdapConnection.*Search\\|SearchRequest' <app_source>/ | grep -v -i 'escape\\|encode\\|sanitiz\\|filter_format' | head -10",
+        "expected": "Zero matches — all LDAP search calls should have upstream escaping or parameterization",
+        "platform": "any"
       },
       {
-        "command": "semgrep --config 'r/generic.secrets.security.detected-ldap-injection' /path/to/app",
-        "expected": "No findings",
+        "command": "grep -rn 'dn_escape\\|escape_dn_chars\\|escapeDN\\|Encoder.LdapDistinguishedNameEncode' <app_source>/",
+        "expected": "DN escaping present for code paths that construct distinguished names from user input",
         "platform": "any"
       }
     ]
@@ -64,8 +65,13 @@
     }
   ],
   "platforms": [
-    "Any (application-layer control)"
+    "Any"
   ],
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
   "scf_identifiers": [
     "IAC-15",
     "IAC-15.1"
@@ -77,23 +83,21 @@
       "relationship_type": "mitigates",
       "method": "structural",
       "rationale": "Directly prevents LDAP injection by escaping special characters in filter values",
-      "evidence_state": "deterministic"
+      "evidence_state": "unquantified"
     },
     {
       "target_namespace": "CWE",
       "target_id": "CWE-943",
       "relationship_type": "mitigates",
       "method": "supportive",
-      "rationale": "Prevents improper neutralization of special elements in data query logic (LDAP variant)",
-      "evidence_state": "deterministic"
+      "evidence_state": "unquantified"
     },
     {
       "target_namespace": "CWE",
       "target_id": "CWE-20",
       "relationship_type": "mitigates",
       "method": "supportive",
-      "rationale": "Input validation via LDAP filter escaping",
-      "evidence_state": "deterministic"
+      "evidence_state": "unquantified"
     }
   ],
   "framework_bindings": [
@@ -108,6 +112,13 @@
       "namespace": "CVSS",
       "version": "4.0",
       "identifier": "Environmental/I",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/C",
       "value": "H->L",
       "relationship_type": "maps_to"
     },

@@ -5,47 +5,49 @@
   "tactic": "Harden",
   "category": "Application Input Validation",
   "category_id": "application-input-validation",
-  "function_id": "input-validation",
+  "function_id": "injection-prevention",
   "control_layer": "Application",
-  "attenuation_type": "deterministic",
+  "attenuation_type": "probabilistic",
   "cvss_vector_impacts": [
     {
       "metric": "AC",
       "from": "L",
       "to": "H",
-      "rationale": "Direct code execution via the scripting engine is blocked; exploitation requires discovering a sandbox bypass or an unrestricted evaluation path, which demands vulnerability-specific research rather than trivial payload submission"
+      "rationale": "Direct code execution via the scripting engine is blocked; exploitation requires discovering a sandbox bypass or an unrestricted evaluation path, which demands vulnerability-specific research rather than trivial payload submission",
+      "conditions": ["For the 'disable' posture this shift is deterministic; for the 'sandbox' posture it is conditional on the sandbox having no known bypass — Groovy sandboxes in particular have had recurring bypasses"]
     },
     {
       "metric": "I",
       "from": "H",
       "to": "L",
-      "rationale": "Sandboxed script engine cannot invoke arbitrary system commands, modify files, or alter application state outside the permitted API surface; integrity impact is confined to the script's authorized scope"
+      "rationale": "Sandboxed script engine cannot invoke arbitrary system commands, modify files, or alter application state outside the permitted API surface; integrity impact is confined to the script's authorized scope",
+      "conditions": ["Conditional on sandbox robustness — a single sandbox bypass restores full code execution and H integrity impact"]
     },
     {
       "metric": "C",
       "from": "H",
       "to": "L",
-      "rationale": "Script engine cannot read arbitrary files, access credentials, or exfiltrate data from the host; information disclosure is limited to data the script is explicitly permitted to access"
+      "rationale": "Script engine cannot read arbitrary files, access credentials, or exfiltrate data from the host; information disclosure is limited to data the script is explicitly permitted to access",
+      "conditions": ["Conditional on sandbox robustness — a single sandbox bypass restores full filesystem and credential read access"]
     }
   ],
   "cwe_relationships": [
     "CWE-94",
     "CWE-95",
     "CWE-96",
-    "CWE-917"
+    "CWE-917",
+    "CWE-1336"
   ],
   "confidence": "High",
   "platforms": [
-    "Any",
-    "Windows Server 2019",
-    "Windows Server 2022"
+    "Any"
   ],
   "verification": {
     "method": "Verify script consoles are disabled or sandboxed, and expression language evaluation is restricted",
     "commands": [
       {
         "command": "curl -s -o /dev/null -w '%{http_code}' -X POST http://localhost:8080/jenkins/script --data 'script=println(1)'",
-        "expected": "403 or 404 (Script Console disabled or access-restricted to administrators only)",
+        "expected": "^(403|404)$",
         "platform": "any"
       },
       {
@@ -56,6 +58,26 @@
       {
         "command": "grep -rn 'SimpleEvaluationContext\\|StandardEvaluationContext' <app_source>/ | grep -c SimpleEvaluationContext",
         "expected": "SimpleEvaluationContext used instead of StandardEvaluationContext for user-controlled SpEL",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'SandboxedEnvironment\\|jinja2\\.sandbox\\|jinja2\\.ext\\.autoescape' <app_source>/",
+        "expected": "Jinja2 sandbox enforcement present in template rendering paths",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'excludedClasses\\|excludedPackageNames\\|allowedClassNames\\|OgnlUtil.*setExcluded' <app_source>/",
+        "expected": "OGNL class/package exclusion configured in Struts or framework configuration",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'TemplateClassResolver\\.SAFER\\|ALLOWS_NOTHING\\|setNewBuiltinClassResolver' <app_source>/",
+        "expected": "Freemarker template class resolver restricted to safe subset",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'ELPolicy\\|isMethodAllowed\\|ELResolver.*CompositeELResolver' <app_source>/",
+        "expected": "EL 3.0 evaluation restricted via custom ELPolicy or resolver configuration",
         "platform": "any"
       }
     ]
@@ -96,6 +118,13 @@
     {
       "target_namespace": "CWE",
       "target_id": "CWE-917",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-1336",
       "relationship_type": "mitigates",
       "method": "supportive",
       "evidence_state": "unquantified"

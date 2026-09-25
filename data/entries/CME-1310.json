@@ -31,24 +31,35 @@
   ],
   "confidence": "High",
   "platforms": [
-    "RHEL 9",
-    "RHEL 10",
-    "Ubuntu 24.04",
-    "Windows Server 2019",
-    "Windows Server 2022"
+    "Any"
   ],
   "verification": {
     "method": "Verify that the application rejects uploads with disallowed extensions and mismatched content types, and that upload storage is outside the document root",
     "commands": [
       {
-        "command": "curl -s -o /dev/null -w \"%{http_code}\" -F \"file=@/tmp/test.php\" https://app/upload",
-        "expected": "400 or 403 (rejected)",
+        "command": "echo '<?php echo 1; ?>' > /tmp/cme-test.php && curl -s -o /dev/null -w '%{http_code}' -F 'file=@/tmp/cme-test.php' <app_upload_endpoint> && rm -f /tmp/cme-test.php",
+        "expected": "^(400|403)$",
+        "platform": "any"
+      },
+      {
+        "command": "printf 'GIF89a<?php system($_GET[\"cmd\"]); ?>' > /tmp/cme-polyglot.gif && curl -s -o /dev/null -w '%{http_code}' -F 'file=@/tmp/cme-polyglot.gif;type=image/gif' <app_upload_endpoint> && rm -f /tmp/cme-polyglot.gif",
+        "expected": "^(400|403)$",
+        "platform": "any"
+      },
+      {
+        "command": "ls -la /var/www/html/uploads/ 2>/dev/null || echo 'no uploads in web root'",
+        "expected": "no uploads in web root",
         "platform": "linux"
       },
       {
-        "command": "ls -la /var/www/html/uploads/ 2>/dev/null || echo \"no uploads in web root\"",
-        "expected": "directory should not exist inside web root",
-        "platform": "linux"
+        "command": "grep -rn 'MEDIA_ROOT\\|UPLOAD_DIR\\|upload_path\\|multer.*dest\\|storage.*destination' <app_source>/",
+        "expected": "Upload storage directory configured outside web/document root",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'uuid\\|random.*filename\\|secure_filename\\|hashlib.*filename\\|Path.*suffix' <app_source>/",
+        "expected": "Uploaded files are renamed using random or hashed identifiers",
+        "platform": "any"
       }
     ]
   },

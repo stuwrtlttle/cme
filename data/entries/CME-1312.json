@@ -30,28 +30,32 @@
   ],
   "cwe_relationships": [
     "CWE-88",
-    "CWE-74"
+    "CWE-74",
+    "CWE-141"
   ],
   "verification": {
     "method": "Verify that subprocess invocations use -- end-of-options before variable arguments and validate input for delimiter characters",
     "commands": [
       {
-        "command": "grep -rn '\"--\"' <app_source>/",
-        "expected": "End-of-options separator present before variable positional arguments in subprocess calls",
+        "command": "grep -rn \"'--'\\|\\\"--\\\"\" <app_source>/ | grep -i 'subprocess\\|exec\\|spawn\\|run\\|command\\|argv\\|args'",
+        "expected": "End-of-options separator (--) used in subprocess argument arrays before variable positional arguments",
         "platform": "any"
       },
       {
-        "command": "grep -rn 'subprocess\\|exec\\|spawn' <app_source>/ | grep -v 'shell=True'",
-        "expected": "Subprocess invocations use array-based arguments with input validation for delimiter characters",
+        "command": "grep -rn 'replace.*\\\\n\\|replace.*\\\\r\\|replace.*\\\\0\\|strip.*newline\\|reject.*newline\\|startswith.*-\\|lstrip.*-' <app_source>/ | grep -i 'arg\\|input\\|param\\|user\\|url' | head -10",
+        "expected": "Delimiter character sanitization applied to user input before subprocess invocation",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'write.*input.*file\\|write.*args.*file\\|tempfile.*write\\|NamedTemporaryFile' <app_source>/ | head -10",
+        "expected": "Input files for downstream tools validate that user data does not contain format-breaking delimiters",
         "platform": "any"
       }
     ]
   },
   "confidence": "High",
   "platforms": [
-    "Any",
-    "Windows Server 2019",
-    "Windows Server 2022"
+    "Any"
   ],
   "references": [
     {
@@ -92,6 +96,13 @@
     {
       "target_namespace": "CWE",
       "target_id": "CWE-74",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-141",
       "relationship_type": "mitigates",
       "method": "supportive",
       "evidence_state": "unquantified"

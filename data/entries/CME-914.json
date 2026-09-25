@@ -13,19 +13,20 @@
       "metric": "AC",
       "from": "L",
       "to": "H",
-      "rationale": "Cross-origin credentialed reads go from trivially possible (wildcard or reflected-origin CORS) to requiring the attacker to compromise an explicitly allowed origin or find a CORS bypass. The mechanism is the server-side origin validation gate that rejects unapproved origins before including permissive CORS headers."
+      "rationale": "Cross-origin credentialed reads go from trivially possible (wildcard or reflected-origin CORS) to requiring the attacker to compromise an explicitly allowed origin or find a CORS bypass. The mechanism is the server-side origin validation gate that rejects unapproved origins before including permissive CORS headers. This attenuation applies only to browser-mediated attack vectors; direct server-to-server requests are not subject to CORS enforcement."
     },
     {
       "metric": "C",
       "from": "H",
       "to": "L",
-      "rationale": "The primary attack vector for CORS-based CWE-940 vulnerabilities is cross-origin data exfiltration via credentialed fetch/XHR. Strict CORS blocks the browser from delivering authenticated response data to the attacker's JavaScript, limiting confidentiality impact to data obtainable without credentials."
+      "rationale": "The primary attack vector for CORS-based CWE-940 vulnerabilities is cross-origin data exfiltration via credentialed fetch/XHR. Strict CORS blocks the browser from delivering authenticated response data to the attacker's JavaScript, limiting confidentiality impact to data obtainable without credentials. This shift is browser-enforced and does not apply to non-browser attack vectors."
     }
   ],
   "cwe_relationships": [
     "CWE-940",
     "CWE-346",
-    "CWE-942"
+    "CWE-942",
+    "CWE-352"
   ],
   "confidence": "High",
   "platforms": [
@@ -53,7 +54,8 @@
   },
   "scf_identifiers": [
     "WEB-04",
-    "WEB-07"
+    "WEB-07",
+    "WEB-09"
   ],
   "effect_mode": "preventive",
   "evidence_state": "unquantified",
@@ -83,6 +85,14 @@
       "relationship_type": "mitigates",
       "method": "supportive",
       "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-352",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "rationale": "CORS preflight enforcement blocks cross-origin state-changing requests that require non-simple methods or headers; simple-method CSRF still requires token-based defenses (see CME-913).",
+      "evidence_state": "unquantified"
     }
   ],
   "framework_bindings": [
@@ -108,6 +118,11 @@
     {
       "namespace": "SCF",
       "identifier": "WEB-07",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "WEB-09",
       "relationship_type": "maps_to"
     }
   ]

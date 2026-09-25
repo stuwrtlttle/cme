@@ -6,8 +6,9 @@
   "category": "Application Input Validation",
   "category_id": "application-input-validation",
   "function_id": "injection-prevention",
+  "control_layer": "Application",
   "effect_mode": "preventive",
-  "evidence_state": "deterministic",
+  "evidence_state": "unquantified",
   "cvss_vector_impacts": [
     {
       "metric": "AC",
@@ -37,28 +38,23 @@
     "method": "Code review for type allowlisting and safe deserialization patterns",
     "commands": [
       {
-        "command": "grep -r 'ObjectInputStream' /path/to/app | grep -E '(setObjectInputFilter|ObjectInputFilter\\.Config)'",
-        "expected": "All ObjectInputStream uses have filter configured",
+        "command": "grep -rn 'ObjectInputStream' <app_source>/ | grep -v -i 'ObjectInputFilter\\|setObjectInputFilter\\|serialFilter\\|REJECT' | head -10",
+        "expected": "Zero matches — all ObjectInputStream uses should have ObjectInputFilter configured",
         "platform": "any"
       },
       {
-        "command": "grep -r 'pickle\\.loads' /path/to/app | grep -v 'Unpickler.*find_class'",
-        "expected": "No unsafe pickle.loads calls (all use restricted Unpickler)",
+        "command": "grep -rn 'ObjectInputFilter\\|setObjectInputFilter\\|serialFilter\\|ALLOWED_CLASSES\\|jdk\\.serialFilter' <app_source>/",
+        "expected": "Java deserialization type filtering configured via ObjectInputFilter or global serial filter",
         "platform": "any"
       },
       {
-        "command": "grep -r 'BinaryFormatter' /path/to/app",
-        "expected": "No BinaryFormatter usage (insecure, use DataContractSerializer)",
+        "command": "grep -rn 'pickle\\.loads\\|pickle\\.load\\|yaml\\.load\\|yaml\\.unsafe_load\\|Marshal\\.load' <app_source>/ | head -10",
+        "expected": "Zero matches — use restricted Unpickler with find_class override, yaml.safe_load, or JSON instead",
         "platform": "any"
       },
       {
-        "command": "grep -r 'unserialize' /path/to/app | grep -v 'json_decode'",
-        "expected": "No PHP unserialize on untrusted data (use JSON)",
-        "platform": "any"
-      },
-      {
-        "command": "semgrep --config 'r/java.lang.security.audit.object-deserialization' /path/to/app",
-        "expected": "No deserialization findings",
+        "command": "grep -rn 'BinaryFormatter\\|SoapFormatter\\|NetDataContractSerializer\\|ObjectStateFormatter' <app_source>/ | head -10",
+        "expected": "Zero matches — use DataContractSerializer or JsonSerializer instead of insecure .NET formatters",
         "platform": "any"
       }
     ]
@@ -78,8 +74,13 @@
     }
   ],
   "platforms": [
-    "Any (application-layer control)"
+    "Any"
   ],
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
   "scf_identifiers": [
     "IAC-15",
     "IAC-15.2",
@@ -92,23 +93,21 @@
       "relationship_type": "mitigates",
       "method": "structural",
       "rationale": "Directly prevents deserialization of untrusted data by allowlisting safe types",
-      "evidence_state": "deterministic"
+      "evidence_state": "unquantified"
     },
     {
       "target_namespace": "CWE",
       "target_id": "CWE-915",
       "relationship_type": "mitigates",
-      "method": "structural",
-      "rationale": "Prevents improperly controlled modification of dynamically-determined object attributes via deserialization gadgets",
-      "evidence_state": "deterministic"
+      "method": "supportive",
+      "evidence_state": "unquantified"
     },
     {
       "target_namespace": "CWE",
       "target_id": "CWE-20",
       "relationship_type": "mitigates",
       "method": "supportive",
-      "rationale": "Input validation via type allowlisting before deserialization",
-      "evidence_state": "deterministic"
+      "evidence_state": "unquantified"
     }
   ],
   "framework_bindings": [
@@ -123,6 +122,13 @@
       "namespace": "CVSS",
       "version": "4.0",
       "identifier": "Environmental/I",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/C",
       "value": "H->L",
       "relationship_type": "maps_to"
     },
