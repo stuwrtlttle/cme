@@ -116,8 +116,13 @@ def main():
     }
 
     if OUTPUT_DIR.exists():
-        shutil.rmtree(OUTPUT_DIR)
-    OUTPUT_DIR.mkdir(parents=True)
+        for child in OUTPUT_DIR.iterdir():
+            if child.is_dir():
+                shutil.rmtree(child)
+            else:
+                child.unlink()
+    else:
+        OUTPUT_DIR.mkdir(parents=True)
     (OUTPUT_DIR / "entries").mkdir()
 
     # Index
