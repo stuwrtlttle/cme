@@ -51,6 +51,109 @@
     ]
   },
   "confidence": "Medium",
+  "remediation": [
+    {
+      "id": "systemd-resolved-dnssec",
+      "name": "Enable DNSSEC validation in systemd-resolved",
+      "platform": "linux",
+      "precondition": "systemctl is-active systemd-resolved >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Set DNSSEC=yes in resolved.conf to enable strict DNSSEC validation for all queries (responses for signed zones that fail validation are rejected)",
+          "command": "mkdir -p /etc/systemd/resolved.conf.d && printf '[Resolve]\\nDNSSEC=yes\\n' > /etc/systemd/resolved.conf.d/99-cme-405-dnssec.conf",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f /etc/systemd/resolved.conf.d/99-cme-405-dnssec.conf"
+        },
+        {
+          "description": "Restart systemd-resolved to apply DNSSEC validation",
+          "command": "systemctl restart systemd-resolved",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "resolvectl status 2>/dev/null | grep -i 'DNSSEC' | grep -ci 'yes'",
+      "references": [
+        {
+          "source": "systemd-resolved.conf(5) — DNSSEC",
+          "url": "https://www.freedesktop.org/software/systemd/man/latest/resolved.conf.html#DNSSEC="
+        },
+        {
+          "source": "RHEL 9 — Configuring DNS name resolution",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/configuring_and_managing_networking/configuring-the-order-of-dns-servers_configuring-and-managing-networking"
+        }
+      ]
+    },
+    {
+      "id": "unbound-dnssec-strict",
+      "name": "Enable strict DNSSEC validation in Unbound resolver",
+      "platform": "linux",
+      "precondition": "command -v unbound-control >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Configure Unbound with automatic trust anchor management and strict validation mode (val-permissive-mode: no rejects responses that fail DNSSEC validation)",
+          "command": "printf 'server:\\n    auto-trust-anchor-file: \"/var/lib/unbound/root.key\"\\n    val-permissive-mode: no\\n' > /etc/unbound/conf.d/cme-405-dnssec.conf",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f /etc/unbound/conf.d/cme-405-dnssec.conf"
+        },
+        {
+          "description": "Fetch or update the DNSSEC root trust anchor key",
+          "command": "unbound-anchor -a /var/lib/unbound/root.key || true",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Restart Unbound to apply DNSSEC validation configuration",
+          "command": "systemctl restart unbound",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "grep -E '^[^#]*val-permissive-mode' /etc/unbound/unbound.conf /etc/unbound/conf.d/*.conf 2>/dev/null | grep -c 'no'",
+      "references": [
+        {
+          "source": "Unbound documentation — DNSSEC validation",
+          "url": "https://unbound.docs.nlnetlabs.nl/en/latest/topics/filtering/dnssec.html"
+        }
+      ]
+    },
+    {
+      "id": "windows-dns-dnssec",
+      "name": "Enable DNSSEC validation on Windows DNS Server",
+      "platform": "windows",
+      "precondition": "Get-Command Get-DnsServerSetting -ErrorAction SilentlyContinue",
+      "steps": [
+        {
+          "description": "Enable DNSSEC validation on the Windows DNS Server and add the root zone trust anchor",
+          "command": "Set-DnsServerSetting -EnableDnsSec $true; Add-DnsServerTrustAnchor -Name '.' -CryptoAlgorithm RsaSha256 -KeyTag 20326 -DigestType Sha256",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "Set-DnsServerSetting -EnableDnsSec $false"
+        },
+        {
+          "description": "Restart the DNS Server service to apply DNSSEC settings",
+          "command": "Restart-Service DNS",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "Get-DnsServerSetting -All 2>$null | Select-Object -ExpandProperty EnableDnsSec",
+      "references": [
+        {
+          "source": "Microsoft — DNSSEC in Windows Server",
+          "url": "https://learn.microsoft.com/en-us/windows-server/networking/dns/dnssec/dnssec-overview"
+        }
+      ]
+    }
+  ],
   "platforms": [
     "RHEL 8",
     "RHEL 9",

@@ -46,6 +46,68 @@
       }
     ]
   },
+  "remediation": [
+    {
+      "id": "dnsmasq-stop-rebind",
+      "name": "dnsmasq DNS rebinding protection via stop-dns-rebind",
+      "platform": "linux",
+      "precondition": "command -v dnsmasq >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Enable stop-dns-rebind in dnsmasq config to reject DNS responses containing private IP addresses for public domains",
+          "command": "grep -q '^stop-dns-rebind' /etc/dnsmasq.conf 2>/dev/null || echo 'stop-dns-rebind' >> /etc/dnsmasq.conf",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "sed -i '/^stop-dns-rebind$/d' /etc/dnsmasq.conf"
+        },
+        {
+          "description": "Restart dnsmasq to apply the rebinding protection",
+          "command": "systemctl restart dnsmasq",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "grep -E 'stop-dns-rebind' /etc/dnsmasq.conf && dig @localhost rebind-test.example.com A +short",
+      "references": [
+        {
+          "source": "dnsmasq man page — stop-dns-rebind",
+          "url": "https://thekelleys.org.uk/dnsmasq/docs/dnsmasq-man.html"
+        }
+      ]
+    },
+    {
+      "id": "unbound-private-address",
+      "name": "Unbound DNS rebinding protection via private-address directives",
+      "platform": "linux",
+      "precondition": "command -v unbound-control >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Add private-address directives to Unbound config to reject responses mapping public domains to RFC 1918, loopback, link-local, and IPv6 ULA/link-local addresses",
+          "command": "printf 'server:\\n    private-address: 10.0.0.0/8\\n    private-address: 172.16.0.0/12\\n    private-address: 192.168.0.0/16\\n    private-address: 127.0.0.0/8\\n    private-address: 169.254.0.0/16\\n    private-address: ::1/128\\n    private-address: fc00::/7\\n    private-address: fe80::/10\\n' > /etc/unbound/conf.d/cme-207-rebind.conf",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f /etc/unbound/conf.d/cme-207-rebind.conf"
+        },
+        {
+          "description": "Validate Unbound configuration and reload",
+          "command": "unbound-checkconf && unbound-control reload",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "grep 'private-address' /etc/unbound/unbound.conf /etc/unbound/conf.d/*.conf 2>/dev/null && dig @localhost rebind-test.example.com A +short",
+      "references": [
+        {
+          "source": "Unbound documentation — private-address",
+          "url": "https://unbound.docs.nlnetlabs.nl/en/latest/manpages/unbound.conf.html"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "NET-10",
     "NET-10.2",

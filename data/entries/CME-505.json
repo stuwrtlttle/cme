@@ -36,6 +36,79 @@
     "RHEL 9",
     "RHEL 8"
   ],
+  "remediation": [
+    {
+      "id": "ima-appraise-enforce",
+      "name": "IMA appraise policy with enforce mode via boot parameter",
+      "platform": "rhel",
+      "precondition": "test -d /sys/kernel/security/ima",
+      "steps": [
+        {
+          "description": "Enable IMA appraise in enforce mode by adding kernel boot parameters (ima_policy=appraise_tcb loads the default TCB appraise policy; ima_appraise=enforce rejects files that fail integrity checks instead of just logging)",
+          "command": "grubby --update-kernel=ALL --args='ima_policy=appraise_tcb ima_appraise=enforce'",
+          "idempotent": true,
+          "requires_restart": "system",
+          "reversible": true,
+          "undo": "grubby --update-kernel=ALL --remove-args='ima_policy=appraise_tcb ima_appraise=enforce'"
+        },
+        {
+          "description": "Label all existing files with IMA extended attributes so they pass appraisal after reboot (this signs every file on the system with its current hash — run BEFORE rebooting into enforce mode)",
+          "command": "find / -fstype ext4 -o -fstype xfs | xargs -P4 evmctl ima_hash --hashalgo sha256 2>/dev/null",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Reboot to activate IMA appraise enforce mode",
+          "command": "systemctl reboot",
+          "idempotent": true,
+          "requires_restart": "system",
+          "reversible": false
+        }
+      ],
+      "verify": "cat /sys/kernel/security/ima/policy | head -5",
+      "references": [
+        {
+          "source": "RHEL 9 — Enhancing system security with IMA and EVM",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/enhancing-system-security-with-the-kernel-integrity-subsystem_security-hardening"
+        },
+        {
+          "source": "Kernel.org — IMA documentation",
+          "url": "https://www.kernel.org/doc/html/latest/security/IMA.html"
+        }
+      ]
+    },
+    {
+      "id": "ima-custom-policy",
+      "name": "Custom IMA measurement and appraisal policy loaded at runtime",
+      "platform": "linux",
+      "precondition": "test -d /sys/kernel/security/ima",
+      "steps": [
+        {
+          "description": "Create a custom IMA policy file that measures and appraises all executed files and shared libraries (the policy cannot be unloaded once written to the kernel — only appended)",
+          "command": "printf 'measure func=BPRM_CHECK\\nmeasure func=MMAP_CHECK mask=MAY_EXEC\\nappraise func=BPRM_CHECK fowner=0\\nappraise func=MMAP_CHECK mask=MAY_EXEC fowner=0\\n' > /etc/ima/ima-policy",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/ima/ima-policy"
+        },
+        {
+          "description": "Load the custom IMA policy into the kernel (NOTE: IMA policy is append-only — rules cannot be removed once loaded, only overridden by a reboot)",
+          "command": "cat /etc/ima/ima-policy > /sys/kernel/security/ima/policy",
+          "idempotent": false,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "cat /sys/kernel/security/ima/policy | grep -c appraise",
+      "references": [
+        {
+          "source": "RHEL 9 — Enhancing system security with IMA and EVM",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/enhancing-system-security-with-the-kernel-integrity-subsystem_security-hardening"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "END-06",
     "END-06.1"

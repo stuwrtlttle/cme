@@ -79,6 +79,78 @@
       "defaultStatus": "applicable"
     }
   ],
+  "remediation": [
+    {
+      "id": "faillock-conf-lockout",
+      "name": "pam_faillock account lockout via faillock.conf",
+      "platform": "linux",
+      "precondition": "test -f /etc/security/faillock.conf",
+      "steps": [
+        {
+          "description": "Configure faillock.conf with deny=5 (lock after 5 failures), unlock_time=900 (15 min lockout), fail_interval=900 (failure counting window)",
+          "command": "printf 'deny = 5\nunlock_time = 900\nfail_interval = 900\neven_deny_root\nroot_unlock_time = 60\ndir = /var/run/faillock\naudit\nsilent\n' > /etc/security/faillock.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "printf 'deny = 0\n' > /etc/security/faillock.conf"
+        },
+        {
+          "description": "Ensure pam_faillock is enabled in system-auth and password-auth via authselect (RHEL 8+)",
+          "command": "authselect enable-feature with-faillock 2>/dev/null || grep -q pam_faillock /etc/pam.d/system-auth",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "authselect disable-feature with-faillock"
+        }
+      ],
+      "verify": "grep '^deny' /etc/security/faillock.conf && grep -c pam_faillock /etc/pam.d/system-auth",
+      "references": [
+        {
+          "source": "RHEL 9 — Configuring user account locking",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/configuring-authselect_security-hardening"
+        }
+      ]
+    },
+    {
+      "id": "windows-account-lockout",
+      "name": "Windows account lockout policy via net accounts",
+      "platform": "windows",
+      "precondition": "net accounts >$null 2>&1",
+      "steps": [
+        {
+          "description": "Set account lockout threshold to 5 failed attempts",
+          "command": "net accounts /lockoutthreshold:5",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "net accounts /lockoutthreshold:0"
+        },
+        {
+          "description": "Set lockout duration to 30 minutes",
+          "command": "net accounts /lockoutduration:30",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "net accounts /lockoutduration:0"
+        },
+        {
+          "description": "Set lockout observation window to 30 minutes",
+          "command": "net accounts /lockoutwindow:30",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "net accounts /lockoutwindow:0"
+        }
+      ],
+      "verify": "net accounts | Select-String 'Lockout'",
+      "references": [
+        {
+          "source": "Microsoft — Account lockout policy",
+          "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/account-lockout-policy"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "IAC-22"
   ],

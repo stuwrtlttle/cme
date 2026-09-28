@@ -57,6 +57,109 @@
     "Windows Server 2019",
     "Windows Server 2022"
   ],
+  "remediation": [
+    {
+      "id": "nftables-egress-deny-internal",
+      "name": "nftables egress rules blocking RFC1918, link-local, and cloud metadata",
+      "platform": "linux",
+      "precondition": "command -v nft >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create an nftables ruleset file that drops outbound connections to RFC1918 ranges, link-local (169.254.0.0/16 including cloud metadata), localhost, and ULA IPv6 from application workloads",
+          "command": "printf '#!/usr/sbin/nft -f\\ntable inet egress_restrict {\\n  chain output {\\n    type filter hook output priority 0; policy accept;\\n    ip daddr 169.254.0.0/16 drop\\n    ip daddr 10.0.0.0/8 drop\\n    ip daddr 172.16.0.0/12 drop\\n    ip daddr 192.168.0.0/16 drop\\n    ip daddr 127.0.0.0/8 drop\\n    ip6 daddr fd00::/8 drop\\n    ip6 daddr ::1 drop\\n  }\\n}\\n' > /etc/nftables/cme-208-egress.nft",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/nftables/cme-208-egress.nft"
+        },
+        {
+          "description": "Include the egress restriction ruleset from the main nftables config if not already included",
+          "command": "grep -q 'cme-208-egress.nft' /etc/sysconfig/nftables.conf 2>/dev/null || echo 'include \"/etc/nftables/cme-208-egress.nft\"' >> /etc/sysconfig/nftables.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "sed -i '/cme-208-egress.nft/d' /etc/sysconfig/nftables.conf"
+        },
+        {
+          "description": "Load the egress restriction ruleset into the running kernel",
+          "command": "nft -f /etc/nftables/cme-208-egress.nft",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "nft delete table inet egress_restrict"
+        }
+      ],
+      "verify": "nft list ruleset | grep -A5 'chain output' | grep -cE '169\\.254|10\\.0\\.0|172\\.16|192\\.168'",
+      "references": [
+        {
+          "source": "RHEL 9 — Getting started with nftables",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/configuring_firewalls_and_packet_filters/getting-started-with-nftables_firewall-packet-filters"
+        }
+      ]
+    },
+    {
+      "id": "kubernetes-egress-networkpolicy",
+      "name": "Kubernetes NetworkPolicy restricting egress to allowed external CIDRs only",
+      "platform": "kubernetes",
+      "precondition": "command -v kubectl >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Apply a default-deny egress NetworkPolicy for the application namespace (blocks all outbound unless explicitly allowed)",
+          "command": "kubectl apply -n <namespace> -f - <<'EOF'\napiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nmetadata:\n  name: cme-208-default-deny-egress\nspec:\n  podSelector: {}\n  policyTypes:\n  - Egress\nEOF",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "kubectl delete networkpolicy cme-208-default-deny-egress -n <namespace>"
+        },
+        {
+          "description": "Allow egress to DNS (kube-dns) so pods can resolve external hostnames",
+          "command": "kubectl apply -n <namespace> -f - <<'EOF'\napiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nmetadata:\n  name: cme-208-allow-dns\nspec:\n  podSelector: {}\n  policyTypes:\n  - Egress\n  egress:\n  - ports:\n    - protocol: UDP\n      port: 53\n    - protocol: TCP\n      port: 53\nEOF",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "kubectl delete networkpolicy cme-208-allow-dns -n <namespace>"
+        },
+        {
+          "description": "Allow egress only to specific external CIDRs the application requires (replace <allowed_cidr> with the actual destination, e.g., 203.0.113.0/24); explicitly exclude RFC1918 and link-local ranges",
+          "command": "kubectl apply -n <namespace> -f - <<'EOF'\napiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nmetadata:\n  name: cme-208-allow-external\nspec:\n  podSelector:\n    matchLabels:\n      app: <app_label>\n  policyTypes:\n  - Egress\n  egress:\n  - to:\n    - ipBlock:\n        cidr: <allowed_cidr>\n        except:\n        - 10.0.0.0/8\n        - 172.16.0.0/12\n        - 192.168.0.0/16\n        - 169.254.0.0/16\nEOF",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "kubectl delete networkpolicy cme-208-allow-external -n <namespace>"
+        }
+      ],
+      "verify": "kubectl get networkpolicy -n <namespace> -o jsonpath='{.items[*].spec.egress}'",
+      "references": [
+        {
+          "source": "Kubernetes — Network Policies",
+          "url": "https://kubernetes.io/docs/concepts/services-networking/network-policies/"
+        }
+      ]
+    },
+    {
+      "id": "windows-firewall-egress-block",
+      "name": "Windows Firewall outbound block rules for RFC1918 and cloud metadata ranges",
+      "platform": "windows",
+      "precondition": "Get-Command New-NetFirewallRule -ErrorAction SilentlyContinue",
+      "steps": [
+        {
+          "description": "Create outbound firewall rules blocking traffic to RFC1918, link-local (cloud metadata), and localhost ranges",
+          "command": "New-NetFirewallRule -DisplayName 'CME-208 Block Egress RFC1918 10/8' -Direction Outbound -Action Block -RemoteAddress 10.0.0.0/8 -Protocol Any\nNew-NetFirewallRule -DisplayName 'CME-208 Block Egress RFC1918 172.16/12' -Direction Outbound -Action Block -RemoteAddress 172.16.0.0/12 -Protocol Any\nNew-NetFirewallRule -DisplayName 'CME-208 Block Egress RFC1918 192.168/16' -Direction Outbound -Action Block -RemoteAddress 192.168.0.0/16 -Protocol Any\nNew-NetFirewallRule -DisplayName 'CME-208 Block Egress Link-Local/Metadata' -Direction Outbound -Action Block -RemoteAddress 169.254.0.0/16 -Protocol Any",
+          "idempotent": false,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "Get-NetFirewallRule -DisplayName 'CME-208*' | Remove-NetFirewallRule"
+        }
+      ],
+      "verify": "Get-NetFirewallRule -Direction Outbound | Where-Object { $_.Action -eq 'Block' -and $_.DisplayName -like 'CME-208*' } | Measure-Object | Select-Object -ExpandProperty Count",
+      "references": [
+        {
+          "source": "Microsoft — New-NetFirewallRule",
+          "url": "https://learn.microsoft.com/en-us/powershell/module/netsecurity/new-netfirewallrule"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "NET-03.5",
     "NET-04.1",

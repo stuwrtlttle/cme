@@ -57,6 +57,43 @@
     "RHEL 8",
     "Ubuntu 24.04"
   ],
+  "remediation": [
+    {
+      "id": "sysctl-network-hardening",
+      "name": "sysctl kernel network stack hardening via /etc/sysctl.d drop-in",
+      "platform": "linux",
+      "precondition": "test -d /proc/sys/net",
+      "steps": [
+        {
+          "description": "Apply network hardening sysctls immediately: enable SYN cookies, disable ICMP redirects (all and default), enable strict reverse path filtering (all and default), disable IP forwarding, reject source-routed packets",
+          "command": "sysctl -w net.ipv4.tcp_syncookies=1 net.ipv4.conf.all.accept_redirects=0 net.ipv4.conf.default.accept_redirects=0 net.ipv6.conf.all.accept_redirects=0 net.ipv6.conf.default.accept_redirects=0 net.ipv4.conf.all.rp_filter=1 net.ipv4.conf.default.rp_filter=1 net.ipv4.ip_forward=0 net.ipv4.conf.all.accept_source_route=0 net.ipv4.conf.default.accept_source_route=0 net.ipv6.conf.all.accept_source_route=0 net.ipv6.conf.default.accept_source_route=0",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "sysctl -w net.ipv4.tcp_syncookies=0 net.ipv4.conf.all.accept_redirects=1 net.ipv4.conf.default.accept_redirects=1 net.ipv6.conf.all.accept_redirects=1 net.ipv6.conf.default.accept_redirects=1 net.ipv4.conf.all.rp_filter=0 net.ipv4.conf.default.rp_filter=0 net.ipv4.conf.all.accept_source_route=1 net.ipv4.conf.default.accept_source_route=1 net.ipv6.conf.all.accept_source_route=1 net.ipv6.conf.default.accept_source_route=1"
+        },
+        {
+          "description": "Persist the hardened network sysctls across reboots via /etc/sysctl.d drop-in file",
+          "command": "printf 'net.ipv4.tcp_syncookies = 1\nnet.ipv4.conf.all.accept_redirects = 0\nnet.ipv4.conf.default.accept_redirects = 0\nnet.ipv6.conf.all.accept_redirects = 0\nnet.ipv6.conf.default.accept_redirects = 0\nnet.ipv4.conf.all.rp_filter = 1\nnet.ipv4.conf.default.rp_filter = 1\nnet.ipv4.ip_forward = 0\nnet.ipv4.conf.all.accept_source_route = 0\nnet.ipv4.conf.default.accept_source_route = 0\nnet.ipv6.conf.all.accept_source_route = 0\nnet.ipv6.conf.default.accept_source_route = 0\n' > /etc/sysctl.d/99-cme-903-network-hardening.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/sysctl.d/99-cme-903-network-hardening.conf && sysctl --system"
+        }
+      ],
+      "verify": "sysctl net.ipv4.tcp_syncookies net.ipv4.conf.all.accept_redirects net.ipv4.conf.all.rp_filter net.ipv4.ip_forward net.ipv4.conf.all.accept_source_route",
+      "references": [
+        {
+          "source": "RHEL 9 Security Hardening — Using the kernel tunables to restrict network access",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/using-the-kernel-tunables-to-restrict-network-access_security-hardening"
+        },
+        {
+          "source": "CIS RHEL 9 Benchmark",
+          "section": "3.2 Network Parameters (Host and Router)"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CFG-02",
     "NET-02.1",

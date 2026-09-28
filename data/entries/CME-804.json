@@ -57,6 +57,87 @@
     "Windows Server 2019",
     "Windows Server 2022"
   ],
+  "remediation": [
+    {
+      "id": "sshd-key-only-auth",
+      "name": "sshd key-only authentication via drop-in config",
+      "platform": "linux",
+      "precondition": "command -v sshd >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create an sshd drop-in config that disables all password-based authentication and enforces public key only. Both PasswordAuthentication and KbdInteractiveAuthentication must be disabled — disabling only PasswordAuthentication leaves keyboard-interactive password prompts active on many configurations",
+          "command": "printf 'PasswordAuthentication no\nKbdInteractiveAuthentication no\nPubkeyAuthentication yes\nAuthenticationMethods publickey\n' > /etc/ssh/sshd_config.d/99-cme-804-key-only.conf",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f /etc/ssh/sshd_config.d/99-cme-804-key-only.conf"
+        },
+        {
+          "description": "Validate sshd configuration before restarting to avoid lockout from syntax errors",
+          "command": "sshd -t",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true
+        },
+        {
+          "description": "Restart sshd to apply the new authentication policy",
+          "command": "systemctl restart sshd",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "sshd -T | grep -E 'passwordauthentication|kbdinteractiveauthentication|pubkeyauthentication'",
+      "references": [
+        {
+          "source": "RHEL 9 — Configuring OpenSSH",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/securing_networks/assembly_using-secure-communications-between-two-systems-with-openssh_securing-networks"
+        },
+        {
+          "source": "sshd_config(5) — AuthenticationMethods",
+          "url": "https://man.openbsd.org/sshd_config#AuthenticationMethods"
+        }
+      ]
+    },
+    {
+      "id": "windows-openssh-key-only",
+      "name": "Windows OpenSSH key-only authentication",
+      "platform": "windows",
+      "precondition": "Test-Path $env:ProgramData\\ssh\\sshd_config",
+      "steps": [
+        {
+          "description": "Set PasswordAuthentication to no in the Windows OpenSSH server config",
+          "command": "(Get-Content $env:ProgramData\\ssh\\sshd_config) -replace '^#?PasswordAuthentication\\s+.*', 'PasswordAuthentication no' | Set-Content $env:ProgramData\\ssh\\sshd_config",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "(Get-Content $env:ProgramData\\ssh\\sshd_config) -replace '^PasswordAuthentication no', 'PasswordAuthentication yes' | Set-Content $env:ProgramData\\ssh\\sshd_config"
+        },
+        {
+          "description": "Ensure PubkeyAuthentication is enabled in the Windows OpenSSH server config",
+          "command": "if (-not (Select-String -Path $env:ProgramData\\ssh\\sshd_config -Pattern '^PubkeyAuthentication yes')) { Add-Content $env:ProgramData\\ssh\\sshd_config 'PubkeyAuthentication yes' }",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "(Get-Content $env:ProgramData\\ssh\\sshd_config) -replace '^PubkeyAuthentication yes', '#PubkeyAuthentication yes' | Set-Content $env:ProgramData\\ssh\\sshd_config"
+        },
+        {
+          "description": "Restart the Windows OpenSSH server service to apply changes",
+          "command": "Restart-Service sshd",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "Get-Content $env:ProgramData\\ssh\\sshd_config | Select-String 'PasswordAuthentication|PubkeyAuthentication'",
+      "references": [
+        {
+          "source": "Microsoft — OpenSSH Server configuration for Windows",
+          "url": "https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh-server-configuration"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CRY-02",
     "IAC-10",

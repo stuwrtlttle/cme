@@ -36,6 +36,50 @@
     "RHEL 8",
     "Fedora"
   ],
+  "remediation": [
+    {
+      "id": "semanage-confined-users",
+      "name": "Map login users to SELinux confined types via semanage",
+      "platform": "rhel",
+      "precondition": "command -v semanage >/dev/null 2>&1 && getenforce | grep -qi enforcing",
+      "steps": [
+        {
+          "description": "Map the default login to user_u so all new and unmapped users are confined (prevents unconfined_u assignment)",
+          "command": "semanage login -m -s user_u -r s0 __default__",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "semanage login -m -s unconfined_u -r s0-s0:c0.c1023 __default__"
+        },
+        {
+          "description": "Map designated admin users to staff_u (allows sudo transition to sysadm_r but otherwise confined — replace <admin_user> with each admin login)",
+          "command": "semanage login -a -s staff_u <admin_user>",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "semanage login -d <admin_user>"
+        },
+        {
+          "description": "Restore SELinux file contexts on all home directories to match the new user mappings",
+          "command": "restorecon -RvF /home",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "semanage login -l | grep -v 'unconfined_u\\|Login Name'",
+      "references": [
+        {
+          "source": "RHEL 9 — Confining an SELinux unconfined administrator",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/using_selinux/managing-confined-and-unconfined-users_using-selinux"
+        },
+        {
+          "source": "RHEL 9 Security Hardening — SELinux Users",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/using-selinux_security-hardening"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "IAC-20",
     "IAC-21"

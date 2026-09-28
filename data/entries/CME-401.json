@@ -50,6 +50,42 @@
     "Fedora",
     "CentOS Stream"
   ],
+  "remediation": [
+    {
+      "id": "crypto-policies-future",
+      "name": "Set system-wide crypto policy to FUTURE via update-crypto-policies",
+      "platform": "rhel",
+      "precondition": "command -v update-crypto-policies >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Set the system-wide cryptographic policy to FUTURE, which disables TLS <1.2, SHA-1 signatures, RSA <3072-bit, all CBC mode ciphers, RC4, and DSA across all system crypto libraries (OpenSSL, GnuTLS, NSS)",
+          "command": "update-crypto-policies --set FUTURE",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "update-crypto-policies --set DEFAULT"
+        },
+        {
+          "description": "Verify that no weak ciphers remain in the effective OpenSSL cipher set (RC4, DES, CBC, NULL should all be absent)",
+          "command": "openssl ciphers -v 'DEFAULT' 2>/dev/null | grep -ciE 'RC4|DES|CBC|NULL'",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "update-crypto-policies --show && openssl ciphers -v 'DEFAULT' 2>/dev/null | grep -ciE 'RC4|DES|CBC|NULL'",
+      "references": [
+        {
+          "source": "RHEL 9 — Using system-wide cryptographic policies",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/using-the-system-wide-cryptographic-policies_security-hardening"
+        },
+        {
+          "source": "RHEL 9 — Switching the system-wide crypto policy to FUTURE",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/switching-the-system-wide-cryptographic-policy-to-mode-compatible-with-earlier-releases_using-the-system-wide-cryptographic-policies"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CRY-01",
     "CRY-01.5"

@@ -70,6 +70,68 @@
     "Windows Server 2019",
     "Windows Server 2022"
   ],
+  "remediation": [
+    {
+      "id": "fips-mode-setup-enable",
+      "name": "Enable FIPS 140-3 mode via fips-mode-setup",
+      "platform": "rhel",
+      "precondition": "command -v fips-mode-setup >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Enable FIPS mode system-wide (sets fips=1 kernel boot parameter, rebuilds initramfs with dracut fips module, and configures crypto-policies to FIPS). Requires a reboot to take effect.",
+          "command": "fips-mode-setup --enable",
+          "idempotent": true,
+          "requires_restart": "system",
+          "reversible": true,
+          "undo": "fips-mode-setup --disable"
+        },
+        {
+          "description": "Reboot to activate FIPS mode (kernel must boot with fips=1 for the crypto API to restrict to validated modules)",
+          "command": "systemctl reboot",
+          "idempotent": true,
+          "requires_restart": "system",
+          "reversible": false
+        }
+      ],
+      "verify": "fips-mode-setup --check && cat /proc/sys/crypto/fips_enabled && openssl list -providers 2>/dev/null | grep -c fips",
+      "references": [
+        {
+          "source": "RHEL 9 — Switching the system to FIPS mode",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/switching-rhel-to-fips-mode_security-hardening"
+        }
+      ]
+    },
+    {
+      "id": "windows-fips-policy",
+      "name": "Enable FIPS algorithm policy via registry",
+      "platform": "windows",
+      "precondition": "Get-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Lsa\\FIPSAlgorithmPolicy' -ErrorAction SilentlyContinue",
+      "steps": [
+        {
+          "description": "Enable the FIPS Algorithm Policy registry key (forces Windows CNG and legacy CSP providers to use only FIPS-validated algorithms)",
+          "command": "Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Lsa\\FIPSAlgorithmPolicy' -Name 'Enabled' -Value 1 -Type DWord",
+          "idempotent": true,
+          "requires_restart": "system",
+          "reversible": true,
+          "undo": "Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Lsa\\FIPSAlgorithmPolicy' -Name 'Enabled' -Value 0 -Type DWord"
+        },
+        {
+          "description": "Reboot to activate FIPS policy (CNG providers reload with FIPS restrictions on boot)",
+          "command": "Restart-Computer -Force",
+          "idempotent": true,
+          "requires_restart": "system",
+          "reversible": false
+        }
+      ],
+      "verify": "Get-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Lsa\\FIPSAlgorithmPolicy' -Name Enabled | Select-Object -ExpandProperty Enabled",
+      "references": [
+        {
+          "source": "Microsoft — FIPS 140 validation",
+          "url": "https://learn.microsoft.com/en-us/windows/security/security-foundations/certification/fips-140-validation"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CRY-01",
     "IAC-12"

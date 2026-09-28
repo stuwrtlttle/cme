@@ -98,7 +98,7 @@ if [ "$VPS_ONLY" = false ]; then
     fi
 
     step "Committing: ${COMMIT_MSG}"
-    git add --all -- ':!.DS_Store' ':!data/.DS_Store'
+    git add --all -- ':!.DS_Store' ':!data/.DS_Store' 2>/dev/null
     git commit -m "$COMMIT_MSG"
     ok "Committed"
 

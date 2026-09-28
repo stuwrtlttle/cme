@@ -48,6 +48,78 @@
     "Kubernetes",
     "OpenShift"
   ],
+  "remediation": [
+    {
+      "id": "kubernetes-seccomp-runtimedefault",
+      "name": "Kubernetes Pod seccomp RuntimeDefault profile",
+      "platform": "kubernetes",
+      "precondition": "command -v kubectl >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Patch the deployment to set seccompProfile type to RuntimeDefault on the pod security context, enforcing the container runtime's default seccomp profile (~44 blocked syscalls)",
+          "command": "kubectl patch deployment <deployment> -n <namespace> --type=merge -p '{\"spec\":{\"template\":{\"spec\":{\"securityContext\":{\"seccompProfile\":{\"type\":\"RuntimeDefault\"}}}}}}'",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "kubectl patch deployment <deployment> -n <namespace> --type=merge -p '{\"spec\":{\"template\":{\"spec\":{\"securityContext\":{\"seccompProfile\":{\"type\":\"Unconfined\"}}}}}}'"
+        },
+        {
+          "description": "Label the namespace to enforce Pod Security Standards at Restricted level, which requires seccomp RuntimeDefault or Localhost profiles on all pods",
+          "command": "kubectl label namespace <namespace> pod-security.kubernetes.io/enforce=restricted --overwrite",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "kubectl label namespace <namespace> pod-security.kubernetes.io/enforce-"
+        }
+      ],
+      "verify": "kubectl get pod -n <namespace> -o jsonpath='{range .items[*]}{.metadata.name} {.spec.securityContext.seccompProfile.type}{\"\\n\"}{end}'",
+      "references": [
+        {
+          "source": "Kubernetes — Restrict a Container's Syscalls with seccomp",
+          "url": "https://kubernetes.io/docs/tutorials/security/seccomp/"
+        },
+        {
+          "source": "Kubernetes — Pod Security Standards",
+          "url": "https://kubernetes.io/docs/concepts/security/pod-security-standards/"
+        }
+      ]
+    },
+    {
+      "id": "podman-seccomp-default",
+      "name": "Podman/Docker default seccomp profile enforcement",
+      "platform": "linux",
+      "precondition": "command -v podman >/dev/null 2>&1 || command -v docker >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Run containers with the default seccomp profile explicitly enabled (this is the default for rootful containers but may be disabled in custom configurations; --security-opt seccomp=unconfined must not be used)",
+          "command": "podman run --security-opt seccomp=/usr/share/containers/seccomp.json <image>",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "podman run --security-opt seccomp=unconfined <image>"
+        },
+        {
+          "description": "Ensure the containers.conf default seccomp profile is not overridden to unconfined in the system-wide podman configuration",
+          "command": "grep -q 'seccomp_profile.*=.*\"\"' /etc/containers/containers.conf 2>/dev/null && sed -i 's|seccomp_profile.*=.*\"\"|seccomp_profile = \"/usr/share/containers/seccomp.json\"|' /etc/containers/containers.conf || echo 'Default seccomp profile already active'",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "sed -i 's|seccomp_profile.*=.*\"/usr/share/containers/seccomp.json\"|seccomp_profile = \"\"|' /etc/containers/containers.conf"
+        }
+      ],
+      "verify": "podman inspect <container> --format '{{.HostConfig.SecurityOpt}}' | grep -c seccomp",
+      "references": [
+        {
+          "source": "Podman — Security Options",
+          "url": "https://docs.podman.io/en/latest/markdown/podman-run.1.html#security-opt-option"
+        },
+        {
+          "source": "RHEL 9 — Building, running, and managing containers",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/building_running_and_managing_containers/index"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CFG-03",
     "CLD-06",

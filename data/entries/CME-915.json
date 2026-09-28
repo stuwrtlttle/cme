@@ -51,6 +51,119 @@
       }
     ]
   },
+  "remediation": [
+    {
+      "id": "nginx-origin-allowlist",
+      "name": "nginx Origin header allowlist with map-based rejection",
+      "platform": "linux",
+      "precondition": "command -v nginx >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create an nginx map that validates the Origin header against an explicit allowlist of trusted origins (replace <trusted_origin> entries with your actual origins, e.g., https://app.example.com)",
+          "command": "printf 'map $http_origin $cors_allowed {\n    default 0;\n    \"https://<trusted_origin>\" 1;\n    \"https://<trusted_origin_2>\" 1;\n}\n\nserver {\n    # Block state-changing cross-origin requests\n    if ($request_method ~* \"POST|PUT|DELETE|PATCH\") {\n        set $cors_check \"method\";\n    }\n    if ($cors_allowed = 0) {\n        set $cors_check \"${cors_check}_blocked\";\n    }\n    if ($cors_check = \"method_blocked\") {\n        return 403;\n    }\n}\n' > /etc/nginx/conf.d/cme-915-origin-restrict.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/nginx/conf.d/cme-915-origin-restrict.conf && nginx -s reload"
+        },
+        {
+          "description": "Test nginx configuration for syntax errors",
+          "command": "nginx -t",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Reload nginx to apply the origin restriction rules",
+          "command": "nginx -s reload",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Origin: https://evil.example.com' https://<your-app>/api/endpoint",
+      "references": [
+        {
+          "source": "nginx — map module documentation",
+          "url": "https://nginx.org/en/docs/http/ngx_http_map_module.html"
+        }
+      ]
+    },
+    {
+      "id": "httpd-origin-enforcement",
+      "name": "Apache httpd Origin header enforcement via SetEnvIf and Require",
+      "platform": "linux",
+      "precondition": "command -v apachectl >/dev/null 2>&1 || command -v httpd >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create an Apache config drop-in that rejects POST/PUT/DELETE/PATCH requests from untrusted origins (replace <trusted_origin> with your actual origin, e.g., https://app.example.com)",
+          "command": "printf '<IfModule mod_setenvif.c>\n    SetEnvIf Origin \"^https://<trusted_origin>$\" ORIGIN_OK=1\n    SetEnvIf Origin \"^https://<trusted_origin_2>$\" ORIGIN_OK=1\n</IfModule>\n\n<Location />\n    <If \"%%{REQUEST_METHOD} in { \\x27POST\\x27, \\x27PUT\\x27, \\x27DELETE\\x27, \\x27PATCH\\x27 }\">\n        <RequireAll>\n            Require all granted\n            Require env ORIGIN_OK\n        </RequireAll>\n    </If>\n</Location>\n' > /etc/httpd/conf.d/cme-915-origin-restrict.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/httpd/conf.d/cme-915-origin-restrict.conf && apachectl graceful"
+        },
+        {
+          "description": "Test Apache configuration for syntax errors",
+          "command": "apachectl configtest",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Reload Apache to apply the origin restriction rules",
+          "command": "apachectl graceful",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Origin: https://evil.example.com' https://<your-app>/api/endpoint",
+      "references": [
+        {
+          "source": "Apache HTTP Server — mod_setenvif",
+          "url": "https://httpd.apache.org/docs/2.4/mod/mod_setenvif.html"
+        }
+      ]
+    },
+    {
+      "id": "haproxy-origin-acl",
+      "name": "HAProxy Origin header ACL with deny on mismatch",
+      "platform": "linux",
+      "precondition": "command -v haproxy >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Add Origin ACL rules to the HAProxy frontend config (replace <trusted_origin> with your actual origins). Add these lines to the appropriate frontend section in /etc/haproxy/haproxy.cfg",
+          "command": "printf '\\n# CME-915: Cross-Origin Request Restriction\\nacl is_state_changing method POST PUT DELETE PATCH\\nacl origin_present req.hdr(Origin) -m found\\nacl origin_allowed req.hdr(Origin) -m str https://<trusted_origin> https://<trusted_origin_2>\\nhttp-request deny deny_status 403 if is_state_changing origin_present !origin_allowed\\n' >> /etc/haproxy/haproxy.cfg",
+          "idempotent": false,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "sed -i '/# CME-915/,/^$/d' /etc/haproxy/haproxy.cfg && systemctl reload haproxy"
+        },
+        {
+          "description": "Validate HAProxy configuration syntax",
+          "command": "haproxy -c -f /etc/haproxy/haproxy.cfg",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Reload HAProxy to apply the origin restriction ACLs",
+          "command": "systemctl reload haproxy",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Origin: https://evil.example.com' https://<your-app>/api/endpoint",
+      "references": [
+        {
+          "source": "HAProxy — ACL documentation",
+          "url": "https://docs.haproxy.org/2.8/configuration.html#7"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "NET-18",
     "WEB-03"

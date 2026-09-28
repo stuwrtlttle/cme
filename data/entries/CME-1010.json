@@ -50,6 +50,90 @@
       }
     ]
   },
+  "remediation": [
+    {
+      "id": "systemd-psi-monitor",
+      "name": "systemd PSI memory pressure monitor with journal alerting",
+      "platform": "linux",
+      "precondition": "test -f /proc/pressure/memory && systemctl --version >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create a shell script that reads PSI avg10 and alerts via systemd-cat when memory pressure exceeds a threshold (default 25%)",
+          "command": "printf '#!/bin/bash\\nTHRESHOLD=${1:-25}\\nwhile true; do\\n  PRESSURE=$(awk \"/^some/ {split(\\$2,a,\\\"=\\\"); printf \\\"%%d\\\", a[2]}\" /proc/pressure/memory)\\n  if [ \"$PRESSURE\" -ge \"$THRESHOLD\" ] 2>/dev/null; then\\n    echo \"ALERT: memory pressure avg10=${PRESSURE}%% exceeds threshold ${THRESHOLD}%%\" | systemd-cat -t cme-1010-psi -p warning\\n  fi\\n  sleep 10\\ndone\\n' > /usr/local/bin/cme-1010-psi-monitor.sh && chmod +x /usr/local/bin/cme-1010-psi-monitor.sh",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /usr/local/bin/cme-1010-psi-monitor.sh"
+        },
+        {
+          "description": "Create a systemd service unit for the PSI memory pressure monitor",
+          "command": "printf '[Unit]\\nDescription=CME-1010 cgroup memory pressure monitor (PSI)\\nAfter=sysinit.target\\n\\n[Service]\\nType=simple\\nExecStart=/usr/local/bin/cme-1010-psi-monitor.sh 25\\nRestart=on-failure\\nRestartSec=10s\\n\\n[Install]\\nWantedBy=multi-user.target\\n' > /etc/systemd/system/cme-1010-psi-monitor.service",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/systemd/system/cme-1010-psi-monitor.service"
+        },
+        {
+          "description": "Enable and start the PSI memory pressure monitor service",
+          "command": "systemctl daemon-reload && systemctl enable --now cme-1010-psi-monitor.service",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "systemctl disable --now cme-1010-psi-monitor.service"
+        }
+      ],
+      "verify": "systemctl is-active cme-1010-psi-monitor.service && cat /proc/pressure/memory",
+      "references": [
+        {
+          "source": "Kernel PSI documentation",
+          "url": "https://docs.kernel.org/accounting/psi.html"
+        },
+        {
+          "source": "RHEL 9 — Monitoring system performance with PSI",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/monitoring_and_managing_system_status_and_performance/setting-up-psi_monitoring-and-managing-system-status-and-performance"
+        }
+      ]
+    },
+    {
+      "id": "cgroup-memory-events-watch",
+      "name": "per-service cgroup memory.events oom_kill watcher",
+      "platform": "linux",
+      "precondition": "test -d /sys/fs/cgroup/system.slice && systemctl --version >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create a script that polls memory.events for oom_kill increments on a target service's cgroup and logs warnings",
+          "command": "printf '#!/bin/bash\\nSVC=${1:?\"Usage: $0 <service-name>\"}\\nCG=/sys/fs/cgroup/system.slice/${SVC}.service/memory.events\\ntest -f \"$CG\" || { echo \"No cgroup at $CG\"; exit 1; }\\nPREV_OOM=$(awk \"/oom_kill/ {print \\$2}\" \"$CG\")\\nwhile true; do\\n  CUR_OOM=$(awk \"/oom_kill/ {print \\$2}\" \"$CG\")\\n  if [ \"$CUR_OOM\" -gt \"$PREV_OOM\" ] 2>/dev/null; then\\n    echo \"ALERT: ${SVC} oom_kill count increased ${PREV_OOM}->${CUR_OOM}\" | systemd-cat -t cme-1010-oom -p err\\n    PREV_OOM=$CUR_OOM\\n  fi\\n  sleep 5\\ndone\\n' > /usr/local/bin/cme-1010-oom-watch.sh && chmod +x /usr/local/bin/cme-1010-oom-watch.sh",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /usr/local/bin/cme-1010-oom-watch.sh"
+        },
+        {
+          "description": "Create a systemd service template that watches memory.events for any specified service",
+          "command": "printf '[Unit]\\nDescription=CME-1010 cgroup memory.events oom_kill watcher for %%i\\nAfter=sysinit.target %s\\n\\n[Service]\\nType=simple\\nExecStart=/usr/local/bin/cme-1010-oom-watch.sh %%i\\nRestart=on-failure\\nRestartSec=10s\\n\\n[Install]\\nWantedBy=multi-user.target\\n' > /etc/systemd/system/cme-1010-oom-watch@.service",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/systemd/system/cme-1010-oom-watch@.service"
+        },
+        {
+          "description": "Enable the oom_kill watcher for a target service (replace <service> with the service name, e.g. httpd)",
+          "command": "systemctl daemon-reload && systemctl enable --now cme-1010-oom-watch@<service>.service",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "systemctl disable --now cme-1010-oom-watch@<service>.service"
+        }
+      ],
+      "verify": "systemctl is-active cme-1010-oom-watch@<service>.service && cat /sys/fs/cgroup/system.slice/<service>.service/memory.events",
+      "references": [
+        {
+          "source": "Kernel cgroup v2 memory controller — memory.events",
+          "url": "https://docs.kernel.org/admin-guide/cgroup-v2.html#memory"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "MON-01",
     "MON-01.4"

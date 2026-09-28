@@ -44,6 +44,51 @@
     "RHEL 8",
     "Fedora"
   ],
+  "remediation": [
+    {
+      "id": "dnf-automatic-security",
+      "name": "dnf-automatic with security-only updates applied on schedule",
+      "platform": "rhel",
+      "precondition": "command -v dnf >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Install the dnf-automatic package if not already present",
+          "command": "dnf install -y dnf-automatic",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "dnf remove -y dnf-automatic"
+        },
+        {
+          "description": "Configure dnf-automatic to download and apply only security updates automatically (replace default download-only behavior with apply)",
+          "command": "sed -i 's/^apply_updates.*/apply_updates = yes/' /etc/dnf/automatic.conf && sed -i 's/^upgrade_type.*/upgrade_type = security/' /etc/dnf/automatic.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "sed -i 's/^apply_updates.*/apply_updates = no/' /etc/dnf/automatic.conf && sed -i 's/^upgrade_type.*/upgrade_type = default/' /etc/dnf/automatic.conf"
+        },
+        {
+          "description": "Enable and start the dnf-automatic-install timer (runs daily at 6am by default, applies updates rather than just downloading)",
+          "command": "systemctl enable --now dnf-automatic-install.timer",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "systemctl disable --now dnf-automatic-install.timer"
+        }
+      ],
+      "verify": "systemctl is-active dnf-automatic-install.timer && grep apply_updates /etc/dnf/automatic.conf",
+      "references": [
+        {
+          "source": "RHEL 9 — Automating software updates",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/managing_software_with_the_dnf_tool/assembly_automating-software-updates_managing-software-with-the-dnf-tool"
+        },
+        {
+          "source": "dnf-automatic(8) man page",
+          "url": "https://man7.org/linux/man-pages/man8/dnf-automatic.8.html"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "VPM-05",
     "VPM-05.4"

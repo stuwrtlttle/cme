@@ -44,6 +44,105 @@
       }
     ]
   },
+  "remediation": [
+    {
+      "id": "httpd-maxconnectionsperchild",
+      "name": "Apache httpd worker recycling via MaxConnectionsPerChild",
+      "platform": "linux",
+      "precondition": "command -v apachectl >/dev/null 2>&1 || command -v httpd >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Set MaxConnectionsPerChild to recycle workers after a fixed number of requests (adjust value based on application memory profile; 1000 is a conservative starting point)",
+          "command": "printf '# CME-917: Worker process recycling to bound memory leak impact\\nMaxConnectionsPerChild 1000\\n' > /etc/httpd/conf.d/cme-917-worker-recycling.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/httpd/conf.d/cme-917-worker-recycling.conf"
+        },
+        {
+          "description": "Validate config syntax before applying",
+          "command": "apachectl configtest",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Gracefully reload Apache to apply the new recycling limit (active connections finish before workers restart)",
+          "command": "systemctl reload httpd",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "grep -i MaxConnectionsPerChild /etc/httpd/conf.d/cme-917-worker-recycling.conf",
+      "references": [
+        {
+          "source": "Apache HTTP Server — MaxConnectionsPerChild Directive",
+          "url": "https://httpd.apache.org/docs/2.4/mod/mpm_common.html#maxconnectionsperchild"
+        }
+      ]
+    },
+    {
+      "id": "php-fpm-max-requests",
+      "name": "PHP-FPM worker recycling via pm.max_requests",
+      "platform": "linux",
+      "precondition": "command -v php-fpm >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Set pm.max_requests in the PHP-FPM pool config to recycle workers after a fixed number of requests (500 is a common default; adjust based on application memory profile)",
+          "command": "sed -i 's/^;\\?pm\\.max_requests\\s*=.*/pm.max_requests = 500/' /etc/php-fpm.d/www.conf 2>/dev/null || sed -i 's/^;\\?pm\\.max_requests\\s*=.*/pm.max_requests = 500/' /etc/php/*/fpm/pool.d/www.conf",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "sed -i 's/^pm\\.max_requests\\s*=.*/pm.max_requests = 0/' /etc/php-fpm.d/www.conf 2>/dev/null || sed -i 's/^pm\\.max_requests\\s*=.*/pm.max_requests = 0/' /etc/php/*/fpm/pool.d/www.conf"
+        },
+        {
+          "description": "Restart PHP-FPM to apply the new recycling limit",
+          "command": "systemctl restart php-fpm",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "grep pm.max_requests /etc/php-fpm.d/www.conf /etc/php/*/fpm/pool.d/www.conf 2>/dev/null",
+      "references": [
+        {
+          "source": "PHP-FPM — pm.max_requests",
+          "url": "https://www.php.net/manual/en/install.fpm.configuration.php"
+        }
+      ]
+    },
+    {
+      "id": "gunicorn-max-requests",
+      "name": "Gunicorn worker recycling via --max-requests with jitter",
+      "platform": "linux",
+      "precondition": "command -v gunicorn >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create or update a systemd drop-in for the Gunicorn service to add --max-requests and --max-requests-jitter flags (replace <service> with your Gunicorn service unit name; jitter staggers worker restarts to avoid simultaneous recycling)",
+          "command": "mkdir -p /etc/systemd/system/<service>.service.d && printf '[Service]\\nEnvironment=\"GUNICORN_CMD_ARGS=--max-requests 1000 --max-requests-jitter 50\"\\n' > /etc/systemd/system/<service>.service.d/cme-917-worker-recycling.conf",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f /etc/systemd/system/<service>.service.d/cme-917-worker-recycling.conf && systemctl daemon-reload"
+        },
+        {
+          "description": "Reload systemd and restart the Gunicorn service to apply recycling",
+          "command": "systemctl daemon-reload && systemctl restart <service>",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "ps aux | grep '[g]unicorn' | grep -oE '\\-\\-max-requests[= ][0-9]+'",
+      "references": [
+        {
+          "source": "Gunicorn — Settings: max_requests",
+          "url": "https://docs.gunicorn.org/en/stable/settings.html#max-requests"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "SEA-07"
   ],

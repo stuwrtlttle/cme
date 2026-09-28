@@ -45,6 +45,70 @@
     "Kubernetes 1.25+",
     "OpenShift 4.12+"
   ],
+  "remediation": [
+    {
+      "id": "k8s-audit-policy",
+      "name": "Kubernetes API server audit policy for security-relevant events",
+      "platform": "kubernetes",
+      "precondition": "kubectl get nodes >/dev/null 2>&1 && test -d /etc/kubernetes/manifests",
+      "steps": [
+        {
+          "description": "Create an audit policy file that logs authentication failures, RBAC denials, secrets/configmaps access, privileged pod creation, and exec/attach at RequestResponse level; logs other write operations at Request level; and metadata-only for read operations",
+          "command": "printf 'apiVersion: audit.k8s.io/v1\nkind: Policy\nrules:\n  - level: RequestResponse\n    resources:\n      - group: \"\"\n        resources: [\"secrets\", \"configmaps\"]\n    verbs: [\"get\", \"list\", \"watch\", \"create\", \"update\", \"patch\", \"delete\"]\n  - level: RequestResponse\n    resources:\n      - group: \"\"\n        resources: [\"pods/exec\", \"pods/attach\", \"pods/portforward\"]\n  - level: RequestResponse\n    users: [\"system:anonymous\"]\n  - level: RequestResponse\n    resources:\n      - group: \"\"\n        resources: [\"pods\"]\n    verbs: [\"create\"]\n  - level: Request\n    verbs: [\"create\", \"update\", \"patch\", \"delete\"]\n  - level: Metadata\n    verbs: [\"get\", \"list\", \"watch\"]\n' > /etc/kubernetes/audit-policy.yaml",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f /etc/kubernetes/audit-policy.yaml"
+        },
+        {
+          "description": "Add audit-policy-file and audit-log-path flags to the kube-apiserver manifest (static pod); the kubelet will automatically restart the API server when the manifest changes",
+          "command": "grep -q 'audit-policy-file' /etc/kubernetes/manifests/kube-apiserver.yaml || sed -i '/- kube-apiserver/a\\    - --audit-policy-file=/etc/kubernetes/audit-policy.yaml\\n    - --audit-log-path=/var/log/kubernetes/audit.log\\n    - --audit-log-maxage=30\\n    - --audit-log-maxbackup=10\\n    - --audit-log-maxsize=100' /etc/kubernetes/manifests/kube-apiserver.yaml",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "sed -i '/audit-policy-file\\|audit-log-path\\|audit-log-maxage\\|audit-log-maxbackup\\|audit-log-maxsize/d' /etc/kubernetes/manifests/kube-apiserver.yaml"
+        },
+        {
+          "description": "Create the audit log directory and mount it into the API server pod (ensure the hostPath volume exists)",
+          "command": "mkdir -p /var/log/kubernetes",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -rf /var/log/kubernetes/audit.log"
+        }
+      ],
+      "verify": "grep audit-policy-file /etc/kubernetes/manifests/kube-apiserver.yaml && test -f /etc/kubernetes/audit-policy.yaml",
+      "references": [
+        {
+          "source": "Kubernetes — Auditing",
+          "url": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/"
+        }
+      ]
+    },
+    {
+      "id": "openshift-audit-profile",
+      "name": "OpenShift API server audit profile (WriteRequestBodies)",
+      "platform": "kubernetes",
+      "precondition": "oc whoami >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Set the OpenShift API server audit profile to WriteRequestBodies, which logs request bodies for write operations (create, update, patch, delete) including secrets and RBAC changes — provides forensic detail without the storage overhead of AllRequestBodies",
+          "command": "oc patch apiserver cluster --type=merge -p '{\"spec\":{\"audit\":{\"profile\":\"WriteRequestBodies\"}}}'",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "oc patch apiserver cluster --type=merge -p '{\"spec\":{\"audit\":{\"profile\":\"Default\"}}}'"
+        }
+      ],
+      "verify": "oc get apiservers.config.openshift.io cluster -o jsonpath='{.spec.audit.profile}'",
+      "references": [
+        {
+          "source": "OpenShift — Configuring the audit log policy",
+          "url": "https://docs.openshift.com/container-platform/latest/security/audit-log-policy-config.html"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CLD-06.2",
     "MON-02",

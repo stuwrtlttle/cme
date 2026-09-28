@@ -65,6 +65,130 @@
   "platforms": [
     "Any"
   ],
+  "remediation": [
+    {
+      "id": "nginx-rate-limit",
+      "name": "nginx rate limiting with limit_req_zone",
+      "platform": "linux",
+      "precondition": "nginx -v 2>&1 | grep -qi nginx",
+      "steps": [
+        {
+          "description": "Define a rate-limiting shared memory zone keyed by client IP (10m zone holds ~160k IPs, limit to 10 requests/second per IP)",
+          "command": "printf 'limit_req_zone $binary_remote_addr zone=cme906:10m rate=10r/s;\\n' > /etc/nginx/conf.d/rate-limit.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/nginx/conf.d/rate-limit.conf"
+        },
+        {
+          "description": "Apply the rate limit to a server or location block with a burst allowance of 20 requests (replace <server_conf> with the target config file path)",
+          "command": "sed -i '/location \\//a \\    limit_req zone=cme906 burst=20 nodelay;' /etc/nginx/conf.d/<server_conf>",
+          "idempotent": false,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "sed -i '/limit_req zone=cme906/d' /etc/nginx/conf.d/<server_conf>"
+        },
+        {
+          "description": "Test nginx configuration syntax before reload",
+          "command": "nginx -t",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Reload nginx to apply the rate limiting configuration",
+          "command": "systemctl reload nginx",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "grep -r 'limit_req_zone' /etc/nginx/ 2>/dev/null",
+      "references": [
+        {
+          "source": "nginx — ngx_http_limit_req_module",
+          "url": "https://nginx.org/en/docs/http/ngx_http_limit_req_module.html"
+        }
+      ]
+    },
+    {
+      "id": "httpd-mod-evasive",
+      "name": "Apache httpd rate limiting with mod_evasive",
+      "platform": "linux",
+      "precondition": "httpd -v 2>&1 | grep -qi apache || apache2 -v 2>&1 | grep -qi apache",
+      "steps": [
+        {
+          "description": "Install mod_evasive (RHEL/CentOS — available from EPEL; on Debian/Ubuntu use libapache2-mod-evasive)",
+          "command": "dnf install -y mod_evasive || apt-get install -y libapache2-mod-evasive",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "dnf remove -y mod_evasive || apt-get remove -y libapache2-mod-evasive"
+        },
+        {
+          "description": "Configure mod_evasive with per-IP request thresholds (50 requests per page per second, 5 concurrent requests per site, 10s blocking period)",
+          "command": "printf '<IfModule mod_evasive24.c>\\n  DOSHashTableSize 3097\\n  DOSPageCount 50\\n  DOSSiteCount 100\\n  DOSPageInterval 1\\n  DOSSiteInterval 1\\n  DOSBlockingPeriod 10\\n</IfModule>\\n' > /etc/httpd/conf.d/mod_evasive.conf",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f /etc/httpd/conf.d/mod_evasive.conf"
+        },
+        {
+          "description": "Reload Apache to activate mod_evasive",
+          "command": "systemctl reload httpd || systemctl reload apache2",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "grep -rE 'mod_ratelimit|mod_evasive' /etc/httpd/conf*/ /etc/apache2/ 2>/dev/null",
+      "references": [
+        {
+          "source": "mod_evasive — Apache DoS evasion module",
+          "url": "https://github.com/jzdziarski/mod_evasive"
+        }
+      ]
+    },
+    {
+      "id": "iis-dynamic-ip-security",
+      "name": "IIS Dynamic IP Restrictions",
+      "platform": "windows",
+      "precondition": "Get-WindowsFeature Web-IP-Security 2>$null | Select-Object -ExpandProperty Installed",
+      "steps": [
+        {
+          "description": "Install the IIS IP and Domain Restrictions feature if not already present",
+          "command": "Install-WindowsFeature Web-IP-Security",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "Uninstall-WindowsFeature Web-IP-Security"
+        },
+        {
+          "description": "Enable Dynamic IP Restrictions to deny by concurrent requests (max 10 concurrent connections per IP)",
+          "command": "Set-WebConfigurationProperty -Filter 'system.webServer/security/dynamicIpSecurity/denyByConcurrentRequests' -PSPath 'IIS:\\Sites\\Default Web Site' -Name enabled -Value $true; Set-WebConfigurationProperty -Filter 'system.webServer/security/dynamicIpSecurity/denyByConcurrentRequests' -PSPath 'IIS:\\Sites\\Default Web Site' -Name maxConcurrentRequests -Value 10",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "Set-WebConfigurationProperty -Filter 'system.webServer/security/dynamicIpSecurity/denyByConcurrentRequests' -PSPath 'IIS:\\Sites\\Default Web Site' -Name enabled -Value $false"
+        },
+        {
+          "description": "Enable Dynamic IP Restrictions to deny by request rate (max 25 requests per 10-second interval per IP)",
+          "command": "Set-WebConfigurationProperty -Filter 'system.webServer/security/dynamicIpSecurity/denyByRequestRate' -PSPath 'IIS:\\Sites\\Default Web Site' -Name enabled -Value $true; Set-WebConfigurationProperty -Filter 'system.webServer/security/dynamicIpSecurity/denyByRequestRate' -PSPath 'IIS:\\Sites\\Default Web Site' -Name maxRequests -Value 25; Set-WebConfigurationProperty -Filter 'system.webServer/security/dynamicIpSecurity/denyByRequestRate' -PSPath 'IIS:\\Sites\\Default Web Site' -Name requestIntervalInMilliseconds -Value 10000",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "Set-WebConfigurationProperty -Filter 'system.webServer/security/dynamicIpSecurity/denyByRequestRate' -PSPath 'IIS:\\Sites\\Default Web Site' -Name enabled -Value $false"
+        }
+      ],
+      "verify": "Get-WebConfigurationProperty -Filter 'system.webServer/security/dynamicIpSecurity/denyByConcurrentRequests' -PSPath 'IIS:\\Sites\\Default Web Site' -Name enabled",
+      "references": [
+        {
+          "source": "Microsoft — Dynamic IP Restrictions in IIS",
+          "url": "https://learn.microsoft.com/en-us/iis/configuration/system.webserver/security/dynamicipsecurity/"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "NET-02.1",
     "NET-03.1",

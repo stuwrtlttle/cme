@@ -42,6 +42,39 @@
     "RHEL 8",
     "Ubuntu 24.04"
   ],
+  "remediation": [
+    {
+      "id": "sysctl-bpf-hardening",
+      "name": "Disable unprivileged BPF and harden BPF JIT via sysctl",
+      "platform": "linux",
+      "precondition": "test -f /proc/sys/kernel/unprivileged_bpf_disabled",
+      "steps": [
+        {
+          "description": "Disable unprivileged BPF program loading and enable BPF JIT hardening (constant blinding) to mitigate JIT spray attacks",
+          "command": "sysctl -w kernel.unprivileged_bpf_disabled=1 net.core.bpf_jit_harden=2",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "sysctl -w kernel.unprivileged_bpf_disabled=0 net.core.bpf_jit_harden=0"
+        },
+        {
+          "description": "Persist BPF hardening sysctls across reboots via drop-in config",
+          "command": "printf 'kernel.unprivileged_bpf_disabled = 1\\nnet.core.bpf_jit_harden = 2\\n' > /etc/sysctl.d/99-cme-603-bpf-hardening.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/sysctl.d/99-cme-603-bpf-hardening.conf && sysctl --system"
+        }
+      ],
+      "verify": "cat /proc/sys/kernel/unprivileged_bpf_disabled && cat /proc/sys/net/core/bpf_jit_harden",
+      "references": [
+        {
+          "source": "RHEL 9 Security Hardening — Securing the kernel",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/securing-the-kernel_security-hardening"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CFG-03",
     "IAC-21"

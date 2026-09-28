@@ -66,6 +66,76 @@
     "Windows Server 2019",
     "Windows Server 2022"
   ],
+  "remediation": [
+    {
+      "id": "crypto-policies-default",
+      "name": "System-wide crypto policy enforcement via update-crypto-policies",
+      "platform": "rhel",
+      "precondition": "command -v update-crypto-policies >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Set the system-wide crypto policy to DEFAULT (enforces TLS 1.2+, removes weak ciphers, disables SHA-1 signatures). Use FUTURE for stricter requirements (TLS 1.2+ with 256-bit symmetric, no CBC) or FIPS for compliance.",
+          "command": "update-crypto-policies --set DEFAULT",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "update-crypto-policies --set LEGACY"
+        },
+        {
+          "description": "Verify the policy was applied consistently across all system crypto libraries",
+          "command": "update-crypto-policies --check",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "update-crypto-policies --show && openssl s_client -connect localhost:443 -tls1 </dev/null 2>&1 | grep -i 'protocol\\|error'",
+      "references": [
+        {
+          "source": "RHEL 9 — System-wide cryptographic policies",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/using-the-system-wide-cryptographic-policies_security-hardening"
+        }
+      ]
+    },
+    {
+      "id": "windows-schannel-tls-hardening",
+      "name": "SChannel TLS protocol and cipher suite hardening via registry",
+      "platform": "windows",
+      "precondition": "Test-Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL'",
+      "steps": [
+        {
+          "description": "Disable TLS 1.0 server-side to prevent downgrade attacks",
+          "command": "New-Item -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.0\\Server' -Force | Out-Null; Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.0\\Server' -Name 'Enabled' -Value 0 -Type DWord; Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.0\\Server' -Name 'DisabledByDefault' -Value 1 -Type DWord",
+          "idempotent": true,
+          "requires_restart": "system",
+          "reversible": true,
+          "undo": "Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.0\\Server' -Name 'Enabled' -Value 1 -Type DWord"
+        },
+        {
+          "description": "Disable TLS 1.1 server-side",
+          "command": "New-Item -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.1\\Server' -Force | Out-Null; Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.1\\Server' -Name 'Enabled' -Value 0 -Type DWord; Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.1\\Server' -Name 'DisabledByDefault' -Value 1 -Type DWord",
+          "idempotent": true,
+          "requires_restart": "system",
+          "reversible": true,
+          "undo": "Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.1\\Server' -Name 'Enabled' -Value 1 -Type DWord"
+        },
+        {
+          "description": "Remove weak cipher suites (RC4, DES, NULL, EXPORT) from the enabled list",
+          "command": "foreach ($suite in (Get-TlsCipherSuite | Where-Object {$_.Name -match 'RC4|DES|NULL|EXPORT'})) { Disable-TlsCipherSuite -Name $suite.Name }",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "Get-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.0\\Server' -Name Enabled -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Enabled",
+      "references": [
+        {
+          "source": "Microsoft — TLS/SSL protocol management",
+          "url": "https://learn.microsoft.com/en-us/windows-server/security/tls/tls-registry-settings"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CRY-01",
     "CRY-03"

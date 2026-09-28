@@ -69,6 +69,86 @@
     "Podman",
     "Docker"
   ],
+  "remediation": [
+    {
+      "id": "kubernetes-readonly-rootfs",
+      "name": "Kubernetes readOnlyRootFilesystem with tmpfs for writable paths",
+      "platform": "kubernetes",
+      "precondition": "command -v kubectl >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Patch the deployment to set readOnlyRootFilesystem: true on all containers, forcing the root filesystem read-only",
+          "command": "kubectl patch deployment <deployment> -n <namespace> --type=json -p '[{\"op\":\"add\",\"path\":\"/spec/template/spec/containers/0/securityContext/readOnlyRootFilesystem\",\"value\":true}]'",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "kubectl patch deployment <deployment> -n <namespace> --type=json -p '[{\"op\":\"replace\",\"path\":\"/spec/template/spec/containers/0/securityContext/readOnlyRootFilesystem\",\"value\":false}]'"
+        },
+        {
+          "description": "Add emptyDir tmpfs volume mounts for paths the application needs to write (e.g., /tmp, /var/run, /var/cache) — adjust paths to your application's requirements",
+          "command": "kubectl patch deployment <deployment> -n <namespace> --type=json -p '[{\"op\":\"add\",\"path\":\"/spec/template/spec/volumes/-\",\"value\":{\"name\":\"tmp\",\"emptyDir\":{\"medium\":\"Memory\",\"sizeLimit\":\"64Mi\"}}},{\"op\":\"add\",\"path\":\"/spec/template/spec/containers/0/volumeMounts/-\",\"value\":{\"name\":\"tmp\",\"mountPath\":\"/tmp\"}}]'",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "kubectl patch deployment <deployment> -n <namespace> --type=json -p '[{\"op\":\"remove\",\"path\":\"/spec/template/spec/volumes/0\"},{\"op\":\"remove\",\"path\":\"/spec/template/spec/containers/0/volumeMounts/0\"}]'"
+        },
+        {
+          "description": "Label the namespace to enforce Pod Security Standards Restricted profile, which requires readOnlyRootFilesystem",
+          "command": "kubectl label namespace <namespace> pod-security.kubernetes.io/enforce=restricted --overwrite",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "kubectl label namespace <namespace> pod-security.kubernetes.io/enforce- --overwrite"
+        }
+      ],
+      "verify": "kubectl get pod -n <namespace> -l app=<app> -o jsonpath='{range .items[*].spec.containers[*]}{.securityContext.readOnlyRootFilesystem}{\"\\n\"}{end}' | grep -c -v 'true'",
+      "references": [
+        {
+          "source": "Kubernetes — Pod Security Standards",
+          "url": "https://kubernetes.io/docs/concepts/security/pod-security-standards/"
+        },
+        {
+          "source": "Kubernetes — Configure a Security Context for a Pod or Container",
+          "url": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/"
+        }
+      ]
+    },
+    {
+      "id": "podman-read-only",
+      "name": "Podman/Docker read-only root filesystem with tmpfs mounts",
+      "platform": "linux",
+      "precondition": "command -v podman >/dev/null 2>&1 || command -v docker >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Run the container with --read-only flag and --tmpfs mounts for writable paths the application requires (adjust paths and size limits to your application)",
+          "command": "podman run --read-only --tmpfs /tmp:rw,size=64m --tmpfs /var/run:rw,size=16m <image>",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "podman run <image>"
+        },
+        {
+          "description": "For existing containers managed by systemd (quadlet or podman-generate-systemd), add ReadOnly=true to the container unit file",
+          "command": "printf '[Container]\\nReadOnly=true\\nTmpfs=/tmp:rw,size=64m\\nTmpfs=/var/run:rw,size=16m\\n' > /etc/containers/systemd/<service>.container.d/readonly.conf && systemctl daemon-reload && systemctl restart <service>",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f /etc/containers/systemd/<service>.container.d/readonly.conf && systemctl daemon-reload && systemctl restart <service>"
+        }
+      ],
+      "verify": "podman inspect <ctr> --format '{{.HostConfig.ReadonlyRootfs}}'",
+      "references": [
+        {
+          "source": "Podman — podman-run(1) --read-only",
+          "url": "https://docs.podman.io/en/latest/markdown/podman-run.1.html"
+        },
+        {
+          "source": "Red Hat — Building, running, and managing containers (Quadlet)",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/building_running_and_managing_containers/index"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CLD-05",
     "SEA-16"

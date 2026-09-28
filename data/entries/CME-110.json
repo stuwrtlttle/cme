@@ -35,6 +35,38 @@
     "RHEL 8",
     "Ubuntu 24.04"
   ],
+  "remediation": [
+    {
+      "id": "sysctl-kexec-disable",
+      "name": "Disable kexec_load via sysctl (one-way latch)",
+      "platform": "linux",
+      "precondition": "test -f /proc/sys/kernel/kexec_load_disabled",
+      "steps": [
+        {
+          "description": "Disable kexec_load immediately. WARNING: this is a one-way kernel latch — once set to 1, it cannot be reverted to 0 without a full system reboot",
+          "command": "sysctl -w kernel.kexec_load_disabled=1",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Persist the setting so kexec is disabled on every boot (applied early by systemd-sysctl)",
+          "command": "printf 'kernel.kexec_load_disabled = 1\n' > /etc/sysctl.d/99-cme-110-kexec.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/sysctl.d/99-cme-110-kexec.conf"
+        }
+      ],
+      "verify": "cat /proc/sys/kernel/kexec_load_disabled",
+      "references": [
+        {
+          "source": "RHEL 9 Security Hardening — Protecting the kernel",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/protecting-the-kernel_security-hardening"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CFG-03",
     "END-06.5"

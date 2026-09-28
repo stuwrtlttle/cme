@@ -59,6 +59,85 @@
     "Windows 10",
     "Windows 11"
   ],
+  "remediation": [
+    {
+      "id": "sshd-gssapi-keytab",
+      "name": "SSH GSSAPI authentication with host keytab enforcement",
+      "platform": "linux",
+      "precondition": "test -f /etc/krb5.conf && klist -k /etc/krb5.keytab 2>/dev/null | grep -q 'host/'",
+      "steps": [
+        {
+          "description": "Enable GSSAPI authentication and disable password authentication in sshd_config (host must already be enrolled in a Kerberos realm with a valid keytab)",
+          "command": "printf 'GSSAPIAuthentication yes\nGSSAPICleanupCredentials yes\nPasswordAuthentication no\nChallengeResponseAuthentication no\n' > /etc/ssh/sshd_config.d/99-cme-806-gssapi.conf",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f /etc/ssh/sshd_config.d/99-cme-806-gssapi.conf"
+        },
+        {
+          "description": "Restart sshd to apply the GSSAPI enforcement configuration",
+          "command": "systemctl restart sshd",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "sshd -T | grep -E 'gssapiauthentication|passwordauthentication'",
+      "references": [
+        {
+          "source": "RHEL 9 — Configuring authentication and authorization",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/configuring_authentication_and_authorization_in_rhel/index"
+        },
+        {
+          "source": "RHEL 9 — Using Kerberos",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/configuring_authentication_and_authorization_in_rhel/using-kerberos_configuring-authentication-and-authorization-in-rhel"
+        }
+      ]
+    },
+    {
+      "id": "ipa-client-enroll",
+      "name": "FreeIPA/IdM client enrollment with Kerberos and SSSD",
+      "platform": "rhel",
+      "precondition": "command -v ipa-client-install >/dev/null 2>&1 || command -v dnf >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Install the IPA client package if not already present",
+          "command": "dnf install -y ipa-client",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "dnf remove -y ipa-client"
+        },
+        {
+          "description": "Enroll the host in the FreeIPA/IdM domain (replace <ipa_domain> and <ipa_server> with your realm and server FQDN; this configures krb5.conf, SSSD, and generates a host keytab)",
+          "command": "ipa-client-install --domain=<ipa_domain> --server=<ipa_server> --mkhomedir --enable-dns-updates --unattended",
+          "idempotent": false,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "ipa-client-install --uninstall --unattended"
+        },
+        {
+          "description": "Enable GSSAPI authentication in sshd and disable password authentication",
+          "command": "printf 'GSSAPIAuthentication yes\nGSSAPICleanupCredentials yes\nPasswordAuthentication no\nChallengeResponseAuthentication no\n' > /etc/ssh/sshd_config.d/99-cme-806-gssapi.conf && systemctl restart sshd",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/ssh/sshd_config.d/99-cme-806-gssapi.conf && systemctl restart sshd"
+        }
+      ],
+      "verify": "klist -k /etc/krb5.keytab | grep -c 'host/' && sshd -T | grep gssapiauthentication",
+      "references": [
+        {
+          "source": "RHEL 9 — Installing an IdM client",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/installing_identity_management/installing-an-idm-client_installing-identity-management"
+        },
+        {
+          "source": "RHEL 9 — Configuring Kerberos authentication in IdM",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/configuring_authentication_and_authorization_in_rhel/configuring-kerberos-with-idm_configuring-authentication-and-authorization-in-rhel"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CRY-02",
     "IAC-02",

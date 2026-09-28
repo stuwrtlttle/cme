@@ -61,6 +61,150 @@
       }
     ]
   },
+  "remediation": [
+    {
+      "id": "nginx-strict-http-parsing",
+      "name": "nginx strict HTTP parsing and smuggling prevention",
+      "platform": "linux",
+      "precondition": "command -v nginx >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create drop-in config enforcing HTTP/1.1 to backends (prevents CL/TE desync), rejecting requests with underscore headers, and limiting header size to prevent oversized header smuggling vectors",
+          "command": "printf 'proxy_http_version 1.1;\\nunderscores_in_headers off;\\nlarge_client_header_buffers 4 8k;\\nignore_invalid_headers on;\\n' > /etc/nginx/conf.d/cme-912-smuggling-prevention.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/nginx/conf.d/cme-912-smuggling-prevention.conf"
+        },
+        {
+          "description": "Test nginx configuration for syntax errors before reloading",
+          "command": "nginx -t",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Reload nginx to apply the strict parsing configuration",
+          "command": "systemctl reload nginx",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "grep -i 'proxy_http_version' /etc/nginx/nginx.conf /etc/nginx/conf.d/*.conf 2>/dev/null | grep -c '1.1'",
+      "references": [
+        {
+          "source": "nginx — Module ngx_http_proxy_module",
+          "url": "https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_http_version"
+        }
+      ]
+    },
+    {
+      "id": "httpd-strict-protocol-options",
+      "name": "Apache httpd HttpProtocolOptions Strict enforcement",
+      "platform": "linux",
+      "precondition": "command -v apachectl >/dev/null 2>&1 || command -v httpd >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create drop-in config setting HttpProtocolOptions Strict to reject requests with invalid headers, whitespace in method, or bare CR/LF characters (available in httpd 2.4.25+)",
+          "command": "printf 'HttpProtocolOptions Strict\\n' > /etc/httpd/conf.d/cme-912-strict-protocol.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/httpd/conf.d/cme-912-strict-protocol.conf"
+        },
+        {
+          "description": "Test httpd configuration for syntax errors",
+          "command": "apachectl configtest",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Reload httpd to apply strict protocol options",
+          "command": "systemctl reload httpd",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "grep -i 'HttpProtocolOptions' /etc/httpd/conf/httpd.conf /etc/httpd/conf.d/*.conf 2>/dev/null | grep -ci 'Strict'",
+      "references": [
+        {
+          "source": "Apache httpd — HttpProtocolOptions Directive",
+          "url": "https://httpd.apache.org/docs/2.4/mod/core.html#httpprotocoloptions"
+        }
+      ]
+    },
+    {
+      "id": "haproxy-smuggling-prevention",
+      "name": "HAProxy duplicate Content-Length denial and strict parsing",
+      "platform": "linux",
+      "precondition": "command -v haproxy >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Add ACL rules to deny requests with duplicate Content-Length headers (hdr_cnt > 1) and requests containing both Content-Length and Transfer-Encoding headers, placed in the frontend section",
+          "command": "printf '\\n# CME-912: Request smuggling prevention\\nhttp-request deny if { hdr_cnt(content-length) gt 1 }\\nhttp-request deny if { hdr(transfer-encoding) -m found } { hdr(content-length) -m found }\\noption httpclose\\n' >> /etc/haproxy/haproxy.cfg",
+          "idempotent": false,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "sed -i '/CME-912/,+4d' /etc/haproxy/haproxy.cfg"
+        },
+        {
+          "description": "Validate HAProxy configuration syntax",
+          "command": "haproxy -c -f /etc/haproxy/haproxy.cfg",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Reload HAProxy to apply smuggling prevention rules",
+          "command": "systemctl reload haproxy",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "grep 'hdr_cnt(content-length)' /etc/haproxy/haproxy.cfg | grep -c 'deny'",
+      "references": [
+        {
+          "source": "HAProxy — HTTP request smuggling protection",
+          "url": "https://www.haproxy.com/documentation/haproxy-configuration-tutorials/security/http-request-smuggling/"
+        }
+      ]
+    },
+    {
+      "id": "iis-request-filtering-strict",
+      "name": "IIS request filtering with double-encoding and high-bit character rejection",
+      "platform": "windows",
+      "precondition": "Get-WebConfigurationProperty -Filter 'system.webServer/security/requestFiltering' -PSPath 'IIS:\\' -Name allowDoubleEscaping -ErrorAction SilentlyContinue",
+      "steps": [
+        {
+          "description": "Disable double-encoding (percent-encoded sequences) in request URLs to prevent URL normalization desync between IIS and backend applications",
+          "command": "Set-WebConfigurationProperty -Filter 'system.webServer/security/requestFiltering' -PSPath 'IIS:\\' -Name allowDoubleEscaping -Value $false",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "Set-WebConfigurationProperty -Filter 'system.webServer/security/requestFiltering' -PSPath 'IIS:\\' -Name allowDoubleEscaping -Value $true"
+        },
+        {
+          "description": "Disable high-bit (non-ASCII) characters in request URLs to prevent encoding-based header injection",
+          "command": "Set-WebConfigurationProperty -Filter 'system.webServer/security/requestFiltering' -PSPath 'IIS:\\' -Name allowHighBitCharacters -Value $false",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "Set-WebConfigurationProperty -Filter 'system.webServer/security/requestFiltering' -PSPath 'IIS:\\' -Name allowHighBitCharacters -Value $true"
+        }
+      ],
+      "verify": "Get-WebConfigurationProperty -Filter 'system.webServer/security/requestFiltering' -PSPath 'IIS:\\' -Name allowDoubleEscaping",
+      "references": [
+        {
+          "source": "Microsoft — Configure request filtering in IIS",
+          "url": "https://learn.microsoft.com/en-us/iis/configuration/system.webserver/security/requestfiltering/"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "NET-18.4",
     "WEB-07"

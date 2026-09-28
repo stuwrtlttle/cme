@@ -75,6 +75,59 @@
       "defaultStatus": "applicable"
     }
   ],
+  "remediation": [
+    {
+      "id": "default-deny-networkpolicy",
+      "name": "default-deny ingress and egress NetworkPolicy with per-service allowlisting",
+      "platform": "kubernetes",
+      "precondition": "kubectl version --client >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Apply a default-deny ingress NetworkPolicy to the target namespace (blocks all inbound traffic to pods unless explicitly allowed by another policy)",
+          "command": "kubectl apply -n <namespace> -f - <<'EOF'\napiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nmetadata:\n  name: default-deny-ingress\nspec:\n  podSelector: {}\n  policyTypes:\n  - Ingress\nEOF",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "kubectl delete networkpolicy default-deny-ingress -n <namespace>"
+        },
+        {
+          "description": "Apply a default-deny egress NetworkPolicy to the target namespace (blocks all outbound traffic from pods unless explicitly allowed)",
+          "command": "kubectl apply -n <namespace> -f - <<'EOF'\napiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nmetadata:\n  name: default-deny-egress\nspec:\n  podSelector: {}\n  policyTypes:\n  - Egress\nEOF",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "kubectl delete networkpolicy default-deny-egress -n <namespace>"
+        },
+        {
+          "description": "Allow DNS egress for all pods in the namespace (required for service discovery to function under default-deny egress)",
+          "command": "kubectl apply -n <namespace> -f - <<'EOF'\napiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nmetadata:\n  name: allow-dns-egress\nspec:\n  podSelector: {}\n  policyTypes:\n  - Egress\n  egress:\n  - to:\n    - namespaceSelector: {}\n    ports:\n    - protocol: UDP\n      port: 53\n    - protocol: TCP\n      port: 53\nEOF",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "kubectl delete networkpolicy allow-dns-egress -n <namespace>"
+        },
+        {
+          "description": "Allow ingress to a specific service from authorized source pods (replace <app_label> with the target pod label and <source_label> with the client pod label)",
+          "command": "kubectl apply -n <namespace> -f - <<'EOF'\napiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nmetadata:\n  name: allow-<app_label>-ingress\nspec:\n  podSelector:\n    matchLabels:\n      app: <app_label>\n  policyTypes:\n  - Ingress\n  ingress:\n  - from:\n    - podSelector:\n        matchLabels:\n          app: <source_label>\n    ports:\n    - protocol: TCP\n      port: <service_port>\nEOF",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "kubectl delete networkpolicy allow-<app_label>-ingress -n <namespace>"
+        }
+      ],
+      "verify": "kubectl get networkpolicy -n <namespace> -o name | head -5",
+      "references": [
+        {
+          "source": "Kubernetes — Network Policies",
+          "url": "https://kubernetes.io/docs/concepts/services-networking/network-policies/"
+        },
+        {
+          "source": "Kubernetes — Declare Network Policy",
+          "url": "https://kubernetes.io/docs/tasks/administer-cluster/declare-network-policy/"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CLD-03",
     "NET-04.1",

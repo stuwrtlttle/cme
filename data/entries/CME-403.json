@@ -85,6 +85,108 @@
       "defaultStatus": "applicable"
     }
   ],
+  "remediation": [
+    {
+      "id": "crypto-policies-tls13",
+      "name": "RHEL crypto-policies TLS 1.3 minimum enforcement",
+      "platform": "rhel",
+      "precondition": "command -v update-crypto-policies >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create a crypto-policies subpolicy module that sets TLS 1.3 as the minimum protocol version system-wide (affects OpenSSL, GnuTLS, NSS, and all applications using system crypto libraries)",
+          "command": "printf 'min_tls_version = TLS1.3\\ntls_cipher = AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305\\n' > /etc/crypto-policies/policies/modules/TLS13-ONLY.pmod",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/crypto-policies/policies/modules/TLS13-ONLY.pmod && update-crypto-policies --set DEFAULT"
+        },
+        {
+          "description": "Apply the FUTURE base policy with the TLS 1.3-only subpolicy module (FUTURE already restricts weak algorithms; the subpolicy raises the TLS floor from 1.2 to 1.3)",
+          "command": "update-crypto-policies --set FUTURE:TLS13-ONLY",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "update-crypto-policies --set DEFAULT"
+        }
+      ],
+      "verify": "update-crypto-policies --show | grep -q 'FUTURE:TLS13-ONLY' && openssl s_client -connect localhost:443 -tls1_2 </dev/null 2>&1 | grep -ci 'handshake failure'",
+      "references": [
+        {
+          "source": "RHEL 9 — Using system-wide cryptographic policies",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/using-the-system-wide-cryptographic-policies_security-hardening"
+        }
+      ]
+    },
+    {
+      "id": "nginx-tls13-only",
+      "name": "nginx TLS 1.3-only protocol enforcement",
+      "platform": "linux",
+      "precondition": "command -v nginx >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create a drop-in config that restricts nginx to TLS 1.3 only, removing support for TLS 1.2 and below",
+          "command": "printf 'ssl_protocols TLSv1.3;\\nssl_prefer_server_ciphers off;\\n' > /etc/nginx/conf.d/cme-403-tls13.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/nginx/conf.d/cme-403-tls13.conf && nginx -s reload"
+        },
+        {
+          "description": "Test configuration and reload nginx to apply the TLS 1.3 restriction",
+          "command": "nginx -t && nginx -s reload",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "openssl s_client -connect <host>:443 -tls1_2 </dev/null 2>&1 | grep -ci 'handshake failure'",
+      "references": [
+        {
+          "source": "nginx — ssl_protocols directive",
+          "url": "https://nginx.org/en/docs/http/ngx_http_ssl_module.html#ssl_protocols"
+        }
+      ]
+    },
+    {
+      "id": "windows-schannel-tls13",
+      "name": "Windows SChannel TLS 1.3-only enforcement via registry",
+      "platform": "windows",
+      "precondition": "Test-Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL'",
+      "steps": [
+        {
+          "description": "Disable TLS 1.2 server-side to prevent downgrade (creates registry key if not present)",
+          "command": "New-Item -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.2\\Server' -Force | Out-Null; Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.2\\Server' -Name 'Enabled' -Value 0 -Type DWord; Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.2\\Server' -Name 'DisabledByDefault' -Value 1 -Type DWord",
+          "idempotent": true,
+          "requires_restart": "system",
+          "reversible": true,
+          "undo": "Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.2\\Server' -Name 'Enabled' -Value 1 -Type DWord; Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.2\\Server' -Name 'DisabledByDefault' -Value 0 -Type DWord"
+        },
+        {
+          "description": "Ensure TLS 1.3 is explicitly enabled server-side (Windows Server 2022+ supports TLS 1.3 in SChannel)",
+          "command": "New-Item -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.3\\Server' -Force | Out-Null; Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.3\\Server' -Name 'Enabled' -Value 1 -Type DWord; Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.3\\Server' -Name 'DisabledByDefault' -Value 0 -Type DWord",
+          "idempotent": true,
+          "requires_restart": "system",
+          "reversible": true,
+          "undo": "Remove-Item -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.3\\Server' -Recurse -Force"
+        },
+        {
+          "description": "Disable TLS 1.1 and TLS 1.0 server-side to prevent legacy protocol negotiation",
+          "command": "foreach ($ver in @('TLS 1.1','TLS 1.0')) { New-Item -Path \"HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\$ver\\Server\" -Force | Out-Null; Set-ItemProperty -Path \"HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\$ver\\Server\" -Name 'Enabled' -Value 0 -Type DWord; Set-ItemProperty -Path \"HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\$ver\\Server\" -Name 'DisabledByDefault' -Value 1 -Type DWord }",
+          "idempotent": true,
+          "requires_restart": "system",
+          "reversible": true,
+          "undo": "foreach ($ver in @('TLS 1.1','TLS 1.0')) { Set-ItemProperty -Path \"HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\$ver\\Server\" -Name 'Enabled' -Value 1 -Type DWord }"
+        }
+      ],
+      "verify": "Get-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.3\\Server' -Name Enabled | Select-Object -ExpandProperty Enabled",
+      "references": [
+        {
+          "source": "Microsoft — TLS registry settings",
+          "url": "https://learn.microsoft.com/en-us/windows-server/security/tls/tls-registry-settings"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CRY-01",
     "CRY-03",

@@ -71,6 +71,95 @@
   "platforms": [
     "Any"
   ],
+  "remediation": [
+    {
+      "id": "java-xxe-prevention",
+      "name": "Java XML parser XXE hardening (DocumentBuilderFactory / SAXParserFactory)",
+      "platform": "any",
+      "precondition": "grep -rql 'DocumentBuilderFactory\\|SAXParserFactory\\|XMLInputFactory' <app_source>/ 2>/dev/null",
+      "steps": [
+        {
+          "description": "Create a secure XML parser factory wrapper that disables external entities, DTD processing, and external schema access for all DocumentBuilderFactory and SAXParserFactory instances (place in application source and replace all direct factory instantiations)",
+          "command": "cat > <app_source>/src/main/java/com/example/SecureXmlParser.java << 'JAVA'\nimport javax.xml.parsers.DocumentBuilderFactory;\nimport javax.xml.XMLConstants;\npublic class SecureXmlParser {\n  public static DocumentBuilderFactory newSecureDocumentBuilderFactory() throws Exception {\n    DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();\n    dbf.setFeature(\"http://apache.org/xml/features/disallow-doctype-decl\", true);\n    dbf.setFeature(\"http://xml.org/sax/features/external-general-entities\", false);\n    dbf.setFeature(\"http://xml.org/sax/features/external-parameter-entities\", false);\n    dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);\n    dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, \"\");\n    dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, \"\");\n    dbf.setXIncludeAware(false);\n    dbf.setExpandEntityReferences(false);\n    return dbf;\n  }\n}\nJAVA",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm <app_source>/src/main/java/com/example/SecureXmlParser.java"
+        }
+      ],
+      "verify": "grep -rn 'disallow-doctype-decl\\|FEATURE_SECURE_PROCESSING\\|ACCESS_EXTERNAL_DTD' <app_source>/",
+      "references": [
+        {
+          "source": "OWASP XXE Prevention Cheat Sheet — Java",
+          "url": "https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html#java"
+        }
+      ]
+    },
+    {
+      "id": "python-defusedxml",
+      "name": "Python XML parsing via defusedxml (drop-in safe replacement)",
+      "platform": "any",
+      "precondition": "grep -rql 'xml.etree\\|lxml\\|xml.dom\\|xml.sax' <app_source>/ 2>/dev/null",
+      "steps": [
+        {
+          "description": "Install defusedxml — a drop-in replacement for Python stdlib XML parsers that disables external entity resolution, DTD processing, and entity expansion by default",
+          "command": "pip install defusedxml",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "pip uninstall -y defusedxml"
+        },
+        {
+          "description": "Replace stdlib XML imports with defusedxml equivalents in application source (xml.etree.ElementTree -> defusedxml.ElementTree, xml.sax -> defusedxml.sax, xml.dom.minidom -> defusedxml.minidom)",
+          "command": "find <app_source>/ -name '*.py' -exec sed -i 's/from xml\\.etree import ElementTree/import defusedxml.ElementTree as ElementTree/g; s/import xml\\.etree\\.ElementTree/import defusedxml.ElementTree/g; s/from xml\\.sax /from defusedxml.sax /g' {} +",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": false
+        }
+      ],
+      "verify": "grep -rn 'defusedxml' <app_source>/",
+      "references": [
+        {
+          "source": "defusedxml documentation",
+          "url": "https://github.com/tiran/defusedxml"
+        },
+        {
+          "source": "OWASP XXE Prevention Cheat Sheet — Python",
+          "url": "https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html#python"
+        }
+      ]
+    },
+    {
+      "id": "modsecurity-xxe-block",
+      "name": "ModSecurity WAF rule to block XXE payloads at the reverse proxy",
+      "platform": "linux",
+      "precondition": "apachectl -M 2>/dev/null | grep -q security2 || nginx -V 2>&1 | grep -q modsecurity",
+      "steps": [
+        {
+          "description": "Deploy a ModSecurity rule that inspects XML request bodies for DOCTYPE declarations containing ENTITY or SYSTEM keywords and blocks them before they reach the application parser",
+          "command": "printf 'SecRule REQUEST_BODY \"<!DOCTYPE[^>]*(?:ENTITY|SYSTEM|PUBLIC)\" \"id:1317001,phase:2,deny,status:403,log,msg:XXE attempt blocked by CME-1317,severity:CRITICAL\"\nSecRule REQUEST_BODY \"<!\\[CDATA\\[\" \"id:1317002,phase:2,deny,status:403,log,msg:CDATA injection blocked by CME-1317,severity:CRITICAL,chain\"\nSecRule REQUEST_HEADERS:Content-Type \"(?:text|application)/xml\" \"\"\n' > /etc/httpd/modsecurity.d/local_rules/cme-1317-xxe-block.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/httpd/modsecurity.d/local_rules/cme-1317-xxe-block.conf"
+        },
+        {
+          "description": "Test configuration and reload the web server to activate the XXE blocking rule",
+          "command": "apachectl configtest && apachectl graceful || { nginx -t && nginx -s reload; }",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "printf '<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///etc/hostname\">]><root>&xxe;</root>' | curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/xml' -d @- http://localhost/ | grep -c '403'",
+      "references": [
+        {
+          "source": "OWASP ModSecurity Core Rule Set — XXE rules",
+          "url": "https://coreruleset.org/docs/"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "WEB-07",
     "WEB-09"

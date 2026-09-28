@@ -54,6 +54,43 @@
       }
     ]
   },
+  "remediation": [
+    {
+      "id": "sysctl-protected-links",
+      "name": "sysctl protected file links hardening",
+      "platform": "linux",
+      "precondition": "test -d /proc/sys/fs",
+      "steps": [
+        {
+          "description": "Enable all four protected file link sysctls immediately (symlinks, hardlinks, regular files, and FIFOs in sticky world-writable directories)",
+          "command": "sysctl -w fs.protected_symlinks=1 fs.protected_hardlinks=1 fs.protected_regular=2 fs.protected_fifos=2",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "sysctl -w fs.protected_symlinks=0 fs.protected_hardlinks=0 fs.protected_regular=0 fs.protected_fifos=0"
+        },
+        {
+          "description": "Persist the settings via sysctl.d drop-in so they survive reboots",
+          "command": "printf 'fs.protected_symlinks = 1\\nfs.protected_hardlinks = 1\\nfs.protected_regular = 2\\nfs.protected_fifos = 2\\n' > /etc/sysctl.d/99-cme-118-protected-links.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/sysctl.d/99-cme-118-protected-links.conf && sysctl --system"
+        }
+      ],
+      "verify": "sysctl fs.protected_symlinks fs.protected_hardlinks fs.protected_regular fs.protected_fifos",
+      "references": [
+        {
+          "source": "RHEL 9 Security Hardening — Protecting against symlink and hardlink attacks",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/using-the-system-wide-cryptographic-policies_security-hardening"
+        },
+        {
+          "source": "kernel.org — Protected file links sysctl documentation",
+          "url": "https://www.kernel.org/doc/Documentation/sysctl/fs.txt"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CFG-02",
     "END-02"

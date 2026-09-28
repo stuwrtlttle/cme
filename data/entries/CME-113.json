@@ -65,6 +65,43 @@
       "defaultStatus": "applicable"
     }
   ],
+  "remediation": [
+    {
+      "id": "windows-cfg-system",
+      "name": "Enable Control Flow Guard (CFG) system-wide via Set-ProcessMitigation",
+      "platform": "windows",
+      "precondition": "Get-Command Set-ProcessMitigation -ErrorAction SilentlyContinue",
+      "steps": [
+        {
+          "description": "Enable Control Flow Guard system-wide so all CFG-compiled binaries enforce indirect call target validation at runtime",
+          "command": "Set-ProcessMitigation -System -Enable CFG",
+          "idempotent": true,
+          "requires_restart": "system",
+          "reversible": true,
+          "undo": "Set-ProcessMitigation -System -Disable CFG"
+        },
+        {
+          "description": "Enable strict CFG mode which also enforces export suppression (blocks indirect calls to functions not in the export table)",
+          "command": "Set-ProcessMitigation -System -Enable StrictCFG",
+          "idempotent": true,
+          "requires_restart": "system",
+          "reversible": true,
+          "undo": "Set-ProcessMitigation -System -Disable StrictCFG"
+        }
+      ],
+      "verify": "(Get-ProcessMitigation -System).CFG.Enable",
+      "references": [
+        {
+          "source": "Microsoft — Exploit Protection Reference",
+          "url": "https://learn.microsoft.com/en-us/defender-endpoint/exploit-protection-reference"
+        },
+        {
+          "source": "Microsoft — Control Flow Guard",
+          "url": "https://learn.microsoft.com/en-us/windows/win32/secbp/control-flow-guard"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "SEA-10"
   ],

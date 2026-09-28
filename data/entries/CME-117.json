@@ -50,6 +50,76 @@
       }
     ]
   },
+  "remediation": [
+    {
+      "id": "malloc-perturb-env",
+      "name": "MALLOC_PERTURB_ environment variable for heap use-after-free hardening",
+      "platform": "linux",
+      "precondition": "test -f /etc/environment || test -d /etc/profile.d",
+      "steps": [
+        {
+          "description": "Set MALLOC_PERTURB_ system-wide so freed heap memory is overwritten with a byte pattern, breaking use-after-free exploitation chains that depend on reading stale heap content (effective on all glibc versions, primary defense on glibc < 2.32)",
+          "command": "printf 'MALLOC_PERTURB_=165\\n' >> /etc/environment",
+          "idempotent": false,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "sed -i '/^MALLOC_PERTURB_=/d' /etc/environment"
+        },
+        {
+          "description": "Create a profile.d script to export MALLOC_PERTURB_ for all login shells (complements /etc/environment for non-PAM contexts)",
+          "command": "printf '#!/bin/sh\\nexport MALLOC_PERTURB_=165\\n' > /etc/profile.d/cme-117-malloc-perturb.sh && chmod 644 /etc/profile.d/cme-117-malloc-perturb.sh",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/profile.d/cme-117-malloc-perturb.sh"
+        }
+      ],
+      "verify": "grep -s MALLOC_PERTURB_ /etc/environment /etc/profile.d/*.sh",
+      "references": [
+        {
+          "source": "glibc malloc tunables documentation",
+          "url": "https://www.gnu.org/software/libc/manual/html_node/Tunables.html"
+        }
+      ]
+    },
+    {
+      "id": "systemd-malloc-perturb",
+      "name": "Systemd service drop-in with MALLOC_PERTURB_ for targeted service hardening",
+      "platform": "linux",
+      "precondition": "systemctl --version >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create a systemd drop-in that sets MALLOC_PERTURB_ for a specific service, filling freed heap memory with a byte pattern to break use-after-free exploitation (replace <service> with the target service name)",
+          "command": "mkdir -p /etc/systemd/system/<service>.service.d && printf '[Service]\\nEnvironment=MALLOC_PERTURB_=165\\n' > /etc/systemd/system/<service>.service.d/heap-hardening.conf",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f /etc/systemd/system/<service>.service.d/heap-hardening.conf && systemctl daemon-reload"
+        },
+        {
+          "description": "Reload systemd to pick up the drop-in configuration",
+          "command": "systemctl daemon-reload",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Restart the target service to apply the new environment variable",
+          "command": "systemctl restart <service>",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "systemctl show <service> -p Environment | grep MALLOC_PERTURB_",
+      "references": [
+        {
+          "source": "systemd.exec — Environment variables in service units",
+          "url": "https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html#Environment"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "SEA-10"
   ],

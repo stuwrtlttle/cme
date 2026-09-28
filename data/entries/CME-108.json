@@ -36,6 +36,43 @@
     "RHEL 8",
     "Ubuntu 24.04"
   ],
+  "remediation": [
+    {
+      "id": "sysctl-kptr-restrict",
+      "name": "Hide kernel pointers from unprivileged users via sysctl",
+      "platform": "linux",
+      "precondition": "test -f /proc/sys/kernel/kptr_restrict",
+      "steps": [
+        {
+          "description": "Set kptr_restrict to 1 (hide kernel pointers from unprivileged users) or 2 (hide from all users including root). Value 1 is recommended for most systems; value 2 may break debugging tools.",
+          "command": "sysctl -w kernel.kptr_restrict=1",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "sysctl -w kernel.kptr_restrict=0"
+        },
+        {
+          "description": "Persist kptr_restrict across reboots via sysctl.d drop-in",
+          "command": "printf 'kernel.kptr_restrict = 1\\n' > /etc/sysctl.d/99-cme-108-kptr-restrict.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/sysctl.d/99-cme-108-kptr-restrict.conf && sysctl --system"
+        }
+      ],
+      "verify": "cat /proc/sys/kernel/kptr_restrict",
+      "references": [
+        {
+          "source": "RHEL 9 — Security Hardening",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/index"
+        },
+        {
+          "source": "kernel.org — sysctl/kernel.txt",
+          "url": "https://www.kernel.org/doc/Documentation/sysctl/kernel.txt"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CFG-02",
     "SEA-10"

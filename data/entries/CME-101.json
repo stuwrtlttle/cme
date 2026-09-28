@@ -138,6 +138,86 @@
       "defaultStatus": "applicable"
     }
   ],
+  "remediation": [
+    {
+      "id": "sysctl-full-aslr",
+      "name": "Enable full ASLR via sysctl with persistent drop-in",
+      "platform": "linux",
+      "precondition": "test -d /proc/sys/kernel",
+      "steps": [
+        {
+          "description": "Set kernel.randomize_va_space to 2 (full randomization: stack, VDSO, shared memory, mmap, heap) in the running kernel",
+          "command": "sysctl -w kernel.randomize_va_space=2",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "sysctl -w kernel.randomize_va_space=0"
+        },
+        {
+          "description": "Persist the setting across reboots via sysctl.d drop-in",
+          "command": "printf 'kernel.randomize_va_space = 2\\n' > /etc/sysctl.d/99-cme-101-aslr.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/sysctl.d/99-cme-101-aslr.conf"
+        }
+      ],
+      "verify": "sysctl kernel.randomize_va_space",
+      "references": [
+        {
+          "source": "RHEL 9 Security Hardening — Protecting against memory-based attacks",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/using-the-kernel-integrity-subsystem_security-hardening"
+        },
+        {
+          "source": "CIS RHEL 9 Benchmark — 1.5.2 Ensure ASLR is enabled",
+          "url": "https://www.cisecurity.org/benchmark/red_hat_linux"
+        }
+      ]
+    },
+    {
+      "id": "windows-exploit-protection-aslr",
+      "name": "Enable system-wide mandatory ASLR via Exploit Protection",
+      "platform": "windows",
+      "precondition": "Get-Command Set-ProcessMitigation -ErrorAction SilentlyContinue",
+      "steps": [
+        {
+          "description": "Enable ForceRelocateImages (mandatory ASLR) system-wide — forces relocation of images not compiled with /DYNAMICBASE",
+          "command": "Set-ProcessMitigation -System -Enable ForceRelocateImages",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "Set-ProcessMitigation -System -Disable ForceRelocateImages"
+        },
+        {
+          "description": "Enable BottomUp randomization system-wide — randomizes the base of the bottom-up allocations (heap, stack, other memory regions)",
+          "command": "Set-ProcessMitigation -System -Enable BottomUp",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "Set-ProcessMitigation -System -Disable BottomUp"
+        },
+        {
+          "description": "Enable HighEntropy ASLR system-wide — uses the full 64-bit address space for randomization on x64 processes",
+          "command": "Set-ProcessMitigation -System -Enable HighEntropy",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "Set-ProcessMitigation -System -Disable HighEntropy"
+        }
+      ],
+      "verify": "(Get-ProcessMitigation -System).ASLR | Format-List",
+      "references": [
+        {
+          "source": "Microsoft — Exploit Protection reference",
+          "url": "https://learn.microsoft.com/en-us/defender-endpoint/exploit-protection-reference"
+        },
+        {
+          "source": "Microsoft — Customize Exploit Protection",
+          "url": "https://learn.microsoft.com/en-us/defender-endpoint/customize-exploit-protection"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "END-02",
     "SEA-10",

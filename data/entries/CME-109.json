@@ -42,6 +42,76 @@
     "RHEL 8",
     "Ubuntu 24.04"
   ],
+  "remediation": [
+    {
+      "id": "grub-lockdown-integrity",
+      "name": "Enable kernel lockdown integrity mode via GRUB boot parameter",
+      "platform": "linux",
+      "precondition": "test -d /sys/kernel/security && grep -q lockdown /sys/kernel/security/lsm 2>/dev/null || test -f /boot/config-$(uname -r)",
+      "steps": [
+        {
+          "description": "Add lockdown=integrity to the kernel command line via GRUB default config. This blocks module parameters, ACPI table loading, iopl/ioperm, and other kernel modification interfaces from userspace — even from root",
+          "command": "grubby --update-kernel=ALL --args='lockdown=integrity'",
+          "idempotent": true,
+          "requires_restart": "system",
+          "reversible": true,
+          "undo": "grubby --update-kernel=ALL --remove-args='lockdown=integrity'"
+        },
+        {
+          "description": "Reboot to activate lockdown mode (the kernel reads the parameter at boot time only)",
+          "command": "systemctl reboot",
+          "idempotent": true,
+          "requires_restart": "system",
+          "reversible": false
+        }
+      ],
+      "verify": "cat /sys/kernel/security/lockdown",
+      "references": [
+        {
+          "source": "Kernel documentation — Kernel Lockdown",
+          "url": "https://www.kernel.org/doc/html/latest/admin-guide/LSM/Lockdown.html"
+        },
+        {
+          "source": "RHEL 9 — Security Hardening",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/index"
+        }
+      ]
+    },
+    {
+      "id": "grub-lockdown-confidentiality",
+      "name": "Enable kernel lockdown confidentiality mode via GRUB boot parameter",
+      "platform": "linux",
+      "precondition": "test -d /sys/kernel/security && grep -q lockdown /sys/kernel/security/lsm 2>/dev/null || test -f /boot/config-$(uname -r)",
+      "steps": [
+        {
+          "description": "Add lockdown=confidentiality to the kernel command line. This is stricter than integrity mode — additionally blocks /dev/mem, /dev/kmem, kprobes, BPF reads of kernel memory, and perf access. May break debugging and monitoring tools that require these interfaces",
+          "command": "grubby --update-kernel=ALL --args='lockdown=confidentiality'",
+          "idempotent": true,
+          "requires_restart": "system",
+          "reversible": true,
+          "undo": "grubby --update-kernel=ALL --remove-args='lockdown=confidentiality'"
+        },
+        {
+          "description": "Reboot to activate lockdown mode",
+          "command": "systemctl reboot",
+          "idempotent": true,
+          "requires_restart": "system",
+          "reversible": false
+        }
+      ],
+      "verify": "cat /sys/kernel/security/lockdown",
+      "references": [
+        {
+          "source": "Kernel documentation — Kernel Lockdown",
+          "url": "https://www.kernel.org/doc/html/latest/admin-guide/LSM/Lockdown.html"
+        },
+        {
+          "source": "RHEL 9 — Security Hardening",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/index"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CFG-03",
     "END-16",

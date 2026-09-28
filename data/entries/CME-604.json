@@ -47,6 +47,70 @@
     "RHEL 8",
     "Ubuntu 24.04"
   ],
+  "remediation": [
+    {
+      "id": "sysctl-max-user-namespaces",
+      "name": "Disable unprivileged user namespaces via user.max_user_namespaces sysctl",
+      "platform": "linux",
+      "precondition": "test -f /proc/sys/user/max_user_namespaces",
+      "steps": [
+        {
+          "description": "Set user.max_user_namespaces to 0 immediately (blocks unprivileged user namespace creation for all new processes)",
+          "command": "sysctl -w user.max_user_namespaces=0",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "sysctl -w user.max_user_namespaces=65536"
+        },
+        {
+          "description": "Persist the setting across reboots via sysctl.d drop-in",
+          "command": "printf 'user.max_user_namespaces = 0\\n' > /etc/sysctl.d/99-cme-604-userns.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/sysctl.d/99-cme-604-userns.conf && sysctl --system"
+        }
+      ],
+      "verify": "cat /proc/sys/user/max_user_namespaces",
+      "references": [
+        {
+          "source": "RHEL 9 Security Hardening — Reducing kernel attack surface",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/reducing-kernel-attack-surface_security-hardening"
+        }
+      ]
+    },
+    {
+      "id": "sysctl-unprivileged-userns-clone",
+      "name": "Disable unprivileged user namespaces via kernel.unprivileged_userns_clone sysctl",
+      "platform": "debian",
+      "precondition": "sysctl kernel.unprivileged_userns_clone >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Set kernel.unprivileged_userns_clone to 0 immediately (Debian/Ubuntu-specific sysctl that prevents unprivileged processes from calling unshare(CLONE_NEWUSER))",
+          "command": "sysctl -w kernel.unprivileged_userns_clone=0",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "sysctl -w kernel.unprivileged_userns_clone=1"
+        },
+        {
+          "description": "Persist the setting across reboots via sysctl.d drop-in",
+          "command": "printf 'kernel.unprivileged_userns_clone = 0\\n' > /etc/sysctl.d/99-cme-604-userns.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/sysctl.d/99-cme-604-userns.conf && sysctl --system"
+        }
+      ],
+      "verify": "sysctl kernel.unprivileged_userns_clone",
+      "references": [
+        {
+          "source": "Debian Wiki — User Namespaces",
+          "url": "https://wiki.debian.org/UserNamespaces"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CFG-03",
     "IAC-21"

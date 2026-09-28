@@ -52,6 +52,82 @@
       }
     ]
   },
+  "remediation": [
+    {
+      "id": "systemd-ld-env-hardening",
+      "name": "systemd drop-in to clear LD_PRELOAD and LD_LIBRARY_PATH per service",
+      "platform": "linux",
+      "precondition": "systemctl --version >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create a systemd drop-in directory for the target service (replace <service> with the service name, e.g., httpd, nginx, postgresql)",
+          "command": "mkdir -p /etc/systemd/system/<service>.service.d",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rmdir /etc/systemd/system/<service>.service.d 2>/dev/null"
+        },
+        {
+          "description": "Create a drop-in that explicitly clears LD_PRELOAD and LD_LIBRARY_PATH and restricts PATH to trusted directories only",
+          "command": "printf '[Service]\\nEnvironment=LD_PRELOAD=\\nEnvironment=LD_LIBRARY_PATH=\\nEnvironment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin\\n' > /etc/systemd/system/<service>.service.d/cme-507-ld-hardening.conf",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f /etc/systemd/system/<service>.service.d/cme-507-ld-hardening.conf"
+        },
+        {
+          "description": "Reload systemd daemon to pick up the drop-in configuration",
+          "command": "systemctl daemon-reload",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Restart the service to apply the hardened environment",
+          "command": "systemctl restart <service>",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "systemctl show <service> -p Environment | grep -i ld_preload",
+      "references": [
+        {
+          "source": "RHEL 9 — Customizing systemd unit files",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/configuring_basic_system_settings/managing-system-services-with-systemctl_configuring-basic-system-settings#proc_customizing-existing-unit-files_managing-system-services-with-systemctl"
+        }
+      ]
+    },
+    {
+      "id": "ld-search-path-hardening",
+      "name": "Secure dynamic linker search paths and rebuild library cache",
+      "platform": "linux",
+      "precondition": "test -d /etc/ld.so.conf.d",
+      "steps": [
+        {
+          "description": "Remove write permissions from all directories referenced in the dynamic linker search path to prevent unprivileged library placement",
+          "command": "for dir in $(cat /etc/ld.so.conf.d/*.conf 2>/dev/null | grep -v '^#' | sort -u); do [ -d \"$dir\" ] && chmod o-w \"$dir\" && echo \"Secured: $dir\"; done",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Rebuild the dynamic linker cache from the trusted search paths",
+          "command": "ldconfig",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "find $(cat /etc/ld.so.conf.d/*.conf 2>/dev/null) -maxdepth 0 -writable 2>/dev/null | wc -l",
+      "references": [
+        {
+          "source": "RHEL 9 Security Hardening — Shared library hardening",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/index"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CFG-02",
     "END-02"

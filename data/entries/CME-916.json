@@ -45,6 +45,82 @@
       }
     ]
   },
+  "remediation": [
+    {
+      "id": "apache-samesite-enforcement",
+      "name": "Apache mod_headers SameSite=Lax enforcement on all cookies",
+      "platform": "linux",
+      "precondition": "apachectl -v >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create an Apache drop-in config that rewrites all Set-Cookie headers to include SameSite=Lax. The Header edit directive appends SameSite=Lax to cookies that do not already carry a SameSite attribute, and rewrites SameSite=None to SameSite=Lax for cookies that explicitly disabled it.",
+          "command": "printf '<IfModule mod_headers.c>\n  Header always edit Set-Cookie \"(?i)^((?!.*SameSite).*)$\" \"$1; SameSite=Lax\"\n  Header always edit Set-Cookie \"(?i)(SameSite=None)\" \"SameSite=Lax\"\n</IfModule>\n' > /etc/httpd/conf.d/cme-916-samesite.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/httpd/conf.d/cme-916-samesite.conf"
+        },
+        {
+          "description": "Test the Apache configuration for syntax errors before reloading",
+          "command": "apachectl configtest",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Gracefully reload Apache to apply the new cookie header rules",
+          "command": "systemctl reload httpd",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "curl -sI https://<your-app>/ | grep -i 'set-cookie' | grep -i 'samesite'",
+      "references": [
+        {
+          "source": "Apache mod_headers — Header Directive",
+          "url": "https://httpd.apache.org/docs/2.4/mod/mod_headers.html"
+        }
+      ]
+    },
+    {
+      "id": "nginx-samesite-enforcement",
+      "name": "nginx proxy_cookie_flags SameSite=Lax enforcement on all proxied cookies",
+      "platform": "linux",
+      "precondition": "nginx -v >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create an nginx drop-in config snippet that adds the SameSite=Lax flag to all cookies set by upstream backends via proxy_cookie_flags. Requires nginx 1.19.3+ (included in RHEL 9+, Fedora, Ubuntu 22.04+).",
+          "command": "printf 'proxy_cookie_flags ~ samesite=lax;\\n' > /etc/nginx/conf.d/cme-916-samesite.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/nginx/conf.d/cme-916-samesite.conf"
+        },
+        {
+          "description": "Test the nginx configuration for syntax errors before reloading",
+          "command": "nginx -t",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Gracefully reload nginx to apply the new cookie flag rules",
+          "command": "systemctl reload nginx",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "curl -sI https://<your-app>/ | grep -i 'set-cookie' | grep -i 'samesite'",
+      "references": [
+        {
+          "source": "nginx proxy_cookie_flags directive",
+          "url": "https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cookie_flags"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "WEB-04",
     "WEB-05"

@@ -42,6 +42,45 @@
     "RHEL 8",
     "Ubuntu 24.04"
   ],
+  "remediation": [
+    {
+      "id": "sysctl-modules-disabled",
+      "name": "Disable kernel module loading at runtime via sysctl",
+      "platform": "linux",
+      "precondition": "test -f /proc/sys/kernel/modules_disabled",
+      "steps": [
+        {
+          "description": "Ensure all required kernel modules are loaded before disabling module loading — list currently loaded modules and verify no critical modules are missing (e.g., filesystem, network, storage drivers)",
+          "command": "lsmod | sort",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true
+        },
+        {
+          "description": "Disable kernel module loading for the running session — WARNING: this is a one-way operation, cannot be reversed without a reboot. Once set to 1, no new modules can be loaded until the system reboots",
+          "command": "sysctl -w kernel.modules_disabled=1",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Persist the setting so module loading is disabled on every boot after all initramfs modules are loaded (sysctl.d runs after modules_load.d)",
+          "command": "printf 'kernel.modules_disabled = 1\\n' > /etc/sysctl.d/99-cme-107-modules-disabled.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/sysctl.d/99-cme-107-modules-disabled.conf"
+        }
+      ],
+      "verify": "cat /proc/sys/kernel/modules_disabled",
+      "references": [
+        {
+          "source": "RHEL 9 Security Hardening — Protecting the kernel",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/protecting-the-kernel_security-hardening"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CFG-03",
     "END-03",

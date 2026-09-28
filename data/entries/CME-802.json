@@ -89,6 +89,78 @@
       "defaultStatus": "applicable"
     }
   ],
+  "remediation": [
+    {
+      "id": "pwquality-conf-hardening",
+      "name": "pam_pwquality configuration with minlen=14 and minclass=4",
+      "platform": "linux",
+      "precondition": "test -f /etc/security/pwquality.conf",
+      "steps": [
+        {
+          "description": "Set minimum password length to 14 characters and require all 4 character classes (uppercase, lowercase, digit, special) in pwquality.conf",
+          "command": "sed -i 's/^#\\?\\s*minlen\\s*=.*/minlen = 14/' /etc/security/pwquality.conf && sed -i 's/^#\\?\\s*minclass\\s*=.*/minclass = 4/' /etc/security/pwquality.conf && sed -i 's/^#\\?\\s*dictcheck\\s*=.*/dictcheck = 1/' /etc/security/pwquality.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "sed -i 's/^minlen\\s*=.*/# minlen = 8/' /etc/security/pwquality.conf && sed -i 's/^minclass\\s*=.*/# minclass = 0/' /etc/security/pwquality.conf"
+        },
+        {
+          "description": "Ensure pam_pwquality.so is enabled in PAM system-auth (RHEL) or common-password (Debian) with retry=3 and enforce_for_root",
+          "command": "grep -q 'pam_pwquality.so' /etc/pam.d/system-auth 2>/dev/null || grep -q 'pam_pwquality.so' /etc/pam.d/common-password 2>/dev/null || echo 'password requisite pam_pwquality.so retry=3 enforce_for_root' >> /etc/pam.d/system-auth",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "sed -i '/pam_pwquality.so/d' /etc/pam.d/system-auth"
+        }
+      ],
+      "verify": "grep '^minlen' /etc/security/pwquality.conf && grep '^minclass' /etc/security/pwquality.conf && grep -c 'pam_pwquality.so' /etc/pam.d/system-auth /etc/pam.d/common-password 2>/dev/null",
+      "references": [
+        {
+          "source": "RHEL 9 Security Hardening — Password security",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/using-authselect-for-configuring-user-authentication_security-hardening"
+        }
+      ]
+    },
+    {
+      "id": "windows-password-policy",
+      "name": "Windows local password policy via net accounts",
+      "platform": "windows",
+      "precondition": "net accounts >$null 2>&1",
+      "steps": [
+        {
+          "description": "Set minimum password length to 14 characters",
+          "command": "net accounts /minpwlen:14",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "net accounts /minpwlen:0"
+        },
+        {
+          "description": "Enable password complexity requirements (uppercase, lowercase, digit, special)",
+          "command": "secedit /export /cfg C:\\Windows\\Temp\\secpol.cfg && (Get-Content C:\\Windows\\Temp\\secpol.cfg) -replace 'PasswordComplexity\\s*=\\s*0','PasswordComplexity = 1' | Set-Content C:\\Windows\\Temp\\secpol.cfg && secedit /configure /db C:\\Windows\\Security\\local.sdb /cfg C:\\Windows\\Temp\\secpol.cfg /areas SECURITYPOLICY",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "secedit /export /cfg C:\\Windows\\Temp\\secpol.cfg && (Get-Content C:\\Windows\\Temp\\secpol.cfg) -replace 'PasswordComplexity\\s*=\\s*1','PasswordComplexity = 0' | Set-Content C:\\Windows\\Temp\\secpol.cfg && secedit /configure /db C:\\Windows\\Security\\local.sdb /cfg C:\\Windows\\Temp\\secpol.cfg /areas SECURITYPOLICY"
+        },
+        {
+          "description": "Set minimum password age to 1 day to prevent rapid cycling through password history",
+          "command": "net accounts /minpwage:1",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "net accounts /minpwage:0"
+        }
+      ],
+      "verify": "net accounts | Select-String 'Minimum password length'",
+      "references": [
+        {
+          "source": "Microsoft — Password Policy",
+          "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/password-policy"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "IAC-10.1",
     "IAC-10.4"

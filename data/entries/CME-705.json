@@ -47,6 +47,78 @@
     "Kubernetes",
     "OpenShift"
   ],
+  "remediation": [
+    {
+      "id": "kubernetes-drop-all-capabilities",
+      "name": "Kubernetes drop ALL capabilities with minimal add-back",
+      "platform": "kubernetes",
+      "precondition": "command -v kubectl >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Patch deployment to drop ALL capabilities and add back only the minimum required (NET_BIND_SERVICE for ports <1024, or none if not needed). Replace <deployment> and <namespace> with actual values.",
+          "command": "kubectl patch deployment <deployment> -n <namespace> --type=json -p '[{\"op\":\"add\",\"path\":\"/spec/template/spec/containers/0/securityContext/capabilities\",\"value\":{\"drop\":[\"ALL\"],\"add\":[\"NET_BIND_SERVICE\"]}}]'",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "kubectl patch deployment <deployment> -n <namespace> --type=json -p '[{\"op\":\"remove\",\"path\":\"/spec/template/spec/containers/0/securityContext/capabilities\"}]'"
+        },
+        {
+          "description": "Label namespace for Pod Security Standards Restricted enforcement, which requires dropping ALL capabilities",
+          "command": "kubectl label namespace <namespace> pod-security.kubernetes.io/enforce=restricted --overwrite",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "kubectl label namespace <namespace> pod-security.kubernetes.io/enforce-"
+        }
+      ],
+      "verify": "kubectl get pod -n <namespace> -o jsonpath='{.items[0].spec.containers[0].securityContext.capabilities.drop}'",
+      "references": [
+        {
+          "source": "Kubernetes — Pod Security Standards",
+          "url": "https://kubernetes.io/docs/concepts/security/pod-security-standards/"
+        },
+        {
+          "source": "Kubernetes — Set capabilities for a Container",
+          "url": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container"
+        }
+      ]
+    },
+    {
+      "id": "podman-cap-drop-all",
+      "name": "Podman/Docker drop ALL capabilities",
+      "platform": "linux",
+      "precondition": "command -v podman >/dev/null 2>&1 || command -v docker >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Run container with all capabilities dropped. Add back only specific capabilities required by the workload (e.g., --cap-add NET_BIND_SERVICE). Replace <image> with the container image.",
+          "command": "podman run --cap-drop ALL --cap-add NET_BIND_SERVICE <image>",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "podman run <image>"
+        },
+        {
+          "description": "Set default capability drop policy in containers.conf so all new containers start with minimal capabilities",
+          "command": "printf '[containers]\\ndefault_capabilities = []\\n' > /etc/containers/containers.conf.d/cme-705-drop-caps.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/containers/containers.conf.d/cme-705-drop-caps.conf"
+        }
+      ],
+      "verify": "podman run --cap-drop ALL <image> grep CapEff /proc/1/status",
+      "references": [
+        {
+          "source": "Podman — Security and capabilities",
+          "url": "https://docs.podman.io/en/latest/markdown/podman-run.1.html#cap-drop-capability"
+        },
+        {
+          "source": "RHEL 9 — Building, running, and managing Linux containers",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/building_running_and_managing_containers/index"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CFG-03",
     "IAC-21"
