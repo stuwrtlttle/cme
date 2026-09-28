@@ -20,6 +20,11 @@ All notable changes to the CME (Common Mitigation Enumeration) project are docum
 - `543f046` Rebuild docs site with remediation sections
 - `c5eb680` Add remediation section rendering to static entry pages
 
+
+### Auto-generated changelog
+
+- `3cc50e8` Add CME-202 remediation variants and simplify remediation page rendering
+
 ## 2026-09-25
 
 ### Auto-generated changelog
