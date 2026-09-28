@@ -52,6 +52,117 @@
     "Fedora",
     "SLES 15"
   ],
+  "remediation": [
+    {
+      "id": "firewalld-zone-restrict",
+      "name": "firewalld zone-based service restriction",
+      "platform": "rhel",
+      "precondition": "command -v firewall-cmd >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Enable and start firewalld if not already running",
+          "command": "systemctl enable --now firewalld",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "systemctl disable --now firewalld"
+        },
+        {
+          "description": "Set the default zone to drop (deny all inbound by default, only explicitly allowed services/ports are reachable)",
+          "command": "firewall-cmd --set-default-zone=drop",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "firewall-cmd --set-default-zone=public"
+        },
+        {
+          "description": "Allow SSH from a specific management network only (replace <mgmt_cidr> with your admin network, e.g., 10.0.1.0/24)",
+          "command": "firewall-cmd --permanent --zone=drop --add-rich-rule='rule family=ipv4 source address=<mgmt_cidr> service name=ssh accept'",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "firewall-cmd --permanent --zone=drop --remove-rich-rule='rule family=ipv4 source address=<mgmt_cidr> service name=ssh accept'"
+        },
+        {
+          "description": "Allow a specific application service port from authorized client networks only (replace <service_port> and <client_cidr>)",
+          "command": "firewall-cmd --permanent --zone=drop --add-rich-rule='rule family=ipv4 source address=<client_cidr> port port=<service_port> protocol=tcp accept'",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "firewall-cmd --permanent --zone=drop --remove-rich-rule='rule family=ipv4 source address=<client_cidr> port port=<service_port> protocol=tcp accept'"
+        },
+        {
+          "description": "Reload firewalld to apply permanent rules",
+          "command": "firewall-cmd --reload",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "firewall-cmd --state && firewall-cmd --get-default-zone && firewall-cmd --list-all",
+      "references": [
+        {
+          "source": "RHEL 9 — Using and configuring firewalld",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/configuring_firewalls_and_packet_filters/using-and-configuring-firewalld_firewall-packet-filters"
+        },
+        {
+          "source": "RHEL 9 Security Hardening — Controlling network traffic using firewalld",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/using-firewalls_security-hardening"
+        }
+      ]
+    },
+    {
+      "id": "nftables-restrict",
+      "name": "nftables default-deny ruleset with per-service allowlisting",
+      "platform": "linux",
+      "precondition": "command -v nft >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create a default-deny nftables ruleset file that allows established connections, ICMP, loopback, SSH from a management network, and a specific service port from authorized clients (replace <mgmt_cidr>, <client_cidr>, <service_port>)",
+          "command": "printf '#!/usr/sbin/nft -f\\nflush ruleset\\ntable inet filter {\\n  chain input {\\n    type filter hook input priority 0; policy drop;\\n    ct state established,related accept\\n    ct state invalid drop\\n    iif lo accept\\n    ip protocol icmp accept\\n    ip6 nexthdr icmpv6 accept\\n    ip saddr <mgmt_cidr> tcp dport 22 accept\\n    ip saddr <client_cidr> tcp dport <service_port> accept\\n  }\\n  chain forward {\\n    type filter hook forward priority 0; policy drop;\\n  }\\n  chain output {\\n    type filter hook output priority 0; policy accept;\\n  }\\n}\\n' > /etc/nftables/cme-202.nft",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/nftables/cme-202.nft"
+        },
+        {
+          "description": "Include the CME-202 ruleset from the main nftables config if not already included",
+          "command": "grep -q 'cme-202.nft' /etc/sysconfig/nftables.conf 2>/dev/null || echo 'include \"/etc/nftables/cme-202.nft\"' >> /etc/sysconfig/nftables.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "sed -i '/cme-202.nft/d' /etc/sysconfig/nftables.conf"
+        },
+        {
+          "description": "Load the ruleset into the running kernel",
+          "command": "nft -f /etc/nftables/cme-202.nft",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "nft flush ruleset"
+        },
+        {
+          "description": "Enable the nftables service so rules persist across reboots",
+          "command": "systemctl enable nftables",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "systemctl disable nftables"
+        }
+      ],
+      "verify": "nft list ruleset | grep -c 'policy drop'",
+      "references": [
+        {
+          "source": "RHEL 9 — Getting started with nftables",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/configuring_firewalls_and_packet_filters/getting-started-with-nftables_firewall-packet-filters"
+        },
+        {
+          "source": "nftables wiki — Simple ruleset for a server",
+          "url": "https://wiki.nftables.org/wiki-nftables/index.php/Simple_ruleset_for_a_server"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "END-05",
     "NET-04",
