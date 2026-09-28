@@ -116,6 +116,74 @@
     </section>
     {% endif %}
 
+    {% if entry.remediation %}
+    <section>
+      <h2>Remediation</h2>
+      {% for rem in entry.remediation %}
+      <div class="remediation-block">
+        <h3 class="remediation-title">{{ rem.name }}
+          <span class="badge badge-layer-{{ rem.platform }}">{{ rem.platform }}</span>
+        </h3>
+
+        {% if rem.precondition %}
+        <div class="remediation-precondition">
+          <strong>Precondition:</strong>
+          <code>{{ rem.precondition }}</code>
+        </div>
+        {% endif %}
+
+        <ol class="remediation-steps">
+          {% for step in rem.steps %}
+          <li>
+            <p>{{ step.description }}</p>
+            <div class="verification-cmd">
+              <span class="cmd-prompt">$</span> {{ step.command }}
+            </div>
+            <div class="remediation-step-meta">
+              {% if step.requires_restart and step.requires_restart != 'none' %}
+              <span class="badge badge-attenuation-unquantified">Restart: {{ step.requires_restart }}</span>
+              {% endif %}
+              {% if step.reversible %}
+              <span class="badge badge-confidence-high">Reversible</span>
+              {% elif step.reversible is defined %}
+              <span class="badge badge-attenuation-unquantified">Not reversible</span>
+              {% endif %}
+            </div>
+            {% if step.undo %}
+            <details class="remediation-undo">
+              <summary>Undo command</summary>
+              <div class="verification-cmd">
+                <span class="cmd-prompt">$</span> {{ step.undo }}
+              </div>
+            </details>
+            {% endif %}
+          </li>
+          {% endfor %}
+        </ol>
+
+        {% if rem.verify %}
+        <div class="remediation-verify">
+          <strong>Verify:</strong>
+          <div class="verification-cmd">
+            <span class="cmd-prompt">$</span> {{ rem.verify }}
+          </div>
+        </div>
+        {% endif %}
+
+        {% if rem.references %}
+        <ul class="sidebar-list remediation-refs">
+          {% for ref in rem.references %}
+          <li>
+            {% if ref.url %}<a href="{{ ref.url }}" target="_blank" rel="noopener">{{ ref.source }}</a>{% else %}{{ ref.source }}{% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </section>
+    {% endif %}
+
     {% if entry.cve_affected %}
     <section>
       <h2>Applicability (CVE {{ entry.cve_schema_version }} Schema)</h2>
