@@ -31,6 +31,11 @@ All notable changes to the CME (Common Mitigation Enumeration) project are docum
 - `f609cab` Rebuild docs site with remediation sections for 48 entries
 - `668e889` Add remediation variants to 48 CME entries
 
+
+### Auto-generated changelog
+
+- `2fc59be` Add remediation support to MCP server and database layer
+
 ## 2026-09-25
 
 ### Auto-generated changelog
