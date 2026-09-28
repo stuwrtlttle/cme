@@ -139,6 +139,31 @@ _CREATE_TABLES = """
         url     TEXT,
         section TEXT
     );
+
+    CREATE TABLE IF NOT EXISTS remediation_variants (
+        id              SERIAL PRIMARY KEY,
+        cme_id          TEXT NOT NULL REFERENCES cme_entries(cme_id) ON DELETE CASCADE,
+        variant_id      TEXT NOT NULL,
+        name            TEXT NOT NULL,
+        platform        TEXT NOT NULL,
+        precondition    TEXT,
+        verify          TEXT,
+        references_json TEXT,
+        variant_order   INTEGER NOT NULL DEFAULT 0
+    );
+
+    CREATE TABLE IF NOT EXISTS remediation_steps (
+        id              SERIAL PRIMARY KEY,
+        variant_db_id   INTEGER NOT NULL REFERENCES remediation_variants(id) ON DELETE CASCADE,
+        cme_id          TEXT NOT NULL,
+        step_order      INTEGER NOT NULL,
+        description     TEXT,
+        command         TEXT NOT NULL,
+        idempotent      BOOLEAN NOT NULL DEFAULT FALSE,
+        requires_restart TEXT NOT NULL DEFAULT 'none',
+        reversible      BOOLEAN NOT NULL DEFAULT TRUE,
+        undo            TEXT
+    );
 """
 
 _CREATE_INDEXES = [
@@ -156,6 +181,8 @@ _CREATE_INDEXES = [
     "CREATE INDEX IF NOT EXISTS idx_bindings_namespace ON framework_bindings(namespace, identifier)",
     "CREATE INDEX IF NOT EXISTS idx_scf_cme ON scf_identifiers(cme_id)",
     "CREATE INDEX IF NOT EXISTS idx_scf_id ON scf_identifiers(scf_id)",
+    "CREATE INDEX IF NOT EXISTS idx_remediation_cme ON remediation_variants(cme_id)",
+    "CREATE INDEX IF NOT EXISTS idx_remediation_steps_variant ON remediation_steps(variant_db_id)",
 ]
 
 
@@ -187,7 +214,8 @@ def init_db(conn: psycopg.Connection) -> None:
 
 def reset_db(conn: psycopg.Connection) -> None:
     """Drop all tables and recreate — used only by the seed script."""
-    for table in ["references_", "scf_identifiers", "verification_commands", "framework_bindings",
+    for table in ["remediation_steps", "remediation_variants", "references_", "scf_identifiers",
+                  "verification_commands", "framework_bindings",
                   "relationships", "cwe_relationships", "cvss_vector_impacts", "cme_entries", "functions"]:
         conn.execute(f"DROP TABLE IF EXISTS {table} CASCADE")
     init_db(conn)
@@ -271,7 +299,8 @@ def insert_entry(conn: psycopg.Connection, entry: dict) -> None:
         },
     )
 
-    for table in ("cvss_vector_impacts", "cwe_relationships", "relationships", "framework_bindings", "scf_identifiers", "verification_commands", "references_"):
+    for table in ("remediation_steps", "remediation_variants", "cvss_vector_impacts", "cwe_relationships",
+                  "relationships", "framework_bindings", "scf_identifiers", "verification_commands", "references_"):
         conn.execute(f"DELETE FROM {table} WHERE cme_id = %(cme_id)s", {"cme_id": entry["cme_id"]})
 
     for impact in entry.get("cvss_vector_impacts", []):
@@ -339,6 +368,41 @@ def insert_entry(conn: psycopg.Connection, entry: dict) -> None:
             {"cme_id": entry["cme_id"], "source": ref["source"],
              "url": ref.get("url"), "section": ref.get("section")},
         )
+
+    for vi, variant in enumerate(entry.get("remediation", [])):
+        row = conn.execute(
+            """INSERT INTO remediation_variants
+               (cme_id, variant_id, name, platform, precondition, verify, references_json, variant_order)
+               VALUES (%(cme_id)s, %(variant_id)s, %(name)s, %(platform)s, %(precondition)s,
+                       %(verify)s, %(references_json)s, %(variant_order)s)
+               RETURNING id""",
+            {
+                "cme_id": entry["cme_id"], "variant_id": variant["id"],
+                "name": variant["name"], "platform": variant["platform"],
+                "precondition": variant.get("precondition"),
+                "verify": variant.get("verify"),
+                "references_json": json.dumps(variant["references"]) if variant.get("references") else None,
+                "variant_order": vi,
+            },
+        ).fetchone()
+        variant_db_id = row["id"]
+        for si, step in enumerate(variant.get("steps", [])):
+            conn.execute(
+                """INSERT INTO remediation_steps
+                   (variant_db_id, cme_id, step_order, description, command,
+                    idempotent, requires_restart, reversible, undo)
+                   VALUES (%(variant_db_id)s, %(cme_id)s, %(step_order)s, %(description)s,
+                           %(command)s, %(idempotent)s, %(requires_restart)s, %(reversible)s, %(undo)s)""",
+                {
+                    "variant_db_id": variant_db_id, "cme_id": entry["cme_id"],
+                    "step_order": si, "description": step.get("description"),
+                    "command": step["command"],
+                    "idempotent": step.get("idempotent", False),
+                    "requires_restart": step.get("requires_restart", "none"),
+                    "reversible": step.get("reversible", True),
+                    "undo": step.get("undo"),
+                },
+            )
 
 
 # --- Query helpers ---
@@ -600,6 +664,41 @@ def _hydrate_batch(conn: psycopg.Connection, entries: list[dict]) -> list[dict]:
     ).fetchall():
         refs_by_id[r["cme_id"]].append({"source": r["source"], "url": r["url"], "section": r["section"]})
 
+    variants_by_id: dict[str, list] = defaultdict(list)
+    variant_rows = conn.execute(
+        """SELECT id, cme_id, variant_id, name, platform, precondition, verify, references_json, variant_order
+           FROM remediation_variants WHERE cme_id = ANY(%(ids)s)
+           ORDER BY cme_id, variant_order""",
+        {"ids": cme_ids},
+    ).fetchall()
+    variant_db_ids = [r["id"] for r in variant_rows]
+    steps_by_variant: dict[int, list] = defaultdict(list)
+    if variant_db_ids:
+        for s in conn.execute(
+            """SELECT variant_db_id, step_order, description, command,
+                      idempotent, requires_restart, reversible, undo
+               FROM remediation_steps WHERE variant_db_id = ANY(%(ids)s)
+               ORDER BY variant_db_id, step_order""",
+            {"ids": variant_db_ids},
+        ).fetchall():
+            step = {"command": s["command"], "idempotent": s["idempotent"],
+                    "requires_restart": s["requires_restart"], "reversible": s["reversible"]}
+            if s["description"]:
+                step["description"] = s["description"]
+            if s["undo"]:
+                step["undo"] = s["undo"]
+            steps_by_variant[s["variant_db_id"]].append(step)
+    for vr in variant_rows:
+        variant = {"id": vr["variant_id"], "name": vr["name"], "platform": vr["platform"],
+                   "steps": steps_by_variant.get(vr["id"], [])}
+        if vr["precondition"]:
+            variant["precondition"] = vr["precondition"]
+        if vr["verify"]:
+            variant["verify"] = vr["verify"]
+        if vr["references_json"]:
+            variant["references"] = json.loads(vr["references_json"])
+        variants_by_id[vr["cme_id"]].append(variant)
+
     relationships_by_id: dict[str, list] = defaultdict(list)
     for r in conn.execute(
         """SELECT cme_id, target_namespace, target_id, relationship_type, method,
@@ -665,5 +764,9 @@ def _hydrate_batch(conn: psycopg.Connection, entries: list[dict]) -> list[dict]:
 
         if cme_id in refs_by_id:
             entry["references"] = refs_by_id[cme_id]
+
+        rem = variants_by_id.get(cme_id, [])
+        if rem:
+            entry["remediation"] = rem
 
     return entries

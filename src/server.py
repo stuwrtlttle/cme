@@ -309,6 +309,37 @@ async def get_verification_commands(cme_id: str) -> str:
 
 
 @mcp.tool()
+async def get_remediation_commands(cme_id: str, platform: str = "") -> str:
+    """Get platform-specific remediation steps for a CME control.
+
+    Returns implementation commands an administrator can run to enable
+    the control on a target system, with safety metadata (idempotent,
+    requires_restart, reversible, undo).
+
+    Args:
+        cme_id: CME identifier (e.g., "CME-202")
+        platform: Optional platform filter (linux, rhel, debian, kubernetes, windows, macos, any)
+    """
+    cme_id_upper = cme_id.upper()
+    entry = await _run_db(lambda conn: db.get_entry(conn, cme_id_upper))
+    if not entry:
+        return json.dumps({"error": f"No entry found for {cme_id}"})
+    remediation = entry.get("remediation", [])
+    if platform:
+        remediation = [r for r in remediation if r["platform"] == platform.lower()]
+    if not remediation:
+        msg = f"No remediation data for {cme_id_upper}"
+        if platform:
+            msg += f" on platform '{platform}'"
+        return json.dumps({"cme_id": cme_id_upper, "message": msg})
+    return json.dumps({
+        "cme_id": entry["cme_id"],
+        "control_name": entry["control_name"],
+        "remediation": remediation,
+    }, indent=2)
+
+
+@mcp.tool()
 async def simulate_cve_risk(
     base_score: float,
     base_vector: str,

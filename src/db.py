@@ -115,6 +115,31 @@ def init_db(conn: sqlite3.Connection) -> None:
             section TEXT
         );
 
+        CREATE TABLE IF NOT EXISTS remediation_variants (
+            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            cme_id          TEXT NOT NULL REFERENCES cme_entries(cme_id) ON DELETE CASCADE,
+            variant_id      TEXT NOT NULL,
+            name            TEXT NOT NULL,
+            platform        TEXT NOT NULL,
+            precondition    TEXT,
+            verify          TEXT,
+            references_json TEXT,
+            variant_order   INTEGER NOT NULL DEFAULT 0
+        );
+
+        CREATE TABLE IF NOT EXISTS remediation_steps (
+            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            variant_db_id   INTEGER NOT NULL REFERENCES remediation_variants(id) ON DELETE CASCADE,
+            cme_id          TEXT NOT NULL,
+            step_order      INTEGER NOT NULL,
+            description     TEXT,
+            command         TEXT NOT NULL,
+            idempotent      BOOLEAN NOT NULL DEFAULT 0,
+            requires_restart TEXT NOT NULL DEFAULT 'none',
+            reversible      BOOLEAN NOT NULL DEFAULT 1,
+            undo            TEXT
+        );
+
         CREATE INDEX IF NOT EXISTS idx_entries_tactic ON cme_entries(tactic);
         CREATE INDEX IF NOT EXISTS idx_entries_layer ON cme_entries(control_layer);
         CREATE INDEX IF NOT EXISTS idx_entries_category ON cme_entries(category);
@@ -129,6 +154,8 @@ def init_db(conn: sqlite3.Connection) -> None:
         CREATE INDEX IF NOT EXISTS idx_bindings_namespace ON framework_bindings(namespace, identifier);
         CREATE INDEX IF NOT EXISTS idx_scf_cme ON scf_identifiers(cme_id);
         CREATE INDEX IF NOT EXISTS idx_scf_id ON scf_identifiers(scf_id);
+        CREATE INDEX IF NOT EXISTS idx_remediation_cme ON remediation_variants(cme_id);
+        CREATE INDEX IF NOT EXISTS idx_remediation_steps_variant ON remediation_steps(variant_db_id);
     """)
     columns = {row["name"] for row in conn.execute("PRAGMA table_info(cme_entries)")}
     for name, definition in {
@@ -198,7 +225,8 @@ def insert_entry(conn: sqlite3.Connection, entry: dict) -> None:
     )
 
     # Clear child rows for upsert
-    for table in ("cvss_vector_impacts", "cwe_relationships", "relationships", "framework_bindings", "scf_identifiers", "verification_commands", "references_"):
+    for table in ("remediation_steps", "remediation_variants", "cvss_vector_impacts", "cwe_relationships",
+                  "relationships", "framework_bindings", "scf_identifiers", "verification_commands", "references_"):
         conn.execute(f"DELETE FROM {table} WHERE cme_id = ?", (entry["cme_id"],))
 
     for impact in entry.get("cvss_vector_impacts", []):
@@ -262,6 +290,28 @@ def insert_entry(conn: sqlite3.Connection, entry: dict) -> None:
             "INSERT INTO references_ (cme_id, source, url, section) VALUES (?, ?, ?, ?)",
             (entry["cme_id"], ref["source"], ref.get("url"), ref.get("section")),
         )
+
+    for vi, variant in enumerate(entry.get("remediation", [])):
+        cursor = conn.execute(
+            """INSERT INTO remediation_variants
+               (cme_id, variant_id, name, platform, precondition, verify, references_json, variant_order)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+            (entry["cme_id"], variant["id"], variant["name"], variant["platform"],
+             variant.get("precondition"), variant.get("verify"),
+             json.dumps(variant["references"]) if variant.get("references") else None, vi),
+        )
+        variant_db_id = cursor.lastrowid
+        for si, step in enumerate(variant.get("steps", [])):
+            conn.execute(
+                """INSERT INTO remediation_steps
+                   (variant_db_id, cme_id, step_order, description, command,
+                    idempotent, requires_restart, reversible, undo)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (variant_db_id, entry["cme_id"], si, step.get("description"),
+                 step["command"], step.get("idempotent", False),
+                 step.get("requires_restart", "none"), step.get("reversible", True),
+                 step.get("undo")),
+            )
 
 
 def _hydrate_impact(r) -> dict:
@@ -550,5 +600,37 @@ def _hydrate(conn: sqlite3.Connection, entry: dict) -> dict:
     refs = conn.execute("SELECT source, url, section FROM references_ WHERE cme_id = ?", (cme_id,)).fetchall()
     if refs:
         entry["references"] = [dict(r) for r in refs]
+
+    variant_rows = conn.execute(
+        """SELECT id, variant_id, name, platform, precondition, verify, references_json
+           FROM remediation_variants WHERE cme_id = ? ORDER BY variant_order""",
+        (cme_id,),
+    ).fetchall()
+    if variant_rows:
+        remediation = []
+        for vr in variant_rows:
+            steps = conn.execute(
+                """SELECT description, command, idempotent, requires_restart, reversible, undo
+                   FROM remediation_steps WHERE variant_db_id = ? ORDER BY step_order""",
+                (vr["id"],),
+            ).fetchall()
+            variant = {"id": vr["variant_id"], "name": vr["name"], "platform": vr["platform"],
+                       "steps": []}
+            if vr["precondition"]:
+                variant["precondition"] = vr["precondition"]
+            if vr["verify"]:
+                variant["verify"] = vr["verify"]
+            if vr["references_json"]:
+                variant["references"] = json.loads(vr["references_json"])
+            for s in steps:
+                step = {"command": s["command"], "idempotent": bool(s["idempotent"]),
+                        "requires_restart": s["requires_restart"], "reversible": bool(s["reversible"])}
+                if s["description"]:
+                    step["description"] = s["description"]
+                if s["undo"]:
+                    step["undo"] = s["undo"]
+                variant["steps"].append(step)
+            remediation.append(variant)
+        entry["remediation"] = remediation
 
     return entry
