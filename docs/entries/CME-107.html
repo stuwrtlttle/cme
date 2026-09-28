@@ -119,6 +119,22 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Disable kernel module loading at runtime via sysctl</span>
+        </div>
+        <pre class="remediation-commands"><code>
+lsmod | sort
+sysctl -w kernel.modules_disabled=1
+printf &#39;kernel.modules_disabled = 1\n&#39; &gt; /etc/sysctl.d/99-cme-107-modules-disabled.conf</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -200,7 +216,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

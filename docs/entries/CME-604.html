@@ -129,6 +129,31 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Disable unprivileged user namespaces via user.max_user_namespaces sysctl</span>
+        </div>
+        <pre class="remediation-commands"><code>
+sysctl -w user.max_user_namespaces=0
+printf &#39;user.max_user_namespaces = 0\n&#39; &gt; /etc/sysctl.d/99-cme-604-userns.conf</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">debian</span>
+          <span class="remediation-name">Disable unprivileged user namespaces via kernel.unprivileged_userns_clone sysctl</span>
+        </div>
+        <pre class="remediation-commands"><code>
+sysctl -w kernel.unprivileged_userns_clone=0
+printf &#39;kernel.unprivileged_userns_clone = 0\n&#39; &gt; /etc/sysctl.d/99-cme-604-userns.conf</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -208,7 +233,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

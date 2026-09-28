@@ -121,6 +121,21 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">rhel</span>
+          <span class="remediation-name">Set system-wide crypto policy to FUTURE via update-crypto-policies</span>
+        </div>
+        <pre class="remediation-commands"><code>
+update-crypto-policies --set FUTURE
+openssl ciphers -v &#39;DEFAULT&#39; 2&gt;/dev/null | grep -ciE &#39;RC4|DES|CBC|NULL&#39;</code></pre>
+      </div>
+      
+    </section>
+    
 
     
     <section>
@@ -251,7 +266,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

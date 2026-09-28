@@ -162,6 +162,33 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">PAM TOTP via google-authenticator module</span>
+        </div>
+        <pre class="remediation-commands"><code>
+dnf install -y google-authenticator || apt install -y libpam-google-authenticator
+grep -q &#39;pam_google_authenticator&#39; /etc/pam.d/system-auth 2&gt;/dev/null || sed -i &#39;/^auth.*pam_unix/a auth       required     pam_google_authenticator.so nullok&#39; /etc/pam.d/system-auth
+grep -q &#39;^AuthenticationMethods&#39; /etc/ssh/sshd_config 2&gt;/dev/null || printf &#39;AuthenticationMethods publickey,keyboard-interactive\nChallengeResponseAuthentication yes\n&#39; &gt;&gt; /etc/ssh/sshd_config
+systemctl restart sshd</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">PAM FIDO2/U2F via pam_u2f module</span>
+        </div>
+        <pre class="remediation-commands"><code>
+dnf install -y pam-u2f || apt install -y libpam-u2f
+grep -q &#39;pam_u2f&#39; /etc/pam.d/system-auth 2&gt;/dev/null || sed -i &#39;/^auth.*pam_unix/a auth       required     pam_u2f.so&#39; /etc/pam.d/system-auth</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -260,7 +287,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

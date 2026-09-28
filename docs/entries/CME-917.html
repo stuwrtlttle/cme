@@ -128,6 +128,42 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Apache httpd worker recycling via MaxConnectionsPerChild</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;# CME-917: Worker process recycling to bound memory leak impact\nMaxConnectionsPerChild 1000\n&#39; &gt; /etc/httpd/conf.d/cme-917-worker-recycling.conf
+apachectl configtest
+systemctl reload httpd</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">PHP-FPM worker recycling via pm.max_requests</span>
+        </div>
+        <pre class="remediation-commands"><code>
+sed -i &#39;s/^;\?pm\.max_requests\s*=.*/pm.max_requests = 500/&#39; /etc/php-fpm.d/www.conf 2&gt;/dev/null || sed -i &#39;s/^;\?pm\.max_requests\s*=.*/pm.max_requests = 500/&#39; /etc/php/*/fpm/pool.d/www.conf
+systemctl restart php-fpm</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Gunicorn worker recycling via --max-requests with jitter</span>
+        </div>
+        <pre class="remediation-commands"><code>
+mkdir -p /etc/systemd/system/&lt;service&gt;.service.d &amp;&amp; printf &#39;[Service]\nEnvironment=&#34;GUNICORN_CMD_ARGS=--max-requests 1000 --max-requests-jitter 50&#34;\n&#39; &gt; /etc/systemd/system/&lt;service&gt;.service.d/cme-917-worker-recycling.conf
+systemctl daemon-reload &amp;&amp; systemctl restart &lt;service&gt;</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -201,7 +237,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

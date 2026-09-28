@@ -105,6 +105,22 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Disable kexec_load via sysctl (one-way latch)</span>
+        </div>
+        <pre class="remediation-commands"><code>
+sysctl -w kernel.kexec_load_disabled=1
+printf &#39;kernel.kexec_load_disabled = 1
+&#39; &gt; /etc/sysctl.d/99-cme-110-kexec.conf</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -184,7 +200,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

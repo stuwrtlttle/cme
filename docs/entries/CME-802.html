@@ -135,6 +135,32 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">pam_pwquality configuration with minlen=14 and minclass=4</span>
+        </div>
+        <pre class="remediation-commands"><code>
+sed -i &#39;s/^#\?\s*minlen\s*=.*/minlen = 14/&#39; /etc/security/pwquality.conf &amp;&amp; sed -i &#39;s/^#\?\s*minclass\s*=.*/minclass = 4/&#39; /etc/security/pwquality.conf &amp;&amp; sed -i &#39;s/^#\?\s*dictcheck\s*=.*/dictcheck = 1/&#39; /etc/security/pwquality.conf
+grep -q &#39;pam_pwquality.so&#39; /etc/pam.d/system-auth 2&gt;/dev/null || grep -q &#39;pam_pwquality.so&#39; /etc/pam.d/common-password 2&gt;/dev/null || echo &#39;password requisite pam_pwquality.so retry=3 enforce_for_root&#39; &gt;&gt; /etc/pam.d/system-auth</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">windows</span>
+          <span class="remediation-name">Windows local password policy via net accounts</span>
+        </div>
+        <pre class="remediation-commands"><code>
+net accounts /minpwlen:14
+secedit /export /cfg C:\Windows\Temp\secpol.cfg &amp;&amp; (Get-Content C:\Windows\Temp\secpol.cfg) -replace &#39;PasswordComplexity\s*=\s*0&#39;,&#39;PasswordComplexity = 1&#39; | Set-Content C:\Windows\Temp\secpol.cfg &amp;&amp; secedit /configure /db C:\Windows\Security\local.sdb /cfg C:\Windows\Temp\secpol.cfg /areas SECURITYPOLICY
+net accounts /minpwage:1</code></pre>
+      </div>
+      
+    </section>
+    
 
     
     <section>
@@ -294,7 +320,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

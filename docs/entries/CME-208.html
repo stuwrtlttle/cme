@@ -149,6 +149,89 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">nftables egress rules blocking RFC1918, link-local, and cloud metadata</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;#!/usr/sbin/nft -f\ntable inet egress_restrict {\n  chain output {\n    type filter hook output priority 0; policy accept;\n    ip daddr 169.254.0.0/16 drop\n    ip daddr 10.0.0.0/8 drop\n    ip daddr 172.16.0.0/12 drop\n    ip daddr 192.168.0.0/16 drop\n    ip daddr 127.0.0.0/8 drop\n    ip6 daddr fd00::/8 drop\n    ip6 daddr ::1 drop\n  }\n}\n&#39; &gt; /etc/nftables/cme-208-egress.nft
+grep -q &#39;cme-208-egress.nft&#39; /etc/sysconfig/nftables.conf 2&gt;/dev/null || echo &#39;include &#34;/etc/nftables/cme-208-egress.nft&#34;&#39; &gt;&gt; /etc/sysconfig/nftables.conf
+nft -f /etc/nftables/cme-208-egress.nft</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">kubernetes</span>
+          <span class="remediation-name">Kubernetes NetworkPolicy restricting egress to allowed external CIDRs only</span>
+        </div>
+        <pre class="remediation-commands"><code>
+kubectl apply -n &lt;namespace&gt; -f - &lt;&lt;&#39;EOF&#39;
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cme-208-default-deny-egress
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+EOF
+kubectl apply -n &lt;namespace&gt; -f - &lt;&lt;&#39;EOF&#39;
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cme-208-allow-dns
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+  egress:
+  - ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+EOF
+kubectl apply -n &lt;namespace&gt; -f - &lt;&lt;&#39;EOF&#39;
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cme-208-allow-external
+spec:
+  podSelector:
+    matchLabels:
+      app: &lt;app_label&gt;
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - ipBlock:
+        cidr: &lt;allowed_cidr&gt;
+        except:
+        - 10.0.0.0/8
+        - 172.16.0.0/12
+        - 192.168.0.0/16
+        - 169.254.0.0/16
+EOF</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">windows</span>
+          <span class="remediation-name">Windows Firewall outbound block rules for RFC1918 and cloud metadata ranges</span>
+        </div>
+        <pre class="remediation-commands"><code>
+New-NetFirewallRule -DisplayName &#39;CME-208 Block Egress RFC1918 10/8&#39; -Direction Outbound -Action Block -RemoteAddress 10.0.0.0/8 -Protocol Any
+New-NetFirewallRule -DisplayName &#39;CME-208 Block Egress RFC1918 172.16/12&#39; -Direction Outbound -Action Block -RemoteAddress 172.16.0.0/12 -Protocol Any
+New-NetFirewallRule -DisplayName &#39;CME-208 Block Egress RFC1918 192.168/16&#39; -Direction Outbound -Action Block -RemoteAddress 192.168.0.0/16 -Protocol Any
+New-NetFirewallRule -DisplayName &#39;CME-208 Block Egress Link-Local/Metadata&#39; -Direction Outbound -Action Block -RemoteAddress 169.254.0.0/16 -Protocol Any</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -230,7 +313,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

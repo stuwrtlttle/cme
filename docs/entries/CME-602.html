@@ -132,6 +132,31 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">kubernetes</span>
+          <span class="remediation-name">Kubernetes Pod seccomp RuntimeDefault profile</span>
+        </div>
+        <pre class="remediation-commands"><code>
+kubectl patch deployment &lt;deployment&gt; -n &lt;namespace&gt; --type=merge -p &#39;{&#34;spec&#34;:{&#34;template&#34;:{&#34;spec&#34;:{&#34;securityContext&#34;:{&#34;seccompProfile&#34;:{&#34;type&#34;:&#34;RuntimeDefault&#34;}}}}}}&#39;
+kubectl label namespace &lt;namespace&gt; pod-security.kubernetes.io/enforce=restricted --overwrite</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Podman/Docker default seccomp profile enforcement</span>
+        </div>
+        <pre class="remediation-commands"><code>
+podman run --security-opt seccomp=/usr/share/containers/seccomp.json &lt;image&gt;
+grep -q &#39;seccomp_profile.*=.*&#34;&#34;&#39; /etc/containers/containers.conf 2&gt;/dev/null &amp;&amp; sed -i &#39;s|seccomp_profile.*=.*&#34;&#34;|seccomp_profile = &#34;/usr/share/containers/seccomp.json&#34;|&#39; /etc/containers/containers.conf || echo &#39;Default seccomp profile already active&#39;</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -213,7 +238,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

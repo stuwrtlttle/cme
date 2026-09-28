@@ -142,6 +142,45 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">nginx rate limiting with limit_req_zone</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;limit_req_zone $binary_remote_addr zone=cme906:10m rate=10r/s;\n&#39; &gt; /etc/nginx/conf.d/rate-limit.conf
+sed -i &#39;/location \//a \    limit_req zone=cme906 burst=20 nodelay;&#39; /etc/nginx/conf.d/&lt;server_conf&gt;
+nginx -t
+systemctl reload nginx</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Apache httpd rate limiting with mod_evasive</span>
+        </div>
+        <pre class="remediation-commands"><code>
+dnf install -y mod_evasive || apt-get install -y libapache2-mod-evasive
+printf &#39;&lt;IfModule mod_evasive24.c&gt;\n  DOSHashTableSize 3097\n  DOSPageCount 50\n  DOSSiteCount 100\n  DOSPageInterval 1\n  DOSSiteInterval 1\n  DOSBlockingPeriod 10\n&lt;/IfModule&gt;\n&#39; &gt; /etc/httpd/conf.d/mod_evasive.conf
+systemctl reload httpd || systemctl reload apache2</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">windows</span>
+          <span class="remediation-name">IIS Dynamic IP Restrictions</span>
+        </div>
+        <pre class="remediation-commands"><code>
+Install-WindowsFeature Web-IP-Security
+Set-WebConfigurationProperty -Filter &#39;system.webServer/security/dynamicIpSecurity/denyByConcurrentRequests&#39; -PSPath &#39;IIS:\Sites\Default Web Site&#39; -Name enabled -Value $true; Set-WebConfigurationProperty -Filter &#39;system.webServer/security/dynamicIpSecurity/denyByConcurrentRequests&#39; -PSPath &#39;IIS:\Sites\Default Web Site&#39; -Name maxConcurrentRequests -Value 10
+Set-WebConfigurationProperty -Filter &#39;system.webServer/security/dynamicIpSecurity/denyByRequestRate&#39; -PSPath &#39;IIS:\Sites\Default Web Site&#39; -Name enabled -Value $true; Set-WebConfigurationProperty -Filter &#39;system.webServer/security/dynamicIpSecurity/denyByRequestRate&#39; -PSPath &#39;IIS:\Sites\Default Web Site&#39; -Name maxRequests -Value 25; Set-WebConfigurationProperty -Filter &#39;system.webServer/security/dynamicIpSecurity/denyByRequestRate&#39; -PSPath &#39;IIS:\Sites\Default Web Site&#39; -Name requestIntervalInMilliseconds -Value 10000</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -219,7 +258,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

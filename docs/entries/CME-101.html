@@ -159,6 +159,32 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Enable full ASLR via sysctl with persistent drop-in</span>
+        </div>
+        <pre class="remediation-commands"><code>
+sysctl -w kernel.randomize_va_space=2
+printf &#39;kernel.randomize_va_space = 2\n&#39; &gt; /etc/sysctl.d/99-cme-101-aslr.conf</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">windows</span>
+          <span class="remediation-name">Enable system-wide mandatory ASLR via Exploit Protection</span>
+        </div>
+        <pre class="remediation-commands"><code>
+Set-ProcessMitigation -System -Enable ForceRelocateImages
+Set-ProcessMitigation -System -Enable BottomUp
+Set-ProcessMitigation -System -Enable HighEntropy</code></pre>
+      </div>
+      
+    </section>
+    
 
     
     <section>
@@ -372,7 +398,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

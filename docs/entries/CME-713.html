@@ -172,6 +172,32 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">kubernetes</span>
+          <span class="remediation-name">Kubernetes readOnlyRootFilesystem with tmpfs for writable paths</span>
+        </div>
+        <pre class="remediation-commands"><code>
+kubectl patch deployment &lt;deployment&gt; -n &lt;namespace&gt; --type=json -p &#39;[{&#34;op&#34;:&#34;add&#34;,&#34;path&#34;:&#34;/spec/template/spec/containers/0/securityContext/readOnlyRootFilesystem&#34;,&#34;value&#34;:true}]&#39;
+kubectl patch deployment &lt;deployment&gt; -n &lt;namespace&gt; --type=json -p &#39;[{&#34;op&#34;:&#34;add&#34;,&#34;path&#34;:&#34;/spec/template/spec/volumes/-&#34;,&#34;value&#34;:{&#34;name&#34;:&#34;tmp&#34;,&#34;emptyDir&#34;:{&#34;medium&#34;:&#34;Memory&#34;,&#34;sizeLimit&#34;:&#34;64Mi&#34;}}},{&#34;op&#34;:&#34;add&#34;,&#34;path&#34;:&#34;/spec/template/spec/containers/0/volumeMounts/-&#34;,&#34;value&#34;:{&#34;name&#34;:&#34;tmp&#34;,&#34;mountPath&#34;:&#34;/tmp&#34;}}]&#39;
+kubectl label namespace &lt;namespace&gt; pod-security.kubernetes.io/enforce=restricted --overwrite</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Podman/Docker read-only root filesystem with tmpfs mounts</span>
+        </div>
+        <pre class="remediation-commands"><code>
+podman run --read-only --tmpfs /tmp:rw,size=64m --tmpfs /var/run:rw,size=16m &lt;image&gt;
+printf &#39;[Container]\nReadOnly=true\nTmpfs=/tmp:rw,size=64m\nTmpfs=/var/run:rw,size=16m\n&#39; &gt; /etc/containers/systemd/&lt;service&gt;.container.d/readonly.conf &amp;&amp; systemctl daemon-reload &amp;&amp; systemctl restart &lt;service&gt;</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -253,7 +279,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

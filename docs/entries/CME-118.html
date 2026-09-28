@@ -144,6 +144,21 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">sysctl protected file links hardening</span>
+        </div>
+        <pre class="remediation-commands"><code>
+sysctl -w fs.protected_symlinks=1 fs.protected_hardlinks=1 fs.protected_regular=2 fs.protected_fifos=2
+printf &#39;fs.protected_symlinks = 1\nfs.protected_hardlinks = 1\nfs.protected_regular = 2\nfs.protected_fifos = 2\n&#39; &gt; /etc/sysctl.d/99-cme-118-protected-links.conf</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -225,7 +240,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

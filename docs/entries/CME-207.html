@@ -128,6 +128,31 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">dnsmasq DNS rebinding protection via stop-dns-rebind</span>
+        </div>
+        <pre class="remediation-commands"><code>
+grep -q &#39;^stop-dns-rebind&#39; /etc/dnsmasq.conf 2&gt;/dev/null || echo &#39;stop-dns-rebind&#39; &gt;&gt; /etc/dnsmasq.conf
+systemctl restart dnsmasq</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Unbound DNS rebinding protection via private-address directives</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;server:\n    private-address: 10.0.0.0/8\n    private-address: 172.16.0.0/12\n    private-address: 192.168.0.0/16\n    private-address: 127.0.0.0/8\n    private-address: 169.254.0.0/16\n    private-address: ::1/128\n    private-address: fc00::/7\n    private-address: fe80::/10\n&#39; &gt; /etc/unbound/conf.d/cme-207-rebind.conf
+unbound-checkconf &amp;&amp; unbound-control reload</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -209,7 +234,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

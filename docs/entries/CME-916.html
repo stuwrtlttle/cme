@@ -131,6 +131,37 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Apache mod_headers SameSite=Lax enforcement on all cookies</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;&lt;IfModule mod_headers.c&gt;
+  Header always edit Set-Cookie &#34;(?i)^((?!.*SameSite).*)$&#34; &#34;$1; SameSite=Lax&#34;
+  Header always edit Set-Cookie &#34;(?i)(SameSite=None)&#34; &#34;SameSite=Lax&#34;
+&lt;/IfModule&gt;
+&#39; &gt; /etc/httpd/conf.d/cme-916-samesite.conf
+apachectl configtest
+systemctl reload httpd</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">nginx proxy_cookie_flags SameSite=Lax enforcement on all proxied cookies</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;proxy_cookie_flags ~ samesite=lax;\n&#39; &gt; /etc/nginx/conf.d/cme-916-samesite.conf
+nginx -t
+systemctl reload nginx</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -206,7 +237,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

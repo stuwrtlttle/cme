@@ -144,6 +144,75 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">nginx Origin header allowlist with map-based rejection</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;map $http_origin $cors_allowed {
+    default 0;
+    &#34;https://&lt;trusted_origin&gt;&#34; 1;
+    &#34;https://&lt;trusted_origin_2&gt;&#34; 1;
+}
+
+server {
+    # Block state-changing cross-origin requests
+    if ($request_method ~* &#34;POST|PUT|DELETE|PATCH&#34;) {
+        set $cors_check &#34;method&#34;;
+    }
+    if ($cors_allowed = 0) {
+        set $cors_check &#34;${cors_check}_blocked&#34;;
+    }
+    if ($cors_check = &#34;method_blocked&#34;) {
+        return 403;
+    }
+}
+&#39; &gt; /etc/nginx/conf.d/cme-915-origin-restrict.conf
+nginx -t
+nginx -s reload</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Apache httpd Origin header enforcement via SetEnvIf and Require</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;&lt;IfModule mod_setenvif.c&gt;
+    SetEnvIf Origin &#34;^https://&lt;trusted_origin&gt;$&#34; ORIGIN_OK=1
+    SetEnvIf Origin &#34;^https://&lt;trusted_origin_2&gt;$&#34; ORIGIN_OK=1
+&lt;/IfModule&gt;
+
+&lt;Location /&gt;
+    &lt;If &#34;%%{REQUEST_METHOD} in { \x27POST\x27, \x27PUT\x27, \x27DELETE\x27, \x27PATCH\x27 }&#34;&gt;
+        &lt;RequireAll&gt;
+            Require all granted
+            Require env ORIGIN_OK
+        &lt;/RequireAll&gt;
+    &lt;/If&gt;
+&lt;/Location&gt;
+&#39; &gt; /etc/httpd/conf.d/cme-915-origin-restrict.conf
+apachectl configtest
+apachectl graceful</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">HAProxy Origin header ACL with deny on mismatch</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;\n# CME-915: Cross-Origin Request Restriction\nacl is_state_changing method POST PUT DELETE PATCH\nacl origin_present req.hdr(Origin) -m found\nacl origin_allowed req.hdr(Origin) -m str https://&lt;trusted_origin&gt; https://&lt;trusted_origin_2&gt;\nhttp-request deny deny_status 403 if is_state_changing origin_present !origin_allowed\n&#39; &gt;&gt; /etc/haproxy/haproxy.cfg
+haproxy -c -f /etc/haproxy/haproxy.cfg
+systemctl reload haproxy</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -219,7 +288,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

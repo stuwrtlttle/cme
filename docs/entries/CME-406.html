@@ -119,6 +119,23 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">rhel</span>
+          <span class="remediation-name">Enforce GPG signature verification on all dnf/yum repositories</span>
+        </div>
+        <pre class="remediation-commands"><code>
+sed -i &#39;s/^gpgcheck=.*/gpgcheck=1/&#39; /etc/dnf/dnf.conf || sed -i &#39;s/^gpgcheck=.*/gpgcheck=1/&#39; /etc/yum.conf
+sed -i &#39;s/^gpgcheck=0/gpgcheck=1/&#39; /etc/yum.repos.d/*.repo
+printf &#39;[main]\nrepo_gpgcheck=1\n&#39; &gt; /etc/dnf/plugins/repo_gpgcheck.conf 2&gt;/dev/null; grep -qx &#39;repo_gpgcheck=1&#39; /etc/dnf/dnf.conf || echo &#39;repo_gpgcheck=1&#39; &gt;&gt; /etc/dnf/dnf.conf
+rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release 2&gt;/dev/null; rpm -qa gpg-pubkey | grep -q gpg-pubkey</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -200,7 +217,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

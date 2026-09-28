@@ -135,6 +135,40 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">pam_faillock account lockout via faillock.conf</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;deny = 5
+unlock_time = 900
+fail_interval = 900
+even_deny_root
+root_unlock_time = 60
+dir = /var/run/faillock
+audit
+silent
+&#39; &gt; /etc/security/faillock.conf
+authselect enable-feature with-faillock 2&gt;/dev/null || grep -q pam_faillock /etc/pam.d/system-auth</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">windows</span>
+          <span class="remediation-name">Windows account lockout policy via net accounts</span>
+        </div>
+        <pre class="remediation-commands"><code>
+net accounts /lockoutthreshold:5
+net accounts /lockoutduration:30
+net accounts /lockoutwindow:30</code></pre>
+      </div>
+      
+    </section>
+    
 
     
     <section>
@@ -275,7 +309,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

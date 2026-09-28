@@ -165,6 +165,32 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">rhel</span>
+          <span class="remediation-name">System-wide crypto policy enforcement via update-crypto-policies</span>
+        </div>
+        <pre class="remediation-commands"><code>
+update-crypto-policies --set DEFAULT
+update-crypto-policies --check</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">windows</span>
+          <span class="remediation-name">SChannel TLS protocol and cipher suite hardening via registry</span>
+        </div>
+        <pre class="remediation-commands"><code>
+New-Item -Path &#39;HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server&#39; -Force | Out-Null; Set-ItemProperty -Path &#39;HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server&#39; -Name &#39;Enabled&#39; -Value 0 -Type DWord; Set-ItemProperty -Path &#39;HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server&#39; -Name &#39;DisabledByDefault&#39; -Value 1 -Type DWord
+New-Item -Path &#39;HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server&#39; -Force | Out-Null; Set-ItemProperty -Path &#39;HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server&#39; -Name &#39;Enabled&#39; -Value 0 -Type DWord; Set-ItemProperty -Path &#39;HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server&#39; -Name &#39;DisabledByDefault&#39; -Value 1 -Type DWord
+foreach ($suite in (Get-TlsCipherSuite | Where-Object {$_.Name -match &#39;RC4|DES|NULL|EXPORT&#39;})) { Disable-TlsCipherSuite -Name $suite.Name }</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -248,7 +274,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

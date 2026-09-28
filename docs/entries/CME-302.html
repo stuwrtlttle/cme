@@ -108,6 +108,22 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">rhel</span>
+          <span class="remediation-name">Map login users to SELinux confined types via semanage</span>
+        </div>
+        <pre class="remediation-commands"><code>
+semanage login -m -s user_u -r s0 __default__
+semanage login -a -s staff_u &lt;admin_user&gt;
+restorecon -RvF /home</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -187,7 +203,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

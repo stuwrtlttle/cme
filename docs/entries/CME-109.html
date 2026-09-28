@@ -119,6 +119,31 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Enable kernel lockdown integrity mode via GRUB boot parameter</span>
+        </div>
+        <pre class="remediation-commands"><code>
+grubby --update-kernel=ALL --args=&#39;lockdown=integrity&#39;
+systemctl reboot</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Enable kernel lockdown confidentiality mode via GRUB boot parameter</span>
+        </div>
+        <pre class="remediation-commands"><code>
+grubby --update-kernel=ALL --args=&#39;lockdown=confidentiality&#39;
+systemctl reboot</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -200,7 +225,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

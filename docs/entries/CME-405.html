@@ -148,6 +148,42 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Enable DNSSEC validation in systemd-resolved</span>
+        </div>
+        <pre class="remediation-commands"><code>
+mkdir -p /etc/systemd/resolved.conf.d &amp;&amp; printf &#39;[Resolve]\nDNSSEC=yes\n&#39; &gt; /etc/systemd/resolved.conf.d/99-cme-405-dnssec.conf
+systemctl restart systemd-resolved</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Enable strict DNSSEC validation in Unbound resolver</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;server:\n    auto-trust-anchor-file: &#34;/var/lib/unbound/root.key&#34;\n    val-permissive-mode: no\n&#39; &gt; /etc/unbound/conf.d/cme-405-dnssec.conf
+unbound-anchor -a /var/lib/unbound/root.key || true
+systemctl restart unbound</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">windows</span>
+          <span class="remediation-name">Enable DNSSEC validation on Windows DNS Server</span>
+        </div>
+        <pre class="remediation-commands"><code>
+Set-DnsServerSetting -EnableDnsSec $true; Add-DnsServerTrustAnchor -Name &#39;.&#39; -CryptoAlgorithm RsaSha256 -KeyTag 20326 -DigestType Sha256
+Restart-Service DNS</code></pre>
+      </div>
+      
+    </section>
+    
 
     
     <section>
@@ -272,7 +308,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

@@ -163,6 +163,30 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">any</span>
+          <span class="remediation-name">JVM-wide deserialization filter via jdk.serialFilter</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;jdk.serialFilter=!*;java.base/*;java.lang.*;java.util.*;java.io.Serializable;&lt;allowed.package.*&gt;\n&#39; &gt;&gt; $(java -XshowSettings:property 2&gt;&amp;1 | grep java.home | awk &#39;{print $3}&#39;)/conf/security/java.security
+java -XshowSettings 2&gt;&amp;1 | grep -i serialFilter</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">any</span>
+          <span class="remediation-name">Python YAML safe_load enforcement via site-wide import hook</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;import yaml\n_orig_load = yaml.load\ndef _safe_load(data, Loader=None, **kw):\n    if Loader is None:\n        Loader = yaml.SafeLoader\n    return _orig_load(data, Loader=Loader, **kw)\nyaml.load = _safe_load\n&#39; &gt; $(python3 -c &#39;import site; print(site.getusersitepackages())&#39;)/usercustomize.py</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -238,7 +262,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

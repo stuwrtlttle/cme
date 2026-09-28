@@ -108,6 +108,21 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Disable unprivileged BPF and harden BPF JIT via sysctl</span>
+        </div>
+        <pre class="remediation-commands"><code>
+sysctl -w kernel.unprivileged_bpf_disabled=1 net.core.bpf_jit_harden=2
+printf &#39;kernel.unprivileged_bpf_disabled = 1\nnet.core.bpf_jit_harden = 2\n&#39; &gt; /etc/sysctl.d/99-cme-603-bpf-hardening.conf</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -199,7 +214,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

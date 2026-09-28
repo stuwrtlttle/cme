@@ -128,6 +128,54 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">kubernetes</span>
+          <span class="remediation-name">Kubernetes API server audit policy for security-relevant events</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;apiVersion: audit.k8s.io/v1
+kind: Policy
+rules:
+  - level: RequestResponse
+    resources:
+      - group: &#34;&#34;
+        resources: [&#34;secrets&#34;, &#34;configmaps&#34;]
+    verbs: [&#34;get&#34;, &#34;list&#34;, &#34;watch&#34;, &#34;create&#34;, &#34;update&#34;, &#34;patch&#34;, &#34;delete&#34;]
+  - level: RequestResponse
+    resources:
+      - group: &#34;&#34;
+        resources: [&#34;pods/exec&#34;, &#34;pods/attach&#34;, &#34;pods/portforward&#34;]
+  - level: RequestResponse
+    users: [&#34;system:anonymous&#34;]
+  - level: RequestResponse
+    resources:
+      - group: &#34;&#34;
+        resources: [&#34;pods&#34;]
+    verbs: [&#34;create&#34;]
+  - level: Request
+    verbs: [&#34;create&#34;, &#34;update&#34;, &#34;patch&#34;, &#34;delete&#34;]
+  - level: Metadata
+    verbs: [&#34;get&#34;, &#34;list&#34;, &#34;watch&#34;]
+&#39; &gt; /etc/kubernetes/audit-policy.yaml
+grep -q &#39;audit-policy-file&#39; /etc/kubernetes/manifests/kube-apiserver.yaml || sed -i &#39;/- kube-apiserver/a\    - --audit-policy-file=/etc/kubernetes/audit-policy.yaml\n    - --audit-log-path=/var/log/kubernetes/audit.log\n    - --audit-log-maxage=30\n    - --audit-log-maxbackup=10\n    - --audit-log-maxsize=100&#39; /etc/kubernetes/manifests/kube-apiserver.yaml
+mkdir -p /var/log/kubernetes</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">kubernetes</span>
+          <span class="remediation-name">OpenShift API server audit profile (WriteRequestBodies)</span>
+        </div>
+        <pre class="remediation-commands"><code>
+oc patch apiserver cluster --type=merge -p &#39;{&#34;spec&#34;:{&#34;audit&#34;:{&#34;profile&#34;:&#34;WriteRequestBodies&#34;}}}&#39;</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -207,7 +255,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

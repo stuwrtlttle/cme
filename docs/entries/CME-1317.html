@@ -182,6 +182,60 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">any</span>
+          <span class="remediation-name">Java XML parser XXE hardening (DocumentBuilderFactory / SAXParserFactory)</span>
+        </div>
+        <pre class="remediation-commands"><code>
+cat &gt; &lt;app_source&gt;/src/main/java/com/example/SecureXmlParser.java &lt;&lt; &#39;JAVA&#39;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.XMLConstants;
+public class SecureXmlParser {
+  public static DocumentBuilderFactory newSecureDocumentBuilderFactory() throws Exception {
+    DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+    dbf.setFeature(&#34;http://apache.org/xml/features/disallow-doctype-decl&#34;, true);
+    dbf.setFeature(&#34;http://xml.org/sax/features/external-general-entities&#34;, false);
+    dbf.setFeature(&#34;http://xml.org/sax/features/external-parameter-entities&#34;, false);
+    dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+    dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, &#34;&#34;);
+    dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, &#34;&#34;);
+    dbf.setXIncludeAware(false);
+    dbf.setExpandEntityReferences(false);
+    return dbf;
+  }
+}
+JAVA</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">any</span>
+          <span class="remediation-name">Python XML parsing via defusedxml (drop-in safe replacement)</span>
+        </div>
+        <pre class="remediation-commands"><code>
+pip install defusedxml
+find &lt;app_source&gt;/ -name &#39;*.py&#39; -exec sed -i &#39;s/from xml\.etree import ElementTree/import defusedxml.ElementTree as ElementTree/g; s/import xml\.etree\.ElementTree/import defusedxml.ElementTree/g; s/from xml\.sax /from defusedxml.sax /g&#39; {} +</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">ModSecurity WAF rule to block XXE payloads at the reverse proxy</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;SecRule REQUEST_BODY &#34;&lt;!DOCTYPE[^&gt;]*(?:ENTITY|SYSTEM|PUBLIC)&#34; &#34;id:1317001,phase:2,deny,status:403,log,msg:XXE attempt blocked by CME-1317,severity:CRITICAL&#34;
+SecRule REQUEST_BODY &#34;&lt;!\[CDATA\[&#34; &#34;id:1317002,phase:2,deny,status:403,log,msg:CDATA injection blocked by CME-1317,severity:CRITICAL,chain&#34;
+SecRule REQUEST_HEADERS:Content-Type &#34;(?:text|application)/xml&#34; &#34;&#34;
+&#39; &gt; /etc/httpd/modsecurity.d/local_rules/cme-1317-xxe-block.conf
+apachectl configtest &amp;&amp; apachectl graceful || { nginx -t &amp;&amp; nginx -s reload; }</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -257,7 +311,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

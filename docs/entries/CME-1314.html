@@ -140,6 +140,33 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">nginx URL canonicalization and encoded-path normalization</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;merge_slashes on;\nlocation ~* &#34;%%2[ef]&#34; {\n    return 400;\n}\n&#39; &gt; /etc/nginx/conf.d/cme-1314-canonicalization.conf
+nginx -t
+nginx -s reload</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Apache httpd URL decoding enforcement and path traversal blocking</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;&lt;IfModule mod_rewrite.c&gt;\n  RewriteEngine On\n  # Block percent-encoded path traversal sequences\n  RewriteCond %%{THE_REQUEST} %%2[eE]%%2[eE] [OR]\n  RewriteCond %%{THE_REQUEST} %%2[fF]\n  RewriteRule .* - [F,L]\n&lt;/IfModule&gt;\nAllowEncodedSlashes NoDecode\n&#39; &gt; /etc/httpd/conf.d/cme-1314-canonicalization.conf
+apachectl configtest 2&gt;&amp;1 || httpd -t 2&gt;&amp;1
+systemctl reload httpd 2&gt;/dev/null || systemctl reload apache2 2&gt;/dev/null</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -213,7 +240,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

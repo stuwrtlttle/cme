@@ -111,6 +111,32 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">rhel</span>
+          <span class="remediation-name">IMA appraise policy with enforce mode via boot parameter</span>
+        </div>
+        <pre class="remediation-commands"><code>
+grubby --update-kernel=ALL --args=&#39;ima_policy=appraise_tcb ima_appraise=enforce&#39;
+find / -fstype ext4 -o -fstype xfs | xargs -P4 evmctl ima_hash --hashalgo sha256 2&gt;/dev/null
+systemctl reboot</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Custom IMA measurement and appraisal policy loaded at runtime</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;measure func=BPRM_CHECK\nmeasure func=MMAP_CHECK mask=MAY_EXEC\nappraise func=BPRM_CHECK fowner=0\nappraise func=MMAP_CHECK mask=MAY_EXEC fowner=0\n&#39; &gt; /etc/ima/ima-policy
+cat /etc/ima/ima-policy &gt; /sys/kernel/security/ima/policy</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -188,7 +214,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

@@ -105,6 +105,22 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">rhel</span>
+          <span class="remediation-name">dnf-automatic with security-only updates applied on schedule</span>
+        </div>
+        <pre class="remediation-commands"><code>
+dnf install -y dnf-automatic
+sed -i &#39;s/^apply_updates.*/apply_updates = yes/&#39; /etc/dnf/automatic.conf &amp;&amp; sed -i &#39;s/^upgrade_type.*/upgrade_type = security/&#39; /etc/dnf/automatic.conf
+systemctl enable --now dnf-automatic-install.timer</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -196,7 +212,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

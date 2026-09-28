@@ -119,6 +119,77 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">kubernetes</span>
+          <span class="remediation-name">default-deny ingress and egress NetworkPolicy with per-service allowlisting</span>
+        </div>
+        <pre class="remediation-commands"><code>
+kubectl apply -n &lt;namespace&gt; -f - &lt;&lt;&#39;EOF&#39;
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+EOF
+kubectl apply -n &lt;namespace&gt; -f - &lt;&lt;&#39;EOF&#39;
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-egress
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+EOF
+kubectl apply -n &lt;namespace&gt; -f - &lt;&lt;&#39;EOF&#39;
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector: {}
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+EOF
+kubectl apply -n &lt;namespace&gt; -f - &lt;&lt;&#39;EOF&#39;
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-&lt;app_label&gt;-ingress
+spec:
+  podSelector:
+    matchLabels:
+      app: &lt;app_label&gt;
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: &lt;source_label&gt;
+    ports:
+    - protocol: TCP
+      port: &lt;service_port&gt;
+EOF</code></pre>
+      </div>
+      
+    </section>
+    
 
     
     <section>
@@ -286,7 +357,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

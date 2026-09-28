@@ -148,6 +148,42 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">rhel</span>
+          <span class="remediation-name">RHEL crypto-policies TLS 1.3 minimum enforcement</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;min_tls_version = TLS1.3\ntls_cipher = AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305\n&#39; &gt; /etc/crypto-policies/policies/modules/TLS13-ONLY.pmod
+update-crypto-policies --set FUTURE:TLS13-ONLY</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">nginx TLS 1.3-only protocol enforcement</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;ssl_protocols TLSv1.3;\nssl_prefer_server_ciphers off;\n&#39; &gt; /etc/nginx/conf.d/cme-403-tls13.conf
+nginx -t &amp;&amp; nginx -s reload</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">windows</span>
+          <span class="remediation-name">Windows SChannel TLS 1.3-only enforcement via registry</span>
+        </div>
+        <pre class="remediation-commands"><code>
+New-Item -Path &#39;HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.2\Server&#39; -Force | Out-Null; Set-ItemProperty -Path &#39;HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.2\Server&#39; -Name &#39;Enabled&#39; -Value 0 -Type DWord; Set-ItemProperty -Path &#39;HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.2\Server&#39; -Name &#39;DisabledByDefault&#39; -Value 1 -Type DWord
+New-Item -Path &#39;HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Server&#39; -Force | Out-Null; Set-ItemProperty -Path &#39;HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Server&#39; -Name &#39;Enabled&#39; -Value 1 -Type DWord; Set-ItemProperty -Path &#39;HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Server&#39; -Name &#39;DisabledByDefault&#39; -Value 0 -Type DWord
+foreach ($ver in @(&#39;TLS 1.1&#39;,&#39;TLS 1.0&#39;)) { New-Item -Path &#34;HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\$ver\Server&#34; -Force | Out-Null; Set-ItemProperty -Path &#34;HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\$ver\Server&#34; -Name &#39;Enabled&#39; -Value 0 -Type DWord; Set-ItemProperty -Path &#34;HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\$ver\Server&#34; -Name &#39;DisabledByDefault&#39; -Value 1 -Type DWord }</code></pre>
+      </div>
+      
+    </section>
+    
 
     
     <section>
@@ -294,7 +330,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

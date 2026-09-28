@@ -137,6 +137,21 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">windows</span>
+          <span class="remediation-name">Enable Control Flow Guard (CFG) system-wide via Set-ProcessMitigation</span>
+        </div>
+        <pre class="remediation-commands"><code>
+Set-ProcessMitigation -System -Enable CFG
+Set-ProcessMitigation -System -Enable StrictCFG</code></pre>
+      </div>
+      
+    </section>
+    
 
     
     <section>
@@ -255,7 +270,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

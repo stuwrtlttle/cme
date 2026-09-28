@@ -129,6 +129,31 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">kubernetes</span>
+          <span class="remediation-name">Kubernetes drop ALL capabilities with minimal add-back</span>
+        </div>
+        <pre class="remediation-commands"><code>
+kubectl patch deployment &lt;deployment&gt; -n &lt;namespace&gt; --type=json -p &#39;[{&#34;op&#34;:&#34;add&#34;,&#34;path&#34;:&#34;/spec/template/spec/containers/0/securityContext/capabilities&#34;,&#34;value&#34;:{&#34;drop&#34;:[&#34;ALL&#34;],&#34;add&#34;:[&#34;NET_BIND_SERVICE&#34;]}}]&#39;
+kubectl label namespace &lt;namespace&gt; pod-security.kubernetes.io/enforce=restricted --overwrite</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Podman/Docker drop ALL capabilities</span>
+        </div>
+        <pre class="remediation-commands"><code>
+podman run --cap-drop ALL --cap-add NET_BIND_SERVICE &lt;image&gt;
+printf &#39;[containers]\ndefault_capabilities = []\n&#39; &gt; /etc/containers/containers.conf.d/cme-705-drop-caps.conf</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -208,7 +233,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

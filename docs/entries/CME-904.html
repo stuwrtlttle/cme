@@ -147,6 +147,35 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">ModSecurity with OWASP CRS on Apache httpd</span>
+        </div>
+        <pre class="remediation-commands"><code>
+dnf install -y mod_security mod_security_crs
+sed -i &#39;s/^SecRuleEngine DetectionOnly/SecRuleEngine On/&#39; /etc/httpd/conf.d/mod_security.conf
+sed -i &#39;s/setvar:tx.paranoia_level=1/setvar:tx.paranoia_level=2/&#39; /etc/httpd/modsecurity.d/owasp-modsecurity-crs/crs-setup.conf
+apachectl configtest &amp;&amp; systemctl reload httpd</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">ModSecurity v3 with OWASP CRS on nginx</span>
+        </div>
+        <pre class="remediation-commands"><code>
+dnf install -y nginx-mod-modsecurity mod_security_crs
+printf &#39;modsecurity on;\nmodsecurity_rules_file /etc/nginx/modsecurity.d/modsecurity.conf;\n&#39; &gt; /etc/nginx/conf.d/modsecurity.conf
+sed -i &#39;s/^SecRuleEngine DetectionOnly/SecRuleEngine On/&#39; /etc/nginx/modsecurity.d/modsecurity.conf
+nginx -t &amp;&amp; systemctl reload nginx</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -222,7 +251,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

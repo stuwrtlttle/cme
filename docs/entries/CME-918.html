@@ -155,6 +155,71 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">rhel</span>
+          <span class="remediation-name">Apache httpd Location-based authorization with Require directives</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;&lt;Location /admin&gt;
+  AuthType Basic
+  AuthName &#34;Restricted&#34;
+  AuthUserFile /etc/httpd/.htpasswd
+  Require group admin
+&lt;/Location&gt;
+&lt;Location /console&gt;
+  AuthType Basic
+  AuthName &#34;Restricted&#34;
+  AuthUserFile /etc/httpd/.htpasswd
+  Require group admin
+&lt;/Location&gt;
+&lt;FilesMatch &#34;\.(bak|old|orig|swp|sql|tar|gz|zip)$&#34;&gt;
+  Require all denied
+&lt;/FilesMatch&gt;
+&#39; &gt; /etc/httpd/conf.d/cme-918-url-auth.conf
+apachectl configtest
+systemctl reload httpd</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">nginx location-based authorization with deny/auth_basic directives</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;location /admin {
+  auth_basic &#34;Restricted&#34;;
+  auth_basic_user_file /etc/nginx/.htpasswd;
+}
+location /console {
+  auth_basic &#34;Restricted&#34;;
+  auth_basic_user_file /etc/nginx/.htpasswd;
+}
+location ~* \.(bak|old|orig|swp|sql|tar|gz|zip)$ {
+  deny all;
+  return 403;
+}
+&#39; &gt; /etc/nginx/conf.d/cme-918-url-auth.conf
+nginx -t
+systemctl reload nginx</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">windows</span>
+          <span class="remediation-name">IIS URL Authorization rules for restricted paths</span>
+        </div>
+        <pre class="remediation-commands"><code>
+Install-WindowsFeature Web-Url-Auth
+Remove-WebConfigurationProperty -Filter &#39;/system.webServer/security/authorization&#39; -PSPath &#39;IIS:\Sites\Default Web Site\admin&#39; -Name &#39;collection&#39; -AtElement @{users=&#39;*&#39;;roles=&#39;&#39;;verbs=&#39;&#39;} -ErrorAction SilentlyContinue; Add-WebConfigurationProperty -Filter &#39;/system.webServer/security/authorization&#39; -PSPath &#39;IIS:\Sites\Default Web Site\admin&#39; -Name &#39;collection&#39; -Value @{accessType=&#39;Allow&#39;;roles=&#39;Administrators&#39;}
+Add-WebConfigurationProperty -Filter &#39;/system.webServer/security/authorization&#39; -PSPath &#39;IIS:\Sites\Default Web Site\admin&#39; -Name &#39;collection&#39; -Value @{accessType=&#39;Deny&#39;;users=&#39;*&#39;}</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -230,7 +295,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

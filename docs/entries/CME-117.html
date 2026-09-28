@@ -134,6 +134,32 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">MALLOC_PERTURB_ environment variable for heap use-after-free hardening</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;MALLOC_PERTURB_=165\n&#39; &gt;&gt; /etc/environment
+printf &#39;#!/bin/sh\nexport MALLOC_PERTURB_=165\n&#39; &gt; /etc/profile.d/cme-117-malloc-perturb.sh &amp;&amp; chmod 644 /etc/profile.d/cme-117-malloc-perturb.sh</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Systemd service drop-in with MALLOC_PERTURB_ for targeted service hardening</span>
+        </div>
+        <pre class="remediation-commands"><code>
+mkdir -p /etc/systemd/system/&lt;service&gt;.service.d &amp;&amp; printf &#39;[Service]\nEnvironment=MALLOC_PERTURB_=165\n&#39; &gt; /etc/systemd/system/&lt;service&gt;.service.d/heap-hardening.conf
+systemctl daemon-reload
+systemctl restart &lt;service&gt;</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -215,7 +241,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

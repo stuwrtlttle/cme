@@ -108,6 +108,22 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">sudoers.d drop-in with command allowlists and hardening defaults</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;Defaults requiretty\nDefaults use_pty\nDefaults logfile=/var/log/sudo.log\nDefaults timestamp_timeout=5\n&#39; &gt; /etc/sudoers.d/00-cme-708-defaults &amp;&amp; visudo -cf /etc/sudoers.d/00-cme-708-defaults
+printf &#39;%%&lt;admin_group&gt; ALL=(root) /usr/bin/systemctl restart *, /usr/bin/journalctl, /usr/sbin/reboot, /usr/bin/dnf update\n&#39; &gt; /etc/sudoers.d/10-cme-708-admins &amp;&amp; visudo -cf /etc/sudoers.d/10-cme-708-admins
+cp /etc/sudoers /etc/sudoers.bak.cme-708 &amp;&amp; sed -i &#39;s/^\(%[a-z].*ALL=(ALL)\s*ALL\)/#\1  # disabled by CME-708/&#39; /etc/sudoers &amp;&amp; visudo -cf /etc/sudoers</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -189,7 +205,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

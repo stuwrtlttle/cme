@@ -159,6 +159,33 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">nginx location-based path traversal blocking</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;server {\n  # Block path traversal sequences (decoded and encoded)\n  location ~* &#34;\.\.\/|\.\.\\\\|%%2e%%2e|%%252e&#34; {\n    return 403;\n  }\n  # Normalize URI before proxying — merge_slashes is on by default\n  # Reject requests with null bytes\n  if ($request_uri ~ &#34;\\x00&#34;) {\n    return 400;\n  }\n}\n&#39; &gt; /etc/nginx/conf.d/cme-1301-traversal-block.conf
+nginx -t
+nginx -s reload</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Apache mod_rewrite path traversal rejection</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;&lt;IfModule mod_rewrite.c&gt;\n  RewriteEngine On\n  # Block decoded traversal sequences\n  RewriteCond %%{REQUEST_URI} \\.\\./ [OR]\n  RewriteCond %%{REQUEST_URI} \\.\\.\\\\\\\\ [OR]\n  # Block URL-encoded traversal (%%2e%%2e)\n  RewriteCond %%{QUERY_STRING} (\\.|%%2e)(\\.|%%2e)(%%2f|%%5c|/|\\\\\\\\) [NC,OR]\n  # Block null bytes\n  RewriteCond %%{REQUEST_URI} %%00\n  RewriteRule .* - [F,L]\n&lt;/IfModule&gt;\n&#39; &gt; /etc/httpd/conf.d/cme-1301-traversal-block.conf
+apachectl configtest
+apachectl graceful</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -232,7 +259,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

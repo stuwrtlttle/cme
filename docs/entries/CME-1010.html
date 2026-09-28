@@ -134,6 +134,33 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">systemd PSI memory pressure monitor with journal alerting</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;#!/bin/bash\nTHRESHOLD=${1:-25}\nwhile true; do\n  PRESSURE=$(awk &#34;/^some/ {split(\$2,a,\&#34;=\&#34;); printf \&#34;%%d\&#34;, a[2]}&#34; /proc/pressure/memory)\n  if [ &#34;$PRESSURE&#34; -ge &#34;$THRESHOLD&#34; ] 2&gt;/dev/null; then\n    echo &#34;ALERT: memory pressure avg10=${PRESSURE}%% exceeds threshold ${THRESHOLD}%%&#34; | systemd-cat -t cme-1010-psi -p warning\n  fi\n  sleep 10\ndone\n&#39; &gt; /usr/local/bin/cme-1010-psi-monitor.sh &amp;&amp; chmod +x /usr/local/bin/cme-1010-psi-monitor.sh
+printf &#39;[Unit]\nDescription=CME-1010 cgroup memory pressure monitor (PSI)\nAfter=sysinit.target\n\n[Service]\nType=simple\nExecStart=/usr/local/bin/cme-1010-psi-monitor.sh 25\nRestart=on-failure\nRestartSec=10s\n\n[Install]\nWantedBy=multi-user.target\n&#39; &gt; /etc/systemd/system/cme-1010-psi-monitor.service
+systemctl daemon-reload &amp;&amp; systemctl enable --now cme-1010-psi-monitor.service</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">per-service cgroup memory.events oom_kill watcher</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;#!/bin/bash\nSVC=${1:?&#34;Usage: $0 &lt;service-name&gt;&#34;}\nCG=/sys/fs/cgroup/system.slice/${SVC}.service/memory.events\ntest -f &#34;$CG&#34; || { echo &#34;No cgroup at $CG&#34;; exit 1; }\nPREV_OOM=$(awk &#34;/oom_kill/ {print \$2}&#34; &#34;$CG&#34;)\nwhile true; do\n  CUR_OOM=$(awk &#34;/oom_kill/ {print \$2}&#34; &#34;$CG&#34;)\n  if [ &#34;$CUR_OOM&#34; -gt &#34;$PREV_OOM&#34; ] 2&gt;/dev/null; then\n    echo &#34;ALERT: ${SVC} oom_kill count increased ${PREV_OOM}-&gt;${CUR_OOM}&#34; | systemd-cat -t cme-1010-oom -p err\n    PREV_OOM=$CUR_OOM\n  fi\n  sleep 5\ndone\n&#39; &gt; /usr/local/bin/cme-1010-oom-watch.sh &amp;&amp; chmod +x /usr/local/bin/cme-1010-oom-watch.sh
+printf &#39;[Unit]\nDescription=CME-1010 cgroup memory.events oom_kill watcher for %%i\nAfter=sysinit.target %s\n\n[Service]\nType=simple\nExecStart=/usr/local/bin/cme-1010-oom-watch.sh %%i\nRestart=on-failure\nRestartSec=10s\n\n[Install]\nWantedBy=multi-user.target\n&#39; &gt; /etc/systemd/system/cme-1010-oom-watch@.service
+systemctl daemon-reload &amp;&amp; systemctl enable --now cme-1010-oom-watch@&lt;service&gt;.service</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -217,7 +244,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

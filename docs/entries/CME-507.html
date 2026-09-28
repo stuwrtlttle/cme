@@ -138,6 +138,33 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">systemd drop-in to clear LD_PRELOAD and LD_LIBRARY_PATH per service</span>
+        </div>
+        <pre class="remediation-commands"><code>
+mkdir -p /etc/systemd/system/&lt;service&gt;.service.d
+printf &#39;[Service]\nEnvironment=LD_PRELOAD=\nEnvironment=LD_LIBRARY_PATH=\nEnvironment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin\n&#39; &gt; /etc/systemd/system/&lt;service&gt;.service.d/cme-507-ld-hardening.conf
+systemctl daemon-reload
+systemctl restart &lt;service&gt;</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Secure dynamic linker search paths and rebuild library cache</span>
+        </div>
+        <pre class="remediation-commands"><code>
+for dir in $(cat /etc/ld.so.conf.d/*.conf 2&gt;/dev/null | grep -v &#39;^#&#39; | sort -u); do [ -d &#34;$dir&#34; ] &amp;&amp; chmod o-w &#34;$dir&#34; &amp;&amp; echo &#34;Secured: $dir&#34;; done
+ldconfig</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -219,7 +246,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

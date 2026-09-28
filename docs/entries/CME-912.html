@@ -162,6 +162,54 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">nginx strict HTTP parsing and smuggling prevention</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;proxy_http_version 1.1;\nunderscores_in_headers off;\nlarge_client_header_buffers 4 8k;\nignore_invalid_headers on;\n&#39; &gt; /etc/nginx/conf.d/cme-912-smuggling-prevention.conf
+nginx -t
+systemctl reload nginx</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Apache httpd HttpProtocolOptions Strict enforcement</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;HttpProtocolOptions Strict\n&#39; &gt; /etc/httpd/conf.d/cme-912-strict-protocol.conf
+apachectl configtest
+systemctl reload httpd</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">HAProxy duplicate Content-Length denial and strict parsing</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;\n# CME-912: Request smuggling prevention\nhttp-request deny if { hdr_cnt(content-length) gt 1 }\nhttp-request deny if { hdr(transfer-encoding) -m found } { hdr(content-length) -m found }\noption httpclose\n&#39; &gt;&gt; /etc/haproxy/haproxy.cfg
+haproxy -c -f /etc/haproxy/haproxy.cfg
+systemctl reload haproxy</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">windows</span>
+          <span class="remediation-name">IIS request filtering with double-encoding and high-bit character rejection</span>
+        </div>
+        <pre class="remediation-commands"><code>
+Set-WebConfigurationProperty -Filter &#39;system.webServer/security/requestFiltering&#39; -PSPath &#39;IIS:\&#39; -Name allowDoubleEscaping -Value $false
+Set-WebConfigurationProperty -Filter &#39;system.webServer/security/requestFiltering&#39; -PSPath &#39;IIS:\&#39; -Name allowHighBitCharacters -Value $false</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -237,7 +285,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 20:15 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 20:57 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>
