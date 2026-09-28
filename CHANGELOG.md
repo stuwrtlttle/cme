@@ -9,6 +9,11 @@ All notable changes to the CME (Common Mitigation Enumeration) project are docum
 - `e0ad7fc` Add 3 CME entries (CME-120,CME-121,CME-808); update 15 entries; fix deploy.sh staged-change detection
 - `21c0387` Remove broken deploy scripts; fix build_site.py bind mount issue
 
+
+### Auto-generated changelog
+
+- `32f9782` Fix deploy.sh: reset generated docs on VPS before git pull
+
 ## 2026-09-25
 
 ### Auto-generated changelog
