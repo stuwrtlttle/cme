@@ -118,6 +118,9 @@ set -euo pipefail
 
 cd ~/cme
 
+echo "  Resetting generated docs before pull..."
+git checkout -- docs/ 2>/dev/null || true
+
 echo "  Pulling latest from GitHub..."
 git pull --ff-only origin main
 
