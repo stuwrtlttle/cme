@@ -2,6 +2,13 @@
 
 All notable changes to the CME (Common Mitigation Enumeration) project are documented here.
 
+## 2026-09-28
+
+### Auto-generated changelog
+
+- `e0ad7fc` Add 3 CME entries (CME-120,CME-121,CME-808); update 15 entries; fix deploy.sh staged-change detection
+- `21c0387` Remove broken deploy scripts; fix build_site.py bind mount issue
+
 ## 2026-09-25
 
 ### Auto-generated changelog
