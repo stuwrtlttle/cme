@@ -151,6 +151,275 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <h3 class="remediation-title">firewalld zone-based service restriction
+          <span class="badge badge-layer-rhel">rhel</span>
+        </h3>
+
+        
+        <div class="remediation-precondition">
+          <strong>Precondition:</strong>
+          <code>command -v firewall-cmd &gt;/dev/null 2&gt;&amp;1</code>
+        </div>
+        
+
+        <ol class="remediation-steps">
+          
+          <li>
+            <p>Enable and start firewalld if not already running</p>
+            <div class="verification-cmd">
+              <span class="cmd-prompt">$</span> systemctl enable --now firewalld
+            </div>
+            <div class="remediation-step-meta">
+              
+              
+              <span class="badge badge-confidence-high">Reversible</span>
+              
+            </div>
+            
+            <details class="remediation-undo">
+              <summary>Undo command</summary>
+              <div class="verification-cmd">
+                <span class="cmd-prompt">$</span> systemctl disable --now firewalld
+              </div>
+            </details>
+            
+          </li>
+          
+          <li>
+            <p>Set the default zone to drop (deny all inbound by default, only explicitly allowed services/ports are reachable)</p>
+            <div class="verification-cmd">
+              <span class="cmd-prompt">$</span> firewall-cmd --set-default-zone=drop
+            </div>
+            <div class="remediation-step-meta">
+              
+              
+              <span class="badge badge-confidence-high">Reversible</span>
+              
+            </div>
+            
+            <details class="remediation-undo">
+              <summary>Undo command</summary>
+              <div class="verification-cmd">
+                <span class="cmd-prompt">$</span> firewall-cmd --set-default-zone=public
+              </div>
+            </details>
+            
+          </li>
+          
+          <li>
+            <p>Allow SSH from a specific management network only (replace &lt;mgmt_cidr&gt; with your admin network, e.g., 10.0.1.0/24)</p>
+            <div class="verification-cmd">
+              <span class="cmd-prompt">$</span> firewall-cmd --permanent --zone=drop --add-rich-rule=&#39;rule family=ipv4 source address=&lt;mgmt_cidr&gt; service name=ssh accept&#39;
+            </div>
+            <div class="remediation-step-meta">
+              
+              
+              <span class="badge badge-confidence-high">Reversible</span>
+              
+            </div>
+            
+            <details class="remediation-undo">
+              <summary>Undo command</summary>
+              <div class="verification-cmd">
+                <span class="cmd-prompt">$</span> firewall-cmd --permanent --zone=drop --remove-rich-rule=&#39;rule family=ipv4 source address=&lt;mgmt_cidr&gt; service name=ssh accept&#39;
+              </div>
+            </details>
+            
+          </li>
+          
+          <li>
+            <p>Allow a specific application service port from authorized client networks only (replace &lt;service_port&gt; and &lt;client_cidr&gt;)</p>
+            <div class="verification-cmd">
+              <span class="cmd-prompt">$</span> firewall-cmd --permanent --zone=drop --add-rich-rule=&#39;rule family=ipv4 source address=&lt;client_cidr&gt; port port=&lt;service_port&gt; protocol=tcp accept&#39;
+            </div>
+            <div class="remediation-step-meta">
+              
+              
+              <span class="badge badge-confidence-high">Reversible</span>
+              
+            </div>
+            
+            <details class="remediation-undo">
+              <summary>Undo command</summary>
+              <div class="verification-cmd">
+                <span class="cmd-prompt">$</span> firewall-cmd --permanent --zone=drop --remove-rich-rule=&#39;rule family=ipv4 source address=&lt;client_cidr&gt; port port=&lt;service_port&gt; protocol=tcp accept&#39;
+              </div>
+            </details>
+            
+          </li>
+          
+          <li>
+            <p>Reload firewalld to apply permanent rules</p>
+            <div class="verification-cmd">
+              <span class="cmd-prompt">$</span> firewall-cmd --reload
+            </div>
+            <div class="remediation-step-meta">
+              
+              
+              <span class="badge badge-attenuation-unquantified">Not reversible</span>
+              
+            </div>
+            
+          </li>
+          
+        </ol>
+
+        
+        <div class="remediation-verify">
+          <strong>Verify:</strong>
+          <div class="verification-cmd">
+            <span class="cmd-prompt">$</span> firewall-cmd --state &amp;&amp; firewall-cmd --get-default-zone &amp;&amp; firewall-cmd --list-all
+          </div>
+        </div>
+        
+
+        
+        <ul class="sidebar-list remediation-refs">
+          
+          <li>
+            <a href="https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/configuring_firewalls_and_packet_filters/using-and-configuring-firewalld_firewall-packet-filters" target="_blank" rel="noopener">RHEL 9 — Using and configuring firewalld</a>
+          </li>
+          
+          <li>
+            <a href="https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/using-firewalls_security-hardening" target="_blank" rel="noopener">RHEL 9 Security Hardening — Controlling network traffic using firewalld</a>
+          </li>
+          
+        </ul>
+        
+      </div>
+      
+      <div class="remediation-block">
+        <h3 class="remediation-title">nftables default-deny ruleset with per-service allowlisting
+          <span class="badge badge-layer-linux">linux</span>
+        </h3>
+
+        
+        <div class="remediation-precondition">
+          <strong>Precondition:</strong>
+          <code>command -v nft &gt;/dev/null 2&gt;&amp;1</code>
+        </div>
+        
+
+        <ol class="remediation-steps">
+          
+          <li>
+            <p>Create a default-deny nftables ruleset file that allows established connections, ICMP, loopback, SSH from a management network, and a specific service port from authorized clients (replace &lt;mgmt_cidr&gt;, &lt;client_cidr&gt;, &lt;service_port&gt;)</p>
+            <div class="verification-cmd">
+              <span class="cmd-prompt">$</span> printf &#39;#!/usr/sbin/nft -f\nflush ruleset\ntable inet filter {\n  chain input {\n    type filter hook input priority 0; policy drop;\n    ct state established,related accept\n    ct state invalid drop\n    iif lo accept\n    ip protocol icmp accept\n    ip6 nexthdr icmpv6 accept\n    ip saddr &lt;mgmt_cidr&gt; tcp dport 22 accept\n    ip saddr &lt;client_cidr&gt; tcp dport &lt;service_port&gt; accept\n  }\n  chain forward {\n    type filter hook forward priority 0; policy drop;\n  }\n  chain output {\n    type filter hook output priority 0; policy accept;\n  }\n}\n&#39; &gt; /etc/nftables/cme-202.nft
+            </div>
+            <div class="remediation-step-meta">
+              
+              
+              <span class="badge badge-confidence-high">Reversible</span>
+              
+            </div>
+            
+            <details class="remediation-undo">
+              <summary>Undo command</summary>
+              <div class="verification-cmd">
+                <span class="cmd-prompt">$</span> rm -f /etc/nftables/cme-202.nft
+              </div>
+            </details>
+            
+          </li>
+          
+          <li>
+            <p>Include the CME-202 ruleset from the main nftables config if not already included</p>
+            <div class="verification-cmd">
+              <span class="cmd-prompt">$</span> grep -q &#39;cme-202.nft&#39; /etc/sysconfig/nftables.conf 2&gt;/dev/null || echo &#39;include &#34;/etc/nftables/cme-202.nft&#34;&#39; &gt;&gt; /etc/sysconfig/nftables.conf
+            </div>
+            <div class="remediation-step-meta">
+              
+              
+              <span class="badge badge-confidence-high">Reversible</span>
+              
+            </div>
+            
+            <details class="remediation-undo">
+              <summary>Undo command</summary>
+              <div class="verification-cmd">
+                <span class="cmd-prompt">$</span> sed -i &#39;/cme-202.nft/d&#39; /etc/sysconfig/nftables.conf
+              </div>
+            </details>
+            
+          </li>
+          
+          <li>
+            <p>Load the ruleset into the running kernel</p>
+            <div class="verification-cmd">
+              <span class="cmd-prompt">$</span> nft -f /etc/nftables/cme-202.nft
+            </div>
+            <div class="remediation-step-meta">
+              
+              
+              <span class="badge badge-confidence-high">Reversible</span>
+              
+            </div>
+            
+            <details class="remediation-undo">
+              <summary>Undo command</summary>
+              <div class="verification-cmd">
+                <span class="cmd-prompt">$</span> nft flush ruleset
+              </div>
+            </details>
+            
+          </li>
+          
+          <li>
+            <p>Enable the nftables service so rules persist across reboots</p>
+            <div class="verification-cmd">
+              <span class="cmd-prompt">$</span> systemctl enable nftables
+            </div>
+            <div class="remediation-step-meta">
+              
+              
+              <span class="badge badge-confidence-high">Reversible</span>
+              
+            </div>
+            
+            <details class="remediation-undo">
+              <summary>Undo command</summary>
+              <div class="verification-cmd">
+                <span class="cmd-prompt">$</span> systemctl disable nftables
+              </div>
+            </details>
+            
+          </li>
+          
+        </ol>
+
+        
+        <div class="remediation-verify">
+          <strong>Verify:</strong>
+          <div class="verification-cmd">
+            <span class="cmd-prompt">$</span> nft list ruleset | grep -c &#39;policy drop&#39;
+          </div>
+        </div>
+        
+
+        
+        <ul class="sidebar-list remediation-refs">
+          
+          <li>
+            <a href="https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/configuring_firewalls_and_packet_filters/getting-started-with-nftables_firewall-packet-filters" target="_blank" rel="noopener">RHEL 9 — Getting started with nftables</a>
+          </li>
+          
+          <li>
+            <a href="https://wiki.nftables.org/wiki-nftables/index.php/Simple_ruleset_for_a_server" target="_blank" rel="noopener">nftables wiki — Simple ruleset for a server</a>
+          </li>
+          
+        </ul>
+        
+      </div>
+      
+    </section>
+    
+
+    
 
     
 
@@ -255,7 +524,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 19:36 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 19:52 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

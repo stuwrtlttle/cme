@@ -127,6 +127,182 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <h3 class="remediation-title">systemd drop-in with WatchdogSec and Restart=on-failure
+          <span class="badge badge-layer-linux">linux</span>
+        </h3>
+
+        
+        <div class="remediation-precondition">
+          <strong>Precondition:</strong>
+          <code>systemctl --version &gt;/dev/null 2&gt;&amp;1</code>
+        </div>
+        
+
+        <ol class="remediation-steps">
+          
+          <li>
+            <p>Create a systemd drop-in directory for the target service</p>
+            <div class="verification-cmd">
+              <span class="cmd-prompt">$</span> mkdir -p /etc/systemd/system/&lt;service&gt;.service.d
+            </div>
+            <div class="remediation-step-meta">
+              
+              
+              <span class="badge badge-confidence-high">Reversible</span>
+              
+            </div>
+            
+            <details class="remediation-undo">
+              <summary>Undo command</summary>
+              <div class="verification-cmd">
+                <span class="cmd-prompt">$</span> rmdir /etc/systemd/system/&lt;service&gt;.service.d 2&gt;/dev/null
+              </div>
+            </details>
+            
+          </li>
+          
+          <li>
+            <p>Write a drop-in that enables the watchdog timer (30s), restart on failure with 5s backoff, and a 3-minute start timeout</p>
+            <div class="verification-cmd">
+              <span class="cmd-prompt">$</span> printf &#39;[Service]\nWatchdogSec=30\nRestart=on-failure\nRestartSec=5s\nStartLimitIntervalSec=180\nStartLimitBurst=5\n&#39; &gt; /etc/systemd/system/&lt;service&gt;.service.d/watchdog.conf
+            </div>
+            <div class="remediation-step-meta">
+              
+              <span class="badge badge-attenuation-unquantified">Restart: service</span>
+              
+              
+              <span class="badge badge-confidence-high">Reversible</span>
+              
+            </div>
+            
+            <details class="remediation-undo">
+              <summary>Undo command</summary>
+              <div class="verification-cmd">
+                <span class="cmd-prompt">$</span> rm -f /etc/systemd/system/&lt;service&gt;.service.d/watchdog.conf
+              </div>
+            </details>
+            
+          </li>
+          
+          <li>
+            <p>Reload systemd manager configuration to pick up the drop-in</p>
+            <div class="verification-cmd">
+              <span class="cmd-prompt">$</span> systemctl daemon-reload
+            </div>
+            <div class="remediation-step-meta">
+              
+              
+              <span class="badge badge-attenuation-unquantified">Not reversible</span>
+              
+            </div>
+            
+          </li>
+          
+          <li>
+            <p>Restart the service to apply watchdog and restart policy</p>
+            <div class="verification-cmd">
+              <span class="cmd-prompt">$</span> systemctl restart &lt;service&gt;
+            </div>
+            <div class="remediation-step-meta">
+              
+              
+              <span class="badge badge-attenuation-unquantified">Not reversible</span>
+              
+            </div>
+            
+          </li>
+          
+        </ol>
+
+        
+        <div class="remediation-verify">
+          <strong>Verify:</strong>
+          <div class="verification-cmd">
+            <span class="cmd-prompt">$</span> systemctl show &lt;service&gt; -p Restart -p WatchdogSec -p RestartSec
+          </div>
+        </div>
+        
+
+        
+        <ul class="sidebar-list remediation-refs">
+          
+          <li>
+            <a href="https://www.freedesktop.org/software/systemd/man/latest/systemd.service.html#WatchdogSec=" target="_blank" rel="noopener">systemd.service(5) — WatchdogSec</a>
+          </li>
+          
+          <li>
+            <a href="https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/using_systemd_unit_files_to_customize_and_optimize_your_system/assembly_working-with-systemd-unit-files_working-with-systemd" target="_blank" rel="noopener">RHEL 9 — Configuring systemd service restart</a>
+          </li>
+          
+        </ul>
+        
+      </div>
+      
+      <div class="remediation-block">
+        <h3 class="remediation-title">Kubernetes liveness probe with restart policy
+          <span class="badge badge-layer-kubernetes">kubernetes</span>
+        </h3>
+
+        
+        <div class="remediation-precondition">
+          <strong>Precondition:</strong>
+          <code>kubectl version --client &gt;/dev/null 2&gt;&amp;1</code>
+        </div>
+        
+
+        <ol class="remediation-steps">
+          
+          <li>
+            <p>Patch the deployment to add an HTTP liveness probe with 30s period and 3 failure threshold, triggering kubelet restart on hang</p>
+            <div class="verification-cmd">
+              <span class="cmd-prompt">$</span> kubectl patch deployment &lt;deployment&gt; -n &lt;namespace&gt; --type=json -p &#39;[{&#34;op&#34;:&#34;add&#34;,&#34;path&#34;:&#34;/spec/template/spec/containers/0/livenessProbe&#34;,&#34;value&#34;:{&#34;httpGet&#34;:{&#34;path&#34;:&#34;/healthz&#34;,&#34;port&#34;:8080},&#34;initialDelaySeconds&#34;:10,&#34;periodSeconds&#34;:30,&#34;failureThreshold&#34;:3}}]&#39;
+            </div>
+            <div class="remediation-step-meta">
+              
+              
+              <span class="badge badge-confidence-high">Reversible</span>
+              
+            </div>
+            
+            <details class="remediation-undo">
+              <summary>Undo command</summary>
+              <div class="verification-cmd">
+                <span class="cmd-prompt">$</span> kubectl patch deployment &lt;deployment&gt; -n &lt;namespace&gt; --type=json -p &#39;[{&#34;op&#34;:&#34;remove&#34;,&#34;path&#34;:&#34;/spec/template/spec/containers/0/livenessProbe&#34;}]&#39;
+              </div>
+            </details>
+            
+          </li>
+          
+        </ol>
+
+        
+        <div class="remediation-verify">
+          <strong>Verify:</strong>
+          <div class="verification-cmd">
+            <span class="cmd-prompt">$</span> kubectl get deployment &lt;deployment&gt; -n &lt;namespace&gt; -o jsonpath=&#39;{.spec.template.spec.containers[0].livenessProbe}&#39;
+          </div>
+        </div>
+        
+
+        
+        <ul class="sidebar-list remediation-refs">
+          
+          <li>
+            <a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/" target="_blank" rel="noopener">Kubernetes — Configure Liveness Probes</a>
+          </li>
+          
+        </ul>
+        
+      </div>
+      
+    </section>
+    
+
+    
 
     
 
@@ -210,7 +386,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-28 19:36 UTC &middot; 137 entries &middot;
+    Generated 2026-09-28 19:52 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>
