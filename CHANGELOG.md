@@ -14,6 +14,12 @@ All notable changes to the CME (Common Mitigation Enumeration) project are docum
 
 - `32f9782` Fix deploy.sh: reset generated docs on VPS before git pull
 
+
+### Auto-generated changelog
+
+- `543f046` Rebuild docs site with remediation sections
+- `c5eb680` Add remediation section rendering to static entry pages
+
 ## 2026-09-25
 
 ### Auto-generated changelog
