@@ -1,0 +1,133 @@
+{
+  "cme_id": "CME-120",
+  "control_name": "Kernel Memory Initialization Enforcement (init_on_alloc / INIT_STACK_ALL_ZERO)",
+  "description": "Enforce automatic zero-initialization of kernel stack variables and heap allocations via CONFIG_INIT_STACK_ALL_ZERO and CONFIG_INIT_ON_ALLOC_DEFAULT_ON. These kernel build options ensure that uninitialized memory contains zeros rather than stale data, preventing information disclosure from uninitialized reads and blocking exploitation of uninitialized pointer dereferences. CONFIG_INIT_ON_FREE_DEFAULT_ON zeros memory on deallocation, further reducing the window for use-after-free exploitation by ensuring freed memory does not contain exploitable pointers or data. The runtime equivalent init_on_alloc=1 and init_on_free=1 kernel boot parameters provide the same behavior without requiring a kernel rebuild. Performance overhead is typically 1-3% for init_on_alloc and 1-5% for init_on_free depending on allocation-heavy workloads.",
+  "tactic": "Harden",
+  "category": "Kernel Hardening",
+  "category_id": "kernel-hardening",
+  "function_id": "memory-safety",
+  "control_layer": "OS/Kernel",
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "attenuation_type": "deterministic",
+  "confidence": "High",
+  "platforms": [
+    "RHEL 8",
+    "RHEL 9",
+    "RHEL 10",
+    "Fedora 40",
+    "Ubuntu 24.04"
+  ],
+  "efficacy": {
+    "conditions": [
+      "Requires kernel compiled with CONFIG_INIT_STACK_ALL_ZERO and CONFIG_INIT_ON_ALLOC_DEFAULT_ON, or booted with init_on_alloc=1 init_on_free=1 parameters."
+    ]
+  },
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Exploit must work with zero-initialized memory rather than attacker-favorable stale values; finding useful uninitialized data paths becomes significantly harder because stack variables, heap allocations, and freed memory all contain zeros instead of exploitable pointers or data"
+    },
+    {
+      "metric": "C",
+      "from": "H",
+      "to": "L",
+      "rationale": "Information disclosure via uninitialized memory reads returns zeros instead of kernel pointers, stack data, or heap contents that would enable KASLR bypass or credential theft"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-824",
+    "CWE-908",
+    "CWE-457",
+    "CWE-200",
+    "CWE-665"
+  ],
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-824",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "Zero-initialization ensures uninitialized pointers are NULL rather than containing exploitable stale addresses",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-908",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "Directly eliminates use of uninitialized resources by ensuring all memory starts at zero",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-457",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "Prevents use of uninitialized variables by enforcing zero-initialization at allocation",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-200",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "rationale": "Eliminates information leaks through uninitialized memory reads by ensuring no stale data persists",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-665",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "Enforces proper initialization at the kernel allocator level regardless of application code",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/C",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "SEA-10",
+      "relationship_type": "maps_to"
+    }
+  ],
+  "scf_identifiers": [
+    "SEA-10"
+  ],
+  "verification": {
+    "method": "Verify kernel is built with memory initialization options or booted with init_on_alloc/init_on_free parameters",
+    "commands": [
+      {
+        "command": "grep -c 'CONFIG_INIT_STACK_ALL_ZERO=y\\|CONFIG_INIT_ON_ALLOC_DEFAULT_ON=y' /boot/config-$(uname -r)",
+        "expected": "2",
+        "platform": "linux"
+      },
+      {
+        "command": "grep -E 'CONFIG_INIT_ON_FREE_DEFAULT_ON=y' /boot/config-$(uname -r)",
+        "expected": "CONFIG_INIT_ON_FREE_DEFAULT_ON=y",
+        "platform": "linux"
+      },
+      {
+        "command": "cat /proc/cmdline | grep -oE 'init_on_alloc=[01]|init_on_free=[01]'",
+        "expected": "init_on_alloc=1",
+        "platform": "linux"
+      }
+    ]
+  }
+}

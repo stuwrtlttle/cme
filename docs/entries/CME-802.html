@@ -38,7 +38,7 @@
     
     <section>
       <h2>Description</h2>
-      <p class="entry-description">Enforces minimum password complexity (length, character classes, dictionary checks) via pam_pwquality, making brute force and dictionary attacks impractical.</p>
+      <p class="entry-description">Enforce minimum password complexity requirements via pam_pwquality (Linux) or Group Policy (Windows), ensuring user-chosen passwords resist brute force and dictionary attacks. Key enforcement parameters: minimum length (minlen, typically 14+), minimum character classes (minclass, requiring uppercase, lowercase, digits, and symbols), and dictionary checking (rejecting common words and variations). The combined effect is a search space of ~95^14 (~4.9x10^27) for online attacks, making brute force impractical within lockout windows. On RHEL/Fedora, pam_pwquality is the standard PAM module; on Debian/Ubuntu, it is available as libpam-pwquality. Windows enforces equivalent policy via Group Policy (Computer Configuration &gt; Windows Settings &gt; Security Settings &gt; Account Policies &gt; Password Policy) or Fine-Grained Password Policies in Active Directory.</p>
     </section>
 
     <section>
@@ -62,7 +62,7 @@
               <span class="cvss-to">H</span>
             </td>
             
-            <td class="cvss-rationale">Password brute force requires significantly more time/resources</td>
+            <td class="cvss-rationale">Without quality enforcement, users choose weak passwords (common words, short strings, credential-stuffing targets) that can be guessed via dictionary attack or brute force with minimal effort. With minlen=14 and minclass=4 enforced, the password search space grows to ~95^14 combinations, making online brute force impractical and offline cracking require significant resources even with GPU acceleration — the attacker must find an alternative authentication bypass rather than simply guessing the password</td>
           </tr>
           
         </tbody>
@@ -88,17 +88,37 @@
     <section>
       <h2>Verification</h2>
       
-      <p class="verification-method">Check pwquality configuration</p>
+      <p class="verification-method">Verify password quality enforcement via pwquality.conf (Linux) or Group Policy (Windows)</p>
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> grep -E &#39;minlen|minclass|dcredit&#39; /etc/security/pwquality.conf
+        <span class="cmd-prompt">$</span> grep &#39;^minlen&#39; /etc/security/pwquality.conf | grep -oE &#39;[0-9]+&#39;
         
-        <br><span class="cmd-expected"># Expected: minlen = 14</span>
+        <br><span class="cmd-expected"># Expected: &gt;=14</span>
         
       </div>
       
-      <div class="cmd-platform">Platform: rhel</div>
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep &#39;^minclass&#39; /etc/security/pwquality.conf | grep -oE &#39;[0-9]+&#39;
+        
+        <br><span class="cmd-expected"># Expected: &gt;=3</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -c &#39;pam_pwquality.so&#39; /etc/pam.d/system-auth /etc/pam.d/common-password 2&gt;/dev/null
+        
+        <br><span class="cmd-expected"># Expected: &gt;=1</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
       
       
       <div class="verification-cmd">
@@ -128,6 +148,22 @@
           </tr>
         </thead>
         <tbody>
+          
+          <tr>
+            <td>redhat</td>
+            <td>enterprise_linux</td>
+            <td class="cpe-cell">
+              
+              <code class="cpe-string">cpe:2.3:o:redhat:enterprise_linux:8:*:*:*:*:*:*:*</code><br>
+              
+              <code class="cpe-string">cpe:2.3:o:redhat:enterprise_linux:9:*:*:*:*:*:*:*</code><br>
+              
+              <code class="cpe-string">cpe:2.3:o:redhat:enterprise_linux:10:*:*:*:*:*:*:*</code>
+              
+            </td>
+            <td>All</td>
+            <td><span class="badge badge-confidence-high">applicable</span></td>
+          </tr>
           
           <tr>
             <td>microsoft</td>
@@ -217,9 +253,13 @@
       <h3>Platforms</h3>
       <ul class="sidebar-list">
         
+        <li>RHEL 8</li>
+        
         <li>RHEL 9</li>
         
-        <li>RHEL 8</li>
+        <li>RHEL 10</li>
+        
+        <li>Fedora</li>
         
         <li>Ubuntu 24.04</li>
         
@@ -252,7 +292,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-15 15:58 UTC &middot; 136 entries &middot;
+    Generated 2026-09-28 19:36 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

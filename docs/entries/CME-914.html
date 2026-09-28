@@ -62,7 +62,7 @@
               <span class="cvss-to">H</span>
             </td>
             
-            <td class="cvss-rationale">Cross-origin credentialed reads go from trivially possible (wildcard or reflected-origin CORS) to requiring the attacker to compromise an explicitly allowed origin or find a CORS bypass. The mechanism is the server-side origin validation gate that rejects unapproved origins before including permissive CORS headers.</td>
+            <td class="cvss-rationale">Cross-origin credentialed reads go from trivially possible (wildcard or reflected-origin CORS) to requiring the attacker to compromise an explicitly allowed origin or find a CORS bypass. The mechanism is the server-side origin validation gate that rejects unapproved origins before including permissive CORS headers. This attenuation applies only to browser-mediated attack vectors; direct server-to-server requests are not subject to CORS enforcement.</td>
           </tr>
           
           <tr>
@@ -73,7 +73,7 @@
               <span class="cvss-to">L</span>
             </td>
             
-            <td class="cvss-rationale">The primary attack vector for CORS-based CWE-940 vulnerabilities is cross-origin data exfiltration via credentialed fetch/XHR. Strict CORS blocks the browser from delivering authenticated response data to the attacker&#39;s JavaScript, limiting confidentiality impact to data obtainable without credentials.</td>
+            <td class="cvss-rationale">The primary attack vector for CORS-based CWE-940 vulnerabilities is cross-origin data exfiltration via credentialed fetch/XHR. Strict CORS blocks the browser from delivering authenticated response data to the attacker&#39;s JavaScript, limiting confidentiality impact to data obtainable without credentials. This shift is browser-enforced and does not apply to non-browser attack vectors.</td>
           </tr>
           
         </tbody>
@@ -94,6 +94,9 @@
         
         <a href="https://cwe.mitre.org/data/definitions/942.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-942</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/352.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-352</a>
         
       </div>
     </section>
@@ -177,6 +180,8 @@
         
         <span class="cwe-link">WEB-07</span>
         
+        <span class="cwe-link">WEB-09</span>
+        
       </div>
     </section>
     
@@ -204,7 +209,7 @@
         <li><strong>Layer:</strong> Application</li>
         <li><strong>Effect:</strong> preventive</li>
         <li><strong>Evidence:</strong> unquantified</li>
-        <li><strong>CWEs:</strong> 3</li>
+        <li><strong>CWEs:</strong> 4</li>
         <li><strong>ATT&amp;CK Mappings:</strong> 0</li>
         <li><strong>CVSS Mods:</strong> 2</li>
       </ul>
@@ -215,7 +220,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-15 15:58 UTC &middot; 136 entries &middot;
+    Generated 2026-09-28 19:36 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

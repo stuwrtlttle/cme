@@ -38,7 +38,7 @@
     
     <section>
       <h2>Description</h2>
-      <p class="entry-description">Centrally enforces minimum cryptographic standards across all system components (OpenSSL, GnuTLS, NSS, OpenSSH, Kerberos). FUTURE policy disables TLS &lt;1.2, SHA-1, RSA &lt;3072, all CBC ciphers, and RC4.</p>
+      <p class="entry-description">Centrally enforce minimum cryptographic standards across all system crypto libraries (OpenSSL, GnuTLS, NSS) and their consumers (OpenSSH, Kerberos, HTTPS, LDAP) via update-crypto-policies. The FUTURE policy disables TLS &lt;1.2, SHA-1 signatures, RSA &lt;3072-bit, all CBC mode ciphers, RC4, and DSA, permitting only AEAD ciphers (AES-GCM, ChaCha20-Poly1305), ECDHE/DHE key exchange, and SHA-256+ signatures. This eliminates the attack surface for protocol downgrade attacks (POODLE, DROWN), cipher suite downgrade attacks (FREAK, Logjam), padding oracle attacks (BEAST, Lucky13), and hash collision attacks against SHA-1. The policy is enforced at the library level — applications linked against system crypto libraries inherit the restrictions without code changes. Applications that use their own crypto implementations (Java&#39;s keytool/cacerts, Go&#39;s crypto/tls, custom-compiled OpenSSL) are not affected and must be configured separately.</p>
     </section>
 
     <section>
@@ -62,7 +62,7 @@
               <span class="cvss-to">H</span>
             </td>
             
-            <td class="cvss-rationale">Weak cipher downgrade attacks are impossible; only strong algorithms available</td>
+            <td class="cvss-rationale">Without the FUTURE policy, system libraries offer weak protocols and ciphers (TLS 1.0, CBC mode, RC4, SHA-1) that enable well-tooled downgrade attacks: POODLE forces TLS 1.0 fallback, FREAK/Logjam force export-grade key exchange, and padding oracles exploit CBC mode — all with public exploit tools and low complexity. With FUTURE policy active, weak primitives are removed from the library&#39;s supported set entirely — the server cannot negotiate down to a vulnerable configuration because the weak options do not exist in memory. This is enforced at the crypto library level before application code runs, making it deterministic rather than configuration-dependent</td>
           </tr>
           
         </tbody>
@@ -94,7 +94,7 @@
     <section>
       <h2>Verification</h2>
       
-      <p class="verification-method">Check system crypto policy level</p>
+      <p class="verification-method">Verify system-wide crypto policy is set to FUTURE and weak algorithms are excluded from the effective cipher set</p>
       
       
       <div class="verification-cmd">
@@ -107,9 +107,54 @@
       <div class="cmd-platform">Platform: rhel</div>
       
       
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> openssl ciphers -v &#39;DEFAULT&#39; 2&gt;/dev/null | grep -ciE &#39;RC4|DES|CBC|NULL&#39;
+        
+        <br><span class="cmd-expected"># Expected: 0</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
     </section>
     
 
+    
+    <section>
+      <h2>Applicability (CVE 5.2.0 Schema)</h2>
+      <table class="cvss-table">
+        <thead>
+          <tr>
+            <th>Vendor</th>
+            <th>Product</th>
+            <th>CPEs</th>
+            <th>Platforms</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td>redhat</td>
+            <td>enterprise_linux</td>
+            <td class="cpe-cell">
+              
+              <code class="cpe-string">cpe:2.3:o:redhat:enterprise_linux:8:*:*:*:*:*:*:*</code><br>
+              
+              <code class="cpe-string">cpe:2.3:o:redhat:enterprise_linux:9:*:*:*:*:*:*:*</code><br>
+              
+              <code class="cpe-string">cpe:2.3:o:redhat:enterprise_linux:10:*:*:*:*:*:*:*</code>
+              
+            </td>
+            <td>All</td>
+            <td><span class="badge badge-confidence-high">applicable</span></td>
+          </tr>
+          
+        </tbody>
+      </table>
+      
+    </section>
     
 
     
@@ -171,9 +216,11 @@
       <h3>Platforms</h3>
       <ul class="sidebar-list">
         
+        <li>RHEL 8</li>
+        
         <li>RHEL 9</li>
         
-        <li>RHEL 8</li>
+        <li>RHEL 10</li>
         
         <li>Fedora</li>
         
@@ -202,7 +249,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-15 15:58 UTC &middot; 136 entries &middot;
+    Generated 2026-09-28 19:36 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

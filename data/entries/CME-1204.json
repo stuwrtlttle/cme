@@ -46,6 +46,80 @@
       }
     ]
   },
+  "remediation": [
+    {
+      "id": "systemd-drop-in",
+      "name": "systemd drop-in with WatchdogSec and Restart=on-failure",
+      "platform": "linux",
+      "precondition": "systemctl --version >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create a systemd drop-in directory for the target service",
+          "command": "mkdir -p /etc/systemd/system/<service>.service.d",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rmdir /etc/systemd/system/<service>.service.d 2>/dev/null"
+        },
+        {
+          "description": "Write a drop-in that enables the watchdog timer (30s), restart on failure with 5s backoff, and a 3-minute start timeout",
+          "command": "printf '[Service]\\nWatchdogSec=30\\nRestart=on-failure\\nRestartSec=5s\\nStartLimitIntervalSec=180\\nStartLimitBurst=5\\n' > /etc/systemd/system/<service>.service.d/watchdog.conf",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f /etc/systemd/system/<service>.service.d/watchdog.conf"
+        },
+        {
+          "description": "Reload systemd manager configuration to pick up the drop-in",
+          "command": "systemctl daemon-reload",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Restart the service to apply watchdog and restart policy",
+          "command": "systemctl restart <service>",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "systemctl show <service> -p Restart -p WatchdogSec -p RestartSec",
+      "references": [
+        {
+          "source": "systemd.service(5) — WatchdogSec",
+          "url": "https://www.freedesktop.org/software/systemd/man/latest/systemd.service.html#WatchdogSec="
+        },
+        {
+          "source": "RHEL 9 — Configuring systemd service restart",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/using_systemd_unit_files_to_customize_and_optimize_your_system/assembly_working-with-systemd-unit-files_working-with-systemd"
+        }
+      ]
+    },
+    {
+      "id": "kubernetes-liveness-probe",
+      "name": "Kubernetes liveness probe with restart policy",
+      "platform": "kubernetes",
+      "precondition": "kubectl version --client >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Patch the deployment to add an HTTP liveness probe with 30s period and 3 failure threshold, triggering kubelet restart on hang",
+          "command": "kubectl patch deployment <deployment> -n <namespace> --type=json -p '[{\"op\":\"add\",\"path\":\"/spec/template/spec/containers/0/livenessProbe\",\"value\":{\"httpGet\":{\"path\":\"/healthz\",\"port\":8080},\"initialDelaySeconds\":10,\"periodSeconds\":30,\"failureThreshold\":3}}]'",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "kubectl patch deployment <deployment> -n <namespace> --type=json -p '[{\"op\":\"remove\",\"path\":\"/spec/template/spec/containers/0/livenessProbe\"}]'"
+        }
+      ],
+      "verify": "kubectl get deployment <deployment> -n <namespace> -o jsonpath='{.spec.template.spec.containers[0].livenessProbe}'",
+      "references": [
+        {
+          "source": "Kubernetes — Configure Liveness Probes",
+          "url": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "BCD-12",
     "SEA-07",

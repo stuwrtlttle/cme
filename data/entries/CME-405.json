@@ -1,7 +1,7 @@
 {
   "cme_id": "CME-405",
   "control_name": "DNSSEC Validation",
-  "description": "Validates DNS responses using cryptographic signatures, preventing DNS spoofing, cache poisoning, and DNS-based redirection attacks.",
+  "description": "Enables DNSSEC validation on the local resolver to cryptographically verify DNS response authenticity using the RRSIG/DNSKEY/DS chain of trust rooted at the DNS root zone. For DNSSEC-signed zones, the resolver verifies that each DNS record carries a valid RRSIG signature produced by the zone's signing key (DNSKEY), and that the signing key is authenticated by a DS record in the parent zone, chaining up to the root trust anchor. Spoofed or modified DNS responses for signed zones are rejected because they lack valid cryptographic signatures — this prevents DNS cache poisoning (Kaminsky attack), DNS spoofing, and DNS-based redirection for services in signed zones. Critical scope limitation: DNSSEC validation only protects lookups for zones that have deployed DNSSEC signing — unsigned zones (still the majority of domains) receive no protection, and the resolver accepts their responses without cryptographic verification. DNSSEC provides data integrity (the response hasn't been modified) and origin authentication (the response came from the authoritative zone), but NOT confidentiality — DNS queries and responses are still visible on the wire unless combined with DNS-over-TLS (DoT) or DNS-over-HTTPS (DoH). Configured via systemd-resolved (DNSSEC=yes), unbound (auto-trust-anchor-file, val-permissive-mode: no), BIND (dnssec-validation auto), or Windows DNS Server (DNSSEC validation settings).",
   "tactic": "Harden",
   "category": "Cryptographic Controls",
   "category_id": "cryptographic-controls",
@@ -13,31 +13,52 @@
       "metric": "AC",
       "from": "L",
       "to": "H",
-      "rationale": "DNS-based redirect/spoofing attacks require breaking DNSSEC chain of trust"
+      "rationale": "Without DNSSEC validation, a network attacker can poison DNS caches or spoof DNS responses with forged records (Kaminsky attack, on-path modification) — the resolver has no way to distinguish legitimate from forged responses. With DNSSEC validation enabled, the resolver rejects any response for a signed zone that lacks a valid RRSIG signature chaining to the root trust anchor. The attacker must compromise a zone signing key or find a collision in the DNSSEC hash algorithm (SHA-256) — both fundamentally harder than forging an unsigned UDP packet. Scope limitation: for unsigned zones (still the majority of domains), DNSSEC validation provides no protection and the attacker's complexity is unchanged. The AC shift applies only to lookups for DNSSEC-signed zones"
     }
   ],
   "cwe_relationships": [
-    "CWE-350"
+    "CWE-350",
+    "CWE-345"
   ],
   "verification": {
-    "method": "Verify DNSSEC validation is enabled in resolver",
+    "method": "Verify DNSSEC validation is enabled in the local resolver and that signed zones are validated with the AD flag",
     "commands": [
       {
-        "command": "resolvectl status | grep DNSSEC",
-        "expected": "DNSSEC setting: yes",
+        "command": "resolvectl status 2>/dev/null | grep -i 'DNSSEC' | grep -ci 'yes'",
+        "expected": ">=1",
         "platform": "linux"
       },
       {
-        "command": "grep 'val-permissive-mode' /etc/unbound/unbound.conf",
-        "expected": "val-permissive-mode: no",
+        "command": "grep -E '^[^#]*val-permissive-mode' /etc/unbound/unbound.conf 2>/dev/null | grep -c 'no'",
+        "expected": "1",
         "platform": "linux"
+      },
+      {
+        "command": "grep -E '^[^#]*dnssec-validation' /etc/named.conf /etc/bind/named.conf.options 2>/dev/null | grep -ci 'auto\\|yes'",
+        "expected": ">=1",
+        "platform": "linux"
+      },
+      {
+        "command": "dig +dnssec +short SOA gov. 2>/dev/null | head -1 | grep -c '.'",
+        "expected": "1",
+        "platform": "any"
+      },
+      {
+        "command": "Get-DnsServerSetting -All 2>$null | Select-Object -ExpandProperty EnableDnsSec",
+        "expected": "True",
+        "platform": "windows"
       }
     ]
   },
-  "confidence": "High",
+  "confidence": "Medium",
   "platforms": [
+    "RHEL 8",
     "RHEL 9",
-    "Ubuntu 24.04"
+    "RHEL 10",
+    "Fedora",
+    "Ubuntu 24.04",
+    "Windows Server 2019",
+    "Windows Server 2022"
   ],
   "scf_identifiers": [
     "CRY-04",
@@ -51,12 +72,34 @@
       "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
     ]
   },
+  "cve_schema_version": "5.2.0",
+  "cve_affected": [
+    {
+      "vendor": "redhat",
+      "product": "enterprise_linux",
+      "cpes": [
+        "cpe:2.3:o:redhat:enterprise_linux:8:*:*:*:*:*:*:*",
+        "cpe:2.3:o:redhat:enterprise_linux:9:*:*:*:*:*:*:*",
+        "cpe:2.3:o:redhat:enterprise_linux:10:*:*:*:*:*:*:*"
+      ],
+      "defaultStatus": "applicable"
+    }
+  ],
   "relationships": [
     {
       "target_namespace": "CWE",
       "target_id": "CWE-350",
       "relationship_type": "mitigates",
-      "method": "supportive",
+      "method": "structural",
+      "rationale": "For DNSSEC-signed zones, the resolver rejects spoofed DNS responses because they lack valid RRSIG signatures — an attacker cannot forge records that pass cryptographic validation, eliminating the spoofed DNS entries that CWE-350 warns about. Does not protect lookups for unsigned zones.",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-345",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "DNSSEC adds cryptographic authenticity verification to DNS responses via the RRSIG/DNSKEY/DS chain of trust — the resolver verifies that response data was signed by the authoritative zone's key, directly addressing insufficient verification of data authenticity for signed zones",
       "evidence_state": "unquantified"
     }
   ],

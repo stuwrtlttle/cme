@@ -26,8 +26,8 @@
   <h1>Local Administrator Password Solution (LAPS)</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
-    <span class="badge badge-layer-"></span>
-    <span class="badge badge-attenuation-deterministic">Deterministic evidence</span>
+    <span class="badge badge-layer-identity">Identity</span>
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
     <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
@@ -38,7 +38,7 @@
     
     <section>
       <h2>Description</h2>
-      <p class="entry-description">Automated rotation of local administrator account passwords on Windows endpoints. LAPS generates unique, randomly-generated passwords per machine and stores them in Active Directory with ACL-protected access. Prevents lateral movement attacks that rely on shared or default local admin credentials by ensuring each machine has a cryptographically random password that rotates on a defined schedule.</p>
+      <p class="entry-description">Automated management of local administrator account passwords on Windows domain-joined endpoints, ensuring each machine has a unique, cryptographically random password that rotates on a defined schedule. Legacy LAPS (AdmPwd.E) stores passwords as a confidential attribute on the computer object in AD, protected by ACLs. Windows LAPS (built-in to Windows 10 21H2+ and Server 2019+) adds password encryption using the machine&#39;s AD certificate and supports Azure AD-joined devices. LAPS eliminates the most common Windows lateral movement vector: shared local admin passwords set during imaging and never rotated. Without LAPS, compromising one machine&#39;s local admin hash (via SAM dump, Mimikatz, or volume shadow copy) enables Pass-the-Hash to every endpoint sharing that password. With LAPS, each hash works on exactly one machine and expires on the rotation schedule. Does not protect domain credentials, service accounts, or application-level credentials — only the local administrator account managed by the LAPS policy.</p>
     </section>
 
     <section>
@@ -62,18 +62,7 @@
               <span class="cvss-to">L</span>
             </td>
             
-            <td class="cvss-rationale">Credential theft yields only single-machine access; password unique per endpoint and rotated</td>
-          </tr>
-          
-          <tr>
-            <td><strong>Privileges Required</strong> (PR)</td>
-            <td>
-              <span class="cvss-from">H</span>
-              <span class="cvss-arrow">&rarr;</span>
-              <span class="cvss-to">L</span>
-            </td>
-            
-            <td class="cvss-rationale">Limits privilege escalation from compromised admin hash; cannot reuse across machines</td>
+            <td class="cvss-rationale">Without LAPS, compromising one machine&#39;s local admin hash (SAM dump, Mimikatz) yields credentials valid on every machine sharing that password — confidentiality impact spans the entire fleet. With LAPS, each machine has a unique random password, so a stolen hash provides admin access only to the single compromised endpoint. Impact is reduced from fleet-wide credential exposure to single-machine access</td>
           </tr>
           
           <tr>
@@ -84,7 +73,7 @@
               <span class="cvss-to">U</span>
             </td>
             
-            <td class="cvss-rationale">Lateral movement prevented; compromised local admin cannot authenticate to other systems</td>
+            <td class="cvss-rationale">In environments with shared local admin passwords, any local admin compromise effectively changes scope to other machines via Pass-the-Hash — the vulnerability impacts resources beyond the vulnerable component. With LAPS, the compromised credential works only on the originating machine, containing the blast radius to the vulnerable component&#39;s security authority. Does not prevent lateral movement via domain credentials, shared service accounts, or non-credential scope changes (VM escape, container escape)</td>
           </tr>
           
         </tbody>
@@ -106,9 +95,6 @@
         <a href="https://cwe.mitre.org/data/definitions/521.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-521</a>
         
-        <a href="https://cwe.mitre.org/data/definitions/257.html"
-           class="cwe-link" target="_blank" rel="noopener">CWE-257</a>
-        
       </div>
     </section>
     
@@ -119,7 +105,7 @@
     <section>
       <h2>Verification</h2>
       
-      <p class="verification-method">Verify LAPS policy enforcement and password storage in AD</p>
+      <p class="verification-method">Verify LAPS policy enforcement via registry (legacy or Windows LAPS) and confirm managed password exists in AD</p>
       
       
       <div class="verification-cmd">
@@ -133,9 +119,9 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> Get-AdmPwdPassword -ComputerName $env:COMPUTERNAME | Select-Object -ExpandProperty Password
+        <span class="cmd-prompt">$</span> Get-ItemProperty -Path &#39;HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\LAPS\Config&#39; -ErrorAction SilentlyContinue | Select-Object -ExpandProperty BackupDirectory
         
-        <br><span class="cmd-expected"># Expected: &lt;non-empty random password string&gt;</span>
+        <br><span class="cmd-expected"># Expected: &gt;=1</span>
         
       </div>
       
@@ -152,9 +138,56 @@
       <div class="cmd-platform">Platform: windows</div>
       
       
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> dsregcmd /status 2&gt;$null | Select-String &#39;AzureAdJoined&#39; | Select-String &#39;YES&#39;
+        
+        <br><span class="cmd-expected"># Expected: YES</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: windows</div>
+      
+      
     </section>
     
 
+    
+    <section>
+      <h2>Applicability (CVE 5.2.0 Schema)</h2>
+      <table class="cvss-table">
+        <thead>
+          <tr>
+            <th>Vendor</th>
+            <th>Product</th>
+            <th>CPEs</th>
+            <th>Platforms</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td>microsoft</td>
+            <td>windows</td>
+            <td class="cpe-cell">
+              
+              <code class="cpe-string">cpe:2.3:o:microsoft:windows_10:*:*:*:*:*:*:*:*</code><br>
+              
+              <code class="cpe-string">cpe:2.3:o:microsoft:windows_11:*:*:*:*:*:*:*:*</code><br>
+              
+              <code class="cpe-string">cpe:2.3:o:microsoft:windows_server_2019:*:*:*:*:*:*:*</code><br>
+              
+              <code class="cpe-string">cpe:2.3:o:microsoft:windows_server_2022:*:*:*:*:*:*:*</code>
+              
+            </td>
+            <td>All</td>
+            <td><span class="badge badge-confidence-high">applicable</span></td>
+          </tr>
+          
+        </tbody>
+      </table>
+      
+    </section>
     
 
     
@@ -236,11 +269,13 @@
       <h3>Platforms</h3>
       <ul class="sidebar-list">
         
-        <li>Windows Server 2012+</li>
+        <li>Windows 10</li>
         
-        <li>Windows 10+</li>
+        <li>Windows 11</li>
         
-        <li>Windows 11+</li>
+        <li>Windows Server 2019</li>
+        
+        <li>Windows Server 2022</li>
         
       </ul>
     </section>
@@ -251,12 +286,12 @@
       <ul class="sidebar-list">
         <li><strong>ID:</strong> CME-808</li>
         <li><strong>Tactic:</strong> Harden</li>
-        <li><strong>Layer:</strong> </li>
+        <li><strong>Layer:</strong> Identity</li>
         <li><strong>Effect:</strong> preventive</li>
-        <li><strong>Evidence:</strong> deterministic</li>
-        <li><strong>CWEs:</strong> 4</li>
+        <li><strong>Evidence:</strong> unquantified</li>
+        <li><strong>CWEs:</strong> 3</li>
         <li><strong>ATT&amp;CK Mappings:</strong> 1</li>
-        <li><strong>CVSS Mods:</strong> 3</li>
+        <li><strong>CVSS Mods:</strong> 2</li>
       </ul>
     </section>
   </aside>
@@ -265,7 +300,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-15 15:58 UTC &middot; 136 entries &middot;
+    Generated 2026-09-28 19:36 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

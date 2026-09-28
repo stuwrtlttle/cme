@@ -1,7 +1,7 @@
 {
   "cme_id": "CME-401",
   "control_name": "System-wide Crypto Policy (FUTURE)",
-  "description": "Centrally enforces minimum cryptographic standards across all system components (OpenSSL, GnuTLS, NSS, OpenSSH, Kerberos). FUTURE policy disables TLS <1.2, SHA-1, RSA <3072, all CBC ciphers, and RC4.",
+  "description": "Centrally enforce minimum cryptographic standards across all system crypto libraries (OpenSSL, GnuTLS, NSS) and their consumers (OpenSSH, Kerberos, HTTPS, LDAP) via update-crypto-policies. The FUTURE policy disables TLS <1.2, SHA-1 signatures, RSA <3072-bit, all CBC mode ciphers, RC4, and DSA, permitting only AEAD ciphers (AES-GCM, ChaCha20-Poly1305), ECDHE/DHE key exchange, and SHA-256+ signatures. This eliminates the attack surface for protocol downgrade attacks (POODLE, DROWN), cipher suite downgrade attacks (FREAK, Logjam), padding oracle attacks (BEAST, Lucky13), and hash collision attacks against SHA-1. The policy is enforced at the library level — applications linked against system crypto libraries inherit the restrictions without code changes. Applications that use their own crypto implementations (Java's keytool/cacerts, Go's crypto/tls, custom-compiled OpenSSL) are not affected and must be configured separately.",
   "tactic": "Harden",
   "category": "Cryptographic Controls",
   "category_id": "cryptographic-controls",
@@ -13,7 +13,7 @@
       "metric": "AC",
       "from": "L",
       "to": "H",
-      "rationale": "Weak cipher downgrade attacks are impossible; only strong algorithms available"
+      "rationale": "Without the FUTURE policy, system libraries offer weak protocols and ciphers (TLS 1.0, CBC mode, RC4, SHA-1) that enable well-tooled downgrade attacks: POODLE forces TLS 1.0 fallback, FREAK/Logjam force export-grade key exchange, and padding oracles exploit CBC mode — all with public exploit tools and low complexity. With FUTURE policy active, weak primitives are removed from the library's supported set entirely — the server cannot negotiate down to a vulnerable configuration because the weak options do not exist in memory. This is enforced at the crypto library level before application code runs, making it deterministic rather than configuration-dependent"
     }
   ],
   "cwe_relationships": [
@@ -22,12 +22,17 @@
     "CWE-757"
   ],
   "verification": {
-    "method": "Check system crypto policy level",
+    "method": "Verify system-wide crypto policy is set to FUTURE and weak algorithms are excluded from the effective cipher set",
     "commands": [
       {
         "command": "update-crypto-policies --show",
         "expected": "FUTURE",
         "platform": "rhel"
+      },
+      {
+        "command": "openssl ciphers -v 'DEFAULT' 2>/dev/null | grep -ciE 'RC4|DES|CBC|NULL'",
+        "expected": "0",
+        "platform": "linux"
       }
     ]
   },
@@ -39,8 +44,9 @@
   ],
   "confidence": "High",
   "platforms": [
-    "RHEL 9",
     "RHEL 8",
+    "RHEL 9",
+    "RHEL 10",
     "Fedora",
     "CentOS Stream"
   ],
@@ -55,26 +61,42 @@
       "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
     ]
   },
+  "cve_schema_version": "5.2.0",
+  "cve_affected": [
+    {
+      "vendor": "redhat",
+      "product": "enterprise_linux",
+      "cpes": [
+        "cpe:2.3:o:redhat:enterprise_linux:8:*:*:*:*:*:*:*",
+        "cpe:2.3:o:redhat:enterprise_linux:9:*:*:*:*:*:*:*",
+        "cpe:2.3:o:redhat:enterprise_linux:10:*:*:*:*:*:*:*"
+      ],
+      "defaultStatus": "applicable"
+    }
+  ],
   "relationships": [
     {
       "target_namespace": "CWE",
       "target_id": "CWE-327",
       "relationship_type": "mitigates",
-      "method": "supportive",
+      "method": "structural",
+      "rationale": "Removes broken and risky algorithms (RC4, DES, SHA-1) from the system crypto libraries entirely — applications cannot use them even if misconfigured",
       "evidence_state": "unquantified"
     },
     {
       "target_namespace": "CWE",
       "target_id": "CWE-326",
       "relationship_type": "mitigates",
-      "method": "supportive",
+      "method": "structural",
+      "rationale": "Enforces minimum key sizes (RSA 3072+, ECDSA 256+) at the library level, preventing inadequate encryption strength",
       "evidence_state": "unquantified"
     },
     {
       "target_namespace": "CWE",
       "target_id": "CWE-757",
       "relationship_type": "mitigates",
-      "method": "supportive",
+      "method": "structural",
+      "rationale": "Weak algorithms are removed from the negotiation set entirely — downgrade attacks cannot succeed because the less-secure option does not exist in the library's supported ciphers",
       "evidence_state": "unquantified"
     }
   ],

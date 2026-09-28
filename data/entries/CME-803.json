@@ -1,7 +1,7 @@
 {
   "cme_id": "CME-803",
   "control_name": "Account Lockout Policy (pam_faillock)",
-  "description": "Locks user accounts after a configurable number of failed authentication attempts, preventing online brute force attacks.",
+  "description": "Lock user accounts after a configurable number of consecutive failed authentication attempts, preventing online brute force and dictionary attacks. On Linux, pam_faillock (RHEL 8+) or pam_tally2 (legacy) tracks per-user authentication failures and locks the account when the threshold is reached. Key parameters: deny (max failed attempts, typically 5), unlock_time (lockout duration in seconds, typically 900), and fail_interval (window for counting failures). With deny=5 and unlock_time=900, brute force is rate-limited to approximately 20 attempts per hour per account, making password guessing computationally infeasible against any password meeting basic quality requirements. On Windows, equivalent policy is configured via Group Policy (Account Lockout Policy) or Fine-Grained Password Policies. Does not protect against password spraying (one password across many accounts) or credential stuffing with breached passwords — those require complementary controls like IP-based rate limiting and credential breach monitoring.",
   "tactic": "Harden",
   "category": "Credential Hardening",
   "category_id": "credential-hardening",
@@ -13,24 +13,24 @@
       "metric": "AC",
       "from": "L",
       "to": "H",
-      "rationale": "Brute force limited to N attempts before lockout"
+      "rationale": "Without lockout, an attacker can make unlimited authentication attempts against a login interface (SSH, RDP, web console), enabling dictionary attacks and brute force with tools like Hydra or Medusa. With pam_faillock configured (deny=5, unlock_time=900), authentication is rate-limited to approximately 20 attempts per hour per account — making brute force of any password meeting basic quality requirements computationally infeasible. The attacker must find an alternative authentication bypass rather than simply guessing credentials. Note: per-account lockout does not prevent password spraying (one password across many accounts) or cause attacker-triggered denial-of-service by deliberately locking accounts — complementary controls (IP-based rate limiting, spray detection) address those scenarios"
     }
   ],
   "cwe_relationships": [
     "CWE-307"
   ],
   "verification": {
-    "method": "Check pam_faillock configuration",
+    "method": "Verify account lockout enforcement via pam_faillock (Linux) or Group Policy (Windows)",
     "commands": [
       {
-        "command": "grep faillock /etc/pam.d/system-auth",
-        "expected": "pam_faillock.so",
-        "platform": "rhel"
+        "command": "grep -rE 'pam_faillock|pam_tally2' /etc/pam.d/system-auth /etc/pam.d/common-auth 2>/dev/null | grep -c 'auth'",
+        "expected": ">=1",
+        "platform": "linux"
       },
       {
-        "command": "grep deny /etc/security/faillock.conf",
+        "command": "grep '^deny' /etc/security/faillock.conf",
         "expected": "deny = 5",
-        "platform": "rhel"
+        "platform": "linux"
       },
       {
         "command": "net accounts | Select-String 'Lockout threshold'",
@@ -46,14 +46,27 @@
   },
   "confidence": "High",
   "platforms": [
-    "RHEL 9",
     "RHEL 8",
+    "RHEL 9",
+    "RHEL 10",
+    "Fedora",
+    "Ubuntu 24.04",
     "Windows 10",
     "Windows 11",
     "Windows Server 2022"
   ],
   "cve_schema_version": "5.2.0",
   "cve_affected": [
+    {
+      "vendor": "redhat",
+      "product": "enterprise_linux",
+      "cpes": [
+        "cpe:2.3:o:redhat:enterprise_linux:8:*:*:*:*:*:*:*",
+        "cpe:2.3:o:redhat:enterprise_linux:9:*:*:*:*:*:*:*",
+        "cpe:2.3:o:redhat:enterprise_linux:10:*:*:*:*:*:*:*"
+      ],
+      "defaultStatus": "applicable"
+    },
     {
       "vendor": "microsoft",
       "product": "windows",

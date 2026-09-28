@@ -60,9 +60,18 @@ fi
 if [ "$VPS_ONLY" = false ]; then
   step "Checking for changes"
 
-  NEW_ENTRIES=$(git ls-files --others --exclude-standard -- 'data/entries/*.json' | sed 's|data/entries/||;s|\.json||' | sort)
-  CHANGED_ENTRIES=$(git diff --name-only -- 'data/entries/*.json' | sed 's|data/entries/||;s|\.json||' | sort)
-  OTHER=$(git diff --name-only -- ':!data/entries/*.json' ':!.DS_Store')
+  NEW_ENTRIES=$( {
+    git diff --cached --diff-filter=A --name-only -- 'data/entries/*.json'
+    git ls-files --others --exclude-standard -- 'data/entries/*.json'
+  } | sed 's|data/entries/||;s|\.json||' | sort -u)
+  CHANGED_ENTRIES=$( {
+    git diff --cached --diff-filter=M --name-only -- 'data/entries/*.json'
+    git diff --diff-filter=M --name-only -- 'data/entries/*.json'
+  } | sed 's|data/entries/||;s|\.json||' | sort -u)
+  OTHER=$( {
+    git diff --cached --name-only -- ':!data/entries/*.json' ':!.DS_Store'
+    git diff --name-only -- ':!data/entries/*.json' ':!.DS_Store'
+  } | sort -u)
   OTHER_NEW=$(git ls-files --others --exclude-standard -- ':!data/entries/*.json' ':!.DS_Store')
 
   if [ -z "$NEW_ENTRIES" ] && [ -z "$CHANGED_ENTRIES" ] && [ -z "$OTHER" ] && [ -z "$OTHER_NEW" ]; then

@@ -26,8 +26,8 @@
   <h1>LDAP Injection Prevention</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
-    <span class="badge badge-layer-"></span>
-    <span class="badge badge-attenuation-deterministic">Deterministic evidence</span>
+    <span class="badge badge-layer-application">Application</span>
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
     <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
@@ -120,29 +120,29 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> grep -r &#39;ldap_search&#39; /path/to/app | grep -v -E &#39;(ldap_escape|escapeLdapFilter|Filter.escape)&#39;
+        <span class="cmd-prompt">$</span> grep -rn &#39;ldap_escape\|escapeLdapFilter\|Filter\.escape\|LdapFilterEncode\|escape_filter_chars\|ldap_escape_filter&#39; &lt;app_source&gt;/
         
-        <br><span class="cmd-expected"># Expected: No matches (all queries use escaping)</span>
-        
-      </div>
-      
-      <div class="cmd-platform">Platform: linux</div>
-      
-      
-      <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> grep -r &#39;DirectorySearcher&#39; /path/to/app/*.cs | grep &#39;Filter\s*=&#39; | grep -v &#39;Encoder.LdapFilterEncode&#39;
-        
-        <br><span class="cmd-expected"># Expected: No matches (all .NET LDAP queries use encoding)</span>
+        <br><span class="cmd-expected"># Expected: LDAP filter escaping functions present in code paths that construct LDAP queries</span>
         
       </div>
       
-      <div class="cmd-platform">Platform: windows</div>
+      <div class="cmd-platform">Platform: any</div>
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> semgrep --config &#39;r/generic.secrets.security.detected-ldap-injection&#39; /path/to/app
+        <span class="cmd-prompt">$</span> grep -rn &#39;ldap_search\|search_s\|ldap\.search\|DirectorySearcher\|LdapConnection.*Search\|SearchRequest&#39; &lt;app_source&gt;/ | grep -v -i &#39;escape\|encode\|sanitiz\|filter_format&#39; | head -10
         
-        <br><span class="cmd-expected"># Expected: No findings</span>
+        <br><span class="cmd-expected"># Expected: Zero matches — all LDAP search calls should have upstream escaping or parameterization</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -rn &#39;dn_escape\|escape_dn_chars\|escapeDN\|Encoder.LdapDistinguishedNameEncode&#39; &lt;app_source&gt;/
+        
+        <br><span class="cmd-expected"># Expected: DN escaping present for code paths that construct distinguished names from user input</span>
         
       </div>
       
@@ -218,7 +218,7 @@
       <h3>Platforms</h3>
       <ul class="sidebar-list">
         
-        <li>Any (application-layer control)</li>
+        <li>Any</li>
         
       </ul>
     </section>
@@ -229,9 +229,9 @@
       <ul class="sidebar-list">
         <li><strong>ID:</strong> CME-1318</li>
         <li><strong>Tactic:</strong> Harden</li>
-        <li><strong>Layer:</strong> </li>
+        <li><strong>Layer:</strong> Application</li>
         <li><strong>Effect:</strong> preventive</li>
-        <li><strong>Evidence:</strong> deterministic</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 3</li>
         <li><strong>ATT&amp;CK Mappings:</strong> 0</li>
         <li><strong>CVSS Mods:</strong> 3</li>
@@ -243,7 +243,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-15 15:58 UTC &middot; 136 entries &middot;
+    Generated 2026-09-28 19:36 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

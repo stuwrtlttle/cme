@@ -1,7 +1,7 @@
 {
   "cme_id": "CME-402",
   "control_name": "FIPS 140-3 Mode",
-  "description": "Enables FIPS-validated cryptographic modules system-wide. Only NIST-approved algorithms are available for all cryptographic operations. Non-compliant operations fail rather than fall back.",
+  "description": "Enforces exclusive use of FIPS 140-3 validated cryptographic modules for all system cryptographic operations. Enabled via the fips=1 kernel boot parameter (dracut fips module) and fips-mode-setup on RHEL, or FIPSAlgorithmPolicy registry key on Windows. When active, the kernel crypto API restricts to validated implementations (AES, SHA-256+, RSA 2048+, ECDSA P-256/P-384, HMAC), the OpenSSL FIPS provider replaces the default provider, and GnuTLS/NSS restrict to FIPS-approved algorithms. Non-validated algorithms (MD5, RC4, DES, Blowfish, Camellia, IDEA) are removed from available cipher lists entirely — operations requesting them fail with an error rather than falling back to a weaker option. FIPS mode imposes significant compatibility constraints: some TLS cipher suites become unavailable, HMAC-MD5 is prohibited (breaking some Kerberos configurations), Ed25519 SSH keys are rejected, and applications using non-validated crypto (custom OpenSSL builds, BoringSSL, Go's crypto/tls) are unaffected. On RHEL, FIPS mode automatically sets the crypto policy to FIPS, which is stricter than DEFAULT but less restrictive than FUTURE for non-FIPS-relevant parameters. The primary value is compliance attestation (FedRAMP, CMMC, DISA STIG) combined with the security benefit of using audited, CAVP-tested implementations.",
   "tactic": "Harden",
   "category": "Cryptographic Controls",
   "category_id": "cryptographic-controls",
@@ -13,16 +13,17 @@
       "metric": "AC",
       "from": "L",
       "to": "H",
-      "rationale": "All crypto operations use validated, audited implementations"
+      "rationale": "Without FIPS mode, system crypto libraries offer both validated and non-validated algorithm implementations — an attacker exploiting a protocol downgrade vulnerability can force negotiation to a non-validated, potentially weaker implementation (e.g., MD5-based HMAC, RC4 stream cipher, DES). With FIPS mode active, non-validated algorithms are removed from the kernel crypto API and userspace library provider lists entirely — the negotiation cannot select them because they do not exist in the available set. The attacker must find an exploitable flaw in the FIPS-validated implementation itself, which has undergone NIST CAVP testing and third-party lab validation. Does not increase complexity for vulnerabilities that do not involve cryptographic algorithm selection (memory corruption, logic bugs, injection)"
     }
   ],
   "cwe_relationships": [
     "CWE-327",
     "CWE-326",
-    "CWE-328"
+    "CWE-328",
+    "CWE-757"
   ],
   "verification": {
-    "method": "Verify FIPS mode is enabled",
+    "method": "Verify FIPS mode is enabled at boot, kernel, and crypto library levels",
     "commands": [
       {
         "command": "fips-mode-setup --check",
@@ -33,6 +34,21 @@
         "command": "cat /proc/sys/crypto/fips_enabled",
         "expected": "1",
         "platform": "linux"
+      },
+      {
+        "command": "grep -qw fips=1 /proc/cmdline && echo 'enabled' || echo 'disabled'",
+        "expected": "enabled",
+        "platform": "linux"
+      },
+      {
+        "command": "openssl list -providers 2>/dev/null | grep -c 'fips'",
+        "expected": "1",
+        "platform": "linux"
+      },
+      {
+        "command": "Get-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Lsa\\FIPSAlgorithmPolicy' -Name Enabled -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Enabled",
+        "expected": "1",
+        "platform": "windows"
       }
     ]
   },
@@ -44,8 +60,15 @@
   ],
   "confidence": "High",
   "platforms": [
+    "RHEL 8",
     "RHEL 9",
-    "RHEL 8"
+    "RHEL 10",
+    "Fedora",
+    "Ubuntu 22.04",
+    "Windows 10",
+    "Windows 11",
+    "Windows Server 2019",
+    "Windows Server 2022"
   ],
   "scf_identifiers": [
     "CRY-01",
@@ -58,26 +81,50 @@
       "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
     ]
   },
+  "cve_schema_version": "5.2.0",
+  "cve_affected": [
+    {
+      "vendor": "redhat",
+      "product": "enterprise_linux",
+      "cpes": [
+        "cpe:2.3:o:redhat:enterprise_linux:8:*:*:*:*:*:*:*",
+        "cpe:2.3:o:redhat:enterprise_linux:9:*:*:*:*:*:*:*",
+        "cpe:2.3:o:redhat:enterprise_linux:10:*:*:*:*:*:*:*"
+      ],
+      "defaultStatus": "applicable"
+    }
+  ],
   "relationships": [
     {
       "target_namespace": "CWE",
       "target_id": "CWE-327",
       "relationship_type": "mitigates",
-      "method": "supportive",
+      "method": "structural",
+      "rationale": "FIPS mode removes non-validated algorithm implementations from the crypto library provider — applications cannot invoke broken or risky algorithms because they are absent from the loaded module set",
       "evidence_state": "unquantified"
     },
     {
       "target_namespace": "CWE",
       "target_id": "CWE-326",
       "relationship_type": "mitigates",
-      "method": "supportive",
+      "method": "structural",
+      "rationale": "FIPS validation requires minimum key sizes (RSA 2048+, ECDSA P-256+, AES-128+) — the validated module enforces these minimums and rejects key generation or import below the threshold",
       "evidence_state": "unquantified"
     },
     {
       "target_namespace": "CWE",
       "target_id": "CWE-328",
       "relationship_type": "mitigates",
-      "method": "supportive",
+      "method": "structural",
+      "rationale": "MD5 and SHA-1 for digital signatures are removed from the FIPS provider — hash operations requesting non-approved algorithms fail rather than producing weak hashes",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-757",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "Non-validated algorithms are absent from the negotiation set — protocol downgrade attacks cannot force selection of a weaker algorithm because it does not exist in the library's available ciphers",
       "evidence_state": "unquantified"
     }
   ],

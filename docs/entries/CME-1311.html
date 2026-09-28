@@ -65,6 +65,17 @@
             <td class="cvss-rationale">Malicious size or count values are rejected before reaching allocation or copy operations; the attacker must find a quantity field that bypasses validation or an alternative code path that does not enforce bounds</td>
           </tr>
           
+          <tr>
+            <td><strong>Availability</strong> (A)</td>
+            <td>
+              <span class="cvss-from">H</span>
+              <span class="cvss-arrow">&rarr;</span>
+              <span class="cvss-to">L</span>
+            </td>
+            
+            <td class="cvss-rationale">Bounds enforcement rejects allocation and iteration requests that exceed configured maximums, preventing unbounded resource consumption from attacker-controlled size or count fields; low availability impact remains possible from repeated bounded-but-large operations within limits</td>
+          </tr>
+          
         </tbody>
       </table>
     </section>
@@ -96,6 +107,9 @@
         <a href="https://cwe.mitre.org/data/definitions/681.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-681</a>
         
+        <a href="https://cwe.mitre.org/data/definitions/789.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-789</a>
+        
       </div>
     </section>
     
@@ -110,23 +124,33 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> curl -s -o /dev/null -w &#34;%{http_code}&#34; -H &#34;Content-Length: 999999999&#34; -d @/dev/null https://app/api/upload
+        <span class="cmd-prompt">$</span> grep -rn &#39;check_mul\|__builtin_mul_overflow\|__builtin_add_overflow\|SafeInt\|checked_mul\|Math\.multiplyExact\|Math\.addExact\|Integer\.MAX_VALUE\|SIZE_MAX\|SSIZE_MAX&#39; &lt;app_source&gt;/
         
-        <br><span class="cmd-expected"># Expected: 413 (Payload Too Large)</span>
+        <br><span class="cmd-expected"># Expected: Safe integer arithmetic or size limit constants used before allocation operations</span>
         
       </div>
       
-      <div class="cmd-platform">Platform: linux</div>
+      <div class="cmd-platform">Platform: any</div>
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> grep -r &#34;max_.*size\|MAX_.*SIZE\|max_.*length\|MAX_.*LEN\|max_.*count\|MAX_.*COUNT&#34; /etc/nginx/nginx.conf /etc/httpd/conf/httpd.conf 2&gt;/dev/null | head -5
+        <span class="cmd-prompt">$</span> grep -rn &#39;MAX_.*SIZE\|MAX_.*COUNT\|MAX_.*LENGTH\|MAX_.*ELEMENTS\|LIMIT_.*SIZE\|max_.*elements\|kMax&#39; &lt;app_source&gt;/
         
-        <br><span class="cmd-expected"># Expected: configured size limits present</span>
+        <br><span class="cmd-expected"># Expected: Application-defined maximum bounds for user-supplied quantity fields</span>
         
       </div>
       
-      <div class="cmd-platform">Platform: linux</div>
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -rn &#39;if.*size.*&gt;\|if.*count.*&gt;\|if.*length.*&gt;\|if.*len.*&gt;.*MAX\|if.*n\b.*&gt;.*MAX&#39; &lt;app_source&gt;/ | head -10
+        
+        <br><span class="cmd-expected"># Expected: Bounds checks on size/count/length variables before allocation or iteration</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
       
       
     </section>
@@ -181,17 +205,7 @@
       <h3>Platforms</h3>
       <ul class="sidebar-list">
         
-        <li>RHEL 9</li>
-        
-        <li>RHEL 10</li>
-        
-        <li>Ubuntu 24.04</li>
-        
-        <li>Fedora</li>
-        
-        <li>Windows Server 2019</li>
-        
-        <li>Windows Server 2022</li>
+        <li>Any</li>
         
       </ul>
     </section>
@@ -205,9 +219,9 @@
         <li><strong>Layer:</strong> Application</li>
         <li><strong>Effect:</strong> preventive</li>
         <li><strong>Evidence:</strong> unquantified</li>
-        <li><strong>CWEs:</strong> 7</li>
+        <li><strong>CWEs:</strong> 8</li>
         <li><strong>ATT&amp;CK Mappings:</strong> 0</li>
-        <li><strong>CVSS Mods:</strong> 1</li>
+        <li><strong>CVSS Mods:</strong> 2</li>
       </ul>
     </section>
   </aside>
@@ -216,7 +230,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-15 15:58 UTC &middot; 136 entries &middot;
+    Generated 2026-09-28 19:36 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

@@ -134,9 +134,9 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> grep -rn &#39;RegexOptions\.NonBacktracking\|RegexOptions\.MatchTimeout\|Regex\.IsMatch.*TimeSpan&#39; &lt;app_source&gt;/ | head -10
+        <span class="cmd-prompt">$</span> grep -rn &#39;RegexOptions\.NonBacktracking\|MatchTimeout\|Regex\.IsMatch.*TimeSpan\|Pattern\.compile.*CANON_EQ\|re2j\.Pattern\|regex\.timeout\|re\.set_timeout&#39; &lt;app_source&gt;/ | head -10
         
-        <br><span class="cmd-expected"># Expected: Regex operations use NonBacktracking mode (.NET 7+) or explicit MatchTimeout</span>
+        <br><span class="cmd-expected"># Expected: Regex operations use NonBacktracking mode, explicit timeout, or safe engine bindings</span>
         
       </div>
       
@@ -144,9 +144,19 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> grep -rn &#39;new RegExp(\|RegExp(.*\buser\|RegExp(.*\breq\.&#39; &lt;app_source&gt;/ | head -10
+        <span class="cmd-prompt">$</span> grep -rn &#39;new RegExp(.*req\.\|new RegExp(.*user\|re\.compile(.*request\|re\.compile(.*input\|re\.compile(.*user\|Pattern\.compile(.*request\|Pattern\.compile(.*getParameter&#39; &lt;app_source&gt;/ | head -10
         
-        <br><span class="cmd-expected"># Expected: No instances of user-controlled input compiled into RegExp without escaping</span>
+        <br><span class="cmd-expected"># Expected: Zero matches — user-controlled input must not be compiled into regex without escaping or literal-match API</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -rn &#39;require.*re2\|import re2\|from google.re2\|from google import re2\|import com.google.re2j\|regex::Regex&#39; &lt;app_source&gt;/
+        
+        <br><span class="cmd-expected"># Expected: Application imports safe regex engine (RE2, re2j, Rust regex) instead of or alongside the default backtracking engine</span>
         
       </div>
       
@@ -207,10 +217,6 @@
         
         <li>Any</li>
         
-        <li>Windows Server 2019</li>
-        
-        <li>Windows Server 2022</li>
-        
       </ul>
     </section>
     
@@ -234,7 +240,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-15 15:58 UTC &middot; 136 entries &middot;
+    Generated 2026-09-28 19:36 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

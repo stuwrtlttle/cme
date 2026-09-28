@@ -24,7 +24,9 @@
     "CWE-787",
     "CWE-125",
     "CWE-120",
-    "CWE-805"
+    "CWE-805",
+    "CWE-824",
+    "CWE-825"
   ],
   "confidence": "High",
   "platforms": [
@@ -106,6 +108,20 @@
     {
       "target_namespace": "CWE",
       "target_id": "CWE-805",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-824",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-825",
       "relationship_type": "mitigates",
       "method": "supportive",
       "evidence_state": "unquantified"

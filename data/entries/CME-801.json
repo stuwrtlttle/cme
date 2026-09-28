@@ -1,7 +1,7 @@
 {
   "cme_id": "CME-801",
   "control_name": "Multi-Factor Authentication (MFA)",
-  "description": "Requires multiple authentication factors (password + TOTP/FIDO2/smart card), preventing credential-only compromise. Even stolen passwords are insufficient for access.",
+  "description": "Enforce multi-factor authentication (MFA) requiring two or more independent authentication factors before granting access. Supported second factors include time-based one-time passwords (TOTP via authenticator apps), FIDO2/WebAuthn hardware security keys, smart cards (PIV/CAC via PKCS#11), and push-based approval. MFA ensures that a compromised password alone is insufficient for account access — the attacker must also obtain or bypass the second factor through a separate channel (physical theft, real-time phishing proxy, SIM swap), each of which adds substantial complexity. FIDO2 keys provide the strongest protection as they are bound to the origin and resistant to phishing. TOTP is vulnerable to real-time proxy phishing (e.g., EvilGinx2) but still requires significantly more attack infrastructure than password-only attacks. MFA is enforced at the authentication layer via PAM modules (Linux), conditional access policies (Azure AD/Entra ID), or IdP configuration (Keycloak, Okta, FreeIPA).",
   "tactic": "Harden",
   "category": "Credential Hardening",
   "category_id": "credential-hardening",
@@ -13,34 +13,38 @@
       "metric": "AC",
       "from": "L",
       "to": "H",
-      "rationale": "Stolen credential alone is insufficient; second factor required"
-    },
-    {
-      "metric": "PR",
-      "from": "N",
-      "to": "H",
-      "rationale": "Unauthenticated access impossible; multi-factor barrier"
+      "rationale": "A stolen password alone cannot authenticate — the attacker must also obtain the second factor through a separate channel (physical theft of a hardware key, real-time phishing proxy to capture TOTP, SIM swap for SMS codes). Each bypass requires substantially more infrastructure and attacker proximity than password-only credential abuse, raising exploitation complexity from trivial replay to a multi-stage attack"
     }
   ],
   "cwe_relationships": [
     "CWE-287",
-    "CWE-306",
     "CWE-521",
     "CWE-303",
-    "CWE-305"
+    "CWE-305",
+    "CWE-798"
   ],
   "verification": {
-    "method": "Verify MFA enforcement in PAM or IdP",
+    "method": "Verify MFA enforcement via PAM modules, SSSD/FreeIPA OTP, smart card, or IdP conditional access policy",
     "commands": [
       {
-        "command": "grep pam_google_authenticator /etc/pam.d/sshd",
-        "expected": "auth required pam_google_authenticator.so",
+        "command": "grep -rE 'pam_google_authenticator|pam_oath|pam_u2f|pam_duo' /etc/pam.d/ 2>/dev/null | grep -c 'auth.*required'",
+        "expected": ">=1",
         "platform": "linux"
       },
       {
-        "command": "grep -r 'auth.*required.*pam_u2f' /etc/pam.d/",
-        "expected": "pam_u2f.so",
+        "command": "grep -c 'pam_sss' /etc/pam.d/system-auth 2>/dev/null && ipa user-show admin --all 2>/dev/null | grep -i 'authentication types' | grep -ic 'otp'",
+        "expected": ">=1",
+        "platform": "rhel"
+      },
+      {
+        "command": "grep -rE 'pam_pkcs11|pam_p11' /etc/pam.d/ 2>/dev/null | grep -c 'auth'",
+        "expected": ">=1",
         "platform": "linux"
+      },
+      {
+        "command": "Get-MgIdentityConditionalAccessPolicy | Where-Object {$_.GrantControls.BuiltInControls -contains 'mfa' -and $_.State -eq 'enabled'} | Measure-Object | Select-Object -ExpandProperty Count",
+        "expected": ">=1",
+        "platform": "windows"
       }
     ]
   },
@@ -69,13 +73,6 @@
     },
     {
       "target_namespace": "CWE",
-      "target_id": "CWE-306",
-      "relationship_type": "mitigates",
-      "method": "supportive",
-      "evidence_state": "unquantified"
-    },
-    {
-      "target_namespace": "CWE",
       "target_id": "CWE-521",
       "relationship_type": "mitigates",
       "method": "supportive",
@@ -96,6 +93,14 @@
       "evidence_state": "unquantified"
     },
     {
+      "target_namespace": "CWE",
+      "target_id": "CWE-798",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "rationale": "Hard-coded credentials alone are insufficient when MFA is enforced; attacker must also obtain the second factor",
+      "evidence_state": "unquantified"
+    },
+    {
       "target_namespace": "ATT&CK",
       "target_id": "T1021",
       "relationship_type": "mitigates",
@@ -110,13 +115,6 @@
       "version": "4.0",
       "identifier": "Environmental/AC",
       "value": "L->H",
-      "relationship_type": "maps_to"
-    },
-    {
-      "namespace": "CVSS",
-      "version": "4.0",
-      "identifier": "Environmental/PR",
-      "value": "N->H",
       "relationship_type": "maps_to"
     },
     {

@@ -152,8 +152,7 @@
                 "description": "Expected output or pattern indicating the control is active"
               },
               "platform": {
-                "type": "string",
-                "enum": ["linux", "rhel", "debian", "kubernetes", "windows", "macos", "any"],
+                "$ref": "#/$defs/platform",
                 "description": "Platform this check applies to"
               }
             },
@@ -163,6 +162,11 @@
         }
       },
       "description": "How a scanner or agent can confirm the control is active"
+    },
+    "remediation": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/remediation_variant" },
+      "description": "Platform-specific implementation recipes for deploying this control. Each variant is a self-contained sequence of steps for one platform or implementation approach. Agents select the variant matching the target system's platform and precondition."
     },
     "d3fend_mapping": {
       "type": "object",
@@ -219,6 +223,93 @@
     }
   },
   "$defs": {
+    "platform": {
+      "type": "string",
+      "enum": ["linux", "rhel", "debian", "kubernetes", "windows", "macos", "any"],
+      "description": "Target platform for a command or remediation step"
+    },
+    "remediation_variant": {
+      "type": "object",
+      "required": ["id", "name", "platform", "steps"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*$",
+          "description": "Stable slug identifying this variant (e.g., 'rhel-crypto-policy', 'pam-totp', 'gpo-lockout'). Used as a reference target from CVE mappings."
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable variant name (e.g., 'FUTURE crypto policy via update-crypto-policies')"
+        },
+        "platform": {
+          "$ref": "#/$defs/platform",
+          "description": "Platform this variant targets. An agent matches this against the target system to select the right variant."
+        },
+        "precondition": {
+          "type": "string",
+          "description": "Shell command that must exit 0 for this variant to be applicable (e.g., 'systemctl --version' to confirm systemd is the init system). Null or absent means no precondition beyond platform match."
+        },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/remediation_step" },
+          "description": "Ordered sequence of implementation steps. Execute in array order; each step may depend on prior steps completing."
+        },
+        "verify": {
+          "type": "string",
+          "description": "Verification command to run after all steps complete, confirming the control is now active. Can reference a verification command index (e.g., '#0' for the first verification.commands entry) or be an inline shell command."
+        },
+        "references": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "source": { "type": "string" },
+              "url": { "type": "string", "format": "uri" },
+              "section": { "type": "string" }
+            },
+            "required": ["source"]
+          },
+          "description": "Documentation references specific to this implementation variant"
+        }
+      },
+      "additionalProperties": false
+    },
+    "remediation_step": {
+      "type": "object",
+      "required": ["description", "command"],
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "What this step does, written so a human reviewer can assess risk before approving execution"
+        },
+        "command": {
+          "type": "string",
+          "description": "Shell or PowerShell command to execute. May contain <placeholder> tokens that must be resolved from context (e.g., <service>, <app_source>)."
+        },
+        "idempotent": {
+          "type": "boolean",
+          "default": false,
+          "description": "True if running this step again after it has already been applied produces the same result with no side effects. Agents use this to decide whether retry is safe."
+        },
+        "requires_restart": {
+          "type": "string",
+          "enum": ["service", "system", "none"],
+          "default": "none",
+          "description": "What must be restarted for this step to take effect. 'service' = the affected service/daemon, 'system' = full reboot required, 'none' = takes effect immediately."
+        },
+        "reversible": {
+          "type": "boolean",
+          "default": true,
+          "description": "True if the change can be cleanly undone. False for destructive or one-way operations (e.g., key rotation, certificate revocation)."
+        },
+        "undo": {
+          "type": "string",
+          "description": "Command to reverse this step. Only meaningful when reversible is true. Enables automated rollback if a later step fails."
+        }
+      },
+      "additionalProperties": false
+    },
     "relationship": {
       "type": "object",
       "required": ["target_namespace", "target_id", "relationship_type"],

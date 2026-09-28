@@ -32,7 +32,7 @@
 
 <ul class="search-results" id="search-results">
   
-  <li data-search="cme-101 aslr (address space layout randomization) randomizes memory layout of processes, making memory corruption exploits significantly harder by requiring the attacker to guess or leak addresses. kernel hardening harden os/kernel cwe-119 cwe-120 cwe-122 cwe-787 cwe-125 cwe-416 cwe-415">
+  <li data-search="cme-101 aslr (address space layout randomization) randomizes memory layout of processes, making memory corruption exploits significantly harder by requiring the attacker to guess or leak addresses. kernel hardening harden os/kernel cwe-119 cwe-120 cwe-122 cwe-787 cwe-125 cwe-416 cwe-415 cwe-824 cwe-825">
     <div>
       <a href="entries/CME-101.html" class="sr-id">CME-101</a>
       <a href="entries/CME-101.html">ASLR (Address Space Layout Randomization)</a>
@@ -212,6 +212,26 @@
     <div class="sr-desc">Compiler-enforced runtime detection of integer overflow and unsafe numeric type conversions. Encompasses: (1) GCC/Clang -ftrapv — traps on signed inte...</div>
   </li>
   
+  <li data-search="cme-120 kernel memory initialization enforcement (init_on_alloc / init_stack_all_zero) enforce automatic zero-initialization of kernel stack variables and heap allocations via config_init_stack_all_zero and config_init_on_alloc_default_on. these kernel build options ensure that uninitialized memory contains zeros rather than stale data, preventing information disclosure from uninitialized reads and blocking exploitation of uninitialized pointer dereferences. config_init_on_free_default_on zeros memory on deallocation, further reducing the window for use-after-free exploitation by ensuring freed memory does not contain exploitable pointers or data. the runtime equivalent init_on_alloc=1 and init_on_free=1 kernel boot parameters provide the same behavior without requiring a kernel rebuild. performance overhead is typically 1-3% for init_on_alloc and 1-5% for init_on_free depending on allocation-heavy workloads. kernel hardening harden os/kernel cwe-824 cwe-908 cwe-457 cwe-200 cwe-665">
+    <div>
+      <a href="entries/CME-120.html" class="sr-id">CME-120</a>
+      <a href="entries/CME-120.html">Kernel Memory Initialization Enforcement (init_on_alloc / INIT_STACK_ALL_ZERO)</a>
+      <span class="badge badge-tactic-harden">Harden</span>
+      <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+    </div>
+    <div class="sr-desc">Enforce automatic zero-initialization of kernel stack variables and heap allocations via CONFIG_INIT_STACK_ALL_ZERO and CONFIG_INIT_ON_ALLOC_DEFAULT_O...</div>
+  </li>
+  
+  <li data-search="cme-121 slab freelist hardening (freelist randomization and integrity) enable config_slab_freelist_random and config_slab_freelist_hardened to randomize slab allocator freelist ordering and validate freelist pointer integrity. freelist randomization breaks the heap layout predictability that use-after-free exploits depend on: the attacker cannot predict which freed object will be returned by the next allocation of the same size, making heap spray and object replacement techniques unreliable. freelist hardening adds xor-based pointer mangling with a per-cache random value and the pointer address itself, detecting freelist pointer corruption that is the hallmark of heap exploitation. when a corrupted freelist pointer is detected, the kernel panics rather than following the corrupted pointer to attacker-controlled memory. together these controls convert deterministic heap exploitation into a probabilistic attack with detection. kernel hardening harden os/kernel cwe-825 cwe-416 cwe-415 cwe-122">
+    <div>
+      <a href="entries/CME-121.html" class="sr-id">CME-121</a>
+      <a href="entries/CME-121.html">SLAB Freelist Hardening (Freelist Randomization and Integrity)</a>
+      <span class="badge badge-tactic-harden">Harden</span>
+      <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+    </div>
+    <div class="sr-desc">Enable CONFIG_SLAB_FREELIST_RANDOM and CONFIG_SLAB_FREELIST_HARDENED to randomize slab allocator freelist ordering and validate freelist pointer integ...</div>
+  </li>
+  
   <li data-search="cme-201 zero trust gateway / identity-aware proxy all network access requires authenticated identity verification. no implicit trust from network position. every request is authenticated and authorized regardless of source network. network isolation isolate network cwe-284 cwe-306 cwe-287 m1035 m0801 limit access to resource over network access management t1021 t0886">
     <div>
       <a href="entries/CME-201.html" class="sr-id">CME-201</a>
@@ -352,54 +372,54 @@
     <div class="sr-desc">Kernel-enforced protection that restricts root-level modification of protected system paths, kernel extensions, and system processes. Even processes r...</div>
   </li>
   
-  <li data-search="cme-401 system-wide crypto policy (future) centrally enforces minimum cryptographic standards across all system components (openssl, gnutls, nss, openssh, kerberos). future policy disables tls &lt;1.2, sha-1, rsa &lt;3072, all cbc ciphers, and rc4. cryptographic controls harden application cwe-327 cwe-326 cwe-757">
+  <li data-search="cme-401 system-wide crypto policy (future) centrally enforce minimum cryptographic standards across all system crypto libraries (openssl, gnutls, nss) and their consumers (openssh, kerberos, https, ldap) via update-crypto-policies. the future policy disables tls &lt;1.2, sha-1 signatures, rsa &lt;3072-bit, all cbc mode ciphers, rc4, and dsa, permitting only aead ciphers (aes-gcm, chacha20-poly1305), ecdhe/dhe key exchange, and sha-256+ signatures. this eliminates the attack surface for protocol downgrade attacks (poodle, drown), cipher suite downgrade attacks (freak, logjam), padding oracle attacks (beast, lucky13), and hash collision attacks against sha-1. the policy is enforced at the library level — applications linked against system crypto libraries inherit the restrictions without code changes. applications that use their own crypto implementations (java&#39;s keytool/cacerts, go&#39;s crypto/tls, custom-compiled openssl) are not affected and must be configured separately. cryptographic controls harden application cwe-327 cwe-326 cwe-757">
     <div>
       <a href="entries/CME-401.html" class="sr-id">CME-401</a>
       <a href="entries/CME-401.html">System-wide Crypto Policy (FUTURE)</a>
       <span class="badge badge-tactic-harden">Harden</span>
       <span class="badge badge-layer-application">Application</span>
     </div>
-    <div class="sr-desc">Centrally enforces minimum cryptographic standards across all system components (OpenSSL, GnuTLS, NSS, OpenSSH, Kerberos). FUTURE policy disables TLS ...</div>
+    <div class="sr-desc">Centrally enforce minimum cryptographic standards across all system crypto libraries (OpenSSL, GnuTLS, NSS) and their consumers (OpenSSH, Kerberos, HT...</div>
   </li>
   
-  <li data-search="cme-402 fips 140-3 mode enables fips-validated cryptographic modules system-wide. only nist-approved algorithms are available for all cryptographic operations. non-compliant operations fail rather than fall back. cryptographic controls harden os/kernel cwe-327 cwe-326 cwe-328">
+  <li data-search="cme-402 fips 140-3 mode enforces exclusive use of fips 140-3 validated cryptographic modules for all system cryptographic operations. enabled via the fips=1 kernel boot parameter (dracut fips module) and fips-mode-setup on rhel, or fipsalgorithmpolicy registry key on windows. when active, the kernel crypto api restricts to validated implementations (aes, sha-256+, rsa 2048+, ecdsa p-256/p-384, hmac), the openssl fips provider replaces the default provider, and gnutls/nss restrict to fips-approved algorithms. non-validated algorithms (md5, rc4, des, blowfish, camellia, idea) are removed from available cipher lists entirely — operations requesting them fail with an error rather than falling back to a weaker option. fips mode imposes significant compatibility constraints: some tls cipher suites become unavailable, hmac-md5 is prohibited (breaking some kerberos configurations), ed25519 ssh keys are rejected, and applications using non-validated crypto (custom openssl builds, boringssl, go&#39;s crypto/tls) are unaffected. on rhel, fips mode automatically sets the crypto policy to fips, which is stricter than default but less restrictive than future for non-fips-relevant parameters. the primary value is compliance attestation (fedramp, cmmc, disa stig) combined with the security benefit of using audited, cavp-tested implementations. cryptographic controls harden os/kernel cwe-327 cwe-326 cwe-328 cwe-757">
     <div>
       <a href="entries/CME-402.html" class="sr-id">CME-402</a>
       <a href="entries/CME-402.html">FIPS 140-3 Mode</a>
       <span class="badge badge-tactic-harden">Harden</span>
       <span class="badge badge-layer-os-kernel">OS/Kernel</span>
     </div>
-    <div class="sr-desc">Enables FIPS-validated cryptographic modules system-wide. Only NIST-approved algorithms are available for all cryptographic operations. Non-compliant ...</div>
+    <div class="sr-desc">Enforces exclusive use of FIPS 140-3 validated cryptographic modules for all system cryptographic operations. Enabled via the fips=1 kernel boot param...</div>
   </li>
   
-  <li data-search="cme-403 tls 1.3 enforcement restricts all tls connections to tls 1.3 minimum, eliminating protocol downgrade attacks and leveraging tls 1.3&#39;s reduced handshake, mandatory forward secrecy, and encrypted extensions. cryptographic controls harden network cwe-757 cwe-327">
+  <li data-search="cme-403 tls 1.3 enforcement enforces tls 1.3 as the minimum protocol version for all tls connections, rejecting tls 1.2 and below at the handshake layer. tls 1.3 eliminates entire attack classes present in earlier versions: cbc mode ciphers are removed (preventing beast, lucky13 padding oracle attacks), renegotiation is removed (preventing renegotiation-based attacks), only aead cipher suites are available (aes-128-gcm, aes-256-gcm, chacha20-poly1305), forward secrecy is mandatory via ephemeral ecdhe/x25519 key exchange (no static rsa key transport), and the server certificate is encrypted during the handshake. enforcement is configured at the service level (nginx ssl_protocols, apache sslprotocol, tomcat sslenabledprotocols), reverse proxy level, or system crypto policy level (update-crypto-policies on rhel). does not protect applications using custom tls implementations that bypass system crypto libraries (go&#39;s crypto/tls, java&#39;s jsse, custom-compiled openssl). compatibility constraint: legacy clients and embedded devices that do not support tls 1.3 will fail to connect. cryptographic controls harden network cwe-757 cwe-327">
     <div>
       <a href="entries/CME-403.html" class="sr-id">CME-403</a>
       <a href="entries/CME-403.html">TLS 1.3 Enforcement</a>
       <span class="badge badge-tactic-harden">Harden</span>
       <span class="badge badge-layer-network">Network</span>
     </div>
-    <div class="sr-desc">Restricts all TLS connections to TLS 1.3 minimum, eliminating protocol downgrade attacks and leveraging TLS 1.3&#39;s reduced handshake, mandatory forward...</div>
+    <div class="sr-desc">Enforces TLS 1.3 as the minimum protocol version for all TLS connections, rejecting TLS 1.2 and below at the handshake layer. TLS 1.3 eliminates entir...</div>
   </li>
   
-  <li data-search="cme-404 certificate pinning application pins expected tls certificate fingerprints or public keys, preventing mitm attacks using rogue or compromised certificate authorities. cryptographic controls harden application cwe-295">
+  <li data-search="cme-404 certificate pinning restricts which tls certificates a client or service will accept by pinning to a specific set of public keys (spki hashes), leaf certificates, or intermediate ca certificates, rather than trusting any certificate signed by any ca in the system trust store. without pinning, compromise of any of hundreds of trusted cas (or a misissued certificate from any ca) enables mitm — demonstrated by diginotar (2011), cnnic subordinate (2015), and symantec incidents. with pinning, the client deterministically rejects certificates whose public key hash does not match the pin set, even if the certificate is validly signed by a trusted ca. pinning is deployed in three contexts: (1) mobile applications (android network security config trust-anchors, ios trustkit/urlsession pinning), (2) service-to-service communication (grpc channel credentials, custom tls verification callbacks), and (3) dns-based pinning via dane/tlsa records (rfc 6698). browser-side http public key pinning (hpkp, rfc 7469) was deprecated and removed from chrome in 2018 due to operational risk (pin rotation failures causing site lockout) — certificate transparency (ct) log monitoring is the modern browser-side equivalent for detecting rogue ca issuance. pin rotation is the primary operational risk: if pins are not updated before certificate renewal, the application loses connectivity. best practice is to pin to at least two keys (primary + backup) and pin to the intermediate ca rather than the leaf to survive routine certificate rotation. cryptographic controls harden application cwe-295">
     <div>
       <a href="entries/CME-404.html" class="sr-id">CME-404</a>
       <a href="entries/CME-404.html">Certificate Pinning</a>
       <span class="badge badge-tactic-harden">Harden</span>
       <span class="badge badge-layer-application">Application</span>
     </div>
-    <div class="sr-desc">Application pins expected TLS certificate fingerprints or public keys, preventing MitM attacks using rogue or compromised certificate authorities.</div>
+    <div class="sr-desc">Restricts which TLS certificates a client or service will accept by pinning to a specific set of public keys (SPKI hashes), leaf certificates, or inte...</div>
   </li>
   
-  <li data-search="cme-405 dnssec validation validates dns responses using cryptographic signatures, preventing dns spoofing, cache poisoning, and dns-based redirection attacks. cryptographic controls harden network cwe-350">
+  <li data-search="cme-405 dnssec validation enables dnssec validation on the local resolver to cryptographically verify dns response authenticity using the rrsig/dnskey/ds chain of trust rooted at the dns root zone. for dnssec-signed zones, the resolver verifies that each dns record carries a valid rrsig signature produced by the zone&#39;s signing key (dnskey), and that the signing key is authenticated by a ds record in the parent zone, chaining up to the root trust anchor. spoofed or modified dns responses for signed zones are rejected because they lack valid cryptographic signatures — this prevents dns cache poisoning (kaminsky attack), dns spoofing, and dns-based redirection for services in signed zones. critical scope limitation: dnssec validation only protects lookups for zones that have deployed dnssec signing — unsigned zones (still the majority of domains) receive no protection, and the resolver accepts their responses without cryptographic verification. dnssec provides data integrity (the response hasn&#39;t been modified) and origin authentication (the response came from the authoritative zone), but not confidentiality — dns queries and responses are still visible on the wire unless combined with dns-over-tls (dot) or dns-over-https (doh). configured via systemd-resolved (dnssec=yes), unbound (auto-trust-anchor-file, val-permissive-mode: no), bind (dnssec-validation auto), or windows dns server (dnssec validation settings). cryptographic controls harden network cwe-350 cwe-345">
     <div>
       <a href="entries/CME-405.html" class="sr-id">CME-405</a>
       <a href="entries/CME-405.html">DNSSEC Validation</a>
       <span class="badge badge-tactic-harden">Harden</span>
       <span class="badge badge-layer-network">Network</span>
     </div>
-    <div class="sr-desc">Validates DNS responses using cryptographic signatures, preventing DNS spoofing, cache poisoning, and DNS-based redirection attacks.</div>
+    <div class="sr-desc">Enables DNSSEC validation on the local resolver to cryptographically verify DNS response authenticity using the RRSIG/DNSKEY/DS chain of trust rooted ...</div>
   </li>
   
   <li data-search="cme-406 signed package enforcement (gpg) rejects installation of unsigned or tampered rpm/deb packages by validating gpg signatures against trusted keys. prevents supply chain attacks via package repositories. cryptographic controls harden os/kernel cwe-345 cwe-494 cwe-347">
@@ -682,64 +702,64 @@
     <div class="sr-desc">Mount the container root filesystem as read-only, forcing all writable data into explicitly declared volumes or tmpfs mounts. Prevents attackers who a...</div>
   </li>
   
-  <li data-search="cme-801 multi-factor authentication (mfa) requires multiple authentication factors (password + totp/fido2/smart card), preventing credential-only compromise. even stolen passwords are insufficient for access. credential hardening harden identity cwe-287 cwe-306 cwe-521 cwe-303 cwe-305 m1032 m0932 multi-factor authentication multi-factor authentication t1021">
+  <li data-search="cme-801 multi-factor authentication (mfa) enforce multi-factor authentication (mfa) requiring two or more independent authentication factors before granting access. supported second factors include time-based one-time passwords (totp via authenticator apps), fido2/webauthn hardware security keys, smart cards (piv/cac via pkcs#11), and push-based approval. mfa ensures that a compromised password alone is insufficient for account access — the attacker must also obtain or bypass the second factor through a separate channel (physical theft, real-time phishing proxy, sim swap), each of which adds substantial complexity. fido2 keys provide the strongest protection as they are bound to the origin and resistant to phishing. totp is vulnerable to real-time proxy phishing (e.g., evilginx2) but still requires significantly more attack infrastructure than password-only attacks. mfa is enforced at the authentication layer via pam modules (linux), conditional access policies (azure ad/entra id), or idp configuration (keycloak, okta, freeipa). credential hardening harden identity cwe-287 cwe-521 cwe-303 cwe-305 cwe-798 m1032 m0932 multi-factor authentication multi-factor authentication t1021">
     <div>
       <a href="entries/CME-801.html" class="sr-id">CME-801</a>
       <a href="entries/CME-801.html">Multi-Factor Authentication (MFA)</a>
       <span class="badge badge-tactic-harden">Harden</span>
       <span class="badge badge-layer-identity">Identity</span>
     </div>
-    <div class="sr-desc">Requires multiple authentication factors (password + TOTP/FIDO2/smart card), preventing credential-only compromise. Even stolen passwords are insuffic...</div>
+    <div class="sr-desc">Enforce multi-factor authentication (MFA) requiring two or more independent authentication factors before granting access. Supported second factors in...</div>
   </li>
   
-  <li data-search="cme-802 password quality enforcement (pwquality) enforces minimum password complexity (length, character classes, dictionary checks) via pam_pwquality, making brute force and dictionary attacks impractical. credential hardening harden identity cwe-521">
+  <li data-search="cme-802 password quality enforcement (pwquality) enforce minimum password complexity requirements via pam_pwquality (linux) or group policy (windows), ensuring user-chosen passwords resist brute force and dictionary attacks. key enforcement parameters: minimum length (minlen, typically 14+), minimum character classes (minclass, requiring uppercase, lowercase, digits, and symbols), and dictionary checking (rejecting common words and variations). the combined effect is a search space of ~95^14 (~4.9x10^27) for online attacks, making brute force impractical within lockout windows. on rhel/fedora, pam_pwquality is the standard pam module; on debian/ubuntu, it is available as libpam-pwquality. windows enforces equivalent policy via group policy (computer configuration &gt; windows settings &gt; security settings &gt; account policies &gt; password policy) or fine-grained password policies in active directory. credential hardening harden identity cwe-521">
     <div>
       <a href="entries/CME-802.html" class="sr-id">CME-802</a>
       <a href="entries/CME-802.html">Password Quality Enforcement (pwquality)</a>
       <span class="badge badge-tactic-harden">Harden</span>
       <span class="badge badge-layer-identity">Identity</span>
     </div>
-    <div class="sr-desc">Enforces minimum password complexity (length, character classes, dictionary checks) via pam_pwquality, making brute force and dictionary attacks impra...</div>
+    <div class="sr-desc">Enforce minimum password complexity requirements via pam_pwquality (Linux) or Group Policy (Windows), ensuring user-chosen passwords resist brute forc...</div>
   </li>
   
-  <li data-search="cme-803 account lockout policy (pam_faillock) locks user accounts after a configurable number of failed authentication attempts, preventing online brute force attacks. credential hardening harden identity cwe-307">
+  <li data-search="cme-803 account lockout policy (pam_faillock) lock user accounts after a configurable number of consecutive failed authentication attempts, preventing online brute force and dictionary attacks. on linux, pam_faillock (rhel 8+) or pam_tally2 (legacy) tracks per-user authentication failures and locks the account when the threshold is reached. key parameters: deny (max failed attempts, typically 5), unlock_time (lockout duration in seconds, typically 900), and fail_interval (window for counting failures). with deny=5 and unlock_time=900, brute force is rate-limited to approximately 20 attempts per hour per account, making password guessing computationally infeasible against any password meeting basic quality requirements. on windows, equivalent policy is configured via group policy (account lockout policy) or fine-grained password policies. does not protect against password spraying (one password across many accounts) or credential stuffing with breached passwords — those require complementary controls like ip-based rate limiting and credential breach monitoring. credential hardening harden identity cwe-307">
     <div>
       <a href="entries/CME-803.html" class="sr-id">CME-803</a>
       <a href="entries/CME-803.html">Account Lockout Policy (pam_faillock)</a>
       <span class="badge badge-tactic-harden">Harden</span>
       <span class="badge badge-layer-identity">Identity</span>
     </div>
-    <div class="sr-desc">Locks user accounts after a configurable number of failed authentication attempts, preventing online brute force attacks.</div>
+    <div class="sr-desc">Lock user accounts after a configurable number of consecutive failed authentication attempts, preventing online brute force and dictionary attacks. On...</div>
   </li>
   
-  <li data-search="cme-804 ssh key-only authentication disables password-based ssh login entirely, requiring public key authentication. eliminates remote brute force against ssh as an attack vector. credential hardening harden identity cwe-287 cwe-521">
+  <li data-search="cme-804 ssh key-only authentication disable all password-based ssh authentication methods (passwordauthentication, kbdinteractiveauthentication) in sshd, requiring public key authentication exclusively. this eliminates the entire password attack surface for ssh — brute force, credential stuffing, and dictionary attacks become impossible regardless of password strength or lockout policy. supported key types include ed25519 (recommended), ecdsa, and rsa (4096-bit minimum). both passwordauthentication and kbdinteractiveauthentication must be set to &#39;no&#39; — disabling only passwordauthentication leaves keyboard-interactive password prompts active on many configurations. on rhel 9+, the authenticationmethods directive can further restrict to publickey-only. key management (rotation, passphrase protection, authorized_keys auditing) becomes the primary credential risk surface. does not protect against pre-authentication ssh daemon vulnerabilities or key compromise via stolen private keys. credential hardening harden identity cwe-287 cwe-307 cwe-521">
     <div>
       <a href="entries/CME-804.html" class="sr-id">CME-804</a>
       <a href="entries/CME-804.html">SSH Key-Only Authentication</a>
       <span class="badge badge-tactic-harden">Harden</span>
       <span class="badge badge-layer-identity">Identity</span>
     </div>
-    <div class="sr-desc">Disables password-based SSH login entirely, requiring public key authentication. Eliminates remote brute force against SSH as an attack vector.</div>
+    <div class="sr-desc">Disable all password-based SSH authentication methods (PasswordAuthentication, KbdInteractiveAuthentication) in sshd, requiring public key authenticat...</div>
   </li>
   
-  <li data-search="cme-805 credential rotation policy automated rotation of secrets, api keys, and passwords on schedule. limits the window during which compromised credentials remain valid. credential hardening harden identity cwe-798 cwe-521">
+  <li data-search="cme-805 credential rotation policy enforce credential lifecycle limits through automated rotation of passwords, api keys, service account tokens, and secrets. two distinct tiers of effectiveness: (1) os-level password aging (chage on linux, group policy on windows) forces periodic password changes, typically every 90 days — this limits the maximum validity window of compromised credentials but provides minimal protection against immediate credential abuse since attackers typically exploit stolen credentials within hours. nist sp 800-63b recommends against mandatory periodic rotation for human users due to the pattern of progressively weaker passwords (password1!, password2!). (2) automated short-lived secret rotation via secrets managers (hashicorp vault dynamic secrets, aws sts temporary credentials, kubernetes service account token projection) with ttls measured in hours — this genuinely limits the exploitation window because credentials may expire before an attacker can extract and replay them. the attenuation strength is directly proportional to the rotation frequency: 1-hour ttls provide strong protection, 90-day aging provides weak protection. credential hardening harden identity cwe-262 cwe-263 cwe-798">
     <div>
       <a href="entries/CME-805.html" class="sr-id">CME-805</a>
       <a href="entries/CME-805.html">Credential Rotation Policy</a>
       <span class="badge badge-tactic-harden">Harden</span>
       <span class="badge badge-layer-identity">Identity</span>
     </div>
-    <div class="sr-desc">Automated rotation of secrets, API keys, and passwords on schedule. Limits the window during which compromised credentials remain valid.</div>
+    <div class="sr-desc">Enforce credential lifecycle limits through automated rotation of passwords, API keys, service account tokens, and secrets. Two distinct tiers of effe...</div>
   </li>
   
-  <li data-search="cme-806 kerberos authentication (gssapi) centralized ticket-based authentication using kerberos. passwords never transmitted over the network; mutual authentication prevents impersonation of either party. credential hardening harden identity cwe-319 cwe-287 cwe-303 m0813 software process and device authentication t0886">
+  <li data-search="cme-806 kerberos authentication (gssapi) enforce kerberos (gssapi) as the authentication mechanism, replacing password-based authentication with cryptographic ticket exchange. the client authenticates to the key distribution center (kdc) and receives a ticket-granting ticket (tgt), then requests service tickets for specific services — passwords never cross the network. service tickets are encrypted with the target service&#39;s key, time-limited (typically 10-hour tgt, configurable), and include timestamps for replay detection. mutual authentication ensures both client and server prove their identity, preventing server impersonation attacks. on rhel, kerberos is deployed via freeipa/idm (ipa-client-install enrolls the host and configures sssd); on windows, active directory provides native kerberos. ssh access is secured via gssapi authentication (gssapiauthentication yes in sshd_config). known attack vectors against kerberos itself (kerberoasting, pass-the-ticket, golden ticket) require the attacker to already have domain credentials or host-level access — they represent post-compromise lateral movement, not the initial credential interception this control prevents. credential hardening harden identity cwe-287 cwe-294 cwe-303 cwe-319 m0813 software process and device authentication t0886">
     <div>
       <a href="entries/CME-806.html" class="sr-id">CME-806</a>
       <a href="entries/CME-806.html">Kerberos Authentication (GSSAPI)</a>
       <span class="badge badge-tactic-harden">Harden</span>
       <span class="badge badge-layer-identity">Identity</span>
     </div>
-    <div class="sr-desc">Centralized ticket-based authentication using Kerberos. Passwords never transmitted over the network; mutual authentication prevents impersonation of ...</div>
+    <div class="sr-desc">Enforce Kerberos (GSSAPI) as the authentication mechanism, replacing password-based authentication with cryptographic ticket exchange. The client auth...</div>
   </li>
   
   <li data-search="cme-807 session lifetime and idle timeout enforcement enforce absolute session lifetime limits and idle inactivity timeouts on all authenticated sessions to minimize the window during which a stolen or abandoned session token can be reused. the control requires: (1) an absolute maximum session duration (e.g., 8-12 hours) after which the session is invalidated regardless of activity, forcing re-authentication; (2) an idle timeout (e.g., 15-30 minutes) that invalidates sessions after a period of no activity; (3) server-side session invalidation on explicit logout that destroys the session record rather than merely clearing the client cookie; and (4) session invalidation on security-relevant account changes (password change, privilege escalation, mfa enrollment) to prevent continued use of pre-change session tokens. configuration is enforced via application server session-timeout directives (web.xml, tomcat session-config, django session_cookie_age, rails session_store expire_after), reverse proxy session modules (mod_session maxage), or identity provider token lifetime policies (keycloak/rhsso access token lifespan, sso session idle/max settings). credential hardening harden identity cwe-613 cwe-384 cwe-539">
@@ -752,14 +772,14 @@
     <div class="sr-desc">Enforce absolute session lifetime limits and idle inactivity timeouts on all authenticated sessions to minimize the window during which a stolen or ab...</div>
   </li>
   
-  <li data-search="cme-808 local administrator password solution (laps) automated rotation of local administrator account passwords on windows endpoints. laps generates unique, randomly-generated passwords per machine and stores them in active directory with acl-protected access. prevents lateral movement attacks that rely on shared or default local admin credentials by ensuring each machine has a cryptographically random password that rotates on a defined schedule. credential hardening harden cwe-1392 cwe-798 cwe-521 cwe-257 m1015 active directory configuration">
+  <li data-search="cme-808 local administrator password solution (laps) automated management of local administrator account passwords on windows domain-joined endpoints, ensuring each machine has a unique, cryptographically random password that rotates on a defined schedule. legacy laps (admpwd.e) stores passwords as a confidential attribute on the computer object in ad, protected by acls. windows laps (built-in to windows 10 21h2+ and server 2019+) adds password encryption using the machine&#39;s ad certificate and supports azure ad-joined devices. laps eliminates the most common windows lateral movement vector: shared local admin passwords set during imaging and never rotated. without laps, compromising one machine&#39;s local admin hash (via sam dump, mimikatz, or volume shadow copy) enables pass-the-hash to every endpoint sharing that password. with laps, each hash works on exactly one machine and expires on the rotation schedule. does not protect domain credentials, service accounts, or application-level credentials — only the local administrator account managed by the laps policy. credential hardening harden identity cwe-1392 cwe-798 cwe-521 m1015 active directory configuration">
     <div>
       <a href="entries/CME-808.html" class="sr-id">CME-808</a>
       <a href="entries/CME-808.html">Local Administrator Password Solution (LAPS)</a>
       <span class="badge badge-tactic-harden">Harden</span>
-      <span class="badge badge-layer-"></span>
+      <span class="badge badge-layer-identity">Identity</span>
     </div>
-    <div class="sr-desc">Automated rotation of local administrator account passwords on Windows endpoints. LAPS generates unique, randomly-generated passwords per machine and ...</div>
+    <div class="sr-desc">Automated management of local administrator account passwords on Windows domain-joined endpoints, ensuring each machine has a unique, cryptographicall...</div>
   </li>
   
   <li data-search="cme-901 ssh hardening (comprehensive) comprehensive ssh hardening: disable root login, enforce protocol 2, restrict ciphers to aead (chacha20/aes-gcm), disable x11/agent forwarding, set maxauthtries, enable logingracetime. protocol hardening harden network cwe-287 cwe-250">
@@ -892,7 +912,7 @@
     <div class="sr-desc">Server-side enforcement of anti-CSRF tokens (synchronizer tokens or double-submit cookies) combined with SameSite=Strict or SameSite=Lax cookie attrib...</div>
   </li>
   
-  <li data-search="cme-914 strict cors origin allowlist enforcement server-side enforcement of a strict, explicitly enumerated origin allowlist for cross-origin resource sharing (cors). the server validates the origin header of every cross-origin request against a fixed allowlist and only responds with access-control-allow-origin for approved origins. critically, the server never reflects the request&#39;s origin header verbatim, never uses wildcard (*) with access-control-allow-credentials: true, and never relies on partial string matching or regex patterns that can be bypassed with attacker-controlled subdomains. for endpoints that handle credentials or session-sensitive data, access-control-allow-credentials is only set when the origin is explicitly trusted. this prevents cross-origin javascript from reading authenticated responses, exfiltrating session tokens, or making credentialed api calls from attacker-controlled pages. application controls harden application cwe-940 cwe-346 cwe-942">
+  <li data-search="cme-914 strict cors origin allowlist enforcement server-side enforcement of a strict, explicitly enumerated origin allowlist for cross-origin resource sharing (cors). the server validates the origin header of every cross-origin request against a fixed allowlist and only responds with access-control-allow-origin for approved origins. critically, the server never reflects the request&#39;s origin header verbatim, never uses wildcard (*) with access-control-allow-credentials: true, and never relies on partial string matching or regex patterns that can be bypassed with attacker-controlled subdomains. for endpoints that handle credentials or session-sensitive data, access-control-allow-credentials is only set when the origin is explicitly trusted. this prevents cross-origin javascript from reading authenticated responses, exfiltrating session tokens, or making credentialed api calls from attacker-controlled pages. application controls harden application cwe-940 cwe-346 cwe-942 cwe-352">
     <div>
       <a href="entries/CME-914.html" class="sr-id">CME-914</a>
       <a href="entries/CME-914.html">Strict CORS Origin Allowlist Enforcement</a>
@@ -1042,7 +1062,7 @@
     <div class="sr-desc">Detects unauthorized modifications to critical system files by comparing against a known-good baseline database. Scheduled or continuous monitoring of...</div>
   </li>
   
-  <li data-search="cme-1005 runtime memory error detection (kasan/hwasan) kernel addresssanitizer (kasan) and hardware-assisted addresssanitizer (hwasan) detect memory safety violations at runtime including use-after-free, out-of-bounds access, buffer size miscalculations, and null pointer dereferences. kasan instruments kernel memory allocations with redzones and quarantine zones to detect invalid accesses. hwasan uses arm memory tagging for lower-overhead production deployments. when a violation is detected, the kernel logs a detailed report and can be configured to panic, preventing silent exploitation. runtime detection detect os/kernel cwe-416 cwe-131 cwe-193 cwe-476 cwe-787 cwe-125 cwe-120 cwe-805">
+  <li data-search="cme-1005 runtime memory error detection (kasan/hwasan) kernel addresssanitizer (kasan) and hardware-assisted addresssanitizer (hwasan) detect memory safety violations at runtime including use-after-free, out-of-bounds access, buffer size miscalculations, and null pointer dereferences. kasan instruments kernel memory allocations with redzones and quarantine zones to detect invalid accesses. hwasan uses arm memory tagging for lower-overhead production deployments. when a violation is detected, the kernel logs a detailed report and can be configured to panic, preventing silent exploitation. runtime detection detect os/kernel cwe-416 cwe-131 cwe-193 cwe-476 cwe-787 cwe-125 cwe-120 cwe-805 cwe-824 cwe-825">
     <div>
       <a href="entries/CME-1005.html" class="sr-id">CME-1005</a>
       <a href="entries/CME-1005.html">Runtime Memory Error Detection (KASAN/HWASan)</a>
@@ -1272,17 +1292,7 @@
     <div class="sr-desc">Application avoids invoking shell commands with user-controlled input. Uses direct process execution (subprocess with list args, no shell=True) or pur...</div>
   </li>
   
-  <li data-search="cme-1308 origin and cors validation enforcement enforces strict cross-origin resource sharing (cors) policies and origin header validation to prevent cross-origin attacks. configures cors headers (access-control-allow-origin, access-control-allow-methods, access-control-allow-credentials) with explicit domain allowlists rather than wildcards. validates the origin and referer headers on all state-changing requests, rejecting requests from unlisted origins. prevents csrf and cross-origin data leakage attacks that rely on permissive or absent origin checks. application input validation harden application cwe-346 cwe-352">
-    <div>
-      <a href="entries/CME-1308.html" class="sr-id">CME-1308</a>
-      <a href="entries/CME-1308.html">Origin and CORS Validation Enforcement</a>
-      <span class="badge badge-tactic-harden">Harden</span>
-      <span class="badge badge-layer-application">Application</span>
-    </div>
-    <div class="sr-desc">Enforces strict Cross-Origin Resource Sharing (CORS) policies and Origin header validation to prevent cross-origin attacks. Configures CORS headers (A...</div>
-  </li>
-  
-  <li data-search="cme-1309 script engine restriction (sandbox / disable) restricts or disables application-embedded scripting and expression language engines to prevent arbitrary code execution. covers three postures: (1) disable unnecessary script consoles and evaluation endpoints entirely (e.g., jenkins script console, debug repls), (2) enforce a language-level sandbox that blocks dangerous operations such as file i/o, process execution, classloading, and reflection while permitting safe computation (e.g., jenkins groovy sandbox, java securitymanager for scripting), and (3) restrict expression language evaluation to a safe subset by disabling type resolution, method invocation, and class instantiation in el/template contexts. applies to groovy, ognl, spel, mvel, jinja2, el 3.0, freemarker, and similar engines embedded in java ee, ci/cd platforms, and web frameworks. application input validation harden application cwe-94 cwe-95 cwe-96 cwe-917">
+  <li data-search="cme-1309 script engine restriction (sandbox / disable) restricts or disables application-embedded scripting and expression language engines to prevent arbitrary code execution. covers three postures: (1) disable unnecessary script consoles and evaluation endpoints entirely (e.g., jenkins script console, debug repls), (2) enforce a language-level sandbox that blocks dangerous operations such as file i/o, process execution, classloading, and reflection while permitting safe computation (e.g., jenkins groovy sandbox, java securitymanager for scripting), and (3) restrict expression language evaluation to a safe subset by disabling type resolution, method invocation, and class instantiation in el/template contexts. applies to groovy, ognl, spel, mvel, jinja2, el 3.0, freemarker, and similar engines embedded in java ee, ci/cd platforms, and web frameworks. application input validation harden application cwe-94 cwe-95 cwe-96 cwe-917 cwe-1336">
     <div>
       <a href="entries/CME-1309.html" class="sr-id">CME-1309</a>
       <a href="entries/CME-1309.html">Script Engine Restriction (Sandbox / Disable)</a>
@@ -1302,7 +1312,7 @@
     <div class="sr-desc">Server-side validation of uploaded files using content inspection (magic byte verification), extension allowlisting, and size limits before the file i...</div>
   </li>
   
-  <li data-search="cme-1311 input size and quantity bounds enforcement validation that user-supplied quantities — sizes, counts, lengths, offsets, indices, and repetition factors — fall within expected bounds before they are used in memory allocation, loop iteration, or buffer operations. rejects values that are negative, zero when unexpected, or exceed a configured maximum. applied at the protocol parsing layer before data reaches processing logic. this prevents integer overflow chains (where an oversized count wraps to a small value and bypasses bounds checks) and resource exhaustion attacks (where an unbounded count causes excessive allocation or iteration). the root cause control for vulnerabilities where the attacker controls a size or count field in a binary protocol, serialized format, or api parameter. application input validation harden application cwe-1284 cwe-20 cwe-1285 cwe-190 cwe-131 cwe-130 cwe-681">
+  <li data-search="cme-1311 input size and quantity bounds enforcement validation that user-supplied quantities — sizes, counts, lengths, offsets, indices, and repetition factors — fall within expected bounds before they are used in memory allocation, loop iteration, or buffer operations. rejects values that are negative, zero when unexpected, or exceed a configured maximum. applied at the protocol parsing layer before data reaches processing logic. this prevents integer overflow chains (where an oversized count wraps to a small value and bypasses bounds checks) and resource exhaustion attacks (where an unbounded count causes excessive allocation or iteration). the root cause control for vulnerabilities where the attacker controls a size or count field in a binary protocol, serialized format, or api parameter. application input validation harden application cwe-1284 cwe-20 cwe-1285 cwe-190 cwe-131 cwe-130 cwe-681 cwe-789">
     <div>
       <a href="entries/CME-1311.html" class="sr-id">CME-1311</a>
       <a href="entries/CME-1311.html">Input Size and Quantity Bounds Enforcement</a>
@@ -1312,7 +1322,7 @@
     <div class="sr-desc">Validation that user-supplied quantities — sizes, counts, lengths, offsets, indices, and repetition factors — fall within expected bounds before they ...</div>
   </li>
   
-  <li data-search="cme-1312 argument injection prevention (downstream input delimiter sanitization) prevents injection of unintended arguments, options, or directives into downstream cli tools, external processes, and structured input files by sanitizing delimiter characters (newlines, option-prefix dashes, null bytes) in user-controlled input before subprocess invocation. enforces the -- end-of-options separator when passing variable input as positional arguments, uses array-based argument construction to preserve argument boundaries, and validates that input destined for downstream tool input files does not contain format-breaking delimiters. distinct from command injection prevention (cme-1307) which addresses shell metacharacter injection: this control addresses injection into the argument parser or input file format of the downstream tool itself, even when no shell is involved. application input validation harden application cwe-88 cwe-74">
+  <li data-search="cme-1312 argument injection prevention (downstream input delimiter sanitization) prevents injection of unintended arguments, options, or directives into downstream cli tools, external processes, and structured input files by sanitizing delimiter characters (newlines, option-prefix dashes, null bytes) in user-controlled input before subprocess invocation. enforces the -- end-of-options separator when passing variable input as positional arguments, uses array-based argument construction to preserve argument boundaries, and validates that input destined for downstream tool input files does not contain format-breaking delimiters. distinct from command injection prevention (cme-1307) which addresses shell metacharacter injection: this control addresses injection into the argument parser or input file format of the downstream tool itself, even when no shell is involved. application input validation harden application cwe-88 cwe-74 cwe-141">
     <div>
       <a href="entries/CME-1312.html" class="sr-id">CME-1312</a>
       <a href="entries/CME-1312.html">Argument Injection Prevention (Downstream Input Delimiter Sanitization)</a>
@@ -1322,7 +1332,7 @@
     <div class="sr-desc">Prevents injection of unintended arguments, options, or directives into downstream CLI tools, external processes, and structured input files by saniti...</div>
   </li>
   
-  <li data-search="cme-1313 crlf / line injection prevention (newline sanitization for structured formats) prevents injection of carriage return (cr, \r) and line feed (lf, \n) characters into structured text formats where newlines serve as record or field delimiters. enforces single-line invariants on input fields used to construct http headers, log entries, configuration files, git refs, email headers, and protocol messages. strips or rejects input containing cr/lf before it reaches format-sensitive output contexts, preventing http response splitting, log forging, configuration file injection, and git ref manipulation. complements http header normalization (cme-912) by operating at the application input layer rather than the protocol proxy layer. application input validation harden application cwe-93 cwe-113">
+  <li data-search="cme-1313 crlf / line injection prevention (newline sanitization for structured formats) prevents injection of carriage return (cr, \r) and line feed (lf, \n) characters into structured text formats where newlines serve as record or field delimiters. enforces single-line invariants on input fields used to construct http headers, log entries, configuration files, git refs, email headers, and protocol messages. strips or rejects input containing cr/lf before it reaches format-sensitive output contexts, preventing http response splitting, log forging, configuration file injection, and git ref manipulation. complements http header normalization (cme-912) by operating at the application input layer rather than the protocol proxy layer. application input validation harden application cwe-93 cwe-113 cwe-117">
     <div>
       <a href="entries/CME-1313.html" class="sr-id">CME-1313</a>
       <a href="entries/CME-1313.html">CRLF / Line Injection Prevention (Newline Sanitization for Structured Formats)</a>
@@ -1332,7 +1342,7 @@
     <div class="sr-desc">Prevents injection of carriage return (CR, \r) and line feed (LF, \n) characters into structured text formats where newlines serve as record or field ...</div>
   </li>
   
-  <li data-search="cme-1314 input canonicalization before security decision normalize and canonicalize all user-supplied structured input (urls, ip addresses, domain names, file paths, type identifiers, protocol schemes) to a standard form before applying any security decision such as allowlist matching, denylist checking, or policy evaluation. decoding, case folding, unicode normalization, ip address format unification (dotted-decimal, hex, octal, ipv4-mapped ipv6), and scheme normalization must occur before the security check — not after. this prevents attackers from using encoding variants, aliasing, or alternate representations to bypass list-based security controls. the canonicalization order must be: decode all layers → normalize → validate against security policy → sanitize. application input validation harden application cwe-184 cwe-183 cwe-20 cwe-180 cwe-1289">
+  <li data-search="cme-1314 input canonicalization before security decision normalize and canonicalize all user-supplied structured input (urls, ip addresses, domain names, file paths, type identifiers, protocol schemes) to a standard form before applying any security decision such as allowlist matching, denylist checking, or policy evaluation. decoding, case folding, unicode normalization, ip address format unification (dotted-decimal, hex, octal, ipv4-mapped ipv6), and scheme normalization must occur before the security check — not after. this prevents attackers from using encoding variants, aliasing, or alternate representations to bypass list-based security controls. the canonicalization order must be: decode all layers → normalize → validate against security policy → sanitize. application input validation harden application cwe-184 cwe-183 cwe-20 cwe-180 cwe-1289 cwe-176">
     <div>
       <a href="entries/CME-1314.html" class="sr-id">CME-1314</a>
       <a href="entries/CME-1314.html">Input Canonicalization Before Security Decision</a>
@@ -1372,22 +1382,22 @@
     <div class="sr-desc">Configures XML parsers to disable external entity resolution, DTD processing, and XInclude expansion, preventing XXE attacks that exploit default-perm...</div>
   </li>
   
-  <li data-search="cme-1318 ldap injection prevention prevention of ldap injection attacks through parameterized ldap queries, input sanitization of special characters (*, (, ), \, nul, |, &amp;), and use of ldap filter escaping functions. prevents attackers from manipulating ldap search filters to bypass authentication, escalate privileges, or extract unauthorized directory data. applies dn escaping for distinguished names and filter escaping for search filter values. application input validation harden cwe-90 cwe-943 cwe-20">
+  <li data-search="cme-1318 ldap injection prevention prevention of ldap injection attacks through parameterized ldap queries, input sanitization of special characters (*, (, ), \, nul, |, &amp;), and use of ldap filter escaping functions. prevents attackers from manipulating ldap search filters to bypass authentication, escalate privileges, or extract unauthorized directory data. applies dn escaping for distinguished names and filter escaping for search filter values. application input validation harden application cwe-90 cwe-943 cwe-20">
     <div>
       <a href="entries/CME-1318.html" class="sr-id">CME-1318</a>
       <a href="entries/CME-1318.html">LDAP Injection Prevention</a>
       <span class="badge badge-tactic-harden">Harden</span>
-      <span class="badge badge-layer-"></span>
+      <span class="badge badge-layer-application">Application</span>
     </div>
     <div class="sr-desc">Prevention of LDAP injection attacks through parameterized LDAP queries, input sanitization of special characters (*, (, ), \, NUL, |, &amp;), and use of ...</div>
   </li>
   
-  <li data-search="cme-1319 deserialization type allowlisting prevention of deserialization attacks through type allowlisting, signature verification of serialized data, and use of safe deserialization libraries. restricts deserialization to explicitly allowed classes and validates object graphs before reconstruction. applies to java (objectinputstream with objectinputfilter), python (restricted pickle with custom unpickler), .net (datacontractserializer, avoiding binaryformatter), ruby (safe marshal alternatives), and php (json over unserialize). prevents remote code execution via crafted serialized payloads by blocking gadget chain instantiation. application input validation harden cwe-502 cwe-915 cwe-20 m1048 application isolation and sandboxing">
+  <li data-search="cme-1319 deserialization type allowlisting prevention of deserialization attacks through type allowlisting, signature verification of serialized data, and use of safe deserialization libraries. restricts deserialization to explicitly allowed classes and validates object graphs before reconstruction. applies to java (objectinputstream with objectinputfilter), python (restricted pickle with custom unpickler), .net (datacontractserializer, avoiding binaryformatter), ruby (safe marshal alternatives), and php (json over unserialize). prevents remote code execution via crafted serialized payloads by blocking gadget chain instantiation. application input validation harden application cwe-502 cwe-915 cwe-20 m1048 application isolation and sandboxing">
     <div>
       <a href="entries/CME-1319.html" class="sr-id">CME-1319</a>
       <a href="entries/CME-1319.html">Deserialization Type Allowlisting</a>
       <span class="badge badge-tactic-harden">Harden</span>
-      <span class="badge badge-layer-"></span>
+      <span class="badge badge-layer-application">Application</span>
     </div>
     <div class="sr-desc">Prevention of deserialization attacks through type allowlisting, signature verification of serialized data, and use of safe deserialization libraries....</div>
   </li>
@@ -1418,7 +1428,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-15 15:58 UTC &middot; 136 entries &middot;
+    Generated 2026-09-28 19:36 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

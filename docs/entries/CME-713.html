@@ -73,7 +73,7 @@
               <span class="cvss-to">H</span>
             </td>
             
-            <td class="cvss-rationale">Exploitation chain requires identifying a writable volume mount to stage payloads; the default filesystem is immutable</td>
+            <td class="cvss-rationale">Root filesystem modification is blocked; exploitation chain requires identifying a writable volume mount (tmpfs, emptyDir, PVC) to stage payloads — complexity increase is strongest when writable mounts are minimized to essential paths only</td>
           </tr>
           
         </tbody>
@@ -109,9 +109,9 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> kubectl get pod &lt;pod&gt; -o jsonpath=&#39;{.spec.containers[*].securityContext.readOnlyRootFilesystem}&#39;
+        <span class="cmd-prompt">$</span> kubectl get pod &lt;pod&gt; -o jsonpath=&#39;{range .spec.containers[*]}{&#34;ro=&#34;}{.securityContext.readOnlyRootFilesystem}{&#34;\n&#34;}{end}&#39; 2&gt;/dev/null | grep &#39;ro=&#39; | grep -c -v &#39;ro=true&#39;
         
-        <br><span class="cmd-expected"># Expected: true</span>
+        <br><span class="cmd-expected"># Expected: 0</span>
         
       </div>
       
@@ -136,6 +136,36 @@
       </div>
       
       <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> kubectl get pod &lt;pod&gt; -o jsonpath=&#39;{range .spec.containers[*].volumeMounts[*]}{.mountPath}{&#34;\t&#34;}{.readOnly}{&#34;\n&#34;}{end}&#39; 2&gt;/dev/null | grep -v &#39;true$&#39; | grep -c -E &#39;^/(usr|bin|sbin|lib|etc|opt|srv|var/www)&#39;
+        
+        <br><span class="cmd-expected"># Expected: 0</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: kubernetes</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> kubectl get clusterpolicy,constrainttemplate -o json 2&gt;/dev/null | grep -c -i &#39;readOnlyRootFilesystem&#39;
+        
+        <br><span class="cmd-expected"># Expected: &gt;=1</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: kubernetes</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> kubectl exec &lt;pod&gt; -c &lt;ctr&gt; -- sh -c &#39;touch /cme-write-test 2&gt;&amp;1&#39; | grep -c -i &#39;read-only&#39;
+        
+        <br><span class="cmd-expected"># Expected: 1</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: kubernetes</div>
       
       
     </section>
@@ -221,7 +251,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-15 15:58 UTC &middot; 136 entries &middot;
+    Generated 2026-09-28 19:36 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

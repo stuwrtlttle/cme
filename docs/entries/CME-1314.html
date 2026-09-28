@@ -90,6 +90,9 @@
         <a href="https://cwe.mitre.org/data/definitions/1289.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-1289</a>
         
+        <a href="https://cwe.mitre.org/data/definitions/176.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-176</a>
+        
       </div>
     </section>
     
@@ -104,9 +107,9 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> grep -rn &#39;urllib.parse\|urlparse\|URL.parse\|new URL\|InetAddress.getByName\|normalize\|canonicalize\|realpath\|resolve&#39; &lt;app_source&gt;/
+        <span class="cmd-prompt">$</span> grep -rn &#39;urllib.parse\|urlparse\|URL.parse\|new URL\|InetAddress.getByName\|canonicalize\|NFC\|NFKC\|unicodedata.normalize\|Normalizer.normalize\|os.path.realpath\|Path.*resolve&#39; &lt;app_source&gt;/ | grep -i &#39;input\|request\|param\|user\|url\|path\|host\|addr&#39;
         
-        <br><span class="cmd-expected"># Expected: Canonicalization calls present before security-relevant comparisons</span>
+        <br><span class="cmd-expected"># Expected: Canonicalization/normalization calls present in input-handling code paths that feed into security decisions</span>
         
       </div>
       
@@ -114,9 +117,19 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> grep -rn &#39;allowlist\|blocklist\|denylist\|whitelist\|blacklist&#39; &lt;app_source&gt;/ | head -20
+        <span class="cmd-prompt">$</span> grep -rn &#39;allowlist\|blocklist\|denylist\|whitelist\|blacklist&#39; &lt;app_source&gt;/ | grep -i &#39;request\|req\.\|params\|raw\|input\|getParameter&#39; | head -10
         
-        <br><span class="cmd-expected"># Expected: Security list checks should reference canonicalized/normalized values, not raw input</span>
+        <br><span class="cmd-expected"># Expected: Zero matches — security list checks should operate on canonicalized values, not raw request parameters</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> curl -s -o /dev/null -w &#39;%{http_code}&#39; &#39;&lt;app_endpoint&gt;/%2e%2e/%2e%2e/etc/passwd&#39; &amp;&amp; echo &#39; &#39; &amp;&amp; curl -s -o /dev/null -w &#39;%{http_code}&#39; &#39;&lt;app_endpoint&gt;/../../etc/passwd&#39;
+        
+        <br><span class="cmd-expected"># Expected: Both requests return identical response codes (both blocked or both canonicalized and rejected)</span>
         
       </div>
       
@@ -175,10 +188,6 @@
         
         <li>Any</li>
         
-        <li>Windows Server 2019</li>
-        
-        <li>Windows Server 2022</li>
-        
       </ul>
     </section>
     
@@ -191,7 +200,7 @@
         <li><strong>Layer:</strong> Application</li>
         <li><strong>Effect:</strong> preventive</li>
         <li><strong>Evidence:</strong> unquantified</li>
-        <li><strong>CWEs:</strong> 5</li>
+        <li><strong>CWEs:</strong> 6</li>
         <li><strong>ATT&amp;CK Mappings:</strong> 0</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
@@ -202,7 +211,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-15 15:58 UTC &middot; 136 entries &middot;
+    Generated 2026-09-28 19:36 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

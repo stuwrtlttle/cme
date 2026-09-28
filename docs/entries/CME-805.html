@@ -38,7 +38,7 @@
     
     <section>
       <h2>Description</h2>
-      <p class="entry-description">Automated rotation of secrets, API keys, and passwords on schedule. Limits the window during which compromised credentials remain valid.</p>
+      <p class="entry-description">Enforce credential lifecycle limits through automated rotation of passwords, API keys, service account tokens, and secrets. Two distinct tiers of effectiveness: (1) OS-level password aging (chage on Linux, Group Policy on Windows) forces periodic password changes, typically every 90 days — this limits the maximum validity window of compromised credentials but provides minimal protection against immediate credential abuse since attackers typically exploit stolen credentials within hours. NIST SP 800-63B recommends against mandatory periodic rotation for human users due to the pattern of progressively weaker passwords (Password1!, Password2!). (2) Automated short-lived secret rotation via secrets managers (HashiCorp Vault dynamic secrets, AWS STS temporary credentials, Kubernetes service account token projection) with TTLs measured in hours — this genuinely limits the exploitation window because credentials may expire before an attacker can extract and replay them. The attenuation strength is directly proportional to the rotation frequency: 1-hour TTLs provide strong protection, 90-day aging provides weak protection.</p>
     </section>
 
     <section>
@@ -62,7 +62,7 @@
               <span class="cvss-to">H</span>
             </td>
             
-            <td class="cvss-rationale">Compromised credentials expire before attacker can use them</td>
+            <td class="cvss-rationale">Effectiveness is proportional to rotation frequency. For automated short-lived secrets (Vault dynamic secrets with 1-hour TTL, STS temporary credentials), the credential may expire before an attacker can extract and replay it — requiring the attacker to maintain persistent access to the credential source rather than using a one-time theft. For 90-day password aging, the protection window is too large to prevent most credential abuse (attackers act within hours), providing only residual protection against very slow-developing compromises such as leaked credential databases discovered months after breach</td>
           </tr>
           
         </tbody>
@@ -75,11 +75,14 @@
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
         
+        <a href="https://cwe.mitre.org/data/definitions/262.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-262</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/263.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-263</a>
+        
         <a href="https://cwe.mitre.org/data/definitions/798.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-798</a>
-        
-        <a href="https://cwe.mitre.org/data/definitions/521.html"
-           class="cwe-link" target="_blank" rel="noopener">CWE-521</a>
         
       </div>
     </section>
@@ -91,13 +94,23 @@
     <section>
       <h2>Verification</h2>
       
-      <p class="verification-method">Check password aging and secret rotation policies</p>
+      <p class="verification-method">Verify credential rotation enforcement via password aging (OS-level) and secret TTL policies (application-level)</p>
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> chage -l &lt;user&gt; | grep &#39;Maximum&#39;
+        <span class="cmd-prompt">$</span> grep &#39;^PASS_MAX_DAYS&#39; /etc/login.defs | grep -oE &#39;[0-9]+&#39;
         
-        <br><span class="cmd-expected"># Expected: Maximum number of days between password change : 90</span>
+        <br><span class="cmd-expected"># Expected: &lt;=90</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> chage -l root | grep &#39;Maximum&#39; | grep -oE &#39;[0-9]+&#39;
+        
+        <br><span class="cmd-expected"># Expected: &lt;=90</span>
         
       </div>
       
@@ -131,6 +144,22 @@
           </tr>
         </thead>
         <tbody>
+          
+          <tr>
+            <td>redhat</td>
+            <td>enterprise_linux</td>
+            <td class="cpe-cell">
+              
+              <code class="cpe-string">cpe:2.3:o:redhat:enterprise_linux:8:*:*:*:*:*:*:*</code><br>
+              
+              <code class="cpe-string">cpe:2.3:o:redhat:enterprise_linux:9:*:*:*:*:*:*:*</code><br>
+              
+              <code class="cpe-string">cpe:2.3:o:redhat:enterprise_linux:10:*:*:*:*:*:*:*</code>
+              
+            </td>
+            <td>All</td>
+            <td><span class="badge badge-confidence-high">applicable</span></td>
+          </tr>
           
           <tr>
             <td>microsoft</td>
@@ -203,7 +232,15 @@
       <h3>Platforms</h3>
       <ul class="sidebar-list">
         
-        <li>Any</li>
+        <li>RHEL 8</li>
+        
+        <li>RHEL 9</li>
+        
+        <li>RHEL 10</li>
+        
+        <li>Fedora</li>
+        
+        <li>Ubuntu 24.04</li>
         
         <li>Windows 10</li>
         
@@ -223,7 +260,7 @@
         <li><strong>Layer:</strong> Identity</li>
         <li><strong>Effect:</strong> preventive</li>
         <li><strong>Evidence:</strong> unquantified</li>
-        <li><strong>CWEs:</strong> 2</li>
+        <li><strong>CWEs:</strong> 3</li>
         <li><strong>ATT&amp;CK Mappings:</strong> 0</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
@@ -234,7 +271,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-15 15:58 UTC &middot; 136 entries &middot;
+    Generated 2026-09-28 19:36 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

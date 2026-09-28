@@ -38,7 +38,7 @@
     
     <section>
       <h2>Description</h2>
-      <p class="entry-description">Centralized ticket-based authentication using Kerberos. Passwords never transmitted over the network; mutual authentication prevents impersonation of either party.</p>
+      <p class="entry-description">Enforce Kerberos (GSSAPI) as the authentication mechanism, replacing password-based authentication with cryptographic ticket exchange. The client authenticates to the Key Distribution Center (KDC) and receives a Ticket-Granting Ticket (TGT), then requests service tickets for specific services — passwords never cross the network. Service tickets are encrypted with the target service&#39;s key, time-limited (typically 10-hour TGT, configurable), and include timestamps for replay detection. Mutual authentication ensures both client and server prove their identity, preventing server impersonation attacks. On RHEL, Kerberos is deployed via FreeIPA/IdM (ipa-client-install enrolls the host and configures SSSD); on Windows, Active Directory provides native Kerberos. SSH access is secured via GSSAPI authentication (GSSAPIAuthentication yes in sshd_config). Known attack vectors against Kerberos itself (Kerberoasting, Pass-the-Ticket, Golden Ticket) require the attacker to already have domain credentials or host-level access — they represent post-compromise lateral movement, not the initial credential interception this control prevents.</p>
     </section>
 
     <section>
@@ -62,7 +62,7 @@
               <span class="cvss-to">H</span>
             </td>
             
-            <td class="cvss-rationale">Credential interception useless; tickets are time-limited and host-bound</td>
+            <td class="cvss-rationale">With password-based authentication, an attacker intercepting network traffic (MITM, packet capture) can capture replayable credentials and use them from any host at any time. With Kerberos, the client proves knowledge of the password to the KDC via an encrypted timestamp (pre-authentication) — the password itself never traverses the network. Service tickets are encrypted with the service&#39;s secret key, time-stamped for replay detection, and valid only for a limited window. The attacker must either compromise the KDC itself, crack service account passwords offline (Kerberoasting — requires existing domain credentials), or steal tickets from host memory (Pass-the-Ticket — requires local access). Each bypass requires preconditions beyond simple network interception</td>
           </tr>
           
         </tbody>
@@ -75,14 +75,17 @@
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
         
-        <a href="https://cwe.mitre.org/data/definitions/319.html"
-           class="cwe-link" target="_blank" rel="noopener">CWE-319</a>
-        
         <a href="https://cwe.mitre.org/data/definitions/287.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-287</a>
         
+        <a href="https://cwe.mitre.org/data/definitions/294.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-294</a>
+        
         <a href="https://cwe.mitre.org/data/definitions/303.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-303</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/319.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-319</a>
         
       </div>
     </section>
@@ -109,13 +112,13 @@
     <section>
       <h2>Verification</h2>
       
-      <p class="verification-method">Check Kerberos authentication is configured</p>
+      <p class="verification-method">Verify Kerberos authentication is configured and enforced via keytab, GSSAPI, and domain enrollment</p>
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> klist -k /etc/krb5.keytab 2&gt;/dev/null | head -3
+        <span class="cmd-prompt">$</span> klist -k /etc/krb5.keytab 2&gt;/dev/null | grep -c &#39;host/&#39;
         
-        <br><span class="cmd-expected"># Expected: keytab entries</span>
+        <br><span class="cmd-expected"># Expected: &gt;=1</span>
         
       </div>
       
@@ -132,9 +135,64 @@
       <div class="cmd-platform">Platform: linux</div>
       
       
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> test -f /etc/krb5.conf &amp;&amp; grep -c &#39;default_realm&#39; /etc/krb5.conf
+        
+        <br><span class="cmd-expected"># Expected: &gt;=1</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> nltest /dsgetdc: 2&gt;$null | Select-String &#39;DC:&#39;
+        
+        <br><span class="cmd-expected"># Expected: DC:</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: windows</div>
+      
+      
     </section>
     
 
+    
+    <section>
+      <h2>Applicability (CVE 5.2.0 Schema)</h2>
+      <table class="cvss-table">
+        <thead>
+          <tr>
+            <th>Vendor</th>
+            <th>Product</th>
+            <th>CPEs</th>
+            <th>Platforms</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td>redhat</td>
+            <td>enterprise_linux</td>
+            <td class="cpe-cell">
+              
+              <code class="cpe-string">cpe:2.3:o:redhat:enterprise_linux:8:*:*:*:*:*:*:*</code><br>
+              
+              <code class="cpe-string">cpe:2.3:o:redhat:enterprise_linux:9:*:*:*:*:*:*:*</code><br>
+              
+              <code class="cpe-string">cpe:2.3:o:redhat:enterprise_linux:10:*:*:*:*:*:*:*</code>
+              
+            </td>
+            <td>All</td>
+            <td><span class="badge badge-confidence-high">applicable</span></td>
+          </tr>
+          
+        </tbody>
+      </table>
+      
+    </section>
     
 
     
@@ -201,9 +259,23 @@
       <h3>Platforms</h3>
       <ul class="sidebar-list">
         
+        <li>RHEL 8</li>
+        
         <li>RHEL 9</li>
         
-        <li>RHEL 8</li>
+        <li>RHEL 10</li>
+        
+        <li>Fedora</li>
+        
+        <li>Ubuntu 24.04</li>
+        
+        <li>Windows Server 2019</li>
+        
+        <li>Windows Server 2022</li>
+        
+        <li>Windows 10</li>
+        
+        <li>Windows 11</li>
         
       </ul>
     </section>
@@ -217,7 +289,7 @@
         <li><strong>Layer:</strong> Identity</li>
         <li><strong>Effect:</strong> preventive</li>
         <li><strong>Evidence:</strong> unquantified</li>
-        <li><strong>CWEs:</strong> 3</li>
+        <li><strong>CWEs:</strong> 4</li>
         <li><strong>ATT&amp;CK Mappings:</strong> 1</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
@@ -228,7 +300,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-15 15:58 UTC &middot; 136 entries &middot;
+    Generated 2026-09-28 19:36 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

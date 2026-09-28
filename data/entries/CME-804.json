@@ -1,7 +1,7 @@
 {
   "cme_id": "CME-804",
   "control_name": "SSH Key-Only Authentication",
-  "description": "Disables password-based SSH login entirely, requiring public key authentication. Eliminates remote brute force against SSH as an attack vector.",
+  "description": "Disable all password-based SSH authentication methods (PasswordAuthentication, KbdInteractiveAuthentication) in sshd, requiring public key authentication exclusively. This eliminates the entire password attack surface for SSH — brute force, credential stuffing, and dictionary attacks become impossible regardless of password strength or lockout policy. Supported key types include Ed25519 (recommended), ECDSA, and RSA (4096-bit minimum). Both PasswordAuthentication and KbdInteractiveAuthentication must be set to 'no' — disabling only PasswordAuthentication leaves keyboard-interactive password prompts active on many configurations. On RHEL 9+, the AuthenticationMethods directive can further restrict to publickey-only. Key management (rotation, passphrase protection, authorized_keys auditing) becomes the primary credential risk surface. Does not protect against pre-authentication SSH daemon vulnerabilities or key compromise via stolen private keys.",
   "tactic": "Harden",
   "category": "Credential Hardening",
   "category_id": "credential-hardening",
@@ -13,34 +13,49 @@
       "metric": "AC",
       "from": "L",
       "to": "H",
-      "rationale": "Password brute force impossible; must compromise private key"
-    },
-    {
-      "metric": "PR",
-      "from": "N",
-      "to": "H",
-      "rationale": "Requires possession of authorized private key"
+      "rationale": "With password authentication enabled, attackers use standard brute-force tools (Hydra, Medusa) against SSH with publicly available credential dumps — attack complexity is Low. With key-only authentication, the attacker must obtain the target's private key through a separate compromise: stealing from a developer workstation, extracting from CI/CD secrets, compromising a jump host with agent forwarding, or insider access. Each path requires a multi-step attack chain with preconditions that raise complexity from trivial credential guessing to targeted key theft"
     }
   ],
   "cwe_relationships": [
     "CWE-287",
+    "CWE-307",
     "CWE-521"
   ],
   "verification": {
-    "method": "Check sshd_config for password auth disabled",
+    "method": "Verify all password-based SSH authentication methods are disabled and only public key authentication is accepted",
     "commands": [
       {
         "command": "sshd -T | grep passwordauthentication",
         "expected": "passwordauthentication no",
         "platform": "linux"
+      },
+      {
+        "command": "sshd -T | grep kbdinteractiveauthentication",
+        "expected": "kbdinteractiveauthentication no",
+        "platform": "linux"
+      },
+      {
+        "command": "sshd -T | grep pubkeyauthentication",
+        "expected": "pubkeyauthentication yes",
+        "platform": "linux"
+      },
+      {
+        "command": "Get-Content $env:ProgramData\\ssh\\sshd_config | Select-String 'PasswordAuthentication'",
+        "expected": "PasswordAuthentication no",
+        "platform": "windows"
       }
     ]
   },
   "confidence": "High",
   "platforms": [
-    "RHEL 9",
     "RHEL 8",
-    "Ubuntu 24.04"
+    "RHEL 9",
+    "RHEL 10",
+    "Fedora",
+    "Ubuntu 24.04",
+    "macOS",
+    "Windows Server 2019",
+    "Windows Server 2022"
   ],
   "scf_identifiers": [
     "CRY-02",
@@ -64,10 +79,32 @@
     },
     {
       "target_namespace": "CWE",
+      "target_id": "CWE-307",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "Eliminates password-based authentication entirely, making brute-force attacks against SSH impossible — stronger than rate-limiting controls which only slow attempts",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
       "target_id": "CWE-521",
       "relationship_type": "mitigates",
-      "method": "supportive",
+      "method": "structural",
+      "rationale": "Removes passwords from the SSH authentication surface entirely, making password quality irrelevant for SSH access",
       "evidence_state": "unquantified"
+    }
+  ],
+  "cve_schema_version": "5.2.0",
+  "cve_affected": [
+    {
+      "vendor": "redhat",
+      "product": "enterprise_linux",
+      "cpes": [
+        "cpe:2.3:o:redhat:enterprise_linux:8:*:*:*:*:*:*:*",
+        "cpe:2.3:o:redhat:enterprise_linux:9:*:*:*:*:*:*:*",
+        "cpe:2.3:o:redhat:enterprise_linux:10:*:*:*:*:*:*:*"
+      ],
+      "defaultStatus": "applicable"
     }
   ],
   "framework_bindings": [
@@ -76,13 +113,6 @@
       "version": "4.0",
       "identifier": "Environmental/AC",
       "value": "L->H",
-      "relationship_type": "maps_to"
-    },
-    {
-      "namespace": "CVSS",
-      "version": "4.0",
-      "identifier": "Environmental/PR",
-      "value": "N->H",
       "relationship_type": "maps_to"
     },
     {

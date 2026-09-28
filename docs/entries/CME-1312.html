@@ -103,6 +103,9 @@
         <a href="https://cwe.mitre.org/data/definitions/74.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-74</a>
         
+        <a href="https://cwe.mitre.org/data/definitions/141.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-141</a>
+        
       </div>
     </section>
     
@@ -117,9 +120,9 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> grep -rn &#39;&#34;--&#34;&#39; &lt;app_source&gt;/
+        <span class="cmd-prompt">$</span> grep -rn &#34;&#39;--&#39;\|\&#34;--\&#34;&#34; &lt;app_source&gt;/ | grep -i &#39;subprocess\|exec\|spawn\|run\|command\|argv\|args&#39;
         
-        <br><span class="cmd-expected"># Expected: End-of-options separator present before variable positional arguments in subprocess calls</span>
+        <br><span class="cmd-expected"># Expected: End-of-options separator (--) used in subprocess argument arrays before variable positional arguments</span>
         
       </div>
       
@@ -127,9 +130,19 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> grep -rn &#39;subprocess\|exec\|spawn&#39; &lt;app_source&gt;/ | grep -v &#39;shell=True&#39;
+        <span class="cmd-prompt">$</span> grep -rn &#39;replace.*\\n\|replace.*\\r\|replace.*\\0\|strip.*newline\|reject.*newline\|startswith.*-\|lstrip.*-&#39; &lt;app_source&gt;/ | grep -i &#39;arg\|input\|param\|user\|url&#39; | head -10
         
-        <br><span class="cmd-expected"># Expected: Subprocess invocations use array-based arguments with input validation for delimiter characters</span>
+        <br><span class="cmd-expected"># Expected: Delimiter character sanitization applied to user input before subprocess invocation</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -rn &#39;write.*input.*file\|write.*args.*file\|tempfile.*write\|NamedTemporaryFile&#39; &lt;app_source&gt;/ | head -10
+        
+        <br><span class="cmd-expected"># Expected: Input files for downstream tools validate that user data does not contain format-breaking delimiters</span>
         
       </div>
       
@@ -215,10 +228,6 @@
         
         <li>Any</li>
         
-        <li>Windows Server 2019</li>
-        
-        <li>Windows Server 2022</li>
-        
       </ul>
     </section>
     
@@ -231,7 +240,7 @@
         <li><strong>Layer:</strong> Application</li>
         <li><strong>Effect:</strong> preventive</li>
         <li><strong>Evidence:</strong> unquantified</li>
-        <li><strong>CWEs:</strong> 2</li>
+        <li><strong>CWEs:</strong> 3</li>
         <li><strong>ATT&amp;CK Mappings:</strong> 0</li>
         <li><strong>CVSS Mods:</strong> 3</li>
       </ul>
@@ -242,7 +251,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-15 15:58 UTC &middot; 136 entries &middot;
+    Generated 2026-09-28 19:36 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

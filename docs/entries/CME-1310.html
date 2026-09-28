@@ -115,9 +115,29 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> curl -s -o /dev/null -w &#34;%{http_code}&#34; -F &#34;file=@/tmp/test.php&#34; https://app/upload
+        <span class="cmd-prompt">$</span> echo &#39;&lt;?php echo 1; ?&gt;&#39; &gt; /tmp/cme-test.php &amp;&amp; curl -s -o /dev/null -w &#39;%{http_code}&#39; -F &#39;file=@/tmp/cme-test.php&#39; &lt;app_upload_endpoint&gt; &amp;&amp; rm -f /tmp/cme-test.php
         
-        <br><span class="cmd-expected"># Expected: 400 or 403 (rejected)</span>
+        <br><span class="cmd-expected"># Expected: ^(400|403)$</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> printf &#39;GIF89a&lt;?php system($_GET[&#34;cmd&#34;]); ?&gt;&#39; &gt; /tmp/cme-polyglot.gif &amp;&amp; curl -s -o /dev/null -w &#39;%{http_code}&#39; -F &#39;file=@/tmp/cme-polyglot.gif;type=image/gif&#39; &lt;app_upload_endpoint&gt; &amp;&amp; rm -f /tmp/cme-polyglot.gif
+        
+        <br><span class="cmd-expected"># Expected: ^(400|403)$</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> ls -la /var/www/html/uploads/ 2&gt;/dev/null || echo &#39;no uploads in web root&#39;
+        
+        <br><span class="cmd-expected"># Expected: no uploads in web root</span>
         
       </div>
       
@@ -125,13 +145,23 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> ls -la /var/www/html/uploads/ 2&gt;/dev/null || echo &#34;no uploads in web root&#34;
+        <span class="cmd-prompt">$</span> grep -rn &#39;MEDIA_ROOT\|UPLOAD_DIR\|upload_path\|multer.*dest\|storage.*destination&#39; &lt;app_source&gt;/
         
-        <br><span class="cmd-expected"># Expected: directory should not exist inside web root</span>
+        <br><span class="cmd-expected"># Expected: Upload storage directory configured outside web/document root</span>
         
       </div>
       
-      <div class="cmd-platform">Platform: linux</div>
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -rn &#39;uuid\|random.*filename\|secure_filename\|hashlib.*filename\|Path.*suffix&#39; &lt;app_source&gt;/
+        
+        <br><span class="cmd-expected"># Expected: Uploaded files are renamed using random or hashed identifiers</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
       
       
     </section>
@@ -186,15 +216,7 @@
       <h3>Platforms</h3>
       <ul class="sidebar-list">
         
-        <li>RHEL 9</li>
-        
-        <li>RHEL 10</li>
-        
-        <li>Ubuntu 24.04</li>
-        
-        <li>Windows Server 2019</li>
-        
-        <li>Windows Server 2022</li>
+        <li>Any</li>
         
       </ul>
     </section>
@@ -219,7 +241,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-15 15:58 UTC &middot; 136 entries &middot;
+    Generated 2026-09-28 19:36 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

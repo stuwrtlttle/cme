@@ -26,8 +26,8 @@
   <h1>Deserialization Type Allowlisting</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
-    <span class="badge badge-layer-"></span>
-    <span class="badge badge-attenuation-deterministic">Deterministic evidence</span>
+    <span class="badge badge-layer-application">Application</span>
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
     <span class="badge badge-layer-preventive">Preventive</span>
   </div>
 </div>
@@ -120,19 +120,9 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> grep -r &#39;ObjectInputStream&#39; /path/to/app | grep -E &#39;(setObjectInputFilter|ObjectInputFilter\.Config)&#39;
+        <span class="cmd-prompt">$</span> grep -rn &#39;ObjectInputStream&#39; &lt;app_source&gt;/ | grep -v -i &#39;ObjectInputFilter\|setObjectInputFilter\|serialFilter\|REJECT&#39; | head -10
         
-        <br><span class="cmd-expected"># Expected: All ObjectInputStream uses have filter configured</span>
-        
-      </div>
-      
-      <div class="cmd-platform">Platform: any</div>
-      
-      
-      <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> grep -r &#39;pickle\.loads&#39; /path/to/app | grep -v &#39;Unpickler.*find_class&#39;
-        
-        <br><span class="cmd-expected"># Expected: No unsafe pickle.loads calls (all use restricted Unpickler)</span>
+        <br><span class="cmd-expected"># Expected: Zero matches — all ObjectInputStream uses should have ObjectInputFilter configured</span>
         
       </div>
       
@@ -140,19 +130,9 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> grep -r &#39;BinaryFormatter&#39; /path/to/app
+        <span class="cmd-prompt">$</span> grep -rn &#39;ObjectInputFilter\|setObjectInputFilter\|serialFilter\|ALLOWED_CLASSES\|jdk\.serialFilter&#39; &lt;app_source&gt;/
         
-        <br><span class="cmd-expected"># Expected: No BinaryFormatter usage (insecure, use DataContractSerializer)</span>
-        
-      </div>
-      
-      <div class="cmd-platform">Platform: any</div>
-      
-      
-      <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> grep -r &#39;unserialize&#39; /path/to/app | grep -v &#39;json_decode&#39;
-        
-        <br><span class="cmd-expected"># Expected: No PHP unserialize on untrusted data (use JSON)</span>
+        <br><span class="cmd-expected"># Expected: Java deserialization type filtering configured via ObjectInputFilter or global serial filter</span>
         
       </div>
       
@@ -160,9 +140,19 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> semgrep --config &#39;r/java.lang.security.audit.object-deserialization&#39; /path/to/app
+        <span class="cmd-prompt">$</span> grep -rn &#39;pickle\.loads\|pickle\.load\|yaml\.load\|yaml\.unsafe_load\|Marshal\.load&#39; &lt;app_source&gt;/ | head -10
         
-        <br><span class="cmd-expected"># Expected: No deserialization findings</span>
+        <br><span class="cmd-expected"># Expected: Zero matches — use restricted Unpickler with find_class override, yaml.safe_load, or JSON instead</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -rn &#39;BinaryFormatter\|SoapFormatter\|NetDataContractSerializer\|ObjectStateFormatter&#39; &lt;app_source&gt;/ | head -10
+        
+        <br><span class="cmd-expected"># Expected: Zero matches — use DataContractSerializer or JsonSerializer instead of insecure .NET formatters</span>
         
       </div>
       
@@ -258,7 +248,7 @@
       <h3>Platforms</h3>
       <ul class="sidebar-list">
         
-        <li>Any (application-layer control)</li>
+        <li>Any</li>
         
       </ul>
     </section>
@@ -269,9 +259,9 @@
       <ul class="sidebar-list">
         <li><strong>ID:</strong> CME-1319</li>
         <li><strong>Tactic:</strong> Harden</li>
-        <li><strong>Layer:</strong> </li>
+        <li><strong>Layer:</strong> Application</li>
         <li><strong>Effect:</strong> preventive</li>
-        <li><strong>Evidence:</strong> deterministic</li>
+        <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 3</li>
         <li><strong>ATT&amp;CK Mappings:</strong> 1</li>
         <li><strong>CVSS Mods:</strong> 3</li>
@@ -283,7 +273,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-15 15:58 UTC &middot; 136 entries &middot;
+    Generated 2026-09-28 19:36 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

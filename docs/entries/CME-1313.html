@@ -92,6 +92,9 @@
         <a href="https://cwe.mitre.org/data/definitions/113.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-113</a>
         
+        <a href="https://cwe.mitre.org/data/definitions/117.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-117</a>
+        
       </div>
     </section>
     
@@ -116,9 +119,29 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> grep -rn &#39;set-cookie\|Set-Header\|add_header\|setHeader&#39; &lt;app_source&gt;/ | head -20
+        <span class="cmd-prompt">$</span> grep -rn &#39;setHeader\|set_header\|add_header\|response\.header\|Set-Cookie&#39; &lt;app_source&gt;/ | head -20
         
-        <br><span class="cmd-expected"># Expected: Header-setting code validates input values do not contain CR/LF</span>
+        <br><span class="cmd-expected"># Expected: Header-setting code uses framework APIs that reject CR/LF or applies upstream sanitization</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -rn &#39;log\.\|logger\.\|logging\.\|syslog\|console\.log&#39; &lt;app_source&gt;/ | grep -i &#39;user\|input\|param\|request\|req\.&#39; | head -10
+        
+        <br><span class="cmd-expected"># Expected: Log statements that include user input apply newline sanitization before writing</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> curl -s -o /dev/null -w &#39;%{http_code}&#39; -H &#39;X-Test: value%0d%0aInjected-Header: true&#39; &lt;app_endpoint&gt;
+        
+        <br><span class="cmd-expected"># Expected: ^(400|403)$</span>
         
       </div>
       
@@ -204,10 +227,6 @@
         
         <li>Any</li>
         
-        <li>Windows Server 2019</li>
-        
-        <li>Windows Server 2022</li>
-        
       </ul>
     </section>
     
@@ -220,7 +239,7 @@
         <li><strong>Layer:</strong> Application</li>
         <li><strong>Effect:</strong> preventive</li>
         <li><strong>Evidence:</strong> unquantified</li>
-        <li><strong>CWEs:</strong> 2</li>
+        <li><strong>CWEs:</strong> 3</li>
         <li><strong>ATT&amp;CK Mappings:</strong> 0</li>
         <li><strong>CVSS Mods:</strong> 2</li>
       </ul>
@@ -231,7 +250,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-15 15:58 UTC &middot; 136 entries &middot;
+    Generated 2026-09-28 19:36 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

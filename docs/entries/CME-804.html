@@ -38,7 +38,7 @@
     
     <section>
       <h2>Description</h2>
-      <p class="entry-description">Disables password-based SSH login entirely, requiring public key authentication. Eliminates remote brute force against SSH as an attack vector.</p>
+      <p class="entry-description">Disable all password-based SSH authentication methods (PasswordAuthentication, KbdInteractiveAuthentication) in sshd, requiring public key authentication exclusively. This eliminates the entire password attack surface for SSH — brute force, credential stuffing, and dictionary attacks become impossible regardless of password strength or lockout policy. Supported key types include Ed25519 (recommended), ECDSA, and RSA (4096-bit minimum). Both PasswordAuthentication and KbdInteractiveAuthentication must be set to &#39;no&#39; — disabling only PasswordAuthentication leaves keyboard-interactive password prompts active on many configurations. On RHEL 9+, the AuthenticationMethods directive can further restrict to publickey-only. Key management (rotation, passphrase protection, authorized_keys auditing) becomes the primary credential risk surface. Does not protect against pre-authentication SSH daemon vulnerabilities or key compromise via stolen private keys.</p>
     </section>
 
     <section>
@@ -62,18 +62,7 @@
               <span class="cvss-to">H</span>
             </td>
             
-            <td class="cvss-rationale">Password brute force impossible; must compromise private key</td>
-          </tr>
-          
-          <tr>
-            <td><strong>Privileges Required</strong> (PR)</td>
-            <td>
-              <span class="cvss-from">N</span>
-              <span class="cvss-arrow">&rarr;</span>
-              <span class="cvss-to">H</span>
-            </td>
-            
-            <td class="cvss-rationale">Requires possession of authorized private key</td>
+            <td class="cvss-rationale">With password authentication enabled, attackers use standard brute-force tools (Hydra, Medusa) against SSH with publicly available credential dumps — attack complexity is Low. With key-only authentication, the attacker must obtain the target&#39;s private key through a separate compromise: stealing from a developer workstation, extracting from CI/CD secrets, compromising a jump host with agent forwarding, or insider access. Each path requires a multi-step attack chain with preconditions that raise complexity from trivial credential guessing to targeted key theft</td>
           </tr>
           
         </tbody>
@@ -89,6 +78,9 @@
         <a href="https://cwe.mitre.org/data/definitions/287.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-287</a>
         
+        <a href="https://cwe.mitre.org/data/definitions/307.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-307</a>
+        
         <a href="https://cwe.mitre.org/data/definitions/521.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-521</a>
         
@@ -102,7 +94,7 @@
     <section>
       <h2>Verification</h2>
       
-      <p class="verification-method">Check sshd_config for password auth disabled</p>
+      <p class="verification-method">Verify all password-based SSH authentication methods are disabled and only public key authentication is accepted</p>
       
       
       <div class="verification-cmd">
@@ -115,9 +107,74 @@
       <div class="cmd-platform">Platform: linux</div>
       
       
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> sshd -T | grep kbdinteractiveauthentication
+        
+        <br><span class="cmd-expected"># Expected: kbdinteractiveauthentication no</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> sshd -T | grep pubkeyauthentication
+        
+        <br><span class="cmd-expected"># Expected: pubkeyauthentication yes</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> Get-Content $env:ProgramData\ssh\sshd_config | Select-String &#39;PasswordAuthentication&#39;
+        
+        <br><span class="cmd-expected"># Expected: PasswordAuthentication no</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: windows</div>
+      
+      
     </section>
     
 
+    
+    <section>
+      <h2>Applicability (CVE 5.2.0 Schema)</h2>
+      <table class="cvss-table">
+        <thead>
+          <tr>
+            <th>Vendor</th>
+            <th>Product</th>
+            <th>CPEs</th>
+            <th>Platforms</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td>redhat</td>
+            <td>enterprise_linux</td>
+            <td class="cpe-cell">
+              
+              <code class="cpe-string">cpe:2.3:o:redhat:enterprise_linux:8:*:*:*:*:*:*:*</code><br>
+              
+              <code class="cpe-string">cpe:2.3:o:redhat:enterprise_linux:9:*:*:*:*:*:*:*</code><br>
+              
+              <code class="cpe-string">cpe:2.3:o:redhat:enterprise_linux:10:*:*:*:*:*:*:*</code>
+              
+            </td>
+            <td>All</td>
+            <td><span class="badge badge-confidence-high">applicable</span></td>
+          </tr>
+          
+        </tbody>
+      </table>
+      
+    </section>
     
 
     
@@ -169,11 +226,21 @@
       <h3>Platforms</h3>
       <ul class="sidebar-list">
         
-        <li>RHEL 9</li>
-        
         <li>RHEL 8</li>
         
+        <li>RHEL 9</li>
+        
+        <li>RHEL 10</li>
+        
+        <li>Fedora</li>
+        
         <li>Ubuntu 24.04</li>
+        
+        <li>macOS</li>
+        
+        <li>Windows Server 2019</li>
+        
+        <li>Windows Server 2022</li>
         
       </ul>
     </section>
@@ -187,9 +254,9 @@
         <li><strong>Layer:</strong> Identity</li>
         <li><strong>Effect:</strong> preventive</li>
         <li><strong>Evidence:</strong> unquantified</li>
-        <li><strong>CWEs:</strong> 2</li>
+        <li><strong>CWEs:</strong> 3</li>
         <li><strong>ATT&amp;CK Mappings:</strong> 0</li>
-        <li><strong>CVSS Mods:</strong> 2</li>
+        <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
     </section>
   </aside>
@@ -198,7 +265,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-15 15:58 UTC &middot; 136 entries &middot;
+    Generated 2026-09-28 19:36 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

@@ -38,7 +38,7 @@
     
     <section>
       <h2>Description</h2>
-      <p class="entry-description">Validates DNS responses using cryptographic signatures, preventing DNS spoofing, cache poisoning, and DNS-based redirection attacks.</p>
+      <p class="entry-description">Enables DNSSEC validation on the local resolver to cryptographically verify DNS response authenticity using the RRSIG/DNSKEY/DS chain of trust rooted at the DNS root zone. For DNSSEC-signed zones, the resolver verifies that each DNS record carries a valid RRSIG signature produced by the zone&#39;s signing key (DNSKEY), and that the signing key is authenticated by a DS record in the parent zone, chaining up to the root trust anchor. Spoofed or modified DNS responses for signed zones are rejected because they lack valid cryptographic signatures — this prevents DNS cache poisoning (Kaminsky attack), DNS spoofing, and DNS-based redirection for services in signed zones. Critical scope limitation: DNSSEC validation only protects lookups for zones that have deployed DNSSEC signing — unsigned zones (still the majority of domains) receive no protection, and the resolver accepts their responses without cryptographic verification. DNSSEC provides data integrity (the response hasn&#39;t been modified) and origin authentication (the response came from the authoritative zone), but NOT confidentiality — DNS queries and responses are still visible on the wire unless combined with DNS-over-TLS (DoT) or DNS-over-HTTPS (DoH). Configured via systemd-resolved (DNSSEC=yes), unbound (auto-trust-anchor-file, val-permissive-mode: no), BIND (dnssec-validation auto), or Windows DNS Server (DNSSEC validation settings).</p>
     </section>
 
     <section>
@@ -62,7 +62,7 @@
               <span class="cvss-to">H</span>
             </td>
             
-            <td class="cvss-rationale">DNS-based redirect/spoofing attacks require breaking DNSSEC chain of trust</td>
+            <td class="cvss-rationale">Without DNSSEC validation, a network attacker can poison DNS caches or spoof DNS responses with forged records (Kaminsky attack, on-path modification) — the resolver has no way to distinguish legitimate from forged responses. With DNSSEC validation enabled, the resolver rejects any response for a signed zone that lacks a valid RRSIG signature chaining to the root trust anchor. The attacker must compromise a zone signing key or find a collision in the DNSSEC hash algorithm (SHA-256) — both fundamentally harder than forging an unsigned UDP packet. Scope limitation: for unsigned zones (still the majority of domains), DNSSEC validation provides no protection and the attacker&#39;s complexity is unchanged. The AC shift applies only to lookups for DNSSEC-signed zones</td>
           </tr>
           
         </tbody>
@@ -78,6 +78,9 @@
         <a href="https://cwe.mitre.org/data/definitions/350.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-350</a>
         
+        <a href="https://cwe.mitre.org/data/definitions/345.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-345</a>
+        
       </div>
     </section>
     
@@ -88,13 +91,13 @@
     <section>
       <h2>Verification</h2>
       
-      <p class="verification-method">Verify DNSSEC validation is enabled in resolver</p>
+      <p class="verification-method">Verify DNSSEC validation is enabled in the local resolver and that signed zones are validated with the AD flag</p>
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> resolvectl status | grep DNSSEC
+        <span class="cmd-prompt">$</span> resolvectl status 2&gt;/dev/null | grep -i &#39;DNSSEC&#39; | grep -ci &#39;yes&#39;
         
-        <br><span class="cmd-expected"># Expected: DNSSEC setting: yes</span>
+        <br><span class="cmd-expected"># Expected: &gt;=1</span>
         
       </div>
       
@@ -102,18 +105,83 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> grep &#39;val-permissive-mode&#39; /etc/unbound/unbound.conf
+        <span class="cmd-prompt">$</span> grep -E &#39;^[^#]*val-permissive-mode&#39; /etc/unbound/unbound.conf 2&gt;/dev/null | grep -c &#39;no&#39;
         
-        <br><span class="cmd-expected"># Expected: val-permissive-mode: no</span>
+        <br><span class="cmd-expected"># Expected: 1</span>
         
       </div>
       
       <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -E &#39;^[^#]*dnssec-validation&#39; /etc/named.conf /etc/bind/named.conf.options 2&gt;/dev/null | grep -ci &#39;auto\|yes&#39;
+        
+        <br><span class="cmd-expected"># Expected: &gt;=1</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> dig +dnssec +short SOA gov. 2&gt;/dev/null | head -1 | grep -c &#39;.&#39;
+        
+        <br><span class="cmd-expected"># Expected: 1</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> Get-DnsServerSetting -All 2&gt;$null | Select-Object -ExpandProperty EnableDnsSec
+        
+        <br><span class="cmd-expected"># Expected: True</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: windows</div>
       
       
     </section>
     
 
+    
+    <section>
+      <h2>Applicability (CVE 5.2.0 Schema)</h2>
+      <table class="cvss-table">
+        <thead>
+          <tr>
+            <th>Vendor</th>
+            <th>Product</th>
+            <th>CPEs</th>
+            <th>Platforms</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td>redhat</td>
+            <td>enterprise_linux</td>
+            <td class="cpe-cell">
+              
+              <code class="cpe-string">cpe:2.3:o:redhat:enterprise_linux:8:*:*:*:*:*:*:*</code><br>
+              
+              <code class="cpe-string">cpe:2.3:o:redhat:enterprise_linux:9:*:*:*:*:*:*:*</code><br>
+              
+              <code class="cpe-string">cpe:2.3:o:redhat:enterprise_linux:10:*:*:*:*:*:*:*</code>
+              
+            </td>
+            <td>All</td>
+            <td><span class="badge badge-confidence-high">applicable</span></td>
+          </tr>
+          
+        </tbody>
+      </table>
+      
+    </section>
     
 
     
@@ -165,9 +233,19 @@
       <h3>Platforms</h3>
       <ul class="sidebar-list">
         
+        <li>RHEL 8</li>
+        
         <li>RHEL 9</li>
         
+        <li>RHEL 10</li>
+        
+        <li>Fedora</li>
+        
         <li>Ubuntu 24.04</li>
+        
+        <li>Windows Server 2019</li>
+        
+        <li>Windows Server 2022</li>
         
       </ul>
     </section>
@@ -181,7 +259,7 @@
         <li><strong>Layer:</strong> Network</li>
         <li><strong>Effect:</strong> preventive</li>
         <li><strong>Evidence:</strong> unquantified</li>
-        <li><strong>CWEs:</strong> 1</li>
+        <li><strong>CWEs:</strong> 2</li>
         <li><strong>ATT&amp;CK Mappings:</strong> 0</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
@@ -192,7 +270,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-15 15:58 UTC &middot; 136 entries &middot;
+    Generated 2026-09-28 19:36 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

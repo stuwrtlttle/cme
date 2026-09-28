@@ -1,0 +1,106 @@
+{
+  "cme_id": "CME-121",
+  "control_name": "SLAB Freelist Hardening (Freelist Randomization and Integrity)",
+  "description": "Enable CONFIG_SLAB_FREELIST_RANDOM and CONFIG_SLAB_FREELIST_HARDENED to randomize slab allocator freelist ordering and validate freelist pointer integrity. Freelist randomization breaks the heap layout predictability that use-after-free exploits depend on: the attacker cannot predict which freed object will be returned by the next allocation of the same size, making heap spray and object replacement techniques unreliable. Freelist hardening adds XOR-based pointer mangling with a per-cache random value and the pointer address itself, detecting freelist pointer corruption that is the hallmark of heap exploitation. When a corrupted freelist pointer is detected, the kernel panics rather than following the corrupted pointer to attacker-controlled memory. Together these controls convert deterministic heap exploitation into a probabilistic attack with detection.",
+  "tactic": "Harden",
+  "category": "Kernel Hardening",
+  "category_id": "kernel-hardening",
+  "function_id": "memory-safety",
+  "control_layer": "OS/Kernel",
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "attenuation_type": "deterministic",
+  "confidence": "High",
+  "platforms": [
+    "RHEL 8",
+    "RHEL 9",
+    "RHEL 10",
+    "Fedora 40",
+    "Ubuntu 24.04"
+  ],
+  "efficacy": {
+    "conditions": [
+      "Requires kernel compiled with CONFIG_SLAB_FREELIST_RANDOM=y and CONFIG_SLAB_FREELIST_HARDENED=y. Both are enabled by default in RHEL 9+ and most modern distribution kernels."
+    ]
+  },
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Freelist randomization eliminates the deterministic allocation ordering that heap exploitation depends on; the attacker must spray many objects and cannot predict which freed slot their controlled data will occupy. Freelist hardening detects pointer corruption and panics, so the attacker must also bypass integrity checks on freelist pointers — exploitation becomes probabilistic with detection rather than reliable"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-825",
+    "CWE-416",
+    "CWE-415",
+    "CWE-122"
+  ],
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-825",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "rationale": "Randomized freelists make expired pointer dereference exploitation unreliable; the freed slot may not contain attacker-controlled data when dereferenced",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-416",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "rationale": "Use-after-free exploits require predictable heap layout to replace freed objects with controlled data; freelist randomization breaks this assumption",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-415",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "rationale": "Freelist hardening detects double-free via corrupted pointer integrity checks and aborts before exploitation",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-122",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "rationale": "Heap overflow overwriting freelist metadata is detected by pointer integrity validation",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "SEA-10",
+      "relationship_type": "maps_to"
+    }
+  ],
+  "scf_identifiers": [
+    "SEA-10"
+  ],
+  "verification": {
+    "method": "Verify kernel is built with slab freelist randomization and hardening",
+    "commands": [
+      {
+        "command": "grep -c 'CONFIG_SLAB_FREELIST_RANDOM=y\\|CONFIG_SLAB_FREELIST_HARDENED=y' /boot/config-$(uname -r)",
+        "expected": "2",
+        "platform": "linux"
+      },
+      {
+        "command": "grep 'CONFIG_SLAB_FREELIST_HARDENED=y' /boot/config-$(uname -r)",
+        "expected": "CONFIG_SLAB_FREELIST_HARDENED=y",
+        "platform": "linux"
+      }
+    ]
+  }
+}

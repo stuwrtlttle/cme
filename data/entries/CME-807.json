@@ -7,19 +7,13 @@
   "category_id": "credential-hardening",
   "function_id": "session-management",
   "control_layer": "Identity",
-  "attenuation_type": "deterministic",
+  "attenuation_type": "probabilistic",
   "cvss_vector_impacts": [
     {
       "metric": "AC",
       "from": "L",
       "to": "H",
-      "rationale": "An attacker who obtains a session token via XSS, network sniffing, physical access, or session fixation must use it within the idle timeout window before it is automatically invalidated; the compressed exploitation window requires the attacker to have real-time access and act immediately rather than using a token discovered hours or days later"
-    },
-    {
-      "metric": "PR",
-      "from": "N",
-      "to": "L",
-      "rationale": "Abandoned sessions from previously authenticated users cannot be reused by unauthenticated attackers because idle timeout and absolute lifetime expiration destroy the session state server-side; the attacker must independently authenticate rather than inheriting a stale authenticated session"
+      "rationale": "Session tokens discovered post-hoc (in server logs, backup files, breach data, or browser history) are likely already expired due to absolute lifetime and idle timeout limits — the attacker cannot use stale tokens at leisure. For real-time token theft (XSS exfiltration, MITM), the compressed validity window forces the attacker to maintain persistent real-time access and automated replay infrastructure rather than casually replaying a token hours later. However, automated exploitation can complete within milliseconds of real-time token capture, so the protection is strongest against delayed or historical token reuse and weakest against automated real-time session hijacking"
     }
   ],
   "cwe_relationships": [
@@ -52,16 +46,14 @@
       },
       {
         "command": "Get-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\CurrentVersion\\Policies\\System' -Name InactivityTimeoutSecs -ErrorAction SilentlyContinue | Select-Object InactivityTimeoutSecs",
-        "expected": "InactivityTimeoutSecs set to 900 or less (15 minutes)",
+        "expected": "<=900",
         "platform": "windows"
       }
     ]
   },
-  "confidence": "High",
+  "confidence": "Medium",
   "platforms": [
-    "Any",
-    "Windows Server 2019",
-    "Windows Server 2022"
+    "Any"
   ],
   "scf_identifiers": [
     "IAC-24",
@@ -81,7 +73,8 @@
       "target_namespace": "CWE",
       "target_id": "CWE-613",
       "relationship_type": "mitigates",
-      "method": "supportive",
+      "method": "structural",
+      "rationale": "Directly addresses insufficient session expiration by enforcing both absolute lifetime and idle timeout with server-side session destruction",
       "evidence_state": "unquantified"
     },
     {
@@ -89,6 +82,7 @@
       "target_id": "CWE-384",
       "relationship_type": "mitigates",
       "method": "supportive",
+      "rationale": "Limits the exploitation window for session fixation attacks — the fixed session ID expires even if the attacker successfully sets it before victim authentication",
       "evidence_state": "unquantified"
     },
     {
@@ -96,6 +90,7 @@
       "target_id": "CWE-539",
       "relationship_type": "mitigates",
       "method": "supportive",
+      "rationale": "Server-side session invalidation ensures that persistent cookies referencing expired sessions are rejected, preventing cookie-based session resurrection",
       "evidence_state": "unquantified"
     }
   ],
@@ -105,13 +100,6 @@
       "version": "4.0",
       "identifier": "Environmental/AC",
       "value": "L->H",
-      "relationship_type": "maps_to"
-    },
-    {
-      "namespace": "CVSS",
-      "version": "4.0",
-      "identifier": "Environmental/PR",
-      "value": "N->L",
       "relationship_type": "maps_to"
     },
     {

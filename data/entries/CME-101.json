@@ -23,7 +23,9 @@
     "CWE-787",
     "CWE-125",
     "CWE-416",
-    "CWE-415"
+    "CWE-415",
+    "CWE-824",
+    "CWE-825"
   ],
   "verification": {
     "method": "Check kernel randomize_va_space sysctl is set to 2 (full randomization)",
@@ -194,6 +196,20 @@
     {
       "target_namespace": "CWE",
       "target_id": "CWE-415",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-824",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-825",
       "relationship_type": "mitigates",
       "method": "supportive",
       "evidence_state": "unquantified"

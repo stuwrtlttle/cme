@@ -38,7 +38,7 @@
     
     <section>
       <h2>Description</h2>
-      <p class="entry-description">Requires multiple authentication factors (password + TOTP/FIDO2/smart card), preventing credential-only compromise. Even stolen passwords are insufficient for access.</p>
+      <p class="entry-description">Enforce multi-factor authentication (MFA) requiring two or more independent authentication factors before granting access. Supported second factors include time-based one-time passwords (TOTP via authenticator apps), FIDO2/WebAuthn hardware security keys, smart cards (PIV/CAC via PKCS#11), and push-based approval. MFA ensures that a compromised password alone is insufficient for account access — the attacker must also obtain or bypass the second factor through a separate channel (physical theft, real-time phishing proxy, SIM swap), each of which adds substantial complexity. FIDO2 keys provide the strongest protection as they are bound to the origin and resistant to phishing. TOTP is vulnerable to real-time proxy phishing (e.g., EvilGinx2) but still requires significantly more attack infrastructure than password-only attacks. MFA is enforced at the authentication layer via PAM modules (Linux), conditional access policies (Azure AD/Entra ID), or IdP configuration (Keycloak, Okta, FreeIPA).</p>
     </section>
 
     <section>
@@ -62,18 +62,7 @@
               <span class="cvss-to">H</span>
             </td>
             
-            <td class="cvss-rationale">Stolen credential alone is insufficient; second factor required</td>
-          </tr>
-          
-          <tr>
-            <td><strong>Privileges Required</strong> (PR)</td>
-            <td>
-              <span class="cvss-from">N</span>
-              <span class="cvss-arrow">&rarr;</span>
-              <span class="cvss-to">H</span>
-            </td>
-            
-            <td class="cvss-rationale">Unauthenticated access impossible; multi-factor barrier</td>
+            <td class="cvss-rationale">A stolen password alone cannot authenticate — the attacker must also obtain the second factor through a separate channel (physical theft of a hardware key, real-time phishing proxy to capture TOTP, SIM swap for SMS codes). Each bypass requires substantially more infrastructure and attacker proximity than password-only credential abuse, raising exploitation complexity from trivial replay to a multi-stage attack</td>
           </tr>
           
         </tbody>
@@ -89,9 +78,6 @@
         <a href="https://cwe.mitre.org/data/definitions/287.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-287</a>
         
-        <a href="https://cwe.mitre.org/data/definitions/306.html"
-           class="cwe-link" target="_blank" rel="noopener">CWE-306</a>
-        
         <a href="https://cwe.mitre.org/data/definitions/521.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-521</a>
         
@@ -100,6 +86,9 @@
         
         <a href="https://cwe.mitre.org/data/definitions/305.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-305</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/798.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-798</a>
         
       </div>
     </section>
@@ -126,13 +115,13 @@
     <section>
       <h2>Verification</h2>
       
-      <p class="verification-method">Verify MFA enforcement in PAM or IdP</p>
+      <p class="verification-method">Verify MFA enforcement via PAM modules, SSSD/FreeIPA OTP, smart card, or IdP conditional access policy</p>
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> grep pam_google_authenticator /etc/pam.d/sshd
+        <span class="cmd-prompt">$</span> grep -rE &#39;pam_google_authenticator|pam_oath|pam_u2f|pam_duo&#39; /etc/pam.d/ 2&gt;/dev/null | grep -c &#39;auth.*required&#39;
         
-        <br><span class="cmd-expected"># Expected: auth required pam_google_authenticator.so</span>
+        <br><span class="cmd-expected"># Expected: &gt;=1</span>
         
       </div>
       
@@ -140,13 +129,33 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> grep -r &#39;auth.*required.*pam_u2f&#39; /etc/pam.d/
+        <span class="cmd-prompt">$</span> grep -c &#39;pam_sss&#39; /etc/pam.d/system-auth 2&gt;/dev/null &amp;&amp; ipa user-show admin --all 2&gt;/dev/null | grep -i &#39;authentication types&#39; | grep -ic &#39;otp&#39;
         
-        <br><span class="cmd-expected"># Expected: pam_u2f.so</span>
+        <br><span class="cmd-expected"># Expected: &gt;=1</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: rhel</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -rE &#39;pam_pkcs11|pam_p11&#39; /etc/pam.d/ 2&gt;/dev/null | grep -c &#39;auth&#39;
+        
+        <br><span class="cmd-expected"># Expected: &gt;=1</span>
         
       </div>
       
       <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> Get-MgIdentityConditionalAccessPolicy | Where-Object {$_.GrantControls.BuiltInControls -contains &#39;mfa&#39; -and $_.State -eq &#39;enabled&#39;} | Measure-Object | Select-Object -ExpandProperty Count
+        
+        <br><span class="cmd-expected"># Expected: &gt;=1</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: windows</div>
       
       
     </section>
@@ -240,7 +249,7 @@
         <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 5</li>
         <li><strong>ATT&amp;CK Mappings:</strong> 2</li>
-        <li><strong>CVSS Mods:</strong> 2</li>
+        <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
     </section>
   </aside>
@@ -249,7 +258,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-15 15:58 UTC &middot; 136 entries &middot;
+    Generated 2026-09-28 19:36 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

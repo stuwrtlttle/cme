@@ -109,6 +109,9 @@
         <a href="https://cwe.mitre.org/data/definitions/917.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-917</a>
         
+        <a href="https://cwe.mitre.org/data/definitions/1336.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-1336</a>
+        
       </div>
     </section>
     
@@ -125,7 +128,7 @@
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> curl -s -o /dev/null -w &#39;%{http_code}&#39; -X POST http://localhost:8080/jenkins/script --data &#39;script=println(1)&#39;
         
-        <br><span class="cmd-expected"># Expected: 403 or 404 (Script Console disabled or access-restricted to administrators only)</span>
+        <br><span class="cmd-expected"># Expected: ^(403|404)$</span>
         
       </div>
       
@@ -152,6 +155,46 @@
       <div class="cmd-platform">Platform: any</div>
       
       
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -rn &#39;SandboxedEnvironment\|jinja2\.sandbox\|jinja2\.ext\.autoescape&#39; &lt;app_source&gt;/
+        
+        <br><span class="cmd-expected"># Expected: Jinja2 sandbox enforcement present in template rendering paths</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -rn &#39;excludedClasses\|excludedPackageNames\|allowedClassNames\|OgnlUtil.*setExcluded&#39; &lt;app_source&gt;/
+        
+        <br><span class="cmd-expected"># Expected: OGNL class/package exclusion configured in Struts or framework configuration</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -rn &#39;TemplateClassResolver\.SAFER\|ALLOWS_NOTHING\|setNewBuiltinClassResolver&#39; &lt;app_source&gt;/
+        
+        <br><span class="cmd-expected"># Expected: Freemarker template class resolver restricted to safe subset</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -rn &#39;ELPolicy\|isMethodAllowed\|ELResolver.*CompositeELResolver&#39; &lt;app_source&gt;/
+        
+        <br><span class="cmd-expected"># Expected: EL 3.0 evaluation restricted via custom ELPolicy or resolver configuration</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
     </section>
     
 
@@ -161,7 +204,7 @@
 
     <div class="entry-nav">
       
-      <a href="CME-1308.html">&larr; CME-1308: Origin and CORS Validation Enforcement</a>
+      <a href="CME-1307.html">&larr; CME-1307: Command Injection Prevention (No Shell Invocation)</a>
       
       
       <a href="CME-1310.html">CME-1310: File Upload Validation (Content Inspection and Extension Allowlist) &rarr;</a>
@@ -178,7 +221,7 @@
     
     <section>
       <h3>Function</h3>
-      <p class="function-id">input-validation</p>
+      <p class="function-id">injection-prevention</p>
     </section>
     
 
@@ -206,10 +249,6 @@
         
         <li>Any</li>
         
-        <li>Windows Server 2019</li>
-        
-        <li>Windows Server 2022</li>
-        
       </ul>
     </section>
     
@@ -222,7 +261,7 @@
         <li><strong>Layer:</strong> Application</li>
         <li><strong>Effect:</strong> preventive</li>
         <li><strong>Evidence:</strong> unquantified</li>
-        <li><strong>CWEs:</strong> 4</li>
+        <li><strong>CWEs:</strong> 5</li>
         <li><strong>ATT&amp;CK Mappings:</strong> 0</li>
         <li><strong>CVSS Mods:</strong> 3</li>
       </ul>
@@ -233,7 +272,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-15 15:58 UTC &middot; 136 entries &middot;
+    Generated 2026-09-28 19:36 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

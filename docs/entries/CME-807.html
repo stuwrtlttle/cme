@@ -62,18 +62,7 @@
               <span class="cvss-to">H</span>
             </td>
             
-            <td class="cvss-rationale">An attacker who obtains a session token via XSS, network sniffing, physical access, or session fixation must use it within the idle timeout window before it is automatically invalidated; the compressed exploitation window requires the attacker to have real-time access and act immediately rather than using a token discovered hours or days later</td>
-          </tr>
-          
-          <tr>
-            <td><strong>Privileges Required</strong> (PR)</td>
-            <td>
-              <span class="cvss-from">N</span>
-              <span class="cvss-arrow">&rarr;</span>
-              <span class="cvss-to">L</span>
-            </td>
-            
-            <td class="cvss-rationale">Abandoned sessions from previously authenticated users cannot be reused by unauthenticated attackers because idle timeout and absolute lifetime expiration destroy the session state server-side; the attacker must independently authenticate rather than inheriting a stale authenticated session</td>
+            <td class="cvss-rationale">Session tokens discovered post-hoc (in server logs, backup files, breach data, or browser history) are likely already expired due to absolute lifetime and idle timeout limits — the attacker cannot use stale tokens at leisure. For real-time token theft (XSS exfiltration, MITM), the compressed validity window forces the attacker to maintain persistent real-time access and automated replay infrastructure rather than casually replaying a token hours later. However, automated exploitation can complete within milliseconds of real-time token capture, so the protection is strongest against delayed or historical token reuse and weakest against automated real-time session hijacking</td>
           </tr>
           
         </tbody>
@@ -151,7 +140,7 @@
       <div class="verification-cmd">
         <span class="cmd-prompt">$</span> Get-ItemProperty -Path &#39;HKLM:\SOFTWARE\Policies\Microsoft\Windows\CurrentVersion\Policies\System&#39; -Name InactivityTimeoutSecs -ErrorAction SilentlyContinue | Select-Object InactivityTimeoutSecs
         
-        <br><span class="cmd-expected"># Expected: InactivityTimeoutSecs set to 900 or less (15 minutes)</span>
+        <br><span class="cmd-expected"># Expected: &lt;=900</span>
         
       </div>
       
@@ -216,10 +205,6 @@
         
         <li>Any</li>
         
-        <li>Windows Server 2019</li>
-        
-        <li>Windows Server 2022</li>
-        
       </ul>
     </section>
     
@@ -234,7 +219,7 @@
         <li><strong>Evidence:</strong> unquantified</li>
         <li><strong>CWEs:</strong> 3</li>
         <li><strong>ATT&amp;CK Mappings:</strong> 0</li>
-        <li><strong>CVSS Mods:</strong> 2</li>
+        <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
     </section>
   </aside>
@@ -243,7 +228,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-15 15:58 UTC &middot; 136 entries &middot;
+    Generated 2026-09-28 19:36 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

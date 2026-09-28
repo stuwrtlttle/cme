@@ -109,9 +109,9 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> grep -rn &#39;FEATURE_SECURE_PROCESSING\|disallow-doctype-decl\|XMLConstants\|setFeature.*external&#39; &lt;app_source&gt;/
+        <span class="cmd-prompt">$</span> grep -rn &#39;FEATURE_SECURE_PROCESSING\|disallow-doctype-decl\|ACCESS_EXTERNAL_DTD\|ACCESS_EXTERNAL_SCHEMA\|IS_SUPPORTING_EXTERNAL_ENTITIES\|SUPPORT_DTD&#39; &lt;app_source&gt;/
         
-        <br><span class="cmd-expected"># Expected: Secure XML parsing features enabled in Java XML parser configuration</span>
+        <br><span class="cmd-expected"># Expected: Java XML parser configured with XXE-prevention features (external DTD/schema access disabled, entity support disabled)</span>
         
       </div>
       
@@ -129,9 +129,9 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> grep -rn &#39;DtdProcessing.Prohibit\|ProhibitDtd.*true\|XmlReaderSettings&#39; &lt;app_source&gt;/
+        <span class="cmd-prompt">$</span> grep -rn &#39;DtdProcessing.Prohibit\|ProhibitDtd.*true\|XmlResolver.*null&#39; &lt;app_source&gt;/
         
-        <br><span class="cmd-expected"># Expected: .NET XML parsing prohibits DTD processing</span>
+        <br><span class="cmd-expected"># Expected: .NET XML parsing prohibits DTD processing or sets XmlResolver to null</span>
         
       </div>
       
@@ -139,9 +139,39 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> grep -rn &#39;libxml_disable_entity_loader\|LIBXML_NOENT\|XML_PARSE_NOENT&#39; &lt;app_source&gt;/
+        <span class="cmd-prompt">$</span> grep -rn &#39;libxml_disable_entity_loader&#39; &lt;app_source&gt;/
         
-        <br><span class="cmd-expected"># Expected: PHP/C XML parsing has external entity loading disabled</span>
+        <br><span class="cmd-expected"># Expected: PHP XML parsing has external entity loading disabled via libxml_disable_entity_loader(true)</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -rn &#39;LIBXML_NOENT\|XML_PARSE_NOENT&#39; &lt;app_source&gt;/
+        
+        <br><span class="cmd-expected"># Expected: Zero matches — LIBXML_NOENT/XML_PARSE_NOENT enables entity substitution (misleading name) and is a vulnerability indicator, not a safety control</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -rn &#39;xml\.NewDecoder\|xml\.Decoder\|encoding/xml&#39; &lt;app_source&gt;/ | head -10
+        
+        <br><span class="cmd-expected"># Expected: Go XML parsing present — verify no external entity resolution configuration (Go xml.Decoder does not resolve external entities by default)</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> printf &#39;&lt;?xml version=&#34;1.0&#34;?&gt;&lt;!DOCTYPE foo [&lt;!ENTITY xxe SYSTEM &#34;file:///etc/hostname&#34;&gt;]&gt;&lt;root&gt;&amp;xxe;&lt;/root&gt;&#39; | curl -s -o /dev/null -w &#39;%{http_code}&#39; -X POST -H &#39;Content-Type: application/xml&#39; -d @- &lt;app_endpoint&gt;
+        
+        <br><span class="cmd-expected"># Expected: ^(400|403|422)$</span>
         
       </div>
       
@@ -202,10 +232,6 @@
         
         <li>Any</li>
         
-        <li>Windows Server 2019</li>
-        
-        <li>Windows Server 2022</li>
-        
       </ul>
     </section>
     
@@ -229,7 +255,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-15 15:58 UTC &middot; 136 entries &middot;
+    Generated 2026-09-28 19:36 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

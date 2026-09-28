@@ -1,7 +1,7 @@
 {
   "cme_id": "CME-806",
   "control_name": "Kerberos Authentication (GSSAPI)",
-  "description": "Centralized ticket-based authentication using Kerberos. Passwords never transmitted over the network; mutual authentication prevents impersonation of either party.",
+  "description": "Enforce Kerberos (GSSAPI) as the authentication mechanism, replacing password-based authentication with cryptographic ticket exchange. The client authenticates to the Key Distribution Center (KDC) and receives a Ticket-Granting Ticket (TGT), then requests service tickets for specific services — passwords never cross the network. Service tickets are encrypted with the target service's key, time-limited (typically 10-hour TGT, configurable), and include timestamps for replay detection. Mutual authentication ensures both client and server prove their identity, preventing server impersonation attacks. On RHEL, Kerberos is deployed via FreeIPA/IdM (ipa-client-install enrolls the host and configures SSSD); on Windows, Active Directory provides native Kerberos. SSH access is secured via GSSAPI authentication (GSSAPIAuthentication yes in sshd_config). Known attack vectors against Kerberos itself (Kerberoasting, Pass-the-Ticket, Golden Ticket) require the attacker to already have domain credentials or host-level access — they represent post-compromise lateral movement, not the initial credential interception this control prevents.",
   "tactic": "Harden",
   "category": "Credential Hardening",
   "category_id": "credential-hardening",
@@ -13,33 +13,51 @@
       "metric": "AC",
       "from": "L",
       "to": "H",
-      "rationale": "Credential interception useless; tickets are time-limited and host-bound"
+      "rationale": "With password-based authentication, an attacker intercepting network traffic (MITM, packet capture) can capture replayable credentials and use them from any host at any time. With Kerberos, the client proves knowledge of the password to the KDC via an encrypted timestamp (pre-authentication) — the password itself never traverses the network. Service tickets are encrypted with the service's secret key, time-stamped for replay detection, and valid only for a limited window. The attacker must either compromise the KDC itself, crack service account passwords offline (Kerberoasting — requires existing domain credentials), or steal tickets from host memory (Pass-the-Ticket — requires local access). Each bypass requires preconditions beyond simple network interception"
     }
   ],
   "cwe_relationships": [
-    "CWE-319",
     "CWE-287",
-    "CWE-303"
+    "CWE-294",
+    "CWE-303",
+    "CWE-319"
   ],
   "verification": {
-    "method": "Check Kerberos authentication is configured",
+    "method": "Verify Kerberos authentication is configured and enforced via keytab, GSSAPI, and domain enrollment",
     "commands": [
       {
-        "command": "klist -k /etc/krb5.keytab 2>/dev/null | head -3",
-        "expected": "keytab entries",
+        "command": "klist -k /etc/krb5.keytab 2>/dev/null | grep -c 'host/'",
+        "expected": ">=1",
         "platform": "linux"
       },
       {
         "command": "sshd -T | grep gssapiauthentication",
         "expected": "gssapiauthentication yes",
         "platform": "linux"
+      },
+      {
+        "command": "test -f /etc/krb5.conf && grep -c 'default_realm' /etc/krb5.conf",
+        "expected": ">=1",
+        "platform": "linux"
+      },
+      {
+        "command": "nltest /dsgetdc: 2>$null | Select-String 'DC:'",
+        "expected": "DC:",
+        "platform": "windows"
       }
     ]
   },
   "confidence": "High",
   "platforms": [
+    "RHEL 8",
     "RHEL 9",
-    "RHEL 8"
+    "RHEL 10",
+    "Fedora",
+    "Ubuntu 24.04",
+    "Windows Server 2019",
+    "Windows Server 2022",
+    "Windows 10",
+    "Windows 11"
   ],
   "scf_identifiers": [
     "CRY-02",
@@ -56,16 +74,18 @@
   "relationships": [
     {
       "target_namespace": "CWE",
-      "target_id": "CWE-319",
+      "target_id": "CWE-287",
       "relationship_type": "mitigates",
       "method": "supportive",
+      "rationale": "Replaces password-based authentication with cryptographic ticket exchange, providing stronger authentication guarantees",
       "evidence_state": "unquantified"
     },
     {
       "target_namespace": "CWE",
-      "target_id": "CWE-287",
+      "target_id": "CWE-294",
       "relationship_type": "mitigates",
-      "method": "supportive",
+      "method": "structural",
+      "rationale": "Kerberos tickets include timestamps and are validated for freshness by the service; replayed tickets are rejected as stale",
       "evidence_state": "unquantified"
     },
     {
@@ -73,6 +93,15 @@
       "target_id": "CWE-303",
       "relationship_type": "mitigates",
       "method": "supportive",
+      "rationale": "Replaces custom or weak authentication implementations with a well-tested, standardized protocol",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-319",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "Passwords never traverse the network; client proves knowledge via encrypted pre-authentication exchange with the KDC",
       "evidence_state": "unquantified"
     },
     {
@@ -82,6 +111,19 @@
       "method": "crosswalk",
       "rationale": "Derived from ATT&CK mitigation M0813 mapped to CME-806; mutual authentication constrains unauthorized ICS remote service access.",
       "evidence_state": "unquantified"
+    }
+  ],
+  "cve_schema_version": "5.2.0",
+  "cve_affected": [
+    {
+      "vendor": "redhat",
+      "product": "enterprise_linux",
+      "cpes": [
+        "cpe:2.3:o:redhat:enterprise_linux:8:*:*:*:*:*:*:*",
+        "cpe:2.3:o:redhat:enterprise_linux:9:*:*:*:*:*:*:*",
+        "cpe:2.3:o:redhat:enterprise_linux:10:*:*:*:*:*:*:*"
+      ],
+      "defaultStatus": "applicable"
     }
   ],
   "framework_bindings": [

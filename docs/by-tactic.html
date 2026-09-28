@@ -29,7 +29,7 @@
 <div class="tactic-section">
   <h2>
     <span class="badge badge-tactic-harden">Harden</span>
-    Harden (93)
+    Harden (94)
   </h2>
   <table class="data-table">
     <thead>
@@ -191,7 +191,7 @@
           <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
           
         </td>
-        <td>3</td>
+        <td>4</td>
       </tr>
       
       <tr>
@@ -461,25 +461,10 @@
       </tr>
       
       <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1308.html">CME-1308</a></td>
-        <td><a href="entries/CME-1308.html">Origin and CORS Validation Enforcement</a></td>
-        <td>Application Input Validation</td>
-        <td class="function-cell">input-validation</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      <tr>
         <td class="cme-id-cell"><a href="entries/CME-1309.html">CME-1309</a></td>
         <td><a href="entries/CME-1309.html">Script Engine Restriction (Sandbox / Disable)</a></td>
         <td>Application Input Validation</td>
-        <td class="function-cell">input-validation</td>
+        <td class="function-cell">injection-prevention</td>
         <td><span class="badge badge-layer-application">Application</span></td>
         <td>Preventive / Unquantified</td>
         <td>
@@ -491,7 +476,7 @@
           <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
           
         </td>
-        <td>4</td>
+        <td>5</td>
       </tr>
       
       <tr>
@@ -520,10 +505,12 @@
         <td>Preventive / Unquantified</td>
         <td>
           
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
+          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
+          
+          <span class="cvss-from">A:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
           
         </td>
-        <td>7</td>
+        <td>8</td>
       </tr>
       
       <tr>
@@ -542,7 +529,7 @@
           <span class="cvss-from">S:C</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">U</span>
           
         </td>
-        <td>2</td>
+        <td>3</td>
       </tr>
       
       <tr>
@@ -559,7 +546,7 @@
           <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
           
         </td>
-        <td>2</td>
+        <td>3</td>
       </tr>
       
       <tr>
@@ -574,7 +561,7 @@
           <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
           
         </td>
-        <td>5</td>
+        <td>6</td>
       </tr>
       
       <tr>
@@ -631,8 +618,8 @@
         <td><a href="entries/CME-1318.html">LDAP Injection Prevention</a></td>
         <td>Application Input Validation</td>
         <td class="function-cell">injection-prevention</td>
-        <td><span class="badge badge-layer-"></span></td>
-        <td>Preventive / Deterministic</td>
+        <td><span class="badge badge-layer-application">Application</span></td>
+        <td>Preventive / Unquantified</td>
         <td>
           
           <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
@@ -650,8 +637,8 @@
         <td><a href="entries/CME-1319.html">Deserialization Type Allowlisting</a></td>
         <td>Application Input Validation</td>
         <td class="function-cell">injection-prevention</td>
-        <td><span class="badge badge-layer-"></span></td>
-        <td>Preventive / Deterministic</td>
+        <td><span class="badge badge-layer-application">Application</span></td>
+        <td>Preventive / Unquantified</td>
         <td>
           
           <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
@@ -674,8 +661,6 @@
         <td><span class="badge badge-layer-application">Application</span></td>
         <td>Preventive / Unquantified</td>
         <td>
-          
-          <span class="cvss-from">PR:N</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>, 
           
           <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
           
@@ -728,9 +713,7 @@
         <td>Preventive / Unquantified</td>
         <td>
           
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">PR:N</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
+          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
           
         </td>
         <td>5</td>
@@ -775,12 +758,10 @@
         <td>Preventive / Unquantified</td>
         <td>
           
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">PR:N</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
+          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
           
         </td>
-        <td>2</td>
+        <td>3</td>
       </tr>
       
       <tr>
@@ -795,7 +776,7 @@
           <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
           
         </td>
-        <td>2</td>
+        <td>3</td>
       </tr>
       
       <tr>
@@ -810,7 +791,7 @@
           <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
           
         </td>
-        <td>3</td>
+        <td>4</td>
       </tr>
       
       <tr>
@@ -822,9 +803,7 @@
         <td>Preventive / Unquantified</td>
         <td>
           
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">PR:N</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
+          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
           
         </td>
         <td>3</td>
@@ -835,18 +814,16 @@
         <td><a href="entries/CME-808.html">Local Administrator Password Solution (LAPS)</a></td>
         <td>Credential Hardening</td>
         <td class="function-cell">password-policy</td>
-        <td><span class="badge badge-layer-"></span></td>
-        <td>Preventive / Deterministic</td>
+        <td><span class="badge badge-layer-identity">Identity</span></td>
+        <td>Preventive / Unquantified</td>
         <td>
           
           <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>, 
           
-          <span class="cvss-from">PR:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>, 
-          
           <span class="cvss-from">S:C</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">U</span>
           
         </td>
-        <td>4</td>
+        <td>3</td>
       </tr>
       
       
@@ -878,7 +855,7 @@
           <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
           
         </td>
-        <td>3</td>
+        <td>4</td>
       </tr>
       
       <tr>
@@ -923,7 +900,7 @@
           <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
           
         </td>
-        <td>1</td>
+        <td>2</td>
       </tr>
       
       <tr>
@@ -1081,7 +1058,7 @@
           <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
           
         </td>
-        <td>7</td>
+        <td>9</td>
       </tr>
       
       <tr>
@@ -1345,6 +1322,38 @@
           
         </td>
         <td>8</td>
+      </tr>
+      
+      <tr>
+        <td class="cme-id-cell"><a href="entries/CME-120.html">CME-120</a></td>
+        <td><a href="entries/CME-120.html">Kernel Memory Initialization Enforcement (init_on_alloc / INIT_STACK_ALL_ZERO)</a></td>
+        <td>Kernel Hardening</td>
+        <td class="function-cell">memory-safety</td>
+        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
+        <td>Preventive / Unquantified</td>
+        <td>
+          
+          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
+          
+          <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
+          
+        </td>
+        <td>5</td>
+      </tr>
+      
+      <tr>
+        <td class="cme-id-cell"><a href="entries/CME-121.html">CME-121</a></td>
+        <td><a href="entries/CME-121.html">SLAB Freelist Hardening (Freelist Randomization and Integrity)</a></td>
+        <td>Kernel Hardening</td>
+        <td class="function-cell">memory-safety</td>
+        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
+        <td>Preventive / Unquantified</td>
+        <td>
+          
+          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
+          
+        </td>
+        <td>4</td>
       </tr>
       
       
@@ -2132,7 +2141,7 @@
           <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
           
         </td>
-        <td>8</td>
+        <td>10</td>
       </tr>
       
       <tr>
@@ -2387,7 +2396,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-15 15:58 UTC &middot; 136 entries &middot;
+    Generated 2026-09-28 19:36 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

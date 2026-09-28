@@ -109,9 +109,9 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> kubectl get clusterimagepolicy --no-headers 2&gt;/dev/null || kubectl get policy.sigstore.dev --no-headers 2&gt;/dev/null
+        <span class="cmd-prompt">$</span> kubectl get clusterimagepolicy --no-headers 2&gt;/dev/null | wc -l || kubectl get policy.sigstore.dev --no-headers 2&gt;/dev/null | wc -l
         
-        <br><span class="cmd-expected"># Expected: Image policy resources present</span>
+        <br><span class="cmd-expected"># Expected: &gt;=1</span>
         
       </div>
       
@@ -119,9 +119,19 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> podman image trust show
+        <span class="cmd-prompt">$</span> kubectl get clusterpolicy -o jsonpath=&#39;{range .items[*]}{.spec.rules[*].verifyImages}{end}&#39; 2&gt;/dev/null | grep -c &#39;image&#39;
         
-        <br><span class="cmd-expected"># Expected: Trust policy configured with signature requirements for production registries</span>
+        <br><span class="cmd-expected"># Expected: &gt;=1</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: kubernetes</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> podman image trust show 2&gt;/dev/null | grep -c &#39;signedBy&#39;
+        
+        <br><span class="cmd-expected"># Expected: &gt;=1</span>
         
       </div>
       
@@ -129,13 +139,33 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> cosign verify --key /path/to/cosign.pub &lt;image&gt; 2&gt;&amp;1 | head -1
+        <span class="cmd-prompt">$</span> cat /etc/containers/policy.json 2&gt;/dev/null | grep -c &#39;signedBy&#39;
         
-        <br><span class="cmd-expected"># Expected: Verification for &lt;image&gt; -- The following checks were performed</span>
+        <br><span class="cmd-expected"># Expected: &gt;=1</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> cosign verify --key &lt;cosign_public_key&gt; &lt;image&gt; 2&gt;&amp;1 | grep -c &#39;The following checks were performed&#39;
+        
+        <br><span class="cmd-expected"># Expected: 1</span>
         
       </div>
       
       <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> kubectl run cme-unsigned-test --image=docker.io/library/busybox:latest --restart=Never --dry-run=server 2&gt;&amp;1 | grep -c -i &#39;denied\|forbidden\|failed.*verif\|signature&#39;
+        
+        <br><span class="cmd-expected"># Expected: &gt;=1</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: kubernetes</div>
       
       
     </section>
@@ -221,7 +251,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-15 15:58 UTC &middot; 136 entries &middot;
+    Generated 2026-09-28 19:36 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

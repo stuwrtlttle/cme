@@ -38,7 +38,7 @@
     
     <section>
       <h2>Description</h2>
-      <p class="entry-description">Enables FIPS-validated cryptographic modules system-wide. Only NIST-approved algorithms are available for all cryptographic operations. Non-compliant operations fail rather than fall back.</p>
+      <p class="entry-description">Enforces exclusive use of FIPS 140-3 validated cryptographic modules for all system cryptographic operations. Enabled via the fips=1 kernel boot parameter (dracut fips module) and fips-mode-setup on RHEL, or FIPSAlgorithmPolicy registry key on Windows. When active, the kernel crypto API restricts to validated implementations (AES, SHA-256+, RSA 2048+, ECDSA P-256/P-384, HMAC), the OpenSSL FIPS provider replaces the default provider, and GnuTLS/NSS restrict to FIPS-approved algorithms. Non-validated algorithms (MD5, RC4, DES, Blowfish, Camellia, IDEA) are removed from available cipher lists entirely — operations requesting them fail with an error rather than falling back to a weaker option. FIPS mode imposes significant compatibility constraints: some TLS cipher suites become unavailable, HMAC-MD5 is prohibited (breaking some Kerberos configurations), Ed25519 SSH keys are rejected, and applications using non-validated crypto (custom OpenSSL builds, BoringSSL, Go&#39;s crypto/tls) are unaffected. On RHEL, FIPS mode automatically sets the crypto policy to FIPS, which is stricter than DEFAULT but less restrictive than FUTURE for non-FIPS-relevant parameters. The primary value is compliance attestation (FedRAMP, CMMC, DISA STIG) combined with the security benefit of using audited, CAVP-tested implementations.</p>
     </section>
 
     <section>
@@ -62,7 +62,7 @@
               <span class="cvss-to">H</span>
             </td>
             
-            <td class="cvss-rationale">All crypto operations use validated, audited implementations</td>
+            <td class="cvss-rationale">Without FIPS mode, system crypto libraries offer both validated and non-validated algorithm implementations — an attacker exploiting a protocol downgrade vulnerability can force negotiation to a non-validated, potentially weaker implementation (e.g., MD5-based HMAC, RC4 stream cipher, DES). With FIPS mode active, non-validated algorithms are removed from the kernel crypto API and userspace library provider lists entirely — the negotiation cannot select them because they do not exist in the available set. The attacker must find an exploitable flaw in the FIPS-validated implementation itself, which has undergone NIST CAVP testing and third-party lab validation. Does not increase complexity for vulnerabilities that do not involve cryptographic algorithm selection (memory corruption, logic bugs, injection)</td>
           </tr>
           
         </tbody>
@@ -84,6 +84,9 @@
         <a href="https://cwe.mitre.org/data/definitions/328.html"
            class="cwe-link" target="_blank" rel="noopener">CWE-328</a>
         
+        <a href="https://cwe.mitre.org/data/definitions/757.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-757</a>
+        
       </div>
     </section>
     
@@ -94,7 +97,7 @@
     <section>
       <h2>Verification</h2>
       
-      <p class="verification-method">Verify FIPS mode is enabled</p>
+      <p class="verification-method">Verify FIPS mode is enabled at boot, kernel, and crypto library levels</p>
       
       
       <div class="verification-cmd">
@@ -117,9 +120,74 @@
       <div class="cmd-platform">Platform: linux</div>
       
       
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -qw fips=1 /proc/cmdline &amp;&amp; echo &#39;enabled&#39; || echo &#39;disabled&#39;
+        
+        <br><span class="cmd-expected"># Expected: enabled</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> openssl list -providers 2&gt;/dev/null | grep -c &#39;fips&#39;
+        
+        <br><span class="cmd-expected"># Expected: 1</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> Get-ItemProperty -Path &#39;HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\FIPSAlgorithmPolicy&#39; -Name Enabled -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Enabled
+        
+        <br><span class="cmd-expected"># Expected: 1</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: windows</div>
+      
+      
     </section>
     
 
+    
+    <section>
+      <h2>Applicability (CVE 5.2.0 Schema)</h2>
+      <table class="cvss-table">
+        <thead>
+          <tr>
+            <th>Vendor</th>
+            <th>Product</th>
+            <th>CPEs</th>
+            <th>Platforms</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td>redhat</td>
+            <td>enterprise_linux</td>
+            <td class="cpe-cell">
+              
+              <code class="cpe-string">cpe:2.3:o:redhat:enterprise_linux:8:*:*:*:*:*:*:*</code><br>
+              
+              <code class="cpe-string">cpe:2.3:o:redhat:enterprise_linux:9:*:*:*:*:*:*:*</code><br>
+              
+              <code class="cpe-string">cpe:2.3:o:redhat:enterprise_linux:10:*:*:*:*:*:*:*</code>
+              
+            </td>
+            <td>All</td>
+            <td><span class="badge badge-confidence-high">applicable</span></td>
+          </tr>
+          
+        </tbody>
+      </table>
+      
+    </section>
     
 
     
@@ -181,9 +249,23 @@
       <h3>Platforms</h3>
       <ul class="sidebar-list">
         
+        <li>RHEL 8</li>
+        
         <li>RHEL 9</li>
         
-        <li>RHEL 8</li>
+        <li>RHEL 10</li>
+        
+        <li>Fedora</li>
+        
+        <li>Ubuntu 22.04</li>
+        
+        <li>Windows 10</li>
+        
+        <li>Windows 11</li>
+        
+        <li>Windows Server 2019</li>
+        
+        <li>Windows Server 2022</li>
         
       </ul>
     </section>
@@ -197,7 +279,7 @@
         <li><strong>Layer:</strong> OS/Kernel</li>
         <li><strong>Effect:</strong> preventive</li>
         <li><strong>Evidence:</strong> unquantified</li>
-        <li><strong>CWEs:</strong> 3</li>
+        <li><strong>CWEs:</strong> 4</li>
         <li><strong>ATT&amp;CK Mappings:</strong> 0</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
@@ -208,7 +290,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-09-15 15:58 UTC &middot; 136 entries &middot;
+    Generated 2026-09-28 19:36 UTC &middot; 137 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

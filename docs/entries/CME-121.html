@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CME-503: nosuid on Non-Root Partitions — Common Mitigation Enumeration</title>
+  <title>CME-121: SLAB Freelist Hardening (Freelist Randomization and Integrity) — Common Mitigation Enumeration</title>
   <link rel="stylesheet" href="../style.css">
 </head>
 <body>
@@ -22,8 +22,8 @@
   <main class="container">
     
 <div class="entry-header">
-  <div class="entry-id">CME-503</div>
-  <h1>nosuid on Non-Root Partitions</h1>
+  <div class="entry-id">CME-121</div>
+  <h1>SLAB Freelist Hardening (Freelist Randomization and Integrity)</h1>
   <div class="entry-meta">
     <span class="badge badge-tactic-harden">Harden</span>
     <span class="badge badge-layer-os-kernel">OS/Kernel</span>
@@ -38,7 +38,7 @@
     
     <section>
       <h2>Description</h2>
-      <p class="entry-description">Mounts partitions like /tmp, /var, /home with nosuid, preventing SUID/SGID binaries from taking effect, blocking a privilege escalation vector.</p>
+      <p class="entry-description">Enable CONFIG_SLAB_FREELIST_RANDOM and CONFIG_SLAB_FREELIST_HARDENED to randomize slab allocator freelist ordering and validate freelist pointer integrity. Freelist randomization breaks the heap layout predictability that use-after-free exploits depend on: the attacker cannot predict which freed object will be returned by the next allocation of the same size, making heap spray and object replacement techniques unreliable. Freelist hardening adds XOR-based pointer mangling with a per-cache random value and the pointer address itself, detecting freelist pointer corruption that is the hallmark of heap exploitation. When a corrupted freelist pointer is detected, the kernel panics rather than following the corrupted pointer to attacker-controlled memory. Together these controls convert deterministic heap exploitation into a probabilistic attack with detection.</p>
     </section>
 
     <section>
@@ -55,14 +55,14 @@
         <tbody>
           
           <tr>
-            <td><strong>Privileges Required</strong> (PR)</td>
+            <td><strong>Attack Complexity</strong> (AC)</td>
             <td>
               <span class="cvss-from">L</span>
               <span class="cvss-arrow">&rarr;</span>
               <span class="cvss-to">H</span>
             </td>
             
-            <td class="cvss-rationale">Cannot deploy SUID binaries to escalate privileges from these partitions</td>
+            <td class="cvss-rationale">Freelist randomization eliminates the deterministic allocation ordering that heap exploitation depends on; the attacker must spray many objects and cannot predict which freed slot their controlled data will occupy. Freelist hardening detects pointer corruption and panics, so the attacker must also bypass integrity checks on freelist pointers — exploitation becomes probabilistic with detection rather than reliable</td>
           </tr>
           
         </tbody>
@@ -75,8 +75,17 @@
       <h2>CWE Relationships</h2>
       <div class="cwe-list">
         
-        <a href="https://cwe.mitre.org/data/definitions/269.html"
-           class="cwe-link" target="_blank" rel="noopener">CWE-269</a>
+        <a href="https://cwe.mitre.org/data/definitions/825.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-825</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/416.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-416</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/415.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-415</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/122.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-122</a>
         
       </div>
     </section>
@@ -88,13 +97,13 @@
     <section>
       <h2>Verification</h2>
       
-      <p class="verification-method">Check nosuid on non-root partitions</p>
+      <p class="verification-method">Verify kernel is built with slab freelist randomization and hardening</p>
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> mount | grep &#39;/tmp&#39; | grep nosuid
+        <span class="cmd-prompt">$</span> grep -c &#39;CONFIG_SLAB_FREELIST_RANDOM=y\|CONFIG_SLAB_FREELIST_HARDENED=y&#39; /boot/config-$(uname -r)
         
-        <br><span class="cmd-expected"># Expected: nosuid</span>
+        <br><span class="cmd-expected"># Expected: 2</span>
         
       </div>
       
@@ -102,9 +111,9 @@
       
       
       <div class="verification-cmd">
-        <span class="cmd-prompt">$</span> mount | grep &#39;/home&#39; | grep nosuid
+        <span class="cmd-prompt">$</span> grep &#39;CONFIG_SLAB_FREELIST_HARDENED=y&#39; /boot/config-$(uname -r)
         
-        <br><span class="cmd-expected"># Expected: nosuid</span>
+        <br><span class="cmd-expected"># Expected: CONFIG_SLAB_FREELIST_HARDENED=y</span>
         
       </div>
       
@@ -120,10 +129,10 @@
 
     <div class="entry-nav">
       
-      <a href="CME-502.html">&larr; CME-502: noexec on /tmp and /dev/shm</a>
+      <a href="CME-120.html">&larr; CME-120: Kernel Memory Initialization Enforcement (init_on_alloc / INIT_STACK_ALL_ZERO)</a>
       
       
-      <a href="CME-504.html">CME-504: dm-verity (Verified Boot) &rarr;</a>
+      <a href="CME-201.html">CME-201: Zero Trust Gateway / Identity-Aware Proxy &rarr;</a>
       
     </div>
   </div>
@@ -131,13 +140,13 @@
   <aside class="entry-sidebar">
     <section>
       <h3>Category</h3>
-      <p>Filesystem Hardening</p>
+      <p>Kernel Hardening</p>
     </section>
 
     
     <section>
       <h3>Function</h3>
-      <p class="function-id">mount-options</p>
+      <p class="function-id">memory-safety</p>
     </section>
     
 
@@ -146,9 +155,7 @@
       <h3>SCF Controls</h3>
       <div class="cwe-list">
         
-        <span class="cwe-link">CFG-02</span>
-        
-        <span class="cwe-link">IAC-21</span>
+        <span class="cwe-link">SEA-10</span>
         
       </div>
     </section>
@@ -163,9 +170,13 @@
       <h3>Platforms</h3>
       <ul class="sidebar-list">
         
+        <li>RHEL 8</li>
+        
         <li>RHEL 9</li>
         
-        <li>RHEL 8</li>
+        <li>RHEL 10</li>
+        
+        <li>Fedora 40</li>
         
         <li>Ubuntu 24.04</li>
         
@@ -176,12 +187,12 @@
     <section>
       <h3>Quick Reference</h3>
       <ul class="sidebar-list">
-        <li><strong>ID:</strong> CME-503</li>
+        <li><strong>ID:</strong> CME-121</li>
         <li><strong>Tactic:</strong> Harden</li>
         <li><strong>Layer:</strong> OS/Kernel</li>
         <li><strong>Effect:</strong> preventive</li>
         <li><strong>Evidence:</strong> unquantified</li>
-        <li><strong>CWEs:</strong> 1</li>
+        <li><strong>CWEs:</strong> 4</li>
         <li><strong>ATT&amp;CK Mappings:</strong> 0</li>
         <li><strong>CVSS Mods:</strong> 1</li>
       </ul>
