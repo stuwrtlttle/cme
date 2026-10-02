@@ -1,0 +1,197 @@
+{
+  "cme_id": "CME-206",
+  "control_name": "Network Policy (Kubernetes)",
+  "description": "Kubernetes NetworkPolicy resources that restrict pod-to-pod and pod-to-external communication. Default-deny ingress/egress with explicit allowlists.",
+  "tactic": "Isolate",
+  "category": "Network Isolation",
+  "category_id": "network-isolation",
+  "function_id": "network-filtering",
+  "control_layer": "Network",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AV",
+      "from": "N",
+      "to": "A",
+      "rationale": "Pod only reachable from explicitly allowed sources"
+    },
+    {
+      "metric": "S",
+      "from": "C",
+      "to": "U",
+      "rationale": "Compromised pod cannot reach arbitrary cluster services"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-284",
+    "CWE-668"
+  ],
+  "verification": {
+    "method": "Check for default-deny NetworkPolicy in namespace",
+    "commands": [
+      {
+        "command": "kubectl get networkpolicy -n <namespace> -o name | head -5",
+        "expected": "networkpolicy.networking.k8s.io/default-deny",
+        "platform": "kubernetes"
+      }
+    ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "Kubernetes",
+    "OpenShift"
+  ],
+  "cve_schema_version": "5.2.0",
+  "cve_affected": [
+    {
+      "vendor": "kubernetes",
+      "product": "kubernetes",
+      "cpes": [
+        "cpe:2.3:a:kubernetes:kubernetes:*:*:*:*:*:*:*:*"
+      ],
+      "defaultStatus": "applicable"
+    },
+    {
+      "vendor": "redhat",
+      "product": "openshift_container_platform",
+      "cpes": [
+        "cpe:2.3:a:redhat:openshift_container_platform:4:*:*:*:*:*:*:*"
+      ],
+      "defaultStatus": "applicable"
+    },
+    {
+      "vendor": "google",
+      "product": "google_kubernetes_engine",
+      "defaultStatus": "applicable"
+    },
+    {
+      "vendor": "amazon",
+      "product": "elastic_kubernetes_service",
+      "defaultStatus": "applicable"
+    },
+    {
+      "vendor": "microsoft",
+      "product": "azure_kubernetes_service",
+      "defaultStatus": "applicable"
+    }
+  ],
+  "remediation": [
+    {
+      "id": "default-deny-networkpolicy",
+      "name": "default-deny ingress and egress NetworkPolicy with per-service allowlisting",
+      "platform": "kubernetes",
+      "precondition": "kubectl version --client >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Apply a default-deny ingress NetworkPolicy to the target namespace (blocks all inbound traffic to pods unless explicitly allowed by another policy)",
+          "command": "kubectl apply -n <namespace> -f - <<'EOF'\napiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nmetadata:\n  name: default-deny-ingress\nspec:\n  podSelector: {}\n  policyTypes:\n  - Ingress\nEOF",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "kubectl delete networkpolicy default-deny-ingress -n <namespace>"
+        },
+        {
+          "description": "Apply a default-deny egress NetworkPolicy to the target namespace (blocks all outbound traffic from pods unless explicitly allowed)",
+          "command": "kubectl apply -n <namespace> -f - <<'EOF'\napiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nmetadata:\n  name: default-deny-egress\nspec:\n  podSelector: {}\n  policyTypes:\n  - Egress\nEOF",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "kubectl delete networkpolicy default-deny-egress -n <namespace>"
+        },
+        {
+          "description": "Allow DNS egress for all pods in the namespace (required for service discovery to function under default-deny egress)",
+          "command": "kubectl apply -n <namespace> -f - <<'EOF'\napiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nmetadata:\n  name: allow-dns-egress\nspec:\n  podSelector: {}\n  policyTypes:\n  - Egress\n  egress:\n  - to:\n    - namespaceSelector: {}\n    ports:\n    - protocol: UDP\n      port: 53\n    - protocol: TCP\n      port: 53\nEOF",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "kubectl delete networkpolicy allow-dns-egress -n <namespace>"
+        },
+        {
+          "description": "Allow ingress to a specific service from authorized source pods (replace <app_label> with the target pod label and <source_label> with the client pod label)",
+          "command": "kubectl apply -n <namespace> -f - <<'EOF'\napiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nmetadata:\n  name: allow-<app_label>-ingress\nspec:\n  podSelector:\n    matchLabels:\n      app: <app_label>\n  policyTypes:\n  - Ingress\n  ingress:\n  - from:\n    - podSelector:\n        matchLabels:\n          app: <source_label>\n    ports:\n    - protocol: TCP\n      port: <service_port>\nEOF",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "kubectl delete networkpolicy allow-<app_label>-ingress -n <namespace>"
+        }
+      ],
+      "verify": "kubectl get networkpolicy -n <namespace> -o name | head -5",
+      "references": [
+        {
+          "source": "Kubernetes — Network Policies",
+          "url": "https://kubernetes.io/docs/concepts/services-networking/network-policies/"
+        },
+        {
+          "source": "Kubernetes — Declare Network Policy",
+          "url": "https://kubernetes.io/docs/tasks/administer-cluster/declare-network-policy/"
+        }
+      ]
+    }
+  ],
+  "scf_identifiers": [
+    "CLD-03",
+    "NET-04.1",
+    "NET-06.6"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-284",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-668",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AV",
+      "value": "N->A",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/S",
+      "value": "C->U",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "ATT&CK",
+      "identifier": "M1037",
+      "value": "Filter Network Traffic",
+      "relationship_type": "maps_to",
+      "rationale": "Kubernetes-native traffic-filtering implementation of ATT&CK Filter Network Traffic."
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "CLD-03",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "NET-04.1",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "NET-06.6",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

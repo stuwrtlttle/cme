@@ -1,0 +1,174 @@
+{
+  "cme_id": "CME-109",
+  "control_name": "Kernel Lockdown Mode",
+  "description": "LSM that restricts kernel features allowing arbitrary code execution or direct hardware access from userspace. Integrity mode blocks module parameters, ACPI tables, and iopl/ioperm. Confidentiality mode additionally blocks /dev/mem, kprobes, and BPF reads.",
+  "tactic": "Harden",
+  "category": "Kernel Hardening",
+  "category_id": "kernel-hardening",
+  "function_id": "kernel-attack-surface",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "PR",
+      "from": "L",
+      "to": "H",
+      "rationale": "Even root cannot modify running kernel via blocked interfaces"
+    },
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Many kernel exploitation primitives are disabled"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-269",
+    "CWE-284"
+  ],
+  "verification": {
+    "method": "Check lockdown LSM state",
+    "commands": [
+      {
+        "command": "cat /sys/kernel/security/lockdown",
+        "expected": "[integrity]",
+        "platform": "linux"
+      }
+    ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 8",
+    "Ubuntu 24.04"
+  ],
+  "remediation": [
+    {
+      "id": "grub-lockdown-integrity",
+      "name": "Enable kernel lockdown integrity mode via GRUB boot parameter",
+      "platform": "linux",
+      "precondition": "test -d /sys/kernel/security && grep -q lockdown /sys/kernel/security/lsm 2>/dev/null || test -f /boot/config-$(uname -r)",
+      "steps": [
+        {
+          "description": "Add lockdown=integrity to the kernel command line via GRUB default config. This blocks module parameters, ACPI table loading, iopl/ioperm, and other kernel modification interfaces from userspace — even from root",
+          "command": "grubby --update-kernel=ALL --args='lockdown=integrity'",
+          "idempotent": true,
+          "requires_restart": "system",
+          "reversible": true,
+          "undo": "grubby --update-kernel=ALL --remove-args='lockdown=integrity'"
+        },
+        {
+          "description": "Reboot to activate lockdown mode (the kernel reads the parameter at boot time only)",
+          "command": "systemctl reboot",
+          "idempotent": true,
+          "requires_restart": "system",
+          "reversible": false
+        }
+      ],
+      "verify": "cat /sys/kernel/security/lockdown",
+      "references": [
+        {
+          "source": "Kernel documentation — Kernel Lockdown",
+          "url": "https://www.kernel.org/doc/html/latest/admin-guide/LSM/Lockdown.html"
+        },
+        {
+          "source": "RHEL 9 — Security Hardening",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/index"
+        }
+      ]
+    },
+    {
+      "id": "grub-lockdown-confidentiality",
+      "name": "Enable kernel lockdown confidentiality mode via GRUB boot parameter",
+      "platform": "linux",
+      "precondition": "test -d /sys/kernel/security && grep -q lockdown /sys/kernel/security/lsm 2>/dev/null || test -f /boot/config-$(uname -r)",
+      "steps": [
+        {
+          "description": "Add lockdown=confidentiality to the kernel command line. This is stricter than integrity mode — additionally blocks /dev/mem, /dev/kmem, kprobes, BPF reads of kernel memory, and perf access. May break debugging and monitoring tools that require these interfaces",
+          "command": "grubby --update-kernel=ALL --args='lockdown=confidentiality'",
+          "idempotent": true,
+          "requires_restart": "system",
+          "reversible": true,
+          "undo": "grubby --update-kernel=ALL --remove-args='lockdown=confidentiality'"
+        },
+        {
+          "description": "Reboot to activate lockdown mode",
+          "command": "systemctl reboot",
+          "idempotent": true,
+          "requires_restart": "system",
+          "reversible": false
+        }
+      ],
+      "verify": "cat /sys/kernel/security/lockdown",
+      "references": [
+        {
+          "source": "Kernel documentation — Kernel Lockdown",
+          "url": "https://www.kernel.org/doc/html/latest/admin-guide/LSM/Lockdown.html"
+        },
+        {
+          "source": "RHEL 9 — Security Hardening",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/index"
+        }
+      ]
+    }
+  ],
+  "scf_identifiers": [
+    "CFG-03",
+    "END-16",
+    "SEA-10"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-269",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-284",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/PR",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "CFG-03",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "END-16",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "SEA-10",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

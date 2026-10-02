@@ -1,0 +1,175 @@
+{
+  "cme_id": "CME-705",
+  "control_name": "Dropped Linux Capabilities",
+  "description": "Removes unnecessary POSIX capabilities from container or process bounding set. Default container profiles drop CAP_SYS_ADMIN, CAP_NET_RAW, CAP_SYS_PTRACE, and others not needed by the workload.",
+  "tactic": "Isolate",
+  "category": "Container Isolation",
+  "category_id": "container-isolation",
+  "function_id": "container-runtime",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "PR",
+      "from": "L",
+      "to": "H",
+      "rationale": "Even privileged operations require specific capabilities that have been dropped"
+    },
+    {
+      "metric": "S",
+      "from": "C",
+      "to": "U",
+      "rationale": "Cannot mount filesystems, trace processes, or perform other scope-changing operations"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-250",
+    "CWE-269"
+  ],
+  "verification": {
+    "method": "Check effective capabilities of running process",
+    "commands": [
+      {
+        "command": "grep CapEff /proc/<pid>/status",
+        "expected": "0000000000000000 or minimal set",
+        "platform": "linux"
+      },
+      {
+        "command": "kubectl get pod <pod> -o jsonpath='{.spec.containers[0].securityContext.capabilities.drop}'",
+        "expected": "ALL",
+        "platform": "kubernetes"
+      }
+    ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "Kubernetes",
+    "OpenShift"
+  ],
+  "remediation": [
+    {
+      "id": "kubernetes-drop-all-capabilities",
+      "name": "Kubernetes drop ALL capabilities with minimal add-back",
+      "platform": "kubernetes",
+      "precondition": "command -v kubectl >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Patch deployment to drop ALL capabilities and add back only the minimum required (NET_BIND_SERVICE for ports <1024, or none if not needed). Replace <deployment> and <namespace> with actual values.",
+          "command": "kubectl patch deployment <deployment> -n <namespace> --type=json -p '[{\"op\":\"add\",\"path\":\"/spec/template/spec/containers/0/securityContext/capabilities\",\"value\":{\"drop\":[\"ALL\"],\"add\":[\"NET_BIND_SERVICE\"]}}]'",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "kubectl patch deployment <deployment> -n <namespace> --type=json -p '[{\"op\":\"remove\",\"path\":\"/spec/template/spec/containers/0/securityContext/capabilities\"}]'"
+        },
+        {
+          "description": "Label namespace for Pod Security Standards Restricted enforcement, which requires dropping ALL capabilities",
+          "command": "kubectl label namespace <namespace> pod-security.kubernetes.io/enforce=restricted --overwrite",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "kubectl label namespace <namespace> pod-security.kubernetes.io/enforce-"
+        }
+      ],
+      "verify": "kubectl get pod -n <namespace> -o jsonpath='{.items[0].spec.containers[0].securityContext.capabilities.drop}'",
+      "references": [
+        {
+          "source": "Kubernetes — Pod Security Standards",
+          "url": "https://kubernetes.io/docs/concepts/security/pod-security-standards/"
+        },
+        {
+          "source": "Kubernetes — Set capabilities for a Container",
+          "url": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container"
+        }
+      ]
+    },
+    {
+      "id": "podman-cap-drop-all",
+      "name": "Podman/Docker drop ALL capabilities",
+      "platform": "linux",
+      "precondition": "command -v podman >/dev/null 2>&1 || command -v docker >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Run container with all capabilities dropped. Add back only specific capabilities required by the workload (e.g., --cap-add NET_BIND_SERVICE). Replace <image> with the container image.",
+          "command": "podman run --cap-drop ALL --cap-add NET_BIND_SERVICE <image>",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "podman run <image>"
+        },
+        {
+          "description": "Set default capability drop policy in containers.conf so all new containers start with minimal capabilities",
+          "command": "printf '[containers]\\ndefault_capabilities = []\\n' > /etc/containers/containers.conf.d/cme-705-drop-caps.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/containers/containers.conf.d/cme-705-drop-caps.conf"
+        }
+      ],
+      "verify": "podman run --cap-drop ALL <image> grep CapEff /proc/1/status",
+      "references": [
+        {
+          "source": "Podman — Security and capabilities",
+          "url": "https://docs.podman.io/en/latest/markdown/podman-run.1.html#cap-drop-capability"
+        },
+        {
+          "source": "RHEL 9 — Building, running, and managing Linux containers",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/building_running_and_managing_containers/index"
+        }
+      ]
+    }
+  ],
+  "scf_identifiers": [
+    "CFG-03",
+    "IAC-21"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-250",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-269",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/PR",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/S",
+      "value": "C->U",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "CFG-03",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "IAC-21",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

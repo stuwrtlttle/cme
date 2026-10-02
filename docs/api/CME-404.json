@@ -1,0 +1,96 @@
+{
+  "cme_id": "CME-404",
+  "control_name": "Certificate Pinning",
+  "description": "Restricts which TLS certificates a client or service will accept by pinning to a specific set of public keys (SPKI hashes), leaf certificates, or intermediate CA certificates, rather than trusting any certificate signed by any CA in the system trust store. Without pinning, compromise of any of hundreds of trusted CAs (or a misissued certificate from any CA) enables MitM — demonstrated by DigiNotar (2011), CNNIC subordinate (2015), and Symantec incidents. With pinning, the client deterministically rejects certificates whose public key hash does not match the pin set, even if the certificate is validly signed by a trusted CA. Pinning is deployed in three contexts: (1) mobile applications (Android Network Security Config trust-anchors, iOS TrustKit/URLSession pinning), (2) service-to-service communication (gRPC channel credentials, custom TLS verification callbacks), and (3) DNS-based pinning via DANE/TLSA records (RFC 6698). Browser-side HTTP Public Key Pinning (HPKP, RFC 7469) was deprecated and removed from Chrome in 2018 due to operational risk (pin rotation failures causing site lockout) — Certificate Transparency (CT) log monitoring is the modern browser-side equivalent for detecting rogue CA issuance. Pin rotation is the primary operational risk: if pins are not updated before certificate renewal, the application loses connectivity. Best practice is to pin to at least two keys (primary + backup) and pin to the intermediate CA rather than the leaf to survive routine certificate rotation.",
+  "tactic": "Harden",
+  "category": "Cryptographic Controls",
+  "category_id": "cryptographic-controls",
+  "function_id": "transport-crypto",
+  "control_layer": "Application",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Without pinning, a network attacker who compromises any trusted CA (or obtains a misissued certificate from any CA in the default trust store) can present a validly-signed certificate and complete the TLS handshake — the client has no way to distinguish the rogue cert from the legitimate one. With pinning, the client compares the presented certificate's public key hash against the pinned set and rejects mismatches regardless of CA signature validity. The attacker must compromise the specific pinned private key, which is a fundamentally harder target than any-of-hundreds-of-CAs. Does not protect against compromise of the pinned key itself, and requires correct pin rotation to avoid self-inflicted outages"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-295"
+  ],
+  "verification": {
+    "method": "Verify certificate pinning is configured via DANE/TLSA records, application configuration, or connection-level SPKI hash validation",
+    "commands": [
+      {
+        "command": "dig +short TLSA _443._tcp.<domain> 2>/dev/null | grep -c '^[0-3] [0-1] [0-2]'",
+        "expected": ">=1",
+        "platform": "any"
+      },
+      {
+        "command": "openssl s_client -connect <host>:<port> </dev/null 2>/dev/null | openssl x509 -pubkey -noout 2>/dev/null | openssl ec -pubin -outform DER 2>/dev/null | openssl dgst -sha256 -binary | openssl enc -base64",
+        "expected": "base64-encoded SPKI hash to compare against pin set",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'pin-sha256\\|pins\\|certificate-pinning\\|trust-anchors\\|TrustKit\\|PublicKeyHash' <app_source>/ 2>/dev/null | grep -c '.'",
+        "expected": ">=1",
+        "platform": "any"
+      },
+      {
+        "command": "grep -A5 'trust-anchors\\|pin-set' <app_source>/res/xml/network_security_config.xml 2>/dev/null | grep -c 'digest'",
+        "expected": ">=1",
+        "platform": "any"
+      }
+    ]
+  },
+  "confidence": "Medium",
+  "platforms": [
+    "Android",
+    "iOS",
+    "RHEL 8",
+    "RHEL 9",
+    "RHEL 10",
+    "Any"
+  ],
+  "scf_identifiers": [
+    "CRY-08",
+    "CRY-11"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-295",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "Pinning eliminates the rogue-CA attack vector entirely — the client rejects any certificate whose public key hash is not in the pin set, regardless of CA signature validity. A validly-signed certificate from a compromised or misissuing CA is deterministically rejected because its key does not match the pinned hash",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "CRY-08",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "CRY-11",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

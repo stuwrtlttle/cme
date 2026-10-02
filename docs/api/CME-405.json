@@ -1,0 +1,233 @@
+{
+  "cme_id": "CME-405",
+  "control_name": "DNSSEC Validation",
+  "description": "Enables DNSSEC validation on the local resolver to cryptographically verify DNS response authenticity using the RRSIG/DNSKEY/DS chain of trust rooted at the DNS root zone. For DNSSEC-signed zones, the resolver verifies that each DNS record carries a valid RRSIG signature produced by the zone's signing key (DNSKEY), and that the signing key is authenticated by a DS record in the parent zone, chaining up to the root trust anchor. Spoofed or modified DNS responses for signed zones are rejected because they lack valid cryptographic signatures — this prevents DNS cache poisoning (Kaminsky attack), DNS spoofing, and DNS-based redirection for services in signed zones. Critical scope limitation: DNSSEC validation only protects lookups for zones that have deployed DNSSEC signing — unsigned zones (still the majority of domains) receive no protection, and the resolver accepts their responses without cryptographic verification. DNSSEC provides data integrity (the response hasn't been modified) and origin authentication (the response came from the authoritative zone), but NOT confidentiality — DNS queries and responses are still visible on the wire unless combined with DNS-over-TLS (DoT) or DNS-over-HTTPS (DoH). Configured via systemd-resolved (DNSSEC=yes), unbound (auto-trust-anchor-file, val-permissive-mode: no), BIND (dnssec-validation auto), or Windows DNS Server (DNSSEC validation settings).",
+  "tactic": "Harden",
+  "category": "Cryptographic Controls",
+  "category_id": "cryptographic-controls",
+  "function_id": "data-integrity-crypto",
+  "control_layer": "Network",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Without DNSSEC validation, a network attacker can poison DNS caches or spoof DNS responses with forged records (Kaminsky attack, on-path modification) — the resolver has no way to distinguish legitimate from forged responses. With DNSSEC validation enabled, the resolver rejects any response for a signed zone that lacks a valid RRSIG signature chaining to the root trust anchor. The attacker must compromise a zone signing key or find a collision in the DNSSEC hash algorithm (SHA-256) — both fundamentally harder than forging an unsigned UDP packet. Scope limitation: for unsigned zones (still the majority of domains), DNSSEC validation provides no protection and the attacker's complexity is unchanged. The AC shift applies only to lookups for DNSSEC-signed zones"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-350",
+    "CWE-345"
+  ],
+  "verification": {
+    "method": "Verify DNSSEC validation is enabled in the local resolver and that signed zones are validated with the AD flag",
+    "commands": [
+      {
+        "command": "resolvectl status 2>/dev/null | grep -i 'DNSSEC' | grep -ci 'yes'",
+        "expected": ">=1",
+        "platform": "linux"
+      },
+      {
+        "command": "grep -E '^[^#]*val-permissive-mode' /etc/unbound/unbound.conf 2>/dev/null | grep -c 'no'",
+        "expected": "1",
+        "platform": "linux"
+      },
+      {
+        "command": "grep -E '^[^#]*dnssec-validation' /etc/named.conf /etc/bind/named.conf.options 2>/dev/null | grep -ci 'auto\\|yes'",
+        "expected": ">=1",
+        "platform": "linux"
+      },
+      {
+        "command": "dig +dnssec +short SOA gov. 2>/dev/null | head -1 | grep -c '.'",
+        "expected": "1",
+        "platform": "any"
+      },
+      {
+        "command": "Get-DnsServerSetting -All 2>$null | Select-Object -ExpandProperty EnableDnsSec",
+        "expected": "True",
+        "platform": "windows"
+      }
+    ]
+  },
+  "confidence": "Medium",
+  "remediation": [
+    {
+      "id": "systemd-resolved-dnssec",
+      "name": "Enable DNSSEC validation in systemd-resolved",
+      "platform": "linux",
+      "precondition": "systemctl is-active systemd-resolved >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Set DNSSEC=yes in resolved.conf to enable strict DNSSEC validation for all queries (responses for signed zones that fail validation are rejected)",
+          "command": "mkdir -p /etc/systemd/resolved.conf.d && printf '[Resolve]\\nDNSSEC=yes\\n' > /etc/systemd/resolved.conf.d/99-cme-405-dnssec.conf",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f /etc/systemd/resolved.conf.d/99-cme-405-dnssec.conf"
+        },
+        {
+          "description": "Restart systemd-resolved to apply DNSSEC validation",
+          "command": "systemctl restart systemd-resolved",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "resolvectl status 2>/dev/null | grep -i 'DNSSEC' | grep -ci 'yes'",
+      "references": [
+        {
+          "source": "systemd-resolved.conf(5) — DNSSEC",
+          "url": "https://www.freedesktop.org/software/systemd/man/latest/resolved.conf.html#DNSSEC="
+        },
+        {
+          "source": "RHEL 9 — Configuring DNS name resolution",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/configuring_and_managing_networking/configuring-the-order-of-dns-servers_configuring-and-managing-networking"
+        }
+      ]
+    },
+    {
+      "id": "unbound-dnssec-strict",
+      "name": "Enable strict DNSSEC validation in Unbound resolver",
+      "platform": "linux",
+      "precondition": "command -v unbound-control >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Configure Unbound with automatic trust anchor management and strict validation mode (val-permissive-mode: no rejects responses that fail DNSSEC validation)",
+          "command": "printf 'server:\\n    auto-trust-anchor-file: \"/var/lib/unbound/root.key\"\\n    val-permissive-mode: no\\n' > /etc/unbound/conf.d/cme-405-dnssec.conf",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f /etc/unbound/conf.d/cme-405-dnssec.conf"
+        },
+        {
+          "description": "Fetch or update the DNSSEC root trust anchor key",
+          "command": "unbound-anchor -a /var/lib/unbound/root.key || true",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Restart Unbound to apply DNSSEC validation configuration",
+          "command": "systemctl restart unbound",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "grep -E '^[^#]*val-permissive-mode' /etc/unbound/unbound.conf /etc/unbound/conf.d/*.conf 2>/dev/null | grep -c 'no'",
+      "references": [
+        {
+          "source": "Unbound documentation — DNSSEC validation",
+          "url": "https://unbound.docs.nlnetlabs.nl/en/latest/topics/filtering/dnssec.html"
+        }
+      ]
+    },
+    {
+      "id": "windows-dns-dnssec",
+      "name": "Enable DNSSEC validation on Windows DNS Server",
+      "platform": "windows",
+      "precondition": "Get-Command Get-DnsServerSetting -ErrorAction SilentlyContinue",
+      "steps": [
+        {
+          "description": "Enable DNSSEC validation on the Windows DNS Server and add the root zone trust anchor",
+          "command": "Set-DnsServerSetting -EnableDnsSec $true; Add-DnsServerTrustAnchor -Name '.' -CryptoAlgorithm RsaSha256 -KeyTag 20326 -DigestType Sha256",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "Set-DnsServerSetting -EnableDnsSec $false"
+        },
+        {
+          "description": "Restart the DNS Server service to apply DNSSEC settings",
+          "command": "Restart-Service DNS",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "Get-DnsServerSetting -All 2>$null | Select-Object -ExpandProperty EnableDnsSec",
+      "references": [
+        {
+          "source": "Microsoft — DNSSEC in Windows Server",
+          "url": "https://learn.microsoft.com/en-us/windows-server/networking/dns/dnssec/dnssec-overview"
+        }
+      ]
+    }
+  ],
+  "platforms": [
+    "RHEL 8",
+    "RHEL 9",
+    "RHEL 10",
+    "Fedora",
+    "Ubuntu 24.04",
+    "Windows Server 2019",
+    "Windows Server 2022"
+  ],
+  "scf_identifiers": [
+    "CRY-04",
+    "CRY-13",
+    "NET-10.2"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "cve_schema_version": "5.2.0",
+  "cve_affected": [
+    {
+      "vendor": "redhat",
+      "product": "enterprise_linux",
+      "cpes": [
+        "cpe:2.3:o:redhat:enterprise_linux:8:*:*:*:*:*:*:*",
+        "cpe:2.3:o:redhat:enterprise_linux:9:*:*:*:*:*:*:*",
+        "cpe:2.3:o:redhat:enterprise_linux:10:*:*:*:*:*:*:*"
+      ],
+      "defaultStatus": "applicable"
+    }
+  ],
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-350",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "For DNSSEC-signed zones, the resolver rejects spoofed DNS responses because they lack valid RRSIG signatures — an attacker cannot forge records that pass cryptographic validation, eliminating the spoofed DNS entries that CWE-350 warns about. Does not protect lookups for unsigned zones.",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-345",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "DNSSEC adds cryptographic authenticity verification to DNS responses via the RRSIG/DNSKEY/DS chain of trust — the resolver verifies that response data was signed by the authoritative zone's key, directly addressing insufficient verification of data authenticity for signed zones",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "CRY-04",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "CRY-13",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "NET-10.2",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

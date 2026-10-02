@@ -1,0 +1,156 @@
+{
+  "cme_id": "CME-406",
+  "control_name": "Signed Package Enforcement (GPG)",
+  "description": "Rejects installation of unsigned or tampered RPM/DEB packages by validating GPG signatures against trusted keys. Prevents supply chain attacks via package repositories.",
+  "tactic": "Harden",
+  "category": "Cryptographic Controls",
+  "category_id": "cryptographic-controls",
+  "function_id": "data-integrity-crypto",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "I",
+      "from": "H",
+      "to": "L",
+      "rationale": "Cannot install tampered packages; cryptographic verification enforced"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-345",
+    "CWE-494",
+    "CWE-347"
+  ],
+  "verification": {
+    "method": "Verify gpgcheck enabled for all repos",
+    "commands": [
+      {
+        "command": "grep -r 'gpgcheck' /etc/yum.repos.d/ | grep -v 'gpgcheck=1'",
+        "expected": "",
+        "platform": "rhel"
+      },
+      {
+        "command": "rpm -qa gpg-pubkey",
+        "expected": "gpg-pubkey",
+        "platform": "rhel"
+      }
+    ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 8",
+    "Fedora"
+  ],
+  "remediation": [
+    {
+      "id": "dnf-gpgcheck-enforce",
+      "name": "Enforce GPG signature verification on all dnf/yum repositories",
+      "platform": "rhel",
+      "precondition": "command -v dnf >/dev/null 2>&1 || command -v yum >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Set gpgcheck=1 globally in dnf.conf to enforce GPG verification as the default for all repositories",
+          "command": "sed -i 's/^gpgcheck=.*/gpgcheck=1/' /etc/dnf/dnf.conf || sed -i 's/^gpgcheck=.*/gpgcheck=1/' /etc/yum.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "sed -i 's/^gpgcheck=.*/gpgcheck=0/' /etc/dnf/dnf.conf"
+        },
+        {
+          "description": "Force gpgcheck=1 on every individual repo file that has it explicitly disabled (overrides per-repo opt-outs)",
+          "command": "sed -i 's/^gpgcheck=0/gpgcheck=1/' /etc/yum.repos.d/*.repo",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Enable repo_gpgcheck to also verify repository metadata signatures (prevents tampered repodata)",
+          "command": "printf '[main]\\nrepo_gpgcheck=1\\n' > /etc/dnf/plugins/repo_gpgcheck.conf 2>/dev/null; grep -qx 'repo_gpgcheck=1' /etc/dnf/dnf.conf || echo 'repo_gpgcheck=1' >> /etc/dnf/dnf.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "sed -i '/^repo_gpgcheck=1$/d' /etc/dnf/dnf.conf"
+        },
+        {
+          "description": "Verify that Red Hat GPG keys are imported (RPM-GPG-KEY-redhat-release covers RHEL content)",
+          "command": "rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release 2>/dev/null; rpm -qa gpg-pubkey | grep -q gpg-pubkey",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rpm -e $(rpm -qa gpg-pubkey)"
+        }
+      ],
+      "verify": "grep -r 'gpgcheck' /etc/yum.repos.d/ | grep -v 'gpgcheck=1' | grep -c . && echo 'FAIL: repos with gpgcheck!=1' || echo 'PASS: all repos enforce GPG'",
+      "references": [
+        {
+          "source": "RHEL 9 — Configuring DNF to require GPG signature validation",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/managing_software_with_the_dnf_tool/assembly_configuring-dnf_managing-software-with-the-dnf-tool"
+        },
+        {
+          "source": "RHEL 9 Security Hardening — Verifying package integrity",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/index"
+        }
+      ]
+    }
+  ],
+  "scf_identifiers": [
+    "CFG-09.2",
+    "CRY-13",
+    "VPM-05.8"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-345",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-494",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-347",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/I",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "CFG-09.2",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "CRY-13",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "VPM-05.8",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

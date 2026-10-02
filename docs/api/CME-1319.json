@@ -1,0 +1,148 @@
+{
+  "cme_id": "CME-1319",
+  "control_name": "Deserialization Type Allowlisting",
+  "description": "Prevention of deserialization attacks through type allowlisting, signature verification of serialized data, and use of safe deserialization libraries. Restricts deserialization to explicitly allowed classes and validates object graphs before reconstruction. Applies to Java (ObjectInputStream with ObjectInputFilter), Python (restricted pickle with custom Unpickler), .NET (DataContractSerializer, avoiding BinaryFormatter), Ruby (safe Marshal alternatives), and PHP (JSON over unserialize). Prevents remote code execution via crafted serialized payloads by blocking gadget chain instantiation.",
+  "tactic": "Harden",
+  "category": "Application Input Validation",
+  "category_id": "application-input-validation",
+  "function_id": "injection-prevention",
+  "control_layer": "Application",
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Requires object injection AND gadget chain AND type allowlist bypass; allowlisting blocks known gadgets"
+    },
+    {
+      "metric": "I",
+      "from": "H",
+      "to": "L",
+      "rationale": "Prevents RCE from deserialization by blocking instantiation of dangerous classes"
+    },
+    {
+      "metric": "C",
+      "from": "H",
+      "to": "L",
+      "rationale": "Prevents data extraction via deserialization side effects; type restrictions limit object graph"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-502",
+    "CWE-915",
+    "CWE-20"
+  ],
+  "verification": {
+    "method": "Code review for type allowlisting and safe deserialization patterns",
+    "commands": [
+      {
+        "command": "grep -rn 'ObjectInputStream' <app_source>/ | grep -v -i 'ObjectInputFilter\\|setObjectInputFilter\\|serialFilter\\|REJECT' | head -10",
+        "expected": "Zero matches — all ObjectInputStream uses should have ObjectInputFilter configured",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'ObjectInputFilter\\|setObjectInputFilter\\|serialFilter\\|ALLOWED_CLASSES\\|jdk\\.serialFilter' <app_source>/",
+        "expected": "Java deserialization type filtering configured via ObjectInputFilter or global serial filter",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'pickle\\.loads\\|pickle\\.load\\|yaml\\.load\\|yaml\\.unsafe_load\\|Marshal\\.load' <app_source>/ | head -10",
+        "expected": "Zero matches — use restricted Unpickler with find_class override, yaml.safe_load, or JSON instead",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'BinaryFormatter\\|SoapFormatter\\|NetDataContractSerializer\\|ObjectStateFormatter' <app_source>/ | head -10",
+        "expected": "Zero matches — use DataContractSerializer or JsonSerializer instead of insecure .NET formatters",
+        "platform": "any"
+      }
+    ]
+  },
+  "references": [
+    {
+      "source": "OWASP Deserialization Cheat Sheet",
+      "url": "https://cheatsheetseries.owasp.org/cheatsheets/Deserialization_Cheat_Sheet.html"
+    },
+    {
+      "source": "CWE-502",
+      "url": "https://cwe.mitre.org/data/definitions/502.html"
+    },
+    {
+      "source": "Java ObjectInputFilter",
+      "url": "https://docs.oracle.com/en/java/javase/17/core/serialization-filtering1.html"
+    }
+  ],
+  "platforms": [
+    "Any"
+  ],
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "scf_identifiers": [
+    "IAC-15",
+    "IAC-15.2",
+    "STA-02"
+  ],
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-502",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "Directly prevents deserialization of untrusted data by allowlisting safe types",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-915",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-20",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/I",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/C",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "IAC-15",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "ATT&CK",
+      "identifier": "M1048",
+      "value": "Application Isolation and Sandboxing",
+      "relationship_type": "supports",
+      "rationale": "Type allowlisting supports application isolation by restricting deserialization scope"
+    }
+  ]
+}

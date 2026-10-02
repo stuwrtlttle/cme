@@ -1,0 +1,137 @@
+{
+  "cme_id": "CME-712",
+  "control_name": "Container Image Signing and Provenance Verification (Cosign/Sigstore)",
+  "description": "Require cryptographic signatures on container images before deployment. Cosign/Sigstore verify image provenance against a trust policy, ensuring only images from authorized build pipelines are admitted. Blocks supply chain attacks where a compromised registry or build system pushes malicious images. Verification can be enforced at admission time via policy controllers (Kyverno, Gatekeeper with cosign) or at pull time via container runtime trust policies (Podman policy.json, CRI-O).",
+  "tactic": "Harden",
+  "category": "Container Isolation",
+  "category_id": "container-isolation",
+  "function_id": "pod-security",
+  "control_layer": "Application",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Attacker must forge a valid cryptographic signature or compromise the signing key to inject a malicious container image; simply pushing to a registry is insufficient"
+    },
+    {
+      "metric": "I",
+      "from": "H",
+      "to": "L",
+      "rationale": "Unsigned or tampered images are rejected at admission; modifications to images after signing are detected and blocked"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-345",
+    "CWE-494",
+    "CWE-829"
+  ],
+  "verification": {
+    "method": "Verify image signature verification is enforced at admission or runtime level",
+    "commands": [
+      {
+        "command": "kubectl get clusterimagepolicy --no-headers 2>/dev/null | wc -l || kubectl get policy.sigstore.dev --no-headers 2>/dev/null | wc -l",
+        "expected": ">=1",
+        "platform": "kubernetes"
+      },
+      {
+        "command": "kubectl get clusterpolicy -o jsonpath='{range .items[*]}{.spec.rules[*].verifyImages}{end}' 2>/dev/null | grep -c 'image'",
+        "expected": ">=1",
+        "platform": "kubernetes"
+      },
+      {
+        "command": "podman image trust show 2>/dev/null | grep -c 'signedBy'",
+        "expected": ">=1",
+        "platform": "linux"
+      },
+      {
+        "command": "cat /etc/containers/policy.json 2>/dev/null | grep -c 'signedBy'",
+        "expected": ">=1",
+        "platform": "linux"
+      },
+      {
+        "command": "cosign verify --key <cosign_public_key> <image> 2>&1 | grep -c 'The following checks were performed'",
+        "expected": "1",
+        "platform": "any"
+      },
+      {
+        "command": "kubectl run cme-unsigned-test --image=docker.io/library/busybox:latest --restart=Never --dry-run=server 2>&1 | grep -c -i 'denied\\|forbidden\\|failed.*verif\\|signature'",
+        "expected": ">=1",
+        "platform": "kubernetes"
+      }
+    ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "Kubernetes 1.25+",
+    "OpenShift 4.12+",
+    "Podman"
+  ],
+  "scf_identifiers": [
+    "CFG-09.2",
+    "CLD-05",
+    "CRY-13"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-345",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-494",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-829",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/I",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "CFG-09.2",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "CLD-05",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "CRY-13",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

@@ -1,0 +1,203 @@
+{
+  "cme_id": "CME-802",
+  "control_name": "Password Quality Enforcement (pwquality)",
+  "description": "Enforce minimum password complexity requirements via pam_pwquality (Linux) or Group Policy (Windows), ensuring user-chosen passwords resist brute force and dictionary attacks. Key enforcement parameters: minimum length (minlen, typically 14+), minimum character classes (minclass, requiring uppercase, lowercase, digits, and symbols), and dictionary checking (rejecting common words and variations). The combined effect is a search space of ~95^14 (~4.9x10^27) for online attacks, making brute force impractical within lockout windows. On RHEL/Fedora, pam_pwquality is the standard PAM module; on Debian/Ubuntu, it is available as libpam-pwquality. Windows enforces equivalent policy via Group Policy (Computer Configuration > Windows Settings > Security Settings > Account Policies > Password Policy) or Fine-Grained Password Policies in Active Directory.",
+  "tactic": "Harden",
+  "category": "Credential Hardening",
+  "category_id": "credential-hardening",
+  "function_id": "password-policy",
+  "control_layer": "Identity",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Without quality enforcement, users choose weak passwords (common words, short strings, credential-stuffing targets) that can be guessed via dictionary attack or brute force with minimal effort. With minlen=14 and minclass=4 enforced, the password search space grows to ~95^14 combinations, making online brute force impractical and offline cracking require significant resources even with GPU acceleration — the attacker must find an alternative authentication bypass rather than simply guessing the password"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-521"
+  ],
+  "verification": {
+    "method": "Verify password quality enforcement via pwquality.conf (Linux) or Group Policy (Windows)",
+    "commands": [
+      {
+        "command": "grep '^minlen' /etc/security/pwquality.conf | grep -oE '[0-9]+'",
+        "expected": ">=14",
+        "platform": "linux"
+      },
+      {
+        "command": "grep '^minclass' /etc/security/pwquality.conf | grep -oE '[0-9]+'",
+        "expected": ">=3",
+        "platform": "linux"
+      },
+      {
+        "command": "grep -c 'pam_pwquality.so' /etc/pam.d/system-auth /etc/pam.d/common-password 2>/dev/null",
+        "expected": ">=1",
+        "platform": "linux"
+      },
+      {
+        "command": "net accounts | Select-String 'Minimum password length'",
+        "expected": "Minimum password length                  14",
+        "platform": "windows"
+      }
+    ]
+  },
+  "references": [
+    {
+      "source": "Red Hat Security Hardening Guide",
+      "section": "Password security"
+    },
+    {
+      "source": "CIS RHEL 9 Benchmark",
+      "section": "5.4 Configure PAM"
+    }
+  ],
+  "confidence": "Medium",
+  "platforms": [
+    "RHEL 8",
+    "RHEL 9",
+    "RHEL 10",
+    "Fedora",
+    "Ubuntu 24.04",
+    "Windows 10",
+    "Windows 11",
+    "Windows Server 2022"
+  ],
+  "cve_schema_version": "5.2.0",
+  "cve_affected": [
+    {
+      "vendor": "redhat",
+      "product": "enterprise_linux",
+      "cpes": [
+        "cpe:2.3:o:redhat:enterprise_linux:8:*:*:*:*:*:*:*",
+        "cpe:2.3:o:redhat:enterprise_linux:9:*:*:*:*:*:*:*",
+        "cpe:2.3:o:redhat:enterprise_linux:10:*:*:*:*:*:*:*"
+      ],
+      "defaultStatus": "applicable"
+    },
+    {
+      "vendor": "microsoft",
+      "product": "windows",
+      "cpes": [
+        "cpe:2.3:o:microsoft:windows_10:*:*:*:*:*:*:*:*",
+        "cpe:2.3:o:microsoft:windows_11:*:*:*:*:*:*:*:*",
+        "cpe:2.3:o:microsoft:windows_server_2019:*:*:*:*:*:*:*",
+        "cpe:2.3:o:microsoft:windows_server_2022:*:*:*:*:*:*:*"
+      ],
+      "defaultStatus": "applicable"
+    }
+  ],
+  "remediation": [
+    {
+      "id": "pwquality-conf-hardening",
+      "name": "pam_pwquality configuration with minlen=14 and minclass=4",
+      "platform": "linux",
+      "precondition": "test -f /etc/security/pwquality.conf",
+      "steps": [
+        {
+          "description": "Set minimum password length to 14 characters and require all 4 character classes (uppercase, lowercase, digit, special) in pwquality.conf",
+          "command": "sed -i 's/^#\\?\\s*minlen\\s*=.*/minlen = 14/' /etc/security/pwquality.conf && sed -i 's/^#\\?\\s*minclass\\s*=.*/minclass = 4/' /etc/security/pwquality.conf && sed -i 's/^#\\?\\s*dictcheck\\s*=.*/dictcheck = 1/' /etc/security/pwquality.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "sed -i 's/^minlen\\s*=.*/# minlen = 8/' /etc/security/pwquality.conf && sed -i 's/^minclass\\s*=.*/# minclass = 0/' /etc/security/pwquality.conf"
+        },
+        {
+          "description": "Ensure pam_pwquality.so is enabled in PAM system-auth (RHEL) or common-password (Debian) with retry=3 and enforce_for_root",
+          "command": "grep -q 'pam_pwquality.so' /etc/pam.d/system-auth 2>/dev/null || grep -q 'pam_pwquality.so' /etc/pam.d/common-password 2>/dev/null || echo 'password requisite pam_pwquality.so retry=3 enforce_for_root' >> /etc/pam.d/system-auth",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "sed -i '/pam_pwquality.so/d' /etc/pam.d/system-auth"
+        }
+      ],
+      "verify": "grep '^minlen' /etc/security/pwquality.conf && grep '^minclass' /etc/security/pwquality.conf && grep -c 'pam_pwquality.so' /etc/pam.d/system-auth /etc/pam.d/common-password 2>/dev/null",
+      "references": [
+        {
+          "source": "RHEL 9 Security Hardening — Password security",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/using-authselect-for-configuring-user-authentication_security-hardening"
+        }
+      ]
+    },
+    {
+      "id": "windows-password-policy",
+      "name": "Windows local password policy via net accounts",
+      "platform": "windows",
+      "precondition": "net accounts >$null 2>&1",
+      "steps": [
+        {
+          "description": "Set minimum password length to 14 characters",
+          "command": "net accounts /minpwlen:14",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "net accounts /minpwlen:0"
+        },
+        {
+          "description": "Enable password complexity requirements (uppercase, lowercase, digit, special)",
+          "command": "secedit /export /cfg C:\\Windows\\Temp\\secpol.cfg && (Get-Content C:\\Windows\\Temp\\secpol.cfg) -replace 'PasswordComplexity\\s*=\\s*0','PasswordComplexity = 1' | Set-Content C:\\Windows\\Temp\\secpol.cfg && secedit /configure /db C:\\Windows\\Security\\local.sdb /cfg C:\\Windows\\Temp\\secpol.cfg /areas SECURITYPOLICY",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "secedit /export /cfg C:\\Windows\\Temp\\secpol.cfg && (Get-Content C:\\Windows\\Temp\\secpol.cfg) -replace 'PasswordComplexity\\s*=\\s*1','PasswordComplexity = 0' | Set-Content C:\\Windows\\Temp\\secpol.cfg && secedit /configure /db C:\\Windows\\Security\\local.sdb /cfg C:\\Windows\\Temp\\secpol.cfg /areas SECURITYPOLICY"
+        },
+        {
+          "description": "Set minimum password age to 1 day to prevent rapid cycling through password history",
+          "command": "net accounts /minpwage:1",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "net accounts /minpwage:0"
+        }
+      ],
+      "verify": "net accounts | Select-String 'Minimum password length'",
+      "references": [
+        {
+          "source": "Microsoft — Password Policy",
+          "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/password-policy"
+        }
+      ]
+    }
+  ],
+  "scf_identifiers": [
+    "IAC-10.1",
+    "IAC-10.4"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-521",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "IAC-10.1",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "IAC-10.4",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

@@ -1,0 +1,328 @@
+{
+  "cme_id": "CME-101",
+  "control_name": "ASLR (Address Space Layout Randomization)",
+  "description": "Randomizes memory layout of processes, making memory corruption exploits significantly harder by requiring the attacker to guess or leak addresses.",
+  "tactic": "Harden",
+  "category": "Kernel Hardening",
+  "category_id": "kernel-hardening",
+  "function_id": "memory-safety",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Attacker must defeat randomization via info leak or brute force"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-119",
+    "CWE-120",
+    "CWE-122",
+    "CWE-787",
+    "CWE-125",
+    "CWE-416",
+    "CWE-415",
+    "CWE-824",
+    "CWE-825"
+  ],
+  "verification": {
+    "method": "Check kernel randomize_va_space sysctl is set to 2 (full randomization)",
+    "commands": [
+      {
+        "command": "cat /proc/sys/kernel/randomize_va_space",
+        "expected": "2",
+        "platform": "linux"
+      },
+      {
+        "command": "sysctl kernel.randomize_va_space",
+        "expected": "kernel.randomize_va_space = 2",
+        "platform": "linux"
+      },
+      {
+        "command": "(Get-ProcessMitigation -System).ASLR.ForceRelocateImages",
+        "expected": "ON",
+        "platform": "windows"
+      },
+      {
+        "command": "(Get-ProcessMitigation -System).ASLR.BottomUp",
+        "expected": "ON",
+        "platform": "windows"
+      }
+    ]
+  },
+  "d3fend_mapping": {
+    "technique_id": "D3-SAOR",
+    "technique_name": "Segment Address Offset Randomization"
+  },
+  "references": [
+    {
+      "source": "Red Hat Security Hardening Guide",
+      "section": "Protecting against memory-based attacks"
+    },
+    {
+      "source": "CIS RHEL 9 Benchmark",
+      "section": "1.5.2 Ensure address space layout randomization (ASLR) is enabled"
+    }
+  ],
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 8",
+    "Ubuntu 24.04",
+    "SLES 15",
+    "Fedora",
+    "Windows 10",
+    "Windows 11",
+    "Windows Server 2022"
+  ],
+  "cve_schema_version": "5.2.0",
+  "cve_affected": [
+    {
+      "vendor": "redhat",
+      "product": "enterprise_linux",
+      "cpes": [
+        "cpe:2.3:o:redhat:enterprise_linux:9:*:*:*:*:*:*:*",
+        "cpe:2.3:o:redhat:enterprise_linux:8:*:*:*:*:*:*:*"
+      ],
+      "platforms": [
+        "x86_64",
+        "aarch64",
+        "s390x",
+        "ppc64le"
+      ],
+      "defaultStatus": "applicable"
+    },
+    {
+      "vendor": "suse",
+      "product": "sle-module-basesystem",
+      "cpes": [
+        "cpe:2.3:o:suse:sles:15:*:*:*:*:*:*:*"
+      ],
+      "defaultStatus": "applicable"
+    },
+    {
+      "vendor": "canonical",
+      "product": "ubuntu_linux",
+      "cpes": [
+        "cpe:2.3:o:canonical:ubuntu_linux:24.04:*:*:*:lts:*:*:*"
+      ],
+      "defaultStatus": "applicable"
+    },
+    {
+      "vendor": "fedoraproject",
+      "product": "fedora",
+      "cpes": [
+        "cpe:2.3:o:fedoraproject:fedora:*:*:*:*:*:*:*:*"
+      ],
+      "defaultStatus": "applicable"
+    },
+    {
+      "vendor": "microsoft",
+      "product": "windows",
+      "cpes": [
+        "cpe:2.3:o:microsoft:windows_10:*:*:*:*:*:*:*:*",
+        "cpe:2.3:o:microsoft:windows_11:*:*:*:*:*:*:*:*",
+        "cpe:2.3:o:microsoft:windows_server_2019:*:*:*:*:*:*:*",
+        "cpe:2.3:o:microsoft:windows_server_2022:*:*:*:*:*:*:*"
+      ],
+      "defaultStatus": "applicable"
+    },
+    {
+      "vendor": "apple",
+      "product": "macos",
+      "cpes": [
+        "cpe:2.3:o:apple:macos:*:*:*:*:*:*:*:*"
+      ],
+      "defaultStatus": "applicable"
+    }
+  ],
+  "remediation": [
+    {
+      "id": "sysctl-full-aslr",
+      "name": "Enable full ASLR via sysctl with persistent drop-in",
+      "platform": "linux",
+      "precondition": "test -d /proc/sys/kernel",
+      "steps": [
+        {
+          "description": "Set kernel.randomize_va_space to 2 (full randomization: stack, VDSO, shared memory, mmap, heap) in the running kernel",
+          "command": "sysctl -w kernel.randomize_va_space=2",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "sysctl -w kernel.randomize_va_space=0"
+        },
+        {
+          "description": "Persist the setting across reboots via sysctl.d drop-in",
+          "command": "printf 'kernel.randomize_va_space = 2\\n' > /etc/sysctl.d/99-cme-101-aslr.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/sysctl.d/99-cme-101-aslr.conf"
+        }
+      ],
+      "verify": "sysctl kernel.randomize_va_space",
+      "references": [
+        {
+          "source": "RHEL 9 Security Hardening — Protecting against memory-based attacks",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/using-the-kernel-integrity-subsystem_security-hardening"
+        },
+        {
+          "source": "CIS RHEL 9 Benchmark — 1.5.2 Ensure ASLR is enabled",
+          "url": "https://www.cisecurity.org/benchmark/red_hat_linux"
+        }
+      ]
+    },
+    {
+      "id": "windows-exploit-protection-aslr",
+      "name": "Enable system-wide mandatory ASLR via Exploit Protection",
+      "platform": "windows",
+      "precondition": "Get-Command Set-ProcessMitigation -ErrorAction SilentlyContinue",
+      "steps": [
+        {
+          "description": "Enable ForceRelocateImages (mandatory ASLR) system-wide — forces relocation of images not compiled with /DYNAMICBASE",
+          "command": "Set-ProcessMitigation -System -Enable ForceRelocateImages",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "Set-ProcessMitigation -System -Disable ForceRelocateImages"
+        },
+        {
+          "description": "Enable BottomUp randomization system-wide — randomizes the base of the bottom-up allocations (heap, stack, other memory regions)",
+          "command": "Set-ProcessMitigation -System -Enable BottomUp",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "Set-ProcessMitigation -System -Disable BottomUp"
+        },
+        {
+          "description": "Enable HighEntropy ASLR system-wide — uses the full 64-bit address space for randomization on x64 processes",
+          "command": "Set-ProcessMitigation -System -Enable HighEntropy",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "Set-ProcessMitigation -System -Disable HighEntropy"
+        }
+      ],
+      "verify": "(Get-ProcessMitigation -System).ASLR | Format-List",
+      "references": [
+        {
+          "source": "Microsoft — Exploit Protection reference",
+          "url": "https://learn.microsoft.com/en-us/defender-endpoint/exploit-protection-reference"
+        },
+        {
+          "source": "Microsoft — Customize Exploit Protection",
+          "url": "https://learn.microsoft.com/en-us/defender-endpoint/customize-exploit-protection"
+        }
+      ]
+    }
+  ],
+  "scf_identifiers": [
+    "END-02",
+    "SEA-10",
+    "SEA-14.1"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-119",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-120",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-122",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-787",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-125",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-416",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-415",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-824",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-825",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "D3FEND",
+      "identifier": "D3-SAOR",
+      "value": "Segment Address Offset Randomization",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "END-02",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "SEA-10",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "SEA-14.1",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

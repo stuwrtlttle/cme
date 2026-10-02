@@ -1,0 +1,961 @@
+[
+  {
+    "cme_id": "CME-101",
+    "control_name": "ASLR (Address Space Layout Randomization)",
+    "tactic": "Harden",
+    "category": "Kernel Hardening",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-102",
+    "control_name": "NX/XD Bit (Non-Executable Memory)",
+    "tactic": "Harden",
+    "category": "Kernel Hardening",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-103",
+    "control_name": "Stack Canaries (Stack Protector)",
+    "tactic": "Harden",
+    "category": "Kernel Hardening",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-104",
+    "control_name": "KASLR (Kernel Address Space Layout Randomization)",
+    "tactic": "Harden",
+    "category": "Kernel Hardening",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-105",
+    "control_name": "SMEP (Supervisor Mode Execution Prevention)",
+    "tactic": "Harden",
+    "category": "Kernel Hardening",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-106",
+    "control_name": "SMAP (Supervisor Mode Access Prevention)",
+    "tactic": "Harden",
+    "category": "Kernel Hardening",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-107",
+    "control_name": "Kernel Module Loading Restriction",
+    "tactic": "Harden",
+    "category": "Kernel Hardening",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-108",
+    "control_name": "kptr_restrict (Kernel Pointer Restriction)",
+    "tactic": "Harden",
+    "category": "Kernel Hardening",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-109",
+    "control_name": "Kernel Lockdown Mode",
+    "tactic": "Harden",
+    "category": "Kernel Hardening",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-110",
+    "control_name": "KEXEC Restriction",
+    "tactic": "Harden",
+    "category": "Kernel Hardening",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-111",
+    "control_name": "Secure Boot (UEFI)",
+    "tactic": "Harden",
+    "category": "Kernel Hardening",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-112",
+    "control_name": "RELRO and PIE (Full)",
+    "tactic": "Harden",
+    "category": "Kernel Hardening",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-113",
+    "control_name": "Control Flow Integrity (CFI / Shadow Call Stack)",
+    "tactic": "Harden",
+    "category": "Kernel Hardening",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-114",
+    "control_name": "Process Resource Limits (ulimit/prlimit)",
+    "tactic": "Harden",
+    "category": "Kernel Hardening",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-116",
+    "control_name": "FORTIFY_SOURCE (Buffer Overflow Detection)",
+    "tactic": "Harden",
+    "category": "Kernel Hardening",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-117",
+    "control_name": "Heap Allocator Hardening (glibc Safe-Linking and Metadata Protection)",
+    "tactic": "Harden",
+    "category": "Kernel Hardening",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-118",
+    "control_name": "Protected File Links (Kernel Symlink/Hardlink Protection)",
+    "tactic": "Harden",
+    "category": "Kernel Hardening",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-119",
+    "control_name": "Compiler Integer Overflow and Conversion Safety (-ftrapv / UBSan Integer)",
+    "tactic": "Harden",
+    "category": "Kernel Hardening",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-120",
+    "control_name": "Kernel Memory Initialization Enforcement (init_on_alloc / INIT_STACK_ALL_ZERO)",
+    "tactic": "Harden",
+    "category": "Kernel Hardening",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-121",
+    "control_name": "SLAB Freelist Hardening (Freelist Randomization and Integrity)",
+    "tactic": "Harden",
+    "category": "Kernel Hardening",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-201",
+    "control_name": "Zero Trust Gateway / Identity-Aware Proxy",
+    "tactic": "Isolate",
+    "category": "Network Isolation",
+    "control_layer": "Network"
+  },
+  {
+    "cme_id": "CME-202",
+    "control_name": "Host-Based Firewall (firewalld/nftables)",
+    "tactic": "Isolate",
+    "category": "Network Isolation",
+    "control_layer": "Network"
+  },
+  {
+    "cme_id": "CME-203",
+    "control_name": "Network Segmentation (VLANs/Subnets)",
+    "tactic": "Isolate",
+    "category": "Network Isolation",
+    "control_layer": "Network"
+  },
+  {
+    "cme_id": "CME-204",
+    "control_name": "IPsec / WireGuard (Encrypted Transport)",
+    "tactic": "Isolate",
+    "category": "Network Isolation",
+    "control_layer": "Network"
+  },
+  {
+    "cme_id": "CME-205",
+    "control_name": "Service Binding to Localhost",
+    "tactic": "Isolate",
+    "category": "Network Isolation",
+    "control_layer": "Network"
+  },
+  {
+    "cme_id": "CME-206",
+    "control_name": "Network Policy (Kubernetes)",
+    "tactic": "Isolate",
+    "category": "Network Isolation",
+    "control_layer": "Network"
+  },
+  {
+    "cme_id": "CME-207",
+    "control_name": "DNS Rebinding Protection",
+    "tactic": "Harden",
+    "category": "Network Isolation",
+    "control_layer": "Network"
+  },
+  {
+    "cme_id": "CME-208",
+    "control_name": "Outbound Network Egress Restriction (SSRF Blast Radius Containment)",
+    "tactic": "Isolate",
+    "category": "Network Isolation",
+    "control_layer": "Network"
+  },
+  {
+    "cme_id": "CME-209",
+    "control_name": "Kubernetes NetworkPolicy Enforcement",
+    "tactic": "Isolate",
+    "category": "Network Isolation",
+    "control_layer": ""
+  },
+  {
+    "cme_id": "CME-301",
+    "control_name": "SELinux (Enforcing Mode)",
+    "tactic": "Harden",
+    "category": "Mandatory Access Control",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-302",
+    "control_name": "SELinux Confined User Mapping",
+    "tactic": "Harden",
+    "category": "Mandatory Access Control",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-303",
+    "control_name": "SELinux Booleans (Restrictive)",
+    "tactic": "Harden",
+    "category": "Mandatory Access Control",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-304",
+    "control_name": "AppArmor (Enforcing Profile)",
+    "tactic": "Harden",
+    "category": "Mandatory Access Control",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-305",
+    "control_name": "macOS System Integrity Protection (SIP)",
+    "tactic": "Harden",
+    "category": "Mandatory Access Control",
+    "control_layer": ""
+  },
+  {
+    "cme_id": "CME-401",
+    "control_name": "System-wide Crypto Policy (FUTURE)",
+    "tactic": "Harden",
+    "category": "Cryptographic Controls",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-402",
+    "control_name": "FIPS 140-3 Mode",
+    "tactic": "Harden",
+    "category": "Cryptographic Controls",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-403",
+    "control_name": "TLS 1.3 Enforcement",
+    "tactic": "Harden",
+    "category": "Cryptographic Controls",
+    "control_layer": "Network"
+  },
+  {
+    "cme_id": "CME-404",
+    "control_name": "Certificate Pinning",
+    "tactic": "Harden",
+    "category": "Cryptographic Controls",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-405",
+    "control_name": "DNSSEC Validation",
+    "tactic": "Harden",
+    "category": "Cryptographic Controls",
+    "control_layer": "Network"
+  },
+  {
+    "cme_id": "CME-406",
+    "control_name": "Signed Package Enforcement (GPG)",
+    "tactic": "Harden",
+    "category": "Cryptographic Controls",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-407",
+    "control_name": "Data-at-Rest Encryption (LUKS/dm-crypt / BitLocker)",
+    "tactic": "Harden",
+    "category": "Cryptographic Controls",
+    "control_layer": "Data"
+  },
+  {
+    "cme_id": "CME-408",
+    "control_name": "System-wide TLS/Crypto Policy Enforcement",
+    "tactic": "Harden",
+    "category": "Cryptographic Controls",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-501",
+    "control_name": "Read-Only Root Filesystem",
+    "tactic": "Isolate",
+    "category": "Filesystem Hardening",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-502",
+    "control_name": "noexec on /tmp and /dev/shm",
+    "tactic": "Harden",
+    "category": "Filesystem Hardening",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-503",
+    "control_name": "nosuid on Non-Root Partitions",
+    "tactic": "Harden",
+    "category": "Filesystem Hardening",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-504",
+    "control_name": "dm-verity (Verified Boot)",
+    "tactic": "Harden",
+    "category": "Filesystem Hardening",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-505",
+    "control_name": "IMA/EVM (Integrity Measurement Architecture)",
+    "tactic": "Harden",
+    "category": "Filesystem Hardening",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-506",
+    "control_name": "Landlock LSM (Filesystem Sandboxing)",
+    "tactic": "Isolate",
+    "category": "Filesystem Hardening",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-507",
+    "control_name": "Secure Dynamic Linker Configuration (LD_PRELOAD/PATH Hardening)",
+    "tactic": "Harden",
+    "category": "Filesystem Hardening",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-508",
+    "control_name": "Quoted Service Path Enforcement (Windows)",
+    "tactic": "Harden",
+    "category": "Filesystem Hardening",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-601",
+    "control_name": "Kernel-Level Syscall Filtering (seccomp)",
+    "tactic": "Harden",
+    "category": "Syscall & BPF Controls",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-602",
+    "control_name": "seccomp-bpf Profile (Container Default)",
+    "tactic": "Harden",
+    "category": "Syscall & BPF Controls",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-603",
+    "control_name": "Unprivileged BPF Disabled",
+    "tactic": "Harden",
+    "category": "Syscall & BPF Controls",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-604",
+    "control_name": "Unprivileged User Namespaces Disabled",
+    "tactic": "Harden",
+    "category": "Syscall & BPF Controls",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-701",
+    "control_name": "Sandboxing / gVisor Runtime",
+    "tactic": "Isolate",
+    "category": "Container Isolation",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-702",
+    "control_name": "Linux Namespaces (User, PID, Network, Mount)",
+    "tactic": "Isolate",
+    "category": "Container Isolation",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-703",
+    "control_name": "Rootless Containers",
+    "tactic": "Isolate",
+    "category": "Container Isolation",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-704",
+    "control_name": "cgroups v2 Resource Limits",
+    "tactic": "Isolate",
+    "category": "Container Isolation",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-705",
+    "control_name": "Dropped Linux Capabilities",
+    "tactic": "Isolate",
+    "category": "Container Isolation",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-706",
+    "control_name": "Pod Security Standards (Restricted)",
+    "tactic": "Isolate",
+    "category": "Container Isolation",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-707",
+    "control_name": "NoNewPrivileges",
+    "tactic": "Isolate",
+    "category": "Privilege Isolation",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-708",
+    "control_name": "Least Privilege sudo Configuration",
+    "tactic": "Isolate",
+    "category": "Privilege Isolation",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-709",
+    "control_name": "systemd Service Sandboxing (PrivateDevices, PrivateTmp, ProtectSystem)",
+    "tactic": "Isolate",
+    "category": "Privilege Isolation",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-710",
+    "control_name": "DynamicUser (systemd)",
+    "tactic": "Isolate",
+    "category": "Privilege Isolation",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-711",
+    "control_name": "Admission Controller Policy Enforcement (OPA/Gatekeeper/Kyverno)",
+    "tactic": "Harden",
+    "category": "Container Isolation",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-712",
+    "control_name": "Container Image Signing and Provenance Verification (Cosign/Sigstore)",
+    "tactic": "Harden",
+    "category": "Container Isolation",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-713",
+    "control_name": "Read-Only Root Filesystem Enforcement",
+    "tactic": "Harden",
+    "category": "Container Isolation",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-801",
+    "control_name": "Multi-Factor Authentication (MFA)",
+    "tactic": "Harden",
+    "category": "Credential Hardening",
+    "control_layer": "Identity"
+  },
+  {
+    "cme_id": "CME-802",
+    "control_name": "Password Quality Enforcement (pwquality)",
+    "tactic": "Harden",
+    "category": "Credential Hardening",
+    "control_layer": "Identity"
+  },
+  {
+    "cme_id": "CME-803",
+    "control_name": "Account Lockout Policy (pam_faillock)",
+    "tactic": "Harden",
+    "category": "Credential Hardening",
+    "control_layer": "Identity"
+  },
+  {
+    "cme_id": "CME-804",
+    "control_name": "SSH Key-Only Authentication",
+    "tactic": "Harden",
+    "category": "Credential Hardening",
+    "control_layer": "Identity"
+  },
+  {
+    "cme_id": "CME-805",
+    "control_name": "Credential Rotation Policy",
+    "tactic": "Harden",
+    "category": "Credential Hardening",
+    "control_layer": "Identity"
+  },
+  {
+    "cme_id": "CME-806",
+    "control_name": "Kerberos Authentication (GSSAPI)",
+    "tactic": "Harden",
+    "category": "Credential Hardening",
+    "control_layer": "Identity"
+  },
+  {
+    "cme_id": "CME-807",
+    "control_name": "Session Lifetime and Idle Timeout Enforcement",
+    "tactic": "Harden",
+    "category": "Credential Hardening",
+    "control_layer": "Identity"
+  },
+  {
+    "cme_id": "CME-808",
+    "control_name": "Local Administrator Password Solution (LAPS)",
+    "tactic": "Harden",
+    "category": "Credential Hardening",
+    "control_layer": "Identity"
+  },
+  {
+    "cme_id": "CME-901",
+    "control_name": "SSH Hardening (Comprehensive)",
+    "tactic": "Harden",
+    "category": "Protocol Hardening",
+    "control_layer": "Network"
+  },
+  {
+    "cme_id": "CME-902",
+    "control_name": "Disable Unused Network Services",
+    "tactic": "Harden",
+    "category": "Protocol Hardening",
+    "control_layer": "Network"
+  },
+  {
+    "cme_id": "CME-903",
+    "control_name": "Kernel Network Hardening (sysctl)",
+    "tactic": "Harden",
+    "category": "Protocol Hardening",
+    "control_layer": "Network"
+  },
+  {
+    "cme_id": "CME-904",
+    "control_name": "WAF (Web Application Firewall)",
+    "tactic": "Harden",
+    "category": "Application Controls",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-905",
+    "control_name": "Content Security Policy (CSP) Headers",
+    "tactic": "Harden",
+    "category": "Application Controls",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-906",
+    "control_name": "Rate Limiting / Connection Throttling",
+    "tactic": "Harden",
+    "category": "Application Controls",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-907",
+    "control_name": "Application-Layer RBAC Enforcement",
+    "tactic": "Harden",
+    "category": "Application Controls",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-908",
+    "control_name": "Object-Level Authorization Checks (IDOR Prevention)",
+    "tactic": "Harden",
+    "category": "Application Controls",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-909",
+    "control_name": "Default-Deny API Authorization Policy",
+    "tactic": "Harden",
+    "category": "Application Controls",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-910",
+    "control_name": "Role Separation / Duty Segregation",
+    "tactic": "Isolate",
+    "category": "Application Controls",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-911",
+    "control_name": "Fine-Grained Administrative Permission Scoping",
+    "tactic": "Isolate",
+    "category": "Application Controls",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-912",
+    "control_name": "HTTP Header Normalization and Request Smuggling Prevention",
+    "tactic": "Harden",
+    "category": "Application Controls",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-913",
+    "control_name": "CSRF Protection (Anti-CSRF Token & SameSite Cookie Enforcement)",
+    "tactic": "Harden",
+    "category": "Application Controls",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-914",
+    "control_name": "Strict CORS Origin Allowlist Enforcement",
+    "tactic": "Harden",
+    "category": "Application Controls",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-915",
+    "control_name": "Cross-Origin Request Restriction (Reverse Proxy Origin Enforcement)",
+    "tactic": "Harden",
+    "category": "Application Controls",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-916",
+    "control_name": "SameSite Cookie Attribute Enforcement",
+    "tactic": "Harden",
+    "category": "Application Controls",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-917",
+    "control_name": "Worker Process Recycling (MaxConnectionsPerChild / max_requests)",
+    "tactic": "Harden",
+    "category": "Application Controls",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-918",
+    "control_name": "URL Path Authorization Enforcement (Forced Browsing Prevention)",
+    "tactic": "Harden",
+    "category": "Application Controls",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-919",
+    "control_name": "JIT Compiler Hardening (JIT Restriction / V8 Sandbox)",
+    "tactic": "Harden",
+    "category": "Application Controls",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-920",
+    "control_name": "Database Least-Privilege Access Control",
+    "tactic": "Harden",
+    "category": "Application Controls",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-921",
+    "control_name": "URL Request Path Canonicalization Before Authorization",
+    "tactic": "Harden",
+    "category": "Application Controls",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-923",
+    "control_name": "Mass-Assignment Prevention Through Explicit Request Schemas",
+    "tactic": "Harden",
+    "category": "Application Controls",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-924",
+    "control_name": "Arbitrary Code Guard (ACG)",
+    "tactic": "Harden",
+    "category": "Application Controls",
+    "control_layer": ""
+  },
+  {
+    "cme_id": "CME-925",
+    "control_name": "Windows Defender Application Control (WDAC)",
+    "tactic": "Harden",
+    "category": "Application Controls",
+    "control_layer": ""
+  },
+  {
+    "cme_id": "CME-1001",
+    "control_name": "EDR Agent (Endpoint Detection & Response)",
+    "tactic": "Detect",
+    "category": "Runtime Detection",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-1002",
+    "control_name": "Audit Subsystem (auditd)",
+    "tactic": "Detect",
+    "category": "Runtime Detection",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-1003",
+    "control_name": "Falco / eBPF Runtime Security",
+    "tactic": "Detect",
+    "category": "Runtime Detection",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-1004",
+    "control_name": "AIDE / File Integrity Monitoring",
+    "tactic": "Detect",
+    "category": "Integrity Detection",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-1005",
+    "control_name": "Runtime Memory Error Detection (KASAN/HWASan)",
+    "tactic": "Detect",
+    "category": "Runtime Detection",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-1006",
+    "control_name": "Privilege Change Audit Logging",
+    "tactic": "Detect",
+    "category": "Runtime Detection",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-1007",
+    "control_name": "Application Configuration Drift Detection (IaC Enforcement)",
+    "tactic": "Detect",
+    "category": "Integrity Detection",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-1008",
+    "control_name": "Application Admin Event Logging (SIEM Integration)",
+    "tactic": "Detect",
+    "category": "Runtime Detection",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-1009",
+    "control_name": "Privilege Assignment Monitoring (Role Grant Alerting)",
+    "tactic": "Detect",
+    "category": "Runtime Detection",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-1010",
+    "control_name": "cgroup Memory Pressure Monitoring (memory.events / PSI)",
+    "tactic": "Detect",
+    "category": "Integrity Detection",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-1011",
+    "control_name": "Kubernetes API Server Audit Policy",
+    "tactic": "Detect",
+    "category": "Runtime Detection",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-1012",
+    "control_name": "USBGuard \u2014 USB Device Access Control",
+    "tactic": "Detect",
+    "category": "Runtime Detection",
+    "control_layer": ""
+  },
+  {
+    "cme_id": "CME-1012",
+    "control_name": "Pre-commit Secrets Detection (gitleaks/trufflehog)",
+    "tactic": "Detect",
+    "category": "Integrity Detection",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-1101",
+    "control_name": "Automated Patch Management (dnf-automatic)",
+    "tactic": "Evict",
+    "category": "Patch Management",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-1102",
+    "control_name": "Live Kernel Patching (kpatch/livepatch)",
+    "tactic": "Evict",
+    "category": "Patch Management",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-1103",
+    "control_name": "Automated Container Image Rebuilds",
+    "tactic": "Evict",
+    "category": "Patch Management",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-1201",
+    "control_name": "Immutable Infrastructure",
+    "tactic": "Restore",
+    "category": "Recovery Controls",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-1202",
+    "control_name": "Automated Backup with Integrity Verification",
+    "tactic": "Restore",
+    "category": "Recovery Controls",
+    "control_layer": "Data"
+  },
+  {
+    "cme_id": "CME-1203",
+    "control_name": "Disaster Recovery / Multi-Region Failover",
+    "tactic": "Restore",
+    "category": "Recovery Controls",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-1204",
+    "control_name": "Service Watchdog and Automatic Restart (systemd WatchdogSec/Restart)",
+    "tactic": "Restore",
+    "category": "Recovery Controls",
+    "control_layer": "OS/Kernel"
+  },
+  {
+    "cme_id": "CME-1301",
+    "control_name": "Path Traversal Prevention (Canonicalization)",
+    "tactic": "Harden",
+    "category": "Application Input Validation",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-1302",
+    "control_name": "Deserialization Allowlist (Safe Loading)",
+    "tactic": "Harden",
+    "category": "Application Input Validation",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-1303",
+    "control_name": "Application-Level Filesystem Access Confinement",
+    "tactic": "Isolate",
+    "category": "Application Input Validation",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-1304",
+    "control_name": "SSRF Prevention (Outbound Request Allowlist)",
+    "tactic": "Harden",
+    "category": "Application Input Validation",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-1305",
+    "control_name": "SQL Injection Prevention (Parameterized Queries)",
+    "tactic": "Harden",
+    "category": "Application Input Validation",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-1306",
+    "control_name": "XSS Prevention (Context-Aware Output Encoding)",
+    "tactic": "Harden",
+    "category": "Application Input Validation",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-1307",
+    "control_name": "Command Injection Prevention (No Shell Invocation)",
+    "tactic": "Harden",
+    "category": "Application Input Validation",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-1309",
+    "control_name": "Script Engine Restriction (Sandbox / Disable)",
+    "tactic": "Harden",
+    "category": "Application Input Validation",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-1310",
+    "control_name": "File Upload Validation (Content Inspection and Extension Allowlist)",
+    "tactic": "Harden",
+    "category": "Application Input Validation",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-1311",
+    "control_name": "Input Size and Quantity Bounds Enforcement",
+    "tactic": "Harden",
+    "category": "Application Input Validation",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-1312",
+    "control_name": "Argument Injection Prevention (Downstream Input Delimiter Sanitization)",
+    "tactic": "Harden",
+    "category": "Application Input Validation",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-1313",
+    "control_name": "CRLF / Line Injection Prevention (Newline Sanitization for Structured Formats)",
+    "tactic": "Harden",
+    "category": "Application Input Validation",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-1314",
+    "control_name": "Input Canonicalization Before Security Decision",
+    "tactic": "Harden",
+    "category": "Application Input Validation",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-1315",
+    "control_name": "Allowlist-Preferred Input Validation (Deny-by-Default Filtering)",
+    "tactic": "Harden",
+    "category": "Application Input Validation",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-1316",
+    "control_name": "Algorithmic Complexity Safeguards (Pattern/Regex Execution Limits)",
+    "tactic": "Harden",
+    "category": "Application Input Validation",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-1317",
+    "control_name": "XML External Entity Prevention (Secure XML Parser Configuration)",
+    "tactic": "Harden",
+    "category": "Application Input Validation",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-1318",
+    "control_name": "LDAP Injection Prevention",
+    "tactic": "Harden",
+    "category": "Application Input Validation",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-1319",
+    "control_name": "Deserialization Type Allowlisting",
+    "tactic": "Harden",
+    "category": "Application Input Validation",
+    "control_layer": "Application"
+  }
+]

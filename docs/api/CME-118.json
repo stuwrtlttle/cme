@@ -1,0 +1,154 @@
+{
+  "cme_id": "CME-118",
+  "control_name": "Protected File Links (Kernel Symlink/Hardlink Protection)",
+  "description": "Enable the kernel filesystem link protection sysctls to prevent exploitation of TOCTOU race conditions and symlink following attacks in world-writable sticky directories. fs.protected_symlinks=1 prevents following symlinks in sticky world-writable directories (e.g., /tmp) unless the follower owns the symlink, the directory owner matches, or the symlink target owner matches. fs.protected_hardlinks=1 prevents creating hardlinks to files not owned by the caller, blocking hardlink-based TOCTOU and privilege escalation attacks. fs.protected_regular=2 and fs.protected_fifos=2 extend protection to regular files and FIFOs in sticky directories. These sysctls are enabled by default on RHEL 7+ but may be modified by administrators or overridden by third-party configurations.",
+  "tactic": "Harden",
+  "category": "Kernel Hardening",
+  "category_id": "kernel-hardening",
+  "function_id": "kernel-attack-surface",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "The most common filesystem TOCTOU and symlink following pattern — symlink or hardlink swap in a sticky world-writable directory like /tmp between a privileged process check and use — is blocked at the kernel level. The attacker must find a TOCTOU target outside of protected directories, exploit a race that does not involve filesystem links, or resort to more complex techniques such as procfs-based redirects. This significantly increases the complexity required for successful exploitation."
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-59",
+    "CWE-61",
+    "CWE-367",
+    "CWE-362"
+  ],
+  "confidence": "High",
+  "platforms": [
+    "RHEL 7",
+    "RHEL 8",
+    "RHEL 9",
+    "RHEL 10"
+  ],
+  "verification": {
+    "method": "Verify that all four protected file link sysctls are enabled. Check sysctl runtime values and persistence configuration.",
+    "commands": [
+      {
+        "command": "sysctl fs.protected_symlinks",
+        "expected": "fs.protected_symlinks = 1",
+        "platform": "linux"
+      },
+      {
+        "command": "sysctl fs.protected_hardlinks",
+        "expected": "fs.protected_hardlinks = 1",
+        "platform": "linux"
+      },
+      {
+        "command": "sysctl fs.protected_regular",
+        "expected": "fs.protected_regular = 2",
+        "platform": "linux"
+      },
+      {
+        "command": "sysctl fs.protected_fifos",
+        "expected": "fs.protected_fifos = 2",
+        "platform": "linux"
+      }
+    ]
+  },
+  "remediation": [
+    {
+      "id": "sysctl-protected-links",
+      "name": "sysctl protected file links hardening",
+      "platform": "linux",
+      "precondition": "test -d /proc/sys/fs",
+      "steps": [
+        {
+          "description": "Enable all four protected file link sysctls immediately (symlinks, hardlinks, regular files, and FIFOs in sticky world-writable directories)",
+          "command": "sysctl -w fs.protected_symlinks=1 fs.protected_hardlinks=1 fs.protected_regular=2 fs.protected_fifos=2",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "sysctl -w fs.protected_symlinks=0 fs.protected_hardlinks=0 fs.protected_regular=0 fs.protected_fifos=0"
+        },
+        {
+          "description": "Persist the settings via sysctl.d drop-in so they survive reboots",
+          "command": "printf 'fs.protected_symlinks = 1\\nfs.protected_hardlinks = 1\\nfs.protected_regular = 2\\nfs.protected_fifos = 2\\n' > /etc/sysctl.d/99-cme-118-protected-links.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/sysctl.d/99-cme-118-protected-links.conf && sysctl --system"
+        }
+      ],
+      "verify": "sysctl fs.protected_symlinks fs.protected_hardlinks fs.protected_regular fs.protected_fifos",
+      "references": [
+        {
+          "source": "RHEL 9 Security Hardening — Protecting against symlink and hardlink attacks",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/using-the-system-wide-cryptographic-policies_security-hardening"
+        },
+        {
+          "source": "kernel.org — Protected file links sysctl documentation",
+          "url": "https://www.kernel.org/doc/Documentation/sysctl/fs.txt"
+        }
+      ]
+    }
+  ],
+  "scf_identifiers": [
+    "CFG-02",
+    "END-02"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-59",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-61",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-367",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-362",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "CFG-02",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "END-02",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

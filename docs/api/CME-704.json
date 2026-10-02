@@ -1,0 +1,193 @@
+{
+  "cme_id": "CME-704",
+  "control_name": "cgroups v2 Resource Limits",
+  "description": "Constrains CPU, memory, I/O, and PIDs for process groups using cgroups v2 unified hierarchy. Prevents resource exhaustion attacks and limits blast radius of runaway or malicious processes.",
+  "tactic": "Isolate",
+  "category": "Container Isolation",
+  "category_id": "container-isolation",
+  "function_id": "container-runtime",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "A",
+      "from": "H",
+      "to": "L",
+      "rationale": "Process cannot exhaust host resources; OOM killer scoped to cgroup"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-400",
+    "CWE-770",
+    "CWE-772",
+    "CWE-401"
+  ],
+  "verification": {
+    "method": "Check cgroup v2 is mounted and limits are set",
+    "commands": [
+      {
+        "command": "mount | grep cgroup2",
+        "expected": "cgroup2",
+        "platform": "linux"
+      },
+      {
+        "command": "cat /sys/fs/cgroup/<slice>/memory.max",
+        "expected": "numeric limit",
+        "platform": "linux"
+      }
+    ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 8",
+    "Ubuntu 24.04",
+    "Kubernetes"
+  ],
+  "remediation": [
+    {
+      "id": "systemd-slice-limits",
+      "name": "cgroup v2 resource limits via systemd slice drop-in",
+      "platform": "linux",
+      "precondition": "test -f /sys/fs/cgroup/cgroup.controllers",
+      "steps": [
+        {
+          "description": "Create a systemd slice drop-in directory for the target service's resource limits",
+          "command": "mkdir -p /etc/systemd/system/<service>.service.d",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rmdir /etc/systemd/system/<service>.service.d 2>/dev/null"
+        },
+        {
+          "description": "Write a drop-in that sets memory limit (512M), CPU quota (100% of one core), and PID limit (256) to scope resource exhaustion to the cgroup",
+          "command": "printf '[Service]\\nMemoryMax=512M\\nMemoryHigh=384M\\nCPUQuota=100%%\\nTasksMax=256\\n' > /etc/systemd/system/<service>.service.d/resource-limits.conf",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f /etc/systemd/system/<service>.service.d/resource-limits.conf"
+        },
+        {
+          "description": "Reload systemd manager configuration to pick up the drop-in",
+          "command": "systemctl daemon-reload",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Restart the service to apply cgroup resource limits",
+          "command": "systemctl restart <service>",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "systemctl show <service> -p MemoryMax -p CPUQuota -p TasksMax",
+      "references": [
+        {
+          "source": "systemd.resource-control(5) — MemoryMax, CPUQuota, TasksMax",
+          "url": "https://www.freedesktop.org/software/systemd/man/latest/systemd.resource-control.html"
+        },
+        {
+          "source": "RHEL 9 — Managing system resources with systemd",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/managing_monitoring_and_updating_the_kernel/assembly_using-cgroups-v2-to-control-distribution-of-cpu-resources_managing-monitoring-and-updating-the-kernel"
+        }
+      ]
+    },
+    {
+      "id": "kubernetes-resource-limits",
+      "name": "Kubernetes container resource requests and limits",
+      "platform": "kubernetes",
+      "precondition": "kubectl version --client >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Patch the deployment to set CPU and memory resource requests and limits on the primary container, scoping OOM kills to the pod rather than the node",
+          "command": "kubectl patch deployment <deployment> -n <namespace> --type=json -p '[{\"op\":\"add\",\"path\":\"/spec/template/spec/containers/0/resources\",\"value\":{\"requests\":{\"cpu\":\"100m\",\"memory\":\"128Mi\"},\"limits\":{\"cpu\":\"1\",\"memory\":\"512Mi\"}}}]'",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "kubectl patch deployment <deployment> -n <namespace> --type=json -p '[{\"op\":\"remove\",\"path\":\"/spec/template/spec/containers/0/resources\"}]'"
+        },
+        {
+          "description": "Create a LimitRange in the namespace to enforce default resource limits on all new pods (catches pods created without explicit limits)",
+          "command": "kubectl apply -f - <<'EOF'\napiVersion: v1\nkind: LimitRange\nmetadata:\n  name: cme-704-defaults\n  namespace: <namespace>\nspec:\n  limits:\n  - default:\n      cpu: \"1\"\n      memory: 512Mi\n    defaultRequest:\n      cpu: 100m\n      memory: 128Mi\n    type: Container\nEOF",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "kubectl delete limitrange cme-704-defaults -n <namespace>"
+        }
+      ],
+      "verify": "kubectl get deployment <deployment> -n <namespace> -o jsonpath='{.spec.template.spec.containers[0].resources}'",
+      "references": [
+        {
+          "source": "Kubernetes — Managing Resources for Containers",
+          "url": "https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
+        },
+        {
+          "source": "Kubernetes — LimitRange",
+          "url": "https://kubernetes.io/docs/concepts/policy/limit-range/"
+        }
+      ]
+    }
+  ],
+  "scf_identifiers": [
+    "CLD-06",
+    "NET-02.1"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-400",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-770",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-772",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-401",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/A",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "CLD-06",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "NET-02.1",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

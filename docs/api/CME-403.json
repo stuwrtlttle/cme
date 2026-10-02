@@ -1,0 +1,250 @@
+{
+  "cme_id": "CME-403",
+  "control_name": "TLS 1.3 Enforcement",
+  "description": "Enforces TLS 1.3 as the minimum protocol version for all TLS connections, rejecting TLS 1.2 and below at the handshake layer. TLS 1.3 eliminates entire attack classes present in earlier versions: CBC mode ciphers are removed (preventing BEAST, Lucky13 padding oracle attacks), renegotiation is removed (preventing renegotiation-based attacks), only AEAD cipher suites are available (AES-128-GCM, AES-256-GCM, ChaCha20-Poly1305), forward secrecy is mandatory via ephemeral ECDHE/X25519 key exchange (no static RSA key transport), and the server certificate is encrypted during the handshake. Enforcement is configured at the service level (nginx ssl_protocols, Apache SSLProtocol, Tomcat sslEnabledProtocols), reverse proxy level, or system crypto policy level (update-crypto-policies on RHEL). Does not protect applications using custom TLS implementations that bypass system crypto libraries (Go's crypto/tls, Java's JSSE, custom-compiled OpenSSL). Compatibility constraint: legacy clients and embedded devices that do not support TLS 1.3 will fail to connect.",
+  "tactic": "Harden",
+  "category": "Cryptographic Controls",
+  "category_id": "cryptographic-controls",
+  "function_id": "transport-crypto",
+  "control_layer": "Network",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Without TLS 1.3 enforcement, a network attacker can force protocol downgrade to TLS 1.2 or lower using well-tooled attacks: POODLE forces TLS 1.0 fallback to exploit CBC padding, DROWN exploits SSLv2 to decrypt TLS sessions, and FREAK/Logjam force export-grade key exchange. With TLS 1.3 enforcement, the server rejects any handshake below 1.3 — the downgrade path does not exist. Additionally, TLS 1.3 mandates forward secrecy via ephemeral key exchange, so even if a server's long-term private key is later compromised, past sessions cannot be retroactively decrypted. The attacker must perform a real-time MitM against AEAD ciphers with ephemeral keys, which requires fundamentally different (and harder) cryptographic attacks than exploiting known protocol weaknesses"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-757",
+    "CWE-327"
+  ],
+  "verification": {
+    "method": "Verify TLS 1.2 is rejected and TLS 1.3 is the minimum accepted protocol version",
+    "commands": [
+      {
+        "command": "openssl s_client -connect <host>:<port> -tls1_2 </dev/null 2>&1 | grep -ci 'handshake failure\\|alert protocol_version\\|no protocols available'",
+        "expected": ">=1",
+        "platform": "any"
+      },
+      {
+        "command": "openssl s_client -connect <host>:<port> -tls1_3 </dev/null 2>&1 | grep -c 'TLSv1.3'",
+        "expected": ">=1",
+        "platform": "any"
+      },
+      {
+        "command": "update-crypto-policies --show 2>/dev/null | grep -qE 'FUTURE|FIPS' && echo 'ok' || grep -rn 'ssl_protocols\\|SSLProtocol\\|sslEnabledProtocols' /etc/nginx/ /etc/httpd/ 2>/dev/null | grep -ci 'TLSv1.3'",
+        "expected": ">=1",
+        "platform": "linux"
+      },
+      {
+        "command": "Get-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.2\\Server' -Name Enabled -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Enabled",
+        "expected": "0",
+        "platform": "windows"
+      },
+      {
+        "command": "Get-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.3\\Server' -Name Enabled -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Enabled",
+        "expected": "1",
+        "platform": "windows"
+      }
+    ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "RHEL 8",
+    "RHEL 9",
+    "RHEL 10",
+    "Fedora",
+    "Ubuntu 22.04",
+    "Windows 10",
+    "Windows 11",
+    "Windows Server 2022",
+    "macOS"
+  ],
+  "cve_schema_version": "5.2.0",
+  "cve_affected": [
+    {
+      "vendor": "redhat",
+      "product": "enterprise_linux",
+      "cpes": [
+        "cpe:2.3:o:redhat:enterprise_linux:8:*:*:*:*:*:*:*",
+        "cpe:2.3:o:redhat:enterprise_linux:9:*:*:*:*:*:*:*",
+        "cpe:2.3:o:redhat:enterprise_linux:10:*:*:*:*:*:*:*"
+      ],
+      "defaultStatus": "applicable"
+    },
+    {
+      "vendor": "microsoft",
+      "product": "windows",
+      "cpes": [
+        "cpe:2.3:o:microsoft:windows_10:*:*:*:*:*:*:*:*",
+        "cpe:2.3:o:microsoft:windows_11:*:*:*:*:*:*:*:*",
+        "cpe:2.3:o:microsoft:windows_server_2022:*:*:*:*:*:*:*"
+      ],
+      "defaultStatus": "applicable"
+    }
+  ],
+  "remediation": [
+    {
+      "id": "crypto-policies-tls13",
+      "name": "RHEL crypto-policies TLS 1.3 minimum enforcement",
+      "platform": "rhel",
+      "precondition": "command -v update-crypto-policies >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create a crypto-policies subpolicy module that sets TLS 1.3 as the minimum protocol version system-wide (affects OpenSSL, GnuTLS, NSS, and all applications using system crypto libraries)",
+          "command": "printf 'min_tls_version = TLS1.3\\ntls_cipher = AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305\\n' > /etc/crypto-policies/policies/modules/TLS13-ONLY.pmod",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/crypto-policies/policies/modules/TLS13-ONLY.pmod && update-crypto-policies --set DEFAULT"
+        },
+        {
+          "description": "Apply the FUTURE base policy with the TLS 1.3-only subpolicy module (FUTURE already restricts weak algorithms; the subpolicy raises the TLS floor from 1.2 to 1.3)",
+          "command": "update-crypto-policies --set FUTURE:TLS13-ONLY",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "update-crypto-policies --set DEFAULT"
+        }
+      ],
+      "verify": "update-crypto-policies --show | grep -q 'FUTURE:TLS13-ONLY' && openssl s_client -connect localhost:443 -tls1_2 </dev/null 2>&1 | grep -ci 'handshake failure'",
+      "references": [
+        {
+          "source": "RHEL 9 — Using system-wide cryptographic policies",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/using-the-system-wide-cryptographic-policies_security-hardening"
+        }
+      ]
+    },
+    {
+      "id": "nginx-tls13-only",
+      "name": "nginx TLS 1.3-only protocol enforcement",
+      "platform": "linux",
+      "precondition": "command -v nginx >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create a drop-in config that restricts nginx to TLS 1.3 only, removing support for TLS 1.2 and below",
+          "command": "printf 'ssl_protocols TLSv1.3;\\nssl_prefer_server_ciphers off;\\n' > /etc/nginx/conf.d/cme-403-tls13.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/nginx/conf.d/cme-403-tls13.conf && nginx -s reload"
+        },
+        {
+          "description": "Test configuration and reload nginx to apply the TLS 1.3 restriction",
+          "command": "nginx -t && nginx -s reload",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "openssl s_client -connect <host>:443 -tls1_2 </dev/null 2>&1 | grep -ci 'handshake failure'",
+      "references": [
+        {
+          "source": "nginx — ssl_protocols directive",
+          "url": "https://nginx.org/en/docs/http/ngx_http_ssl_module.html#ssl_protocols"
+        }
+      ]
+    },
+    {
+      "id": "windows-schannel-tls13",
+      "name": "Windows SChannel TLS 1.3-only enforcement via registry",
+      "platform": "windows",
+      "precondition": "Test-Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL'",
+      "steps": [
+        {
+          "description": "Disable TLS 1.2 server-side to prevent downgrade (creates registry key if not present)",
+          "command": "New-Item -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.2\\Server' -Force | Out-Null; Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.2\\Server' -Name 'Enabled' -Value 0 -Type DWord; Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.2\\Server' -Name 'DisabledByDefault' -Value 1 -Type DWord",
+          "idempotent": true,
+          "requires_restart": "system",
+          "reversible": true,
+          "undo": "Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.2\\Server' -Name 'Enabled' -Value 1 -Type DWord; Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.2\\Server' -Name 'DisabledByDefault' -Value 0 -Type DWord"
+        },
+        {
+          "description": "Ensure TLS 1.3 is explicitly enabled server-side (Windows Server 2022+ supports TLS 1.3 in SChannel)",
+          "command": "New-Item -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.3\\Server' -Force | Out-Null; Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.3\\Server' -Name 'Enabled' -Value 1 -Type DWord; Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.3\\Server' -Name 'DisabledByDefault' -Value 0 -Type DWord",
+          "idempotent": true,
+          "requires_restart": "system",
+          "reversible": true,
+          "undo": "Remove-Item -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.3\\Server' -Recurse -Force"
+        },
+        {
+          "description": "Disable TLS 1.1 and TLS 1.0 server-side to prevent legacy protocol negotiation",
+          "command": "foreach ($ver in @('TLS 1.1','TLS 1.0')) { New-Item -Path \"HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\$ver\\Server\" -Force | Out-Null; Set-ItemProperty -Path \"HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\$ver\\Server\" -Name 'Enabled' -Value 0 -Type DWord; Set-ItemProperty -Path \"HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\$ver\\Server\" -Name 'DisabledByDefault' -Value 1 -Type DWord }",
+          "idempotent": true,
+          "requires_restart": "system",
+          "reversible": true,
+          "undo": "foreach ($ver in @('TLS 1.1','TLS 1.0')) { Set-ItemProperty -Path \"HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\$ver\\Server\" -Name 'Enabled' -Value 1 -Type DWord }"
+        }
+      ],
+      "verify": "Get-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.3\\Server' -Name Enabled | Select-Object -ExpandProperty Enabled",
+      "references": [
+        {
+          "source": "Microsoft — TLS registry settings",
+          "url": "https://learn.microsoft.com/en-us/windows-server/security/tls/tls-registry-settings"
+        }
+      ]
+    }
+  ],
+  "scf_identifiers": [
+    "CRY-01",
+    "CRY-03",
+    "NET-12",
+    "WEB-10"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-757",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "TLS 1.3 enforcement rejects all handshakes below version 1.3 — the server cannot negotiate down to TLS 1.2, 1.1, 1.0, or SSLv3 because the protocol version check occurs before cipher negotiation. Downgrade attacks (POODLE, DROWN) have no lower-version endpoint to target.",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-327",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "TLS 1.3 exclusively supports AEAD cipher suites (AES-GCM, ChaCha20-Poly1305) and mandates ephemeral key exchange — CBC mode ciphers, RC4, static RSA key transport, and renegotiation do not exist in the protocol specification. Broken algorithms cannot be selected because they are absent from the TLS 1.3 cipher suite definitions.",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "CRY-01",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "CRY-03",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "NET-12",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "WEB-10",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

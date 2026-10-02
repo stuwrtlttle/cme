@@ -1,0 +1,239 @@
+{
+  "cme_id": "CME-806",
+  "control_name": "Kerberos Authentication (GSSAPI)",
+  "description": "Enforce Kerberos (GSSAPI) as the authentication mechanism, replacing password-based authentication with cryptographic ticket exchange. The client authenticates to the Key Distribution Center (KDC) and receives a Ticket-Granting Ticket (TGT), then requests service tickets for specific services — passwords never cross the network. Service tickets are encrypted with the target service's key, time-limited (typically 10-hour TGT, configurable), and include timestamps for replay detection. Mutual authentication ensures both client and server prove their identity, preventing server impersonation attacks. On RHEL, Kerberos is deployed via FreeIPA/IdM (ipa-client-install enrolls the host and configures SSSD); on Windows, Active Directory provides native Kerberos. SSH access is secured via GSSAPI authentication (GSSAPIAuthentication yes in sshd_config). Known attack vectors against Kerberos itself (Kerberoasting, Pass-the-Ticket, Golden Ticket) require the attacker to already have domain credentials or host-level access — they represent post-compromise lateral movement, not the initial credential interception this control prevents.",
+  "tactic": "Harden",
+  "category": "Credential Hardening",
+  "category_id": "credential-hardening",
+  "function_id": "authentication-methods",
+  "control_layer": "Identity",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "With password-based authentication, an attacker intercepting network traffic (MITM, packet capture) can capture replayable credentials and use them from any host at any time. With Kerberos, the client proves knowledge of the password to the KDC via an encrypted timestamp (pre-authentication) — the password itself never traverses the network. Service tickets are encrypted with the service's secret key, time-stamped for replay detection, and valid only for a limited window. The attacker must either compromise the KDC itself, crack service account passwords offline (Kerberoasting — requires existing domain credentials), or steal tickets from host memory (Pass-the-Ticket — requires local access). Each bypass requires preconditions beyond simple network interception"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-287",
+    "CWE-294",
+    "CWE-303",
+    "CWE-319"
+  ],
+  "verification": {
+    "method": "Verify Kerberos authentication is configured and enforced via keytab, GSSAPI, and domain enrollment",
+    "commands": [
+      {
+        "command": "klist -k /etc/krb5.keytab 2>/dev/null | grep -c 'host/'",
+        "expected": ">=1",
+        "platform": "linux"
+      },
+      {
+        "command": "sshd -T | grep gssapiauthentication",
+        "expected": "gssapiauthentication yes",
+        "platform": "linux"
+      },
+      {
+        "command": "test -f /etc/krb5.conf && grep -c 'default_realm' /etc/krb5.conf",
+        "expected": ">=1",
+        "platform": "linux"
+      },
+      {
+        "command": "nltest /dsgetdc: 2>$null | Select-String 'DC:'",
+        "expected": "DC:",
+        "platform": "windows"
+      }
+    ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "RHEL 8",
+    "RHEL 9",
+    "RHEL 10",
+    "Fedora",
+    "Ubuntu 24.04",
+    "Windows Server 2019",
+    "Windows Server 2022",
+    "Windows 10",
+    "Windows 11"
+  ],
+  "remediation": [
+    {
+      "id": "sshd-gssapi-keytab",
+      "name": "SSH GSSAPI authentication with host keytab enforcement",
+      "platform": "linux",
+      "precondition": "test -f /etc/krb5.conf && klist -k /etc/krb5.keytab 2>/dev/null | grep -q 'host/'",
+      "steps": [
+        {
+          "description": "Enable GSSAPI authentication and disable password authentication in sshd_config (host must already be enrolled in a Kerberos realm with a valid keytab)",
+          "command": "printf 'GSSAPIAuthentication yes\nGSSAPICleanupCredentials yes\nPasswordAuthentication no\nChallengeResponseAuthentication no\n' > /etc/ssh/sshd_config.d/99-cme-806-gssapi.conf",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f /etc/ssh/sshd_config.d/99-cme-806-gssapi.conf"
+        },
+        {
+          "description": "Restart sshd to apply the GSSAPI enforcement configuration",
+          "command": "systemctl restart sshd",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "sshd -T | grep -E 'gssapiauthentication|passwordauthentication'",
+      "references": [
+        {
+          "source": "RHEL 9 — Configuring authentication and authorization",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/configuring_authentication_and_authorization_in_rhel/index"
+        },
+        {
+          "source": "RHEL 9 — Using Kerberos",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/configuring_authentication_and_authorization_in_rhel/using-kerberos_configuring-authentication-and-authorization-in-rhel"
+        }
+      ]
+    },
+    {
+      "id": "ipa-client-enroll",
+      "name": "FreeIPA/IdM client enrollment with Kerberos and SSSD",
+      "platform": "rhel",
+      "precondition": "command -v ipa-client-install >/dev/null 2>&1 || command -v dnf >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Install the IPA client package if not already present",
+          "command": "dnf install -y ipa-client",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "dnf remove -y ipa-client"
+        },
+        {
+          "description": "Enroll the host in the FreeIPA/IdM domain (replace <ipa_domain> and <ipa_server> with your realm and server FQDN; this configures krb5.conf, SSSD, and generates a host keytab)",
+          "command": "ipa-client-install --domain=<ipa_domain> --server=<ipa_server> --mkhomedir --enable-dns-updates --unattended",
+          "idempotent": false,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "ipa-client-install --uninstall --unattended"
+        },
+        {
+          "description": "Enable GSSAPI authentication in sshd and disable password authentication",
+          "command": "printf 'GSSAPIAuthentication yes\nGSSAPICleanupCredentials yes\nPasswordAuthentication no\nChallengeResponseAuthentication no\n' > /etc/ssh/sshd_config.d/99-cme-806-gssapi.conf && systemctl restart sshd",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/ssh/sshd_config.d/99-cme-806-gssapi.conf && systemctl restart sshd"
+        }
+      ],
+      "verify": "klist -k /etc/krb5.keytab | grep -c 'host/' && sshd -T | grep gssapiauthentication",
+      "references": [
+        {
+          "source": "RHEL 9 — Installing an IdM client",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/installing_identity_management/installing-an-idm-client_installing-identity-management"
+        },
+        {
+          "source": "RHEL 9 — Configuring Kerberos authentication in IdM",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/configuring_authentication_and_authorization_in_rhel/configuring-kerberos-with-idm_configuring-authentication-and-authorization-in-rhel"
+        }
+      ]
+    }
+  ],
+  "scf_identifiers": [
+    "CRY-02",
+    "IAC-02",
+    "IAC-30"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-287",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "rationale": "Replaces password-based authentication with cryptographic ticket exchange, providing stronger authentication guarantees",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-294",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "Kerberos tickets include timestamps and are validated for freshness by the service; replayed tickets are rejected as stale",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-303",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "rationale": "Replaces custom or weak authentication implementations with a well-tested, standardized protocol",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-319",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "Passwords never traverse the network; client proves knowledge via encrypted pre-authentication exchange with the KDC",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "ATT&CK",
+      "target_id": "T0886",
+      "relationship_type": "mitigates",
+      "method": "crosswalk",
+      "rationale": "Derived from ATT&CK mitigation M0813 mapped to CME-806; mutual authentication constrains unauthorized ICS remote service access.",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "cve_schema_version": "5.2.0",
+  "cve_affected": [
+    {
+      "vendor": "redhat",
+      "product": "enterprise_linux",
+      "cpes": [
+        "cpe:2.3:o:redhat:enterprise_linux:8:*:*:*:*:*:*:*",
+        "cpe:2.3:o:redhat:enterprise_linux:9:*:*:*:*:*:*:*",
+        "cpe:2.3:o:redhat:enterprise_linux:10:*:*:*:*:*:*:*"
+      ],
+      "defaultStatus": "applicable"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "ATT&CK",
+      "identifier": "M0813",
+      "value": "Software Process and Device Authentication",
+      "relationship_type": "maps_to",
+      "rationale": "Concrete mutual-authentication implementation of ATT&CK ICS Software Process and Device Authentication."
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "CRY-02",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "IAC-02",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "IAC-30",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

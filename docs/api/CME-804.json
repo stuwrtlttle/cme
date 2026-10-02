@@ -1,0 +1,215 @@
+{
+  "cme_id": "CME-804",
+  "control_name": "SSH Key-Only Authentication",
+  "description": "Disable all password-based SSH authentication methods (PasswordAuthentication, KbdInteractiveAuthentication) in sshd, requiring public key authentication exclusively. This eliminates the entire password attack surface for SSH — brute force, credential stuffing, and dictionary attacks become impossible regardless of password strength or lockout policy. Supported key types include Ed25519 (recommended), ECDSA, and RSA (4096-bit minimum). Both PasswordAuthentication and KbdInteractiveAuthentication must be set to 'no' — disabling only PasswordAuthentication leaves keyboard-interactive password prompts active on many configurations. On RHEL 9+, the AuthenticationMethods directive can further restrict to publickey-only. Key management (rotation, passphrase protection, authorized_keys auditing) becomes the primary credential risk surface. Does not protect against pre-authentication SSH daemon vulnerabilities or key compromise via stolen private keys.",
+  "tactic": "Harden",
+  "category": "Credential Hardening",
+  "category_id": "credential-hardening",
+  "function_id": "authentication-methods",
+  "control_layer": "Identity",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "With password authentication enabled, attackers use standard brute-force tools (Hydra, Medusa) against SSH with publicly available credential dumps — attack complexity is Low. With key-only authentication, the attacker must obtain the target's private key through a separate compromise: stealing from a developer workstation, extracting from CI/CD secrets, compromising a jump host with agent forwarding, or insider access. Each path requires a multi-step attack chain with preconditions that raise complexity from trivial credential guessing to targeted key theft"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-287",
+    "CWE-307",
+    "CWE-521"
+  ],
+  "verification": {
+    "method": "Verify all password-based SSH authentication methods are disabled and only public key authentication is accepted",
+    "commands": [
+      {
+        "command": "sshd -T | grep passwordauthentication",
+        "expected": "passwordauthentication no",
+        "platform": "linux"
+      },
+      {
+        "command": "sshd -T | grep kbdinteractiveauthentication",
+        "expected": "kbdinteractiveauthentication no",
+        "platform": "linux"
+      },
+      {
+        "command": "sshd -T | grep pubkeyauthentication",
+        "expected": "pubkeyauthentication yes",
+        "platform": "linux"
+      },
+      {
+        "command": "Get-Content $env:ProgramData\\ssh\\sshd_config | Select-String 'PasswordAuthentication'",
+        "expected": "PasswordAuthentication no",
+        "platform": "windows"
+      }
+    ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "RHEL 8",
+    "RHEL 9",
+    "RHEL 10",
+    "Fedora",
+    "Ubuntu 24.04",
+    "macOS",
+    "Windows Server 2019",
+    "Windows Server 2022"
+  ],
+  "remediation": [
+    {
+      "id": "sshd-key-only-auth",
+      "name": "sshd key-only authentication via drop-in config",
+      "platform": "linux",
+      "precondition": "command -v sshd >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create an sshd drop-in config that disables all password-based authentication and enforces public key only. Both PasswordAuthentication and KbdInteractiveAuthentication must be disabled — disabling only PasswordAuthentication leaves keyboard-interactive password prompts active on many configurations",
+          "command": "printf 'PasswordAuthentication no\nKbdInteractiveAuthentication no\nPubkeyAuthentication yes\nAuthenticationMethods publickey\n' > /etc/ssh/sshd_config.d/99-cme-804-key-only.conf",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f /etc/ssh/sshd_config.d/99-cme-804-key-only.conf"
+        },
+        {
+          "description": "Validate sshd configuration before restarting to avoid lockout from syntax errors",
+          "command": "sshd -t",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true
+        },
+        {
+          "description": "Restart sshd to apply the new authentication policy",
+          "command": "systemctl restart sshd",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "sshd -T | grep -E 'passwordauthentication|kbdinteractiveauthentication|pubkeyauthentication'",
+      "references": [
+        {
+          "source": "RHEL 9 — Configuring OpenSSH",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/securing_networks/assembly_using-secure-communications-between-two-systems-with-openssh_securing-networks"
+        },
+        {
+          "source": "sshd_config(5) — AuthenticationMethods",
+          "url": "https://man.openbsd.org/sshd_config#AuthenticationMethods"
+        }
+      ]
+    },
+    {
+      "id": "windows-openssh-key-only",
+      "name": "Windows OpenSSH key-only authentication",
+      "platform": "windows",
+      "precondition": "Test-Path $env:ProgramData\\ssh\\sshd_config",
+      "steps": [
+        {
+          "description": "Set PasswordAuthentication to no in the Windows OpenSSH server config",
+          "command": "(Get-Content $env:ProgramData\\ssh\\sshd_config) -replace '^#?PasswordAuthentication\\s+.*', 'PasswordAuthentication no' | Set-Content $env:ProgramData\\ssh\\sshd_config",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "(Get-Content $env:ProgramData\\ssh\\sshd_config) -replace '^PasswordAuthentication no', 'PasswordAuthentication yes' | Set-Content $env:ProgramData\\ssh\\sshd_config"
+        },
+        {
+          "description": "Ensure PubkeyAuthentication is enabled in the Windows OpenSSH server config",
+          "command": "if (-not (Select-String -Path $env:ProgramData\\ssh\\sshd_config -Pattern '^PubkeyAuthentication yes')) { Add-Content $env:ProgramData\\ssh\\sshd_config 'PubkeyAuthentication yes' }",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "(Get-Content $env:ProgramData\\ssh\\sshd_config) -replace '^PubkeyAuthentication yes', '#PubkeyAuthentication yes' | Set-Content $env:ProgramData\\ssh\\sshd_config"
+        },
+        {
+          "description": "Restart the Windows OpenSSH server service to apply changes",
+          "command": "Restart-Service sshd",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "Get-Content $env:ProgramData\\ssh\\sshd_config | Select-String 'PasswordAuthentication|PubkeyAuthentication'",
+      "references": [
+        {
+          "source": "Microsoft — OpenSSH Server configuration for Windows",
+          "url": "https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh-server-configuration"
+        }
+      ]
+    }
+  ],
+  "scf_identifiers": [
+    "CRY-02",
+    "IAC-10",
+    "IAC-10.2"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-287",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-307",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "Eliminates password-based authentication entirely, making brute-force attacks against SSH impossible — stronger than rate-limiting controls which only slow attempts",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-521",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "Removes passwords from the SSH authentication surface entirely, making password quality irrelevant for SSH access",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "cve_schema_version": "5.2.0",
+  "cve_affected": [
+    {
+      "vendor": "redhat",
+      "product": "enterprise_linux",
+      "cpes": [
+        "cpe:2.3:o:redhat:enterprise_linux:8:*:*:*:*:*:*:*",
+        "cpe:2.3:o:redhat:enterprise_linux:9:*:*:*:*:*:*:*",
+        "cpe:2.3:o:redhat:enterprise_linux:10:*:*:*:*:*:*:*"
+      ],
+      "defaultStatus": "applicable"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "CRY-02",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "IAC-10",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "IAC-10.2",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

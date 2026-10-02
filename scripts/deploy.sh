@@ -136,6 +136,12 @@ docker compose up -d server
 echo "  Rebuilding docs site..."
 python3 build_site.py
 
+echo "  Installing API CORS config..."
+if [ -f ~/cme/nginx/api-cors.conf ]; then
+  docker cp ~/cme/nginx/api-cors.conf openclaw-nginx-1:/etc/nginx/conf.d/api-cors.conf
+  docker exec openclaw-nginx-1 nginx -t 2>/dev/null && echo "    nginx config OK" || echo "    WARNING: nginx config test failed — check api-cors.conf paths"
+fi
+
 echo "  Restarting nginx to pick up new docs..."
 docker restart openclaw-nginx-1 >/dev/null
 
@@ -159,6 +165,13 @@ if [ "$MCP_CODE" = "200" ] || [ "$MCP_CODE" = "405" ] || [ "$MCP_CODE" = "400" ]
   ok "MCP endpoint → responding"
 else
   warn "MCP endpoint → $MCP_CODE"
+fi
+
+API_CODE=$(curl -s -o /dev/null -w '%{http_code}' https://cmetaxonomy.org/api/entries.json 2>/dev/null || echo "000")
+if [ "$API_CODE" = "200" ]; then
+  ok "API endpoint → 200"
+else
+  warn "API endpoint → $API_CODE"
 fi
 
 echo -e "\n${GREEN}${BOLD}Deploy complete.${NC}"

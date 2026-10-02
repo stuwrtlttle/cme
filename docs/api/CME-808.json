@@ -1,0 +1,156 @@
+{
+  "cme_id": "CME-808",
+  "control_name": "Local Administrator Password Solution (LAPS)",
+  "description": "Automated management of local administrator account passwords on Windows domain-joined endpoints, ensuring each machine has a unique, cryptographically random password that rotates on a defined schedule. Legacy LAPS (AdmPwd.E) stores passwords as a confidential attribute on the computer object in AD, protected by ACLs. Windows LAPS (built-in to Windows 10 21H2+ and Server 2019+) adds password encryption using the machine's AD certificate and supports Azure AD-joined devices. LAPS eliminates the most common Windows lateral movement vector: shared local admin passwords set during imaging and never rotated. Without LAPS, compromising one machine's local admin hash (via SAM dump, Mimikatz, or volume shadow copy) enables Pass-the-Hash to every endpoint sharing that password. With LAPS, each hash works on exactly one machine and expires on the rotation schedule. Does not protect domain credentials, service accounts, or application-level credentials — only the local administrator account managed by the LAPS policy.",
+  "tactic": "Harden",
+  "category": "Credential Hardening",
+  "category_id": "credential-hardening",
+  "function_id": "password-policy",
+  "control_layer": "Identity",
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "attenuation_type": "deterministic",
+  "confidence": "High",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "cvss_vector_impacts": [
+    {
+      "metric": "C",
+      "from": "H",
+      "to": "L",
+      "rationale": "Without LAPS, compromising one machine's local admin hash (SAM dump, Mimikatz) yields credentials valid on every machine sharing that password — confidentiality impact spans the entire fleet. With LAPS, each machine has a unique random password, so a stolen hash provides admin access only to the single compromised endpoint. Impact is reduced from fleet-wide credential exposure to single-machine access"
+    },
+    {
+      "metric": "S",
+      "from": "C",
+      "to": "U",
+      "rationale": "In environments with shared local admin passwords, any local admin compromise effectively changes scope to other machines via Pass-the-Hash — the vulnerability impacts resources beyond the vulnerable component. With LAPS, the compromised credential works only on the originating machine, containing the blast radius to the vulnerable component's security authority. Does not prevent lateral movement via domain credentials, shared service accounts, or non-credential scope changes (VM escape, container escape)"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-1392",
+    "CWE-798",
+    "CWE-521"
+  ],
+  "verification": {
+    "method": "Verify LAPS policy enforcement via registry (legacy or Windows LAPS) and confirm managed password exists in AD",
+    "commands": [
+      {
+        "command": "Get-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft Services\\AdmPwd' -Name AdmPwdEnabled -ErrorAction SilentlyContinue | Select-Object -ExpandProperty AdmPwdEnabled",
+        "expected": "1",
+        "platform": "windows"
+      },
+      {
+        "command": "Get-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\LAPS\\Config' -ErrorAction SilentlyContinue | Select-Object -ExpandProperty BackupDirectory",
+        "expected": ">=1",
+        "platform": "windows"
+      },
+      {
+        "command": "Get-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft Services\\AdmPwd' -Name PasswordComplexity -ErrorAction SilentlyContinue | Select-Object -ExpandProperty PasswordComplexity",
+        "expected": "4",
+        "platform": "windows"
+      },
+      {
+        "command": "dsregcmd /status 2>$null | Select-String 'AzureAdJoined' | Select-String 'YES'",
+        "expected": "YES",
+        "platform": "windows"
+      }
+    ]
+  },
+  "references": [
+    {
+      "source": "Microsoft LAPS Documentation",
+      "url": "https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-overview"
+    },
+    {
+      "source": "MITRE ATT&CK Mitigation",
+      "url": "https://attack.mitre.org/mitigations/M1015/"
+    }
+  ],
+  "platforms": [
+    "Windows 10",
+    "Windows 11",
+    "Windows Server 2019",
+    "Windows Server 2022"
+  ],
+  "scf_identifiers": [
+    "IAC-01",
+    "IAC-01.2"
+  ],
+  "cve_schema_version": "5.2.0",
+  "cve_affected": [
+    {
+      "vendor": "microsoft",
+      "product": "windows",
+      "cpes": [
+        "cpe:2.3:o:microsoft:windows_10:*:*:*:*:*:*:*:*",
+        "cpe:2.3:o:microsoft:windows_11:*:*:*:*:*:*:*:*",
+        "cpe:2.3:o:microsoft:windows_server_2019:*:*:*:*:*:*:*",
+        "cpe:2.3:o:microsoft:windows_server_2022:*:*:*:*:*:*:*"
+      ],
+      "defaultStatus": "applicable"
+    }
+  ],
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-1392",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "LAPS replaces default/shared local admin passwords with unique auto-generated passwords per endpoint, eliminating the default credential attack surface",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-798",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "rationale": "Automated rotation ensures local admin passwords are not static or hardcoded in imaging templates; does not address hardcoded credentials in application code",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-521",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "LAPS generates cryptographically random passwords meeting configurable complexity requirements, removing human password selection from local admin accounts",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/C",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/S",
+      "value": "C->U",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "ATT&CK",
+      "identifier": "M1015",
+      "value": "Active Directory Configuration",
+      "relationship_type": "maps_to",
+      "rationale": "LAPS is explicitly mentioned as ATT&CK mitigation M1015"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "IAC-01",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "IAC-01.2",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

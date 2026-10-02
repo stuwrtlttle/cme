@@ -1,0 +1,124 @@
+{
+  "cme_id": "CME-603",
+  "control_name": "Unprivileged BPF Disabled",
+  "description": "Prevents unprivileged users from loading BPF programs into the kernel. BPF programs run in kernel context and vulnerabilities in the BPF verifier have been a frequent source of privilege escalation.",
+  "tactic": "Harden",
+  "category": "Syscall & BPF Controls",
+  "category_id": "syscall-bpf-controls",
+  "function_id": "seccomp",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "PR",
+      "from": "L",
+      "to": "H",
+      "rationale": "Unprivileged user cannot load BPF programs to exploit verifier bugs"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-269",
+    "CWE-119"
+  ],
+  "verification": {
+    "method": "Check unprivileged_bpf_disabled sysctl",
+    "commands": [
+      {
+        "command": "cat /proc/sys/kernel/unprivileged_bpf_disabled",
+        "expected": "1",
+        "platform": "linux"
+      }
+    ]
+  },
+  "references": [
+    {
+      "source": "Red Hat Security Hardening Guide",
+      "section": "BPF hardening"
+    }
+  ],
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 8",
+    "Ubuntu 24.04"
+  ],
+  "remediation": [
+    {
+      "id": "sysctl-bpf-hardening",
+      "name": "Disable unprivileged BPF and harden BPF JIT via sysctl",
+      "platform": "linux",
+      "precondition": "test -f /proc/sys/kernel/unprivileged_bpf_disabled",
+      "steps": [
+        {
+          "description": "Disable unprivileged BPF program loading and enable BPF JIT hardening (constant blinding) to mitigate JIT spray attacks",
+          "command": "sysctl -w kernel.unprivileged_bpf_disabled=1 net.core.bpf_jit_harden=2",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "sysctl -w kernel.unprivileged_bpf_disabled=0 net.core.bpf_jit_harden=0"
+        },
+        {
+          "description": "Persist BPF hardening sysctls across reboots via drop-in config",
+          "command": "printf 'kernel.unprivileged_bpf_disabled = 1\\nnet.core.bpf_jit_harden = 2\\n' > /etc/sysctl.d/99-cme-603-bpf-hardening.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/sysctl.d/99-cme-603-bpf-hardening.conf && sysctl --system"
+        }
+      ],
+      "verify": "cat /proc/sys/kernel/unprivileged_bpf_disabled && cat /proc/sys/net/core/bpf_jit_harden",
+      "references": [
+        {
+          "source": "RHEL 9 Security Hardening — Securing the kernel",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/securing-the-kernel_security-hardening"
+        }
+      ]
+    }
+  ],
+  "scf_identifiers": [
+    "CFG-03",
+    "IAC-21"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-269",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-119",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/PR",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "CFG-03",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "IAC-21",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

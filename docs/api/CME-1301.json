@@ -1,0 +1,221 @@
+{
+  "cme_id": "CME-1301",
+  "control_name": "Path Traversal Prevention (Canonicalization)",
+  "description": "Application-level path validation that canonicalizes user-supplied paths (resolving symlinks, ../, and relative references) and verifies the resolved path falls within an allowed base directory. Rejects absolute path injection and directory traversal sequences before any filesystem operation. Prevents attackers from reading or writing files outside intended directories.",
+  "tactic": "Harden",
+  "category": "Application Input Validation",
+  "category_id": "application-input-validation",
+  "function_id": "input-validation",
+  "control_layer": "Application",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Traversal payloads (../, absolute paths) are rejected before reaching filesystem operations; attacker must find a bypass that survives full path canonicalization and prefix validation"
+    },
+    {
+      "metric": "C",
+      "from": "H",
+      "to": "L",
+      "rationale": "File read confined to allowed directory; sensitive files outside base path are unreachable"
+    },
+    {
+      "metric": "I",
+      "from": "H",
+      "to": "L",
+      "rationale": "File write operations confined to allowed directory; attacker cannot overwrite arbitrary system files outside the base path"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-22",
+    "CWE-23",
+    "CWE-36",
+    "CWE-59",
+    "CWE-73"
+  ],
+  "verification": {
+    "method": "Test application with path traversal payloads and verify rejection; inspect source for canonicalization before file access",
+    "commands": [
+      {
+        "command": "grep -rn 'os.path.realpath\\|pathlib.*resolve\\|os.path.abspath\\|getCanonicalPath\\|toRealPath\\|path\\.resolve\\|realpathSync\\|filepath\\.EvalSymlinks\\|filepath\\.Abs\\|Path\\.GetFullPath' <app_source>/",
+        "expected": "realpath|resolve|getCanonicalPath|GetFullPath|EvalSymlinks",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'is_relative_to\\|os.path.commonpath\\|startsWith.*getCanonical\\|path\\.relative\\|filepath\\.Rel\\|Path\\.GetRelativePath' <app_source>/",
+        "expected": "is_relative_to|commonpath|startsWith|relative|Rel",
+        "platform": "any"
+      },
+      {
+        "command": "curl -s -o /dev/null -w '%{http_code}' 'http://<target>/<endpoint>?path=../../etc/passwd'",
+        "expected": "400 or 403",
+        "platform": "any"
+      }
+    ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "Any"
+  ],
+  "remediation": [
+    {
+      "id": "nginx-traversal-block",
+      "name": "nginx location-based path traversal blocking",
+      "platform": "linux",
+      "precondition": "command -v nginx >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create an nginx config snippet that rejects requests containing path traversal sequences (../, ..\\ , URL-encoded variants) before they reach the application",
+          "command": "printf 'server {\\n  # Block path traversal sequences (decoded and encoded)\\n  location ~* \"\\.\\.\\/|\\.\\.\\\\\\\\|%%2e%%2e|%%252e\" {\\n    return 403;\\n  }\\n  # Normalize URI before proxying — merge_slashes is on by default\\n  # Reject requests with null bytes\\n  if ($request_uri ~ \"\\\\x00\") {\\n    return 400;\\n  }\\n}\\n' > /etc/nginx/conf.d/cme-1301-traversal-block.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/nginx/conf.d/cme-1301-traversal-block.conf && nginx -s reload"
+        },
+        {
+          "description": "Test nginx configuration syntax",
+          "command": "nginx -t",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Reload nginx to apply the traversal blocking rules",
+          "command": "nginx -s reload",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "curl -s -o /dev/null -w '%{http_code}' 'http://localhost/<endpoint>?path=../../etc/passwd'",
+      "references": [
+        {
+          "source": "OWASP Path Traversal",
+          "url": "https://owasp.org/www-community/attacks/Path_Traversal"
+        },
+        {
+          "source": "nginx Security Controls",
+          "url": "https://docs.nginx.com/nginx/admin-guide/security-controls/"
+        }
+      ]
+    },
+    {
+      "id": "httpd-traversal-rewrite",
+      "name": "Apache mod_rewrite path traversal rejection",
+      "platform": "linux",
+      "precondition": "command -v apachectl >/dev/null 2>&1 || command -v httpd >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create an Apache config snippet that uses mod_rewrite to reject requests containing path traversal sequences (decoded and URL-encoded ../ patterns) and null bytes",
+          "command": "printf '<IfModule mod_rewrite.c>\\n  RewriteEngine On\\n  # Block decoded traversal sequences\\n  RewriteCond %%{REQUEST_URI} \\\\.\\\\./ [OR]\\n  RewriteCond %%{REQUEST_URI} \\\\.\\\\.\\\\\\\\\\\\\\\\ [OR]\\n  # Block URL-encoded traversal (%%2e%%2e)\\n  RewriteCond %%{QUERY_STRING} (\\\\.|%%2e)(\\\\.|%%2e)(%%2f|%%5c|/|\\\\\\\\\\\\\\\\) [NC,OR]\\n  # Block null bytes\\n  RewriteCond %%{REQUEST_URI} %%00\\n  RewriteRule .* - [F,L]\\n</IfModule>\\n' > /etc/httpd/conf.d/cme-1301-traversal-block.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/httpd/conf.d/cme-1301-traversal-block.conf && apachectl graceful"
+        },
+        {
+          "description": "Test Apache configuration syntax",
+          "command": "apachectl configtest",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Gracefully reload Apache to apply the traversal blocking rules",
+          "command": "apachectl graceful",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "curl -s -o /dev/null -w '%{http_code}' 'http://localhost/<endpoint>?path=../../etc/passwd'",
+      "references": [
+        {
+          "source": "OWASP Path Traversal",
+          "url": "https://owasp.org/www-community/attacks/Path_Traversal"
+        },
+        {
+          "source": "Apache mod_rewrite Reference",
+          "url": "https://httpd.apache.org/docs/2.4/mod/mod_rewrite.html"
+        }
+      ]
+    }
+  ],
+  "scf_identifiers": [
+    "WEB-09"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-22",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-23",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-36",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-59",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-73",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/C",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/I",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "WEB-09",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

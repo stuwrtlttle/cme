@@ -1,0 +1,156 @@
+{
+  "cme_id": "CME-903",
+  "control_name": "Kernel Network Hardening (sysctl)",
+  "description": "Kernel network stack hardening via sysctl: enable SYN cookies (TCP SYN flood protection), disable IP forwarding, reject source-routed packets, ignore ICMP redirects, enable reverse path filtering.",
+  "tactic": "Harden",
+  "category": "Protocol Hardening",
+  "category_id": "protocol-hardening",
+  "function_id": "protocol-config",
+  "control_layer": "Network",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Network-level attacks (SYN flood, source routing, ICMP redirect) are blocked"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-284",
+    "CWE-940",
+    "CWE-350"
+  ],
+  "verification": {
+    "method": "Check network hardening sysctls",
+    "commands": [
+      {
+        "command": "sysctl net.ipv4.tcp_syncookies",
+        "expected": "net.ipv4.tcp_syncookies = 1",
+        "platform": "linux"
+      },
+      {
+        "command": "sysctl net.ipv4.conf.all.accept_redirects",
+        "expected": "net.ipv4.conf.all.accept_redirects = 0",
+        "platform": "linux"
+      },
+      {
+        "command": "sysctl net.ipv4.conf.all.rp_filter",
+        "expected": "net.ipv4.conf.all.rp_filter = 1",
+        "platform": "linux"
+      }
+    ]
+  },
+  "references": [
+    {
+      "source": "Red Hat Security Hardening Guide",
+      "section": "Network security"
+    },
+    {
+      "source": "CIS RHEL 9 Benchmark",
+      "section": "3.2 Network Parameters"
+    }
+  ],
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 8",
+    "Ubuntu 24.04"
+  ],
+  "remediation": [
+    {
+      "id": "sysctl-network-hardening",
+      "name": "sysctl kernel network stack hardening via /etc/sysctl.d drop-in",
+      "platform": "linux",
+      "precondition": "test -d /proc/sys/net",
+      "steps": [
+        {
+          "description": "Apply network hardening sysctls immediately: enable SYN cookies, disable ICMP redirects (all and default), enable strict reverse path filtering (all and default), disable IP forwarding, reject source-routed packets",
+          "command": "sysctl -w net.ipv4.tcp_syncookies=1 net.ipv4.conf.all.accept_redirects=0 net.ipv4.conf.default.accept_redirects=0 net.ipv6.conf.all.accept_redirects=0 net.ipv6.conf.default.accept_redirects=0 net.ipv4.conf.all.rp_filter=1 net.ipv4.conf.default.rp_filter=1 net.ipv4.ip_forward=0 net.ipv4.conf.all.accept_source_route=0 net.ipv4.conf.default.accept_source_route=0 net.ipv6.conf.all.accept_source_route=0 net.ipv6.conf.default.accept_source_route=0",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "sysctl -w net.ipv4.tcp_syncookies=0 net.ipv4.conf.all.accept_redirects=1 net.ipv4.conf.default.accept_redirects=1 net.ipv6.conf.all.accept_redirects=1 net.ipv6.conf.default.accept_redirects=1 net.ipv4.conf.all.rp_filter=0 net.ipv4.conf.default.rp_filter=0 net.ipv4.conf.all.accept_source_route=1 net.ipv4.conf.default.accept_source_route=1 net.ipv6.conf.all.accept_source_route=1 net.ipv6.conf.default.accept_source_route=1"
+        },
+        {
+          "description": "Persist the hardened network sysctls across reboots via /etc/sysctl.d drop-in file",
+          "command": "printf 'net.ipv4.tcp_syncookies = 1\nnet.ipv4.conf.all.accept_redirects = 0\nnet.ipv4.conf.default.accept_redirects = 0\nnet.ipv6.conf.all.accept_redirects = 0\nnet.ipv6.conf.default.accept_redirects = 0\nnet.ipv4.conf.all.rp_filter = 1\nnet.ipv4.conf.default.rp_filter = 1\nnet.ipv4.ip_forward = 0\nnet.ipv4.conf.all.accept_source_route = 0\nnet.ipv4.conf.default.accept_source_route = 0\nnet.ipv6.conf.all.accept_source_route = 0\nnet.ipv6.conf.default.accept_source_route = 0\n' > /etc/sysctl.d/99-cme-903-network-hardening.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/sysctl.d/99-cme-903-network-hardening.conf && sysctl --system"
+        }
+      ],
+      "verify": "sysctl net.ipv4.tcp_syncookies net.ipv4.conf.all.accept_redirects net.ipv4.conf.all.rp_filter net.ipv4.ip_forward net.ipv4.conf.all.accept_source_route",
+      "references": [
+        {
+          "source": "RHEL 9 Security Hardening — Using the kernel tunables to restrict network access",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/using-the-kernel-tunables-to-restrict-network-access_security-hardening"
+        },
+        {
+          "source": "CIS RHEL 9 Benchmark",
+          "section": "3.2 Network Parameters (Host and Router)"
+        }
+      ]
+    }
+  ],
+  "scf_identifiers": [
+    "CFG-02",
+    "NET-02.1",
+    "NET-03"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-284",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-940",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-350",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "CFG-02",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "NET-02.1",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "NET-03",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

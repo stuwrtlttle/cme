@@ -1,0 +1,143 @@
+{
+  "cme_id": "CME-107",
+  "control_name": "Kernel Module Loading Restriction",
+  "description": "Disables dynamic kernel module loading at runtime, preventing insertion of rootkits or malicious kernel code after boot.",
+  "tactic": "Harden",
+  "category": "Kernel Hardening",
+  "category_id": "kernel-hardening",
+  "function_id": "kernel-attack-surface",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Cannot load malicious kernel modules even with root access"
+    },
+    {
+      "metric": "I",
+      "from": "H",
+      "to": "L",
+      "rationale": "Prevents kernel-level persistence via modules"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-94",
+    "CWE-829"
+  ],
+  "verification": {
+    "method": "Check modules_disabled sysctl",
+    "commands": [
+      {
+        "command": "cat /proc/sys/kernel/modules_disabled",
+        "expected": "1",
+        "platform": "linux"
+      }
+    ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 8",
+    "Ubuntu 24.04"
+  ],
+  "remediation": [
+    {
+      "id": "sysctl-modules-disabled",
+      "name": "Disable kernel module loading at runtime via sysctl",
+      "platform": "linux",
+      "precondition": "test -f /proc/sys/kernel/modules_disabled",
+      "steps": [
+        {
+          "description": "Ensure all required kernel modules are loaded before disabling module loading — list currently loaded modules and verify no critical modules are missing (e.g., filesystem, network, storage drivers)",
+          "command": "lsmod | sort",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true
+        },
+        {
+          "description": "Disable kernel module loading for the running session — WARNING: this is a one-way operation, cannot be reversed without a reboot. Once set to 1, no new modules can be loaded until the system reboots",
+          "command": "sysctl -w kernel.modules_disabled=1",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Persist the setting so module loading is disabled on every boot after all initramfs modules are loaded (sysctl.d runs after modules_load.d)",
+          "command": "printf 'kernel.modules_disabled = 1\\n' > /etc/sysctl.d/99-cme-107-modules-disabled.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/sysctl.d/99-cme-107-modules-disabled.conf"
+        }
+      ],
+      "verify": "cat /proc/sys/kernel/modules_disabled",
+      "references": [
+        {
+          "source": "RHEL 9 Security Hardening — Protecting the kernel",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/protecting-the-kernel_security-hardening"
+        }
+      ]
+    }
+  ],
+  "scf_identifiers": [
+    "CFG-03",
+    "END-03",
+    "SEA-06"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-94",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-829",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/I",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "CFG-03",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "END-03",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "SEA-06",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

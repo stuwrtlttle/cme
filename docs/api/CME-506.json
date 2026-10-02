@@ -1,0 +1,104 @@
+{
+  "cme_id": "CME-506",
+  "control_name": "Landlock LSM (Filesystem Sandboxing)",
+  "description": "Linux Security Module that allows unprivileged processes to restrict their own filesystem access. Process voluntarily drops access to paths it does not need, reducing impact of compromise.",
+  "tactic": "Isolate",
+  "category": "Filesystem Hardening",
+  "category_id": "filesystem-hardening",
+  "function_id": "filesystem-access-control",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "S",
+      "from": "C",
+      "to": "U",
+      "rationale": "Process cannot access filesystem paths outside its Landlock ruleset"
+    },
+    {
+      "metric": "C",
+      "from": "H",
+      "to": "L",
+      "rationale": "File read access restricted to declared paths"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-284",
+    "CWE-269"
+  ],
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "Ubuntu 24.04",
+    "Fedora"
+  ],
+  "verification": {
+    "method": "Check if process has active Landlock restrictions",
+    "commands": [
+      {
+        "command": "grep Landlock /proc/self/status",
+        "expected": "Landlock",
+        "platform": "linux"
+      }
+    ]
+  },
+  "scf_identifiers": [
+    "IAC-20",
+    "IAC-21",
+    "SEA-04"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-284",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-269",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/S",
+      "value": "C->U",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/C",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "IAC-20",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "IAC-21",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "SEA-04",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

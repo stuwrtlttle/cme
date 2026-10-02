@@ -124,6 +124,7 @@ def main():
     else:
         OUTPUT_DIR.mkdir(parents=True)
     (OUTPUT_DIR / "entries").mkdir()
+    (OUTPUT_DIR / "api").mkdir()
 
     # Index
     tmpl = env.get_template("index.html")
@@ -174,7 +175,26 @@ def main():
     # Copy CSS
     shutil.copy(TEMPLATES_DIR / "static" / "style.css", OUTPUT_DIR / "style.css")
 
-    print(f"Built {len(entries)} entry pages + 5 index pages -> {OUTPUT_DIR}/")
+    # Static JSON API
+    api_dir = OUTPUT_DIR / "api"
+    api_index = []
+    for entry_path in sorted(ENTRIES_DIR.glob("CME-*.json")):
+        shutil.copy(entry_path, api_dir / entry_path.name)
+        with open(entry_path) as f:
+            raw = json.load(f)
+        api_index.append({
+            "cme_id": raw["cme_id"],
+            "control_name": raw["control_name"],
+            "tactic": raw["tactic"],
+            "category": raw["category"],
+            "control_layer": raw.get("control_layer", ""),
+        })
+    api_index.sort(key=lambda e: int(e["cme_id"].split("-")[1]))
+    (api_dir / "entries.json").write_text(
+        json.dumps(api_index, indent=2) + "\n"
+    )
+
+    print(f"Built {len(entries)} entry pages + 5 index pages + {len(api_index)} API endpoints -> {OUTPUT_DIR}/")
 
 
 if __name__ == "__main__":

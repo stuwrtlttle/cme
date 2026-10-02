@@ -1,0 +1,187 @@
+{
+  "cme_id": "CME-803",
+  "control_name": "Account Lockout Policy (pam_faillock)",
+  "description": "Lock user accounts after a configurable number of consecutive failed authentication attempts, preventing online brute force and dictionary attacks. On Linux, pam_faillock (RHEL 8+) or pam_tally2 (legacy) tracks per-user authentication failures and locks the account when the threshold is reached. Key parameters: deny (max failed attempts, typically 5), unlock_time (lockout duration in seconds, typically 900), and fail_interval (window for counting failures). With deny=5 and unlock_time=900, brute force is rate-limited to approximately 20 attempts per hour per account, making password guessing computationally infeasible against any password meeting basic quality requirements. On Windows, equivalent policy is configured via Group Policy (Account Lockout Policy) or Fine-Grained Password Policies. Does not protect against password spraying (one password across many accounts) or credential stuffing with breached passwords — those require complementary controls like IP-based rate limiting and credential breach monitoring.",
+  "tactic": "Harden",
+  "category": "Credential Hardening",
+  "category_id": "credential-hardening",
+  "function_id": "password-policy",
+  "control_layer": "Identity",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Without lockout, an attacker can make unlimited authentication attempts against a login interface (SSH, RDP, web console), enabling dictionary attacks and brute force with tools like Hydra or Medusa. With pam_faillock configured (deny=5, unlock_time=900), authentication is rate-limited to approximately 20 attempts per hour per account — making brute force of any password meeting basic quality requirements computationally infeasible. The attacker must find an alternative authentication bypass rather than simply guessing credentials. Note: per-account lockout does not prevent password spraying (one password across many accounts) or cause attacker-triggered denial-of-service by deliberately locking accounts — complementary controls (IP-based rate limiting, spray detection) address those scenarios"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-307"
+  ],
+  "verification": {
+    "method": "Verify account lockout enforcement via pam_faillock (Linux) or Group Policy (Windows)",
+    "commands": [
+      {
+        "command": "grep -rE 'pam_faillock|pam_tally2' /etc/pam.d/system-auth /etc/pam.d/common-auth 2>/dev/null | grep -c 'auth'",
+        "expected": ">=1",
+        "platform": "linux"
+      },
+      {
+        "command": "grep '^deny' /etc/security/faillock.conf",
+        "expected": "deny = 5",
+        "platform": "linux"
+      },
+      {
+        "command": "net accounts | Select-String 'Lockout threshold'",
+        "expected": "Lockout threshold                        5",
+        "platform": "windows"
+      },
+      {
+        "command": "net accounts | Select-String 'Lockout duration'",
+        "expected": "Lockout duration (minutes)               30",
+        "platform": "windows"
+      }
+    ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "RHEL 8",
+    "RHEL 9",
+    "RHEL 10",
+    "Fedora",
+    "Ubuntu 24.04",
+    "Windows 10",
+    "Windows 11",
+    "Windows Server 2022"
+  ],
+  "cve_schema_version": "5.2.0",
+  "cve_affected": [
+    {
+      "vendor": "redhat",
+      "product": "enterprise_linux",
+      "cpes": [
+        "cpe:2.3:o:redhat:enterprise_linux:8:*:*:*:*:*:*:*",
+        "cpe:2.3:o:redhat:enterprise_linux:9:*:*:*:*:*:*:*",
+        "cpe:2.3:o:redhat:enterprise_linux:10:*:*:*:*:*:*:*"
+      ],
+      "defaultStatus": "applicable"
+    },
+    {
+      "vendor": "microsoft",
+      "product": "windows",
+      "cpes": [
+        "cpe:2.3:o:microsoft:windows_10:*:*:*:*:*:*:*:*",
+        "cpe:2.3:o:microsoft:windows_11:*:*:*:*:*:*:*:*",
+        "cpe:2.3:o:microsoft:windows_server_2019:*:*:*:*:*:*:*",
+        "cpe:2.3:o:microsoft:windows_server_2022:*:*:*:*:*:*:*"
+      ],
+      "defaultStatus": "applicable"
+    }
+  ],
+  "remediation": [
+    {
+      "id": "faillock-conf-lockout",
+      "name": "pam_faillock account lockout via faillock.conf",
+      "platform": "linux",
+      "precondition": "test -f /etc/security/faillock.conf",
+      "steps": [
+        {
+          "description": "Configure faillock.conf with deny=5 (lock after 5 failures), unlock_time=900 (15 min lockout), fail_interval=900 (failure counting window)",
+          "command": "printf 'deny = 5\nunlock_time = 900\nfail_interval = 900\neven_deny_root\nroot_unlock_time = 60\ndir = /var/run/faillock\naudit\nsilent\n' > /etc/security/faillock.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "printf 'deny = 0\n' > /etc/security/faillock.conf"
+        },
+        {
+          "description": "Ensure pam_faillock is enabled in system-auth and password-auth via authselect (RHEL 8+)",
+          "command": "authselect enable-feature with-faillock 2>/dev/null || grep -q pam_faillock /etc/pam.d/system-auth",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "authselect disable-feature with-faillock"
+        }
+      ],
+      "verify": "grep '^deny' /etc/security/faillock.conf && grep -c pam_faillock /etc/pam.d/system-auth",
+      "references": [
+        {
+          "source": "RHEL 9 — Configuring user account locking",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/configuring-authselect_security-hardening"
+        }
+      ]
+    },
+    {
+      "id": "windows-account-lockout",
+      "name": "Windows account lockout policy via net accounts",
+      "platform": "windows",
+      "precondition": "net accounts >$null 2>&1",
+      "steps": [
+        {
+          "description": "Set account lockout threshold to 5 failed attempts",
+          "command": "net accounts /lockoutthreshold:5",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "net accounts /lockoutthreshold:0"
+        },
+        {
+          "description": "Set lockout duration to 30 minutes",
+          "command": "net accounts /lockoutduration:30",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "net accounts /lockoutduration:0"
+        },
+        {
+          "description": "Set lockout observation window to 30 minutes",
+          "command": "net accounts /lockoutwindow:30",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "net accounts /lockoutwindow:0"
+        }
+      ],
+      "verify": "net accounts | Select-String 'Lockout'",
+      "references": [
+        {
+          "source": "Microsoft — Account lockout policy",
+          "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/account-lockout-policy"
+        }
+      ]
+    }
+  ],
+  "scf_identifiers": [
+    "IAC-22"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-307",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "IAC-22",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

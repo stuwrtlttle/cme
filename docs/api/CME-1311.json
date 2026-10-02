@@ -1,0 +1,154 @@
+{
+  "cme_id": "CME-1311",
+  "control_name": "Input Size and Quantity Bounds Enforcement",
+  "description": "Validation that user-supplied quantities — sizes, counts, lengths, offsets, indices, and repetition factors — fall within expected bounds before they are used in memory allocation, loop iteration, or buffer operations. Rejects values that are negative, zero when unexpected, or exceed a configured maximum. Applied at the protocol parsing layer before data reaches processing logic. This prevents integer overflow chains (where an oversized count wraps to a small value and bypasses bounds checks) and resource exhaustion attacks (where an unbounded count causes excessive allocation or iteration). The root cause control for vulnerabilities where the attacker controls a size or count field in a binary protocol, serialized format, or API parameter.",
+  "tactic": "Harden",
+  "category": "Application Input Validation",
+  "category_id": "application-input-validation",
+  "function_id": "input-validation",
+  "control_layer": "Application",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Malicious size or count values are rejected before reaching allocation or copy operations; the attacker must find a quantity field that bypasses validation or an alternative code path that does not enforce bounds"
+    },
+    {
+      "metric": "A",
+      "from": "H",
+      "to": "L",
+      "rationale": "Bounds enforcement rejects allocation and iteration requests that exceed configured maximums, preventing unbounded resource consumption from attacker-controlled size or count fields; low availability impact remains possible from repeated bounded-but-large operations within limits"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-1284",
+    "CWE-20",
+    "CWE-1285",
+    "CWE-190",
+    "CWE-131",
+    "CWE-130",
+    "CWE-681",
+    "CWE-789"
+  ],
+  "confidence": "High",
+  "platforms": [
+    "Any"
+  ],
+  "verification": {
+    "method": "Verify that the application enforces maximum size limits on user-supplied quantity fields and rejects values outside expected ranges",
+    "commands": [
+      {
+        "command": "grep -rn 'check_mul\\|__builtin_mul_overflow\\|__builtin_add_overflow\\|SafeInt\\|checked_mul\\|Math\\.multiplyExact\\|Math\\.addExact\\|Integer\\.MAX_VALUE\\|SIZE_MAX\\|SSIZE_MAX' <app_source>/",
+        "expected": "Safe integer arithmetic or size limit constants used before allocation operations",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'MAX_.*SIZE\\|MAX_.*COUNT\\|MAX_.*LENGTH\\|MAX_.*ELEMENTS\\|LIMIT_.*SIZE\\|max_.*elements\\|kMax' <app_source>/",
+        "expected": "Application-defined maximum bounds for user-supplied quantity fields",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'if.*size.*>\\|if.*count.*>\\|if.*length.*>\\|if.*len.*>.*MAX\\|if.*n\\b.*>.*MAX' <app_source>/ | head -10",
+        "expected": "Bounds checks on size/count/length variables before allocation or iteration",
+        "platform": "any"
+      }
+    ]
+  },
+  "scf_identifiers": [
+    "SEA-10",
+    "WEB-09"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-1284",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-20",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-1285",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-190",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-131",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-130",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-681",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-789",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/A",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "SEA-10",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "WEB-09",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

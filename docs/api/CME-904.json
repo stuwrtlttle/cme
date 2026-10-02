@@ -1,0 +1,232 @@
+{
+  "cme_id": "CME-904",
+  "control_name": "WAF (Web Application Firewall)",
+  "description": "HTTP-layer filtering that inspects requests for injection, XSS, path traversal, and other OWASP Top 10 patterns. Can operate in blocking or detection mode with OWASP Core Rule Set.",
+  "tactic": "Harden",
+  "category": "Application Controls",
+  "category_id": "application-controls",
+  "function_id": "request-filtering",
+  "control_layer": "Application",
+  "attenuation_type": "probabilistic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "OWASP Core Rule Set signature matching detects and blocks known injection, XSS, path traversal, and protocol violation patterns at the HTTP request layer before they reach the application",
+      "probability": 0.7,
+      "evidence_basis": "OWASP CRS in blocking mode at paranoia level 2+ blocks the majority of automated and scripted attacks; manual bypass by skilled attackers remains possible via encoding evasion, payload obfuscation, and WAF-specific techniques",
+      "conditions": [
+        "WAF must be in blocking mode, not detection-only",
+        "OWASP CRS or equivalent ruleset must be loaded and current",
+        "No direct-to-origin access path exists that bypasses the WAF",
+        "WAF must cover all application endpoints"
+      ]
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-79",
+    "CWE-89",
+    "CWE-94",
+    "CWE-78",
+    "CWE-22"
+  ],
+  "verification": {
+    "method": "Verify WAF is in enforcement mode with rules loaded and blocking common attack payloads",
+    "commands": [
+      {
+        "command": "curl -s -o /dev/null -w '%{http_code}' 'http://<target>/?q=<script>alert(1)</script>'",
+        "expected": "403",
+        "platform": "any"
+      },
+      {
+        "command": "curl -s -o /dev/null -w '%{http_code}' 'http://<target>/?id=1+UNION+SELECT+1,2,3--'",
+        "expected": "403",
+        "platform": "any"
+      },
+      {
+        "command": "curl -s -o /dev/null -w '%{http_code}' 'http://<target>/../../etc/passwd'",
+        "expected": "403",
+        "platform": "any"
+      },
+      {
+        "command": "apachectl -M 2>/dev/null | grep security",
+        "expected": "security2_module",
+        "platform": "linux"
+      }
+    ]
+  },
+  "confidence": "Medium",
+  "platforms": [
+    "Any"
+  ],
+  "remediation": [
+    {
+      "id": "modsecurity-apache-crs",
+      "name": "ModSecurity with OWASP CRS on Apache httpd",
+      "platform": "linux",
+      "precondition": "command -v apachectl >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Install ModSecurity and the OWASP Core Rule Set (RHEL/Fedora; for Debian use apt install libapache2-mod-security2 modsecurity-crs)",
+          "command": "dnf install -y mod_security mod_security_crs",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "dnf remove -y mod_security mod_security_crs"
+        },
+        {
+          "description": "Switch ModSecurity from detection-only to blocking mode by setting SecRuleEngine On",
+          "command": "sed -i 's/^SecRuleEngine DetectionOnly/SecRuleEngine On/' /etc/httpd/conf.d/mod_security.conf",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "sed -i 's/^SecRuleEngine On/SecRuleEngine DetectionOnly/' /etc/httpd/conf.d/mod_security.conf"
+        },
+        {
+          "description": "Set paranoia level to 2 for broader attack detection (default is 1)",
+          "command": "sed -i 's/setvar:tx.paranoia_level=1/setvar:tx.paranoia_level=2/' /etc/httpd/modsecurity.d/owasp-modsecurity-crs/crs-setup.conf",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "sed -i 's/setvar:tx.paranoia_level=2/setvar:tx.paranoia_level=1/' /etc/httpd/modsecurity.d/owasp-modsecurity-crs/crs-setup.conf"
+        },
+        {
+          "description": "Test Apache configuration and reload to activate WAF rules",
+          "command": "apachectl configtest && systemctl reload httpd",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "apachectl -M 2>/dev/null | grep security2_module && curl -s -o /dev/null -w '%{http_code}' 'http://localhost/?q=<script>alert(1)</script>'",
+      "references": [
+        {
+          "source": "OWASP ModSecurity Core Rule Set — Installation",
+          "url": "https://coreruleset.org/docs/deployment/install/"
+        },
+        {
+          "source": "RHEL 9 — Configuring ModSecurity",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/deploying_web_servers_and_reverse_proxies/setting-apache-http-server_deploying-web-servers-and-reverse-proxies"
+        }
+      ]
+    },
+    {
+      "id": "modsecurity-nginx-crs",
+      "name": "ModSecurity v3 with OWASP CRS on nginx",
+      "platform": "linux",
+      "precondition": "command -v nginx >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Install the nginx ModSecurity connector module and OWASP CRS (package names vary by distribution; may require building from source or EPEL/third-party repo)",
+          "command": "dnf install -y nginx-mod-modsecurity mod_security_crs",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "dnf remove -y nginx-mod-modsecurity"
+        },
+        {
+          "description": "Enable ModSecurity in the nginx http block and include the OWASP CRS rules",
+          "command": "printf 'modsecurity on;\\nmodsecurity_rules_file /etc/nginx/modsecurity.d/modsecurity.conf;\\n' > /etc/nginx/conf.d/modsecurity.conf",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f /etc/nginx/conf.d/modsecurity.conf"
+        },
+        {
+          "description": "Set ModSecurity to blocking mode (SecRuleEngine On) in the main modsecurity.conf",
+          "command": "sed -i 's/^SecRuleEngine DetectionOnly/SecRuleEngine On/' /etc/nginx/modsecurity.d/modsecurity.conf",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "sed -i 's/^SecRuleEngine On/SecRuleEngine DetectionOnly/' /etc/nginx/modsecurity.d/modsecurity.conf"
+        },
+        {
+          "description": "Test nginx configuration and reload to activate WAF rules",
+          "command": "nginx -t && systemctl reload nginx",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "nginx -T 2>/dev/null | grep -c 'modsecurity on' && curl -s -o /dev/null -w '%{http_code}' 'http://localhost/?q=<script>alert(1)</script>'",
+      "references": [
+        {
+          "source": "OWASP ModSecurity Core Rule Set — Installation",
+          "url": "https://coreruleset.org/docs/deployment/install/"
+        },
+        {
+          "source": "ModSecurity v3 nginx connector",
+          "url": "https://github.com/owasp-modsecurity/ModSecurity-nginx"
+        }
+      ]
+    }
+  ],
+  "scf_identifiers": [
+    "NET-08",
+    "WEB-03"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-79",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-89",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-94",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-78",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-22",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "NET-08",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "WEB-03",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

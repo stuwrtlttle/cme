@@ -1,0 +1,167 @@
+{
+  "cme_id": "CME-604",
+  "control_name": "Unprivileged User Namespaces Disabled",
+  "description": "Prevents unprivileged users from creating user namespaces. User namespaces expose kernel attack surface (mount, network, PID operations) to unprivileged users and have been a frequent LPE vector.",
+  "tactic": "Harden",
+  "category": "Syscall & BPF Controls",
+  "category_id": "syscall-bpf-controls",
+  "function_id": "seccomp",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "PR",
+      "from": "L",
+      "to": "H",
+      "rationale": "Unprivileged user cannot create namespaces to reach privileged kernel paths"
+    },
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Many kernel LPE exploits require user namespaces as a prerequisite"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-269",
+    "CWE-119"
+  ],
+  "verification": {
+    "method": "Check user.max_user_namespaces sysctl",
+    "commands": [
+      {
+        "command": "cat /proc/sys/user/max_user_namespaces",
+        "expected": "0",
+        "platform": "linux"
+      },
+      {
+        "command": "sysctl kernel.unprivileged_userns_clone 2>/dev/null",
+        "expected": "kernel.unprivileged_userns_clone = 0",
+        "platform": "debian"
+      }
+    ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 8",
+    "Ubuntu 24.04"
+  ],
+  "remediation": [
+    {
+      "id": "sysctl-max-user-namespaces",
+      "name": "Disable unprivileged user namespaces via user.max_user_namespaces sysctl",
+      "platform": "linux",
+      "precondition": "test -f /proc/sys/user/max_user_namespaces",
+      "steps": [
+        {
+          "description": "Set user.max_user_namespaces to 0 immediately (blocks unprivileged user namespace creation for all new processes)",
+          "command": "sysctl -w user.max_user_namespaces=0",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "sysctl -w user.max_user_namespaces=65536"
+        },
+        {
+          "description": "Persist the setting across reboots via sysctl.d drop-in",
+          "command": "printf 'user.max_user_namespaces = 0\\n' > /etc/sysctl.d/99-cme-604-userns.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/sysctl.d/99-cme-604-userns.conf && sysctl --system"
+        }
+      ],
+      "verify": "cat /proc/sys/user/max_user_namespaces",
+      "references": [
+        {
+          "source": "RHEL 9 Security Hardening — Reducing kernel attack surface",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/reducing-kernel-attack-surface_security-hardening"
+        }
+      ]
+    },
+    {
+      "id": "sysctl-unprivileged-userns-clone",
+      "name": "Disable unprivileged user namespaces via kernel.unprivileged_userns_clone sysctl",
+      "platform": "debian",
+      "precondition": "sysctl kernel.unprivileged_userns_clone >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Set kernel.unprivileged_userns_clone to 0 immediately (Debian/Ubuntu-specific sysctl that prevents unprivileged processes from calling unshare(CLONE_NEWUSER))",
+          "command": "sysctl -w kernel.unprivileged_userns_clone=0",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "sysctl -w kernel.unprivileged_userns_clone=1"
+        },
+        {
+          "description": "Persist the setting across reboots via sysctl.d drop-in",
+          "command": "printf 'kernel.unprivileged_userns_clone = 0\\n' > /etc/sysctl.d/99-cme-604-userns.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/sysctl.d/99-cme-604-userns.conf && sysctl --system"
+        }
+      ],
+      "verify": "sysctl kernel.unprivileged_userns_clone",
+      "references": [
+        {
+          "source": "Debian Wiki — User Namespaces",
+          "url": "https://wiki.debian.org/UserNamespaces"
+        }
+      ]
+    }
+  ],
+  "scf_identifiers": [
+    "CFG-03",
+    "IAC-21"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-269",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-119",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/PR",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "CFG-03",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "IAC-21",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

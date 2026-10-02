@@ -1,0 +1,258 @@
+{
+  "cme_id": "CME-906",
+  "control_name": "Rate Limiting / Connection Throttling",
+  "description": "Limits request rate per client IP or authenticated identity. Mitigates brute force attacks, credential stuffing, and application-level denial of service from single-source attackers. Does not protect against distributed attacks across many source IPs.",
+  "tactic": "Harden",
+  "category": "Application Controls",
+  "category_id": "application-controls",
+  "function_id": "request-filtering",
+  "control_layer": "Application",
+  "attenuation_type": "probabilistic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "A",
+      "from": "H",
+      "to": "L",
+      "rationale": "Per-IP request throttling caps the rate at which any single source can consume application resources (connections, threads, CPU), preventing single-source request flooding from exhausting capacity for other clients",
+      "probability": 0.5,
+      "evidence_basis": "Effective against single-source flooding and automated scanning; ineffective against distributed DoS (botnet traffic from thousands of IPs stays under per-IP limits), application-complexity DoS (single expensive request), and connection-level exhaustion (Slowloris)",
+      "conditions": [
+        "Attack originates from a single source IP or small number of IPs",
+        "Attack relies on request volume, not request complexity",
+        "Rate limiting is configured in blocking mode with appropriate thresholds"
+      ]
+    },
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Per-IP throttling limits authentication attempts to a rate that makes dictionary and brute force attacks from a single source impractical (e.g., 5 attempts/minute vs thousands/second)",
+      "probability": 0.6,
+      "evidence_basis": "Effective against single-source brute force and automated credential testing tools; ineffective against distributed credential stuffing using residential proxy rotation or botnet IPs, where each source stays under the per-IP limit",
+      "conditions": [
+        "Brute force originates from a single source IP or small number of IPs",
+        "Attacker is not using credential stuffing with known-valid pairs (few attempts needed)",
+        "Rate limiting applies to authentication endpoints specifically"
+      ]
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-307",
+    "CWE-400",
+    "CWE-799"
+  ],
+  "verification": {
+    "method": "Verify rate limiting is configured in the web server or reverse proxy",
+    "commands": [
+      {
+        "command": "grep -r 'limit_req_zone' /etc/nginx/ 2>/dev/null",
+        "expected": "limit_req_zone",
+        "platform": "linux"
+      },
+      {
+        "command": "grep -rE 'mod_ratelimit|mod_evasive' /etc/httpd/conf*/ /etc/apache2/ 2>/dev/null",
+        "expected": "mod_ratelimit",
+        "platform": "linux"
+      },
+      {
+        "command": "Get-WebConfigurationProperty -Filter 'system.webServer/security/dynamicIpSecurity/denyByConcurrentRequests' -PSPath 'IIS:\\Sites\\Default Web Site' -Name enabled",
+        "expected": "True",
+        "platform": "windows"
+      }
+    ]
+  },
+  "confidence": "Medium",
+  "platforms": [
+    "Any"
+  ],
+  "remediation": [
+    {
+      "id": "nginx-rate-limit",
+      "name": "nginx rate limiting with limit_req_zone",
+      "platform": "linux",
+      "precondition": "nginx -v 2>&1 | grep -qi nginx",
+      "steps": [
+        {
+          "description": "Define a rate-limiting shared memory zone keyed by client IP (10m zone holds ~160k IPs, limit to 10 requests/second per IP)",
+          "command": "printf 'limit_req_zone $binary_remote_addr zone=cme906:10m rate=10r/s;\\n' > /etc/nginx/conf.d/rate-limit.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/nginx/conf.d/rate-limit.conf"
+        },
+        {
+          "description": "Apply the rate limit to a server or location block with a burst allowance of 20 requests (replace <server_conf> with the target config file path)",
+          "command": "sed -i '/location \\//a \\    limit_req zone=cme906 burst=20 nodelay;' /etc/nginx/conf.d/<server_conf>",
+          "idempotent": false,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "sed -i '/limit_req zone=cme906/d' /etc/nginx/conf.d/<server_conf>"
+        },
+        {
+          "description": "Test nginx configuration syntax before reload",
+          "command": "nginx -t",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Reload nginx to apply the rate limiting configuration",
+          "command": "systemctl reload nginx",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "grep -r 'limit_req_zone' /etc/nginx/ 2>/dev/null",
+      "references": [
+        {
+          "source": "nginx — ngx_http_limit_req_module",
+          "url": "https://nginx.org/en/docs/http/ngx_http_limit_req_module.html"
+        }
+      ]
+    },
+    {
+      "id": "httpd-mod-evasive",
+      "name": "Apache httpd rate limiting with mod_evasive",
+      "platform": "linux",
+      "precondition": "httpd -v 2>&1 | grep -qi apache || apache2 -v 2>&1 | grep -qi apache",
+      "steps": [
+        {
+          "description": "Install mod_evasive (RHEL/CentOS — available from EPEL; on Debian/Ubuntu use libapache2-mod-evasive)",
+          "command": "dnf install -y mod_evasive || apt-get install -y libapache2-mod-evasive",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "dnf remove -y mod_evasive || apt-get remove -y libapache2-mod-evasive"
+        },
+        {
+          "description": "Configure mod_evasive with per-IP request thresholds (50 requests per page per second, 5 concurrent requests per site, 10s blocking period)",
+          "command": "printf '<IfModule mod_evasive24.c>\\n  DOSHashTableSize 3097\\n  DOSPageCount 50\\n  DOSSiteCount 100\\n  DOSPageInterval 1\\n  DOSSiteInterval 1\\n  DOSBlockingPeriod 10\\n</IfModule>\\n' > /etc/httpd/conf.d/mod_evasive.conf",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f /etc/httpd/conf.d/mod_evasive.conf"
+        },
+        {
+          "description": "Reload Apache to activate mod_evasive",
+          "command": "systemctl reload httpd || systemctl reload apache2",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "grep -rE 'mod_ratelimit|mod_evasive' /etc/httpd/conf*/ /etc/apache2/ 2>/dev/null",
+      "references": [
+        {
+          "source": "mod_evasive — Apache DoS evasion module",
+          "url": "https://github.com/jzdziarski/mod_evasive"
+        }
+      ]
+    },
+    {
+      "id": "iis-dynamic-ip-security",
+      "name": "IIS Dynamic IP Restrictions",
+      "platform": "windows",
+      "precondition": "Get-WindowsFeature Web-IP-Security 2>$null | Select-Object -ExpandProperty Installed",
+      "steps": [
+        {
+          "description": "Install the IIS IP and Domain Restrictions feature if not already present",
+          "command": "Install-WindowsFeature Web-IP-Security",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "Uninstall-WindowsFeature Web-IP-Security"
+        },
+        {
+          "description": "Enable Dynamic IP Restrictions to deny by concurrent requests (max 10 concurrent connections per IP)",
+          "command": "Set-WebConfigurationProperty -Filter 'system.webServer/security/dynamicIpSecurity/denyByConcurrentRequests' -PSPath 'IIS:\\Sites\\Default Web Site' -Name enabled -Value $true; Set-WebConfigurationProperty -Filter 'system.webServer/security/dynamicIpSecurity/denyByConcurrentRequests' -PSPath 'IIS:\\Sites\\Default Web Site' -Name maxConcurrentRequests -Value 10",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "Set-WebConfigurationProperty -Filter 'system.webServer/security/dynamicIpSecurity/denyByConcurrentRequests' -PSPath 'IIS:\\Sites\\Default Web Site' -Name enabled -Value $false"
+        },
+        {
+          "description": "Enable Dynamic IP Restrictions to deny by request rate (max 25 requests per 10-second interval per IP)",
+          "command": "Set-WebConfigurationProperty -Filter 'system.webServer/security/dynamicIpSecurity/denyByRequestRate' -PSPath 'IIS:\\Sites\\Default Web Site' -Name enabled -Value $true; Set-WebConfigurationProperty -Filter 'system.webServer/security/dynamicIpSecurity/denyByRequestRate' -PSPath 'IIS:\\Sites\\Default Web Site' -Name maxRequests -Value 25; Set-WebConfigurationProperty -Filter 'system.webServer/security/dynamicIpSecurity/denyByRequestRate' -PSPath 'IIS:\\Sites\\Default Web Site' -Name requestIntervalInMilliseconds -Value 10000",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "Set-WebConfigurationProperty -Filter 'system.webServer/security/dynamicIpSecurity/denyByRequestRate' -PSPath 'IIS:\\Sites\\Default Web Site' -Name enabled -Value $false"
+        }
+      ],
+      "verify": "Get-WebConfigurationProperty -Filter 'system.webServer/security/dynamicIpSecurity/denyByConcurrentRequests' -PSPath 'IIS:\\Sites\\Default Web Site' -Name enabled",
+      "references": [
+        {
+          "source": "Microsoft — Dynamic IP Restrictions in IIS",
+          "url": "https://learn.microsoft.com/en-us/iis/configuration/system.webserver/security/dynamicipsecurity/"
+        }
+      ]
+    }
+  ],
+  "scf_identifiers": [
+    "NET-02.1",
+    "NET-03.1",
+    "WEB-04"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-307",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-400",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-799",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/A",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "NET-02.1",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "NET-03.1",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "WEB-04",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

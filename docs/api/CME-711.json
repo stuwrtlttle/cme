@@ -1,0 +1,112 @@
+{
+  "cme_id": "CME-711",
+  "control_name": "Admission Controller Policy Enforcement (OPA/Gatekeeper/Kyverno)",
+  "description": "Policy-as-code enforcement at the Kubernetes admission gate. Admission controllers intercept API requests before persistence and reject workloads that violate security policies: no privileged containers, no host namespace sharing, required labels/annotations, image registry allowlists. Provides defense-in-depth on top of Pod Security Standards (CME-706) with custom policy granularity. OPA/Gatekeeper uses Rego policies via ConstraintTemplate CRDs; Kyverno uses Kubernetes-native ClusterPolicy resources. OpenShift SecurityContextConstraints serve as a built-in admission control mechanism.",
+  "tactic": "Harden",
+  "category": "Container Isolation",
+  "category_id": "container-isolation",
+  "function_id": "pod-security",
+  "control_layer": "Application",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Attacker must bypass the policy engine to deploy a malicious or privileged workload; simply having API access is insufficient without a policy-compliant manifest — the attacker must find a policy gap, exempt namespace, or webhook bypass"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-269",
+    "CWE-284",
+    "CWE-250"
+  ],
+  "verification": {
+    "method": "Verify admission controller is deployed and enforcing policies",
+    "commands": [
+      {
+        "command": "kubectl get constraint --no-headers 2>/dev/null | wc -l",
+        "expected": ">=1",
+        "platform": "kubernetes"
+      },
+      {
+        "command": "kubectl get clusterpolicy --no-headers 2>/dev/null | wc -l",
+        "expected": ">=1",
+        "platform": "kubernetes"
+      },
+      {
+        "command": "oc get scc --no-headers 2>/dev/null | wc -l",
+        "expected": ">=1",
+        "platform": "kubernetes"
+      },
+      {
+        "command": "kubectl get constraint -o jsonpath='{range .items[*]}{.spec.enforcementAction}{\"\\n\"}{end}' 2>/dev/null | grep -c -i 'deny'",
+        "expected": ">=1",
+        "platform": "kubernetes"
+      },
+      {
+        "command": "kubectl run cme-test --image=busybox --restart=Never --dry-run=server --overrides='{\"spec\":{\"containers\":[{\"name\":\"test\",\"image\":\"busybox\",\"securityContext\":{\"privileged\":true}}]}}' 2>&1 | grep -c -i 'denied\\|forbidden\\|violated'",
+        "expected": ">=1",
+        "platform": "kubernetes"
+      }
+    ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "Kubernetes 1.25+",
+    "OpenShift 4.12+"
+  ],
+  "scf_identifiers": [
+    "CFG-06",
+    "CLD-02"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-269",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-284",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-250",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "CFG-06",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "CLD-02",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

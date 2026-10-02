@@ -1,0 +1,131 @@
+{
+  "cme_id": "CME-1318",
+  "control_name": "LDAP Injection Prevention",
+  "description": "Prevention of LDAP injection attacks through parameterized LDAP queries, input sanitization of special characters (*, (, ), \\, NUL, |, &), and use of LDAP filter escaping functions. Prevents attackers from manipulating LDAP search filters to bypass authentication, escalate privileges, or extract unauthorized directory data. Applies DN escaping for distinguished names and filter escaping for search filter values.",
+  "tactic": "Harden",
+  "category": "Application Input Validation",
+  "category_id": "application-input-validation",
+  "function_id": "injection-prevention",
+  "control_layer": "Application",
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Requires crafted input AND LDAP filter bypass; escaping prevents filter manipulation"
+    },
+    {
+      "metric": "I",
+      "from": "H",
+      "to": "L",
+      "rationale": "Prevents unauthorized directory writes and authentication bypass via filter injection"
+    },
+    {
+      "metric": "C",
+      "from": "H",
+      "to": "L",
+      "rationale": "Prevents directory enumeration and unauthorized data extraction via wildcard injection"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-90",
+    "CWE-943",
+    "CWE-20"
+  ],
+  "verification": {
+    "method": "Code review for LDAP filter escaping and parameterized queries",
+    "commands": [
+      {
+        "command": "grep -rn 'ldap_escape\\|escapeLdapFilter\\|Filter\\.escape\\|LdapFilterEncode\\|escape_filter_chars\\|ldap_escape_filter' <app_source>/",
+        "expected": "LDAP filter escaping functions present in code paths that construct LDAP queries",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'ldap_search\\|search_s\\|ldap\\.search\\|DirectorySearcher\\|LdapConnection.*Search\\|SearchRequest' <app_source>/ | grep -v -i 'escape\\|encode\\|sanitiz\\|filter_format' | head -10",
+        "expected": "Zero matches — all LDAP search calls should have upstream escaping or parameterization",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'dn_escape\\|escape_dn_chars\\|escapeDN\\|Encoder.LdapDistinguishedNameEncode' <app_source>/",
+        "expected": "DN escaping present for code paths that construct distinguished names from user input",
+        "platform": "any"
+      }
+    ]
+  },
+  "references": [
+    {
+      "source": "OWASP LDAP Injection",
+      "url": "https://owasp.org/www-community/attacks/LDAP_Injection"
+    },
+    {
+      "source": "CWE-90",
+      "url": "https://cwe.mitre.org/data/definitions/90.html"
+    }
+  ],
+  "platforms": [
+    "Any"
+  ],
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "scf_identifiers": [
+    "IAC-15",
+    "IAC-15.1"
+  ],
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-90",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "Directly prevents LDAP injection by escaping special characters in filter values",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-943",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-20",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/I",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/C",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "IAC-15",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

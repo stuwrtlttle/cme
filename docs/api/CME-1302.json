@@ -1,0 +1,191 @@
+{
+  "cme_id": "CME-1302",
+  "control_name": "Deserialization Allowlist (Safe Loading)",
+  "description": "Restricts deserialization to an explicit allowlist of permitted types, classes, or functions. Prevents attacker-controlled serialized data from instantiating arbitrary objects, invoking dangerous functions, or triggering unintended code paths. Applies to JSON schema validation, YAML safe_load, pickle restrictions, and custom deserialization frameworks.",
+  "tactic": "Harden",
+  "category": "Application Input Validation",
+  "category_id": "application-input-validation",
+  "function_id": "input-validation",
+  "control_layer": "Application",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Only allowlisted types can be deserialized; attacker must find an exploitable gadget chain using only permitted types, which is fundamentally harder than exploiting unrestricted deserialization"
+    },
+    {
+      "metric": "C",
+      "from": "H",
+      "to": "L",
+      "rationale": "Arbitrary code execution via gadget chains blocked; attacker cannot exfiltrate data beyond what allowlisted types expose"
+    },
+    {
+      "metric": "I",
+      "from": "H",
+      "to": "L",
+      "rationale": "Cannot invoke arbitrary functions or modify state via deserialized objects; modifications limited to intended domain of allowlisted types"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-470",
+    "CWE-502",
+    "CWE-1188"
+  ],
+  "verification": {
+    "method": "Verify deserialization uses safe loading or allowlist enforcement across all application languages",
+    "commands": [
+      {
+        "command": "grep -rn 'yaml.safe_load\\|SafeLoader\\|RestrictedUnpickler\\|ObjectInputFilter\\|JsonSerializer' <app_source>/",
+        "expected": "safe_load|SafeLoader|RestrictedUnpickler|ObjectInputFilter|JsonSerializer",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'yaml.load\\|pickle.load\\|marshal.load' <app_source>/ | grep -v 'safe_load\\|SafeLoader'",
+        "expected": "No output",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'jdk.serialFilter\\|ObjectInputFilter\\|serialFilter' /etc/java/ /usr/lib/jvm/*/conf/ 2>/dev/null || java -XshowSettings 2>&1 | grep serialFilter",
+        "expected": "serialFilter",
+        "platform": "linux"
+      },
+      {
+        "command": "grep -rn 'TypeNameHandling\\.None\\|TypeNameHandling\\.Auto\\|BinaryFormatter' <app_source>/ | grep -v None",
+        "expected": "No output",
+        "platform": "any"
+      }
+    ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "Any"
+  ],
+  "remediation": [
+    {
+      "id": "java-serial-filter",
+      "name": "JVM-wide deserialization filter via jdk.serialFilter",
+      "platform": "any",
+      "precondition": "java -version 2>&1 | grep -q 'version'",
+      "steps": [
+        {
+          "description": "Set a global deserialization filter in the JVM security properties file to reject all classes except an explicit allowlist (replace <allowed.package.*> with your application's required classes)",
+          "command": "printf 'jdk.serialFilter=!*;java.base/*;java.lang.*;java.util.*;java.io.Serializable;<allowed.package.*>\\n' >> $(java -XshowSettings:property 2>&1 | grep java.home | awk '{print $3}')/conf/security/java.security",
+          "idempotent": false,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "sed -i '/^jdk.serialFilter=/d' $(java -XshowSettings:property 2>&1 | grep java.home | awk '{print $3}')/conf/security/java.security"
+        },
+        {
+          "description": "Verify the filter is active by checking JVM settings for serialFilter property",
+          "command": "java -XshowSettings 2>&1 | grep -i serialFilter",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true
+        }
+      ],
+      "verify": "grep -rn 'jdk.serialFilter\\|ObjectInputFilter\\|serialFilter' /etc/java/ /usr/lib/jvm/*/conf/ 2>/dev/null || java -XshowSettings 2>&1 | grep serialFilter",
+      "references": [
+        {
+          "source": "Oracle — JEP 290: Filter Incoming Serialization Data",
+          "url": "https://openjdk.org/jeps/290"
+        },
+        {
+          "source": "Oracle — Serialization Filtering",
+          "url": "https://docs.oracle.com/en/java/javase/17/core/serialization-filtering1.html"
+        }
+      ]
+    },
+    {
+      "id": "python-yaml-safe-load",
+      "name": "Python YAML safe_load enforcement via site-wide import hook",
+      "platform": "any",
+      "precondition": "python3 -c 'import yaml' 2>/dev/null",
+      "steps": [
+        {
+          "description": "Create a site-wide usercustomize.py that monkey-patches yaml.load to require SafeLoader, preventing unsafe deserialization of YAML documents",
+          "command": "printf 'import yaml\\n_orig_load = yaml.load\\ndef _safe_load(data, Loader=None, **kw):\\n    if Loader is None:\\n        Loader = yaml.SafeLoader\\n    return _orig_load(data, Loader=Loader, **kw)\\nyaml.load = _safe_load\\n' > $(python3 -c 'import site; print(site.getusersitepackages())')/usercustomize.py",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f $(python3 -c 'import site; print(site.getusersitepackages())')/usercustomize.py"
+        }
+      ],
+      "verify": "grep -rn 'yaml.safe_load\\|SafeLoader' <app_source>/",
+      "references": [
+        {
+          "source": "PyYAML — yaml.safe_load documentation",
+          "url": "https://pyyaml.org/wiki/PyYAMLDocumentation"
+        }
+      ]
+    }
+  ],
+  "scf_identifiers": [
+    "WEB-07",
+    "WEB-09"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-470",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-502",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-1188",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/C",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/I",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "WEB-07",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "WEB-09",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

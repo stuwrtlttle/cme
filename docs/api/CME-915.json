@@ -1,0 +1,227 @@
+{
+  "cme_id": "CME-915",
+  "control_name": "Cross-Origin Request Restriction (Reverse Proxy Origin Enforcement)",
+  "description": "Configure the reverse proxy or load balancer (nginx, Apache httpd, HAProxy) to validate the Origin and Referer headers on state-changing requests (POST, PUT, DELETE, PATCH, and WebSocket Upgrade) against an explicit allowlist of trusted origins. Requests with an Origin that does not match the allowlist are rejected with 403 before reaching the backend application. This provides defense-in-depth for applications that fail to validate cross-origin requests internally — the proxy enforces the same-origin boundary at the infrastructure layer.",
+  "tactic": "Harden",
+  "category": "Application Controls",
+  "category_id": "application-controls",
+  "function_id": "origin-cors",
+  "control_layer": "Application",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "The attacker must achieve a same-origin position (e.g., XSS on the allowed domain or social engineering to access a same-origin page) to bypass the proxy-level origin restriction. A simple cross-origin request from an attacker-controlled domain is rejected by the proxy before reaching the application, significantly increasing the complexity required for successful exploitation."
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-346",
+    "CWE-352",
+    "CWE-940",
+    "CWE-942"
+  ],
+  "confidence": "High",
+  "platforms": [
+    "Any"
+  ],
+  "verification": {
+    "method": "Check reverse proxy configuration for Origin/Referer header validation on state-changing requests. The proxy should reject requests with an Origin not in the trusted allowlist.",
+    "commands": [
+      {
+        "command": "grep -rE \"valid_referers|map.*\\$http_origin\" /etc/nginx/",
+        "expected": "Non-empty output — nginx origin validation map or valid_referers directive found",
+        "platform": "rhel"
+      },
+      {
+        "command": "grep -rE \"Require expr.*HTTP_ORIGIN|SetEnvIf Origin\" /etc/httpd/conf.d/",
+        "expected": "Non-empty output — Apache Origin validation rules found",
+        "platform": "rhel"
+      },
+      {
+        "command": "grep -rE \"hdr\\(Origin\\)|req\\.hdr\\(Origin\\)\" /etc/haproxy/",
+        "expected": "Non-empty output — HAProxy Origin ACL rules found",
+        "platform": "rhel"
+      },
+      {
+        "command": "curl -s -o /dev/null -w \"%{http_code}\" -X POST -H \"Origin: https://evil.example.com\" https://<your-app>/api/endpoint",
+        "expected": "403",
+        "platform": "any"
+      }
+    ]
+  },
+  "remediation": [
+    {
+      "id": "nginx-origin-allowlist",
+      "name": "nginx Origin header allowlist with map-based rejection",
+      "platform": "linux",
+      "precondition": "command -v nginx >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create an nginx map that validates the Origin header against an explicit allowlist of trusted origins (replace <trusted_origin> entries with your actual origins, e.g., https://app.example.com)",
+          "command": "printf 'map $http_origin $cors_allowed {\n    default 0;\n    \"https://<trusted_origin>\" 1;\n    \"https://<trusted_origin_2>\" 1;\n}\n\nserver {\n    # Block state-changing cross-origin requests\n    if ($request_method ~* \"POST|PUT|DELETE|PATCH\") {\n        set $cors_check \"method\";\n    }\n    if ($cors_allowed = 0) {\n        set $cors_check \"${cors_check}_blocked\";\n    }\n    if ($cors_check = \"method_blocked\") {\n        return 403;\n    }\n}\n' > /etc/nginx/conf.d/cme-915-origin-restrict.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/nginx/conf.d/cme-915-origin-restrict.conf && nginx -s reload"
+        },
+        {
+          "description": "Test nginx configuration for syntax errors",
+          "command": "nginx -t",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Reload nginx to apply the origin restriction rules",
+          "command": "nginx -s reload",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Origin: https://evil.example.com' https://<your-app>/api/endpoint",
+      "references": [
+        {
+          "source": "nginx — map module documentation",
+          "url": "https://nginx.org/en/docs/http/ngx_http_map_module.html"
+        }
+      ]
+    },
+    {
+      "id": "httpd-origin-enforcement",
+      "name": "Apache httpd Origin header enforcement via SetEnvIf and Require",
+      "platform": "linux",
+      "precondition": "command -v apachectl >/dev/null 2>&1 || command -v httpd >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create an Apache config drop-in that rejects POST/PUT/DELETE/PATCH requests from untrusted origins (replace <trusted_origin> with your actual origin, e.g., https://app.example.com)",
+          "command": "printf '<IfModule mod_setenvif.c>\n    SetEnvIf Origin \"^https://<trusted_origin>$\" ORIGIN_OK=1\n    SetEnvIf Origin \"^https://<trusted_origin_2>$\" ORIGIN_OK=1\n</IfModule>\n\n<Location />\n    <If \"%%{REQUEST_METHOD} in { \\x27POST\\x27, \\x27PUT\\x27, \\x27DELETE\\x27, \\x27PATCH\\x27 }\">\n        <RequireAll>\n            Require all granted\n            Require env ORIGIN_OK\n        </RequireAll>\n    </If>\n</Location>\n' > /etc/httpd/conf.d/cme-915-origin-restrict.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/httpd/conf.d/cme-915-origin-restrict.conf && apachectl graceful"
+        },
+        {
+          "description": "Test Apache configuration for syntax errors",
+          "command": "apachectl configtest",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Reload Apache to apply the origin restriction rules",
+          "command": "apachectl graceful",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Origin: https://evil.example.com' https://<your-app>/api/endpoint",
+      "references": [
+        {
+          "source": "Apache HTTP Server — mod_setenvif",
+          "url": "https://httpd.apache.org/docs/2.4/mod/mod_setenvif.html"
+        }
+      ]
+    },
+    {
+      "id": "haproxy-origin-acl",
+      "name": "HAProxy Origin header ACL with deny on mismatch",
+      "platform": "linux",
+      "precondition": "command -v haproxy >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Add Origin ACL rules to the HAProxy frontend config (replace <trusted_origin> with your actual origins). Add these lines to the appropriate frontend section in /etc/haproxy/haproxy.cfg",
+          "command": "printf '\\n# CME-915: Cross-Origin Request Restriction\\nacl is_state_changing method POST PUT DELETE PATCH\\nacl origin_present req.hdr(Origin) -m found\\nacl origin_allowed req.hdr(Origin) -m str https://<trusted_origin> https://<trusted_origin_2>\\nhttp-request deny deny_status 403 if is_state_changing origin_present !origin_allowed\\n' >> /etc/haproxy/haproxy.cfg",
+          "idempotent": false,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "sed -i '/# CME-915/,/^$/d' /etc/haproxy/haproxy.cfg && systemctl reload haproxy"
+        },
+        {
+          "description": "Validate HAProxy configuration syntax",
+          "command": "haproxy -c -f /etc/haproxy/haproxy.cfg",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Reload HAProxy to apply the origin restriction ACLs",
+          "command": "systemctl reload haproxy",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Origin: https://evil.example.com' https://<your-app>/api/endpoint",
+      "references": [
+        {
+          "source": "HAProxy — ACL documentation",
+          "url": "https://docs.haproxy.org/2.8/configuration.html#7"
+        }
+      ]
+    }
+  ],
+  "scf_identifiers": [
+    "NET-18",
+    "WEB-03"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-346",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-352",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-940",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-942",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "NET-18",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "WEB-03",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

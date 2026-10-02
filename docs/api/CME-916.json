@@ -1,0 +1,177 @@
+{
+  "cme_id": "CME-916",
+  "control_name": "SameSite Cookie Attribute Enforcement",
+  "description": "Configure the web server or reverse proxy to enforce the SameSite attribute (Lax or Strict) on all Set-Cookie response headers. When SameSite=Lax is set, browsers do not include the cookie in cross-site POST, PUT, DELETE, or other state-changing requests initiated from a different origin. When SameSite=Strict is set, cookies are not included in any cross-site navigation. This prevents CSRF attacks because the attacker cross-origin request arrives without the victim session cookie, making it unauthenticated. Modern browsers default to SameSite=Lax for cookies that omit SameSite, but applications that explicitly set SameSite=None (for cross-origin API use) or legacy applications that predate the default bypass this protection. Admin enforcement at the proxy layer overrides the application cookie attributes.",
+  "tactic": "Harden",
+  "category": "Application Controls",
+  "category_id": "application-controls",
+  "function_id": "origin-cors",
+  "control_layer": "Application",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "The attacker must find a way to bypass the SameSite restriction (e.g., exploit a subdomain XSS vulnerability to achieve same-site context, or target a browser that does not enforce SameSite) to include the victim session cookie in a cross-site request. Without this bypass, cross-site state-changing requests arrive unauthenticated and are rejected by the application."
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-346",
+    "CWE-352",
+    "CWE-1275"
+  ],
+  "confidence": "High",
+  "platforms": [
+    "Any"
+  ],
+  "verification": {
+    "method": "Verify that all Set-Cookie response headers include SameSite=Lax or SameSite=Strict. Check web server or reverse proxy configuration for cookie attribute enforcement directives.",
+    "commands": [
+      {
+        "command": "grep -rE \"Header.*(edit|always set).*Set-Cookie.*SameSite\" /etc/httpd/conf.d/",
+        "expected": "Non-empty output — Apache mod_headers SameSite enforcement directive found",
+        "platform": "rhel"
+      },
+      {
+        "command": "grep -rE \"proxy_cookie_flags|proxy_cookie_path.*SameSite\" /etc/nginx/",
+        "expected": "Non-empty output — nginx SameSite cookie flag directive found",
+        "platform": "rhel"
+      },
+      {
+        "command": "curl -sI https://<your-app>/ | grep -i \"set-cookie\" | grep -i \"samesite\"",
+        "expected": "SameSite=Lax or SameSite=Strict on all Set-Cookie headers",
+        "platform": "any"
+      }
+    ]
+  },
+  "remediation": [
+    {
+      "id": "apache-samesite-enforcement",
+      "name": "Apache mod_headers SameSite=Lax enforcement on all cookies",
+      "platform": "linux",
+      "precondition": "apachectl -v >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create an Apache drop-in config that rewrites all Set-Cookie headers to include SameSite=Lax. The Header edit directive appends SameSite=Lax to cookies that do not already carry a SameSite attribute, and rewrites SameSite=None to SameSite=Lax for cookies that explicitly disabled it.",
+          "command": "printf '<IfModule mod_headers.c>\n  Header always edit Set-Cookie \"(?i)^((?!.*SameSite).*)$\" \"$1; SameSite=Lax\"\n  Header always edit Set-Cookie \"(?i)(SameSite=None)\" \"SameSite=Lax\"\n</IfModule>\n' > /etc/httpd/conf.d/cme-916-samesite.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/httpd/conf.d/cme-916-samesite.conf"
+        },
+        {
+          "description": "Test the Apache configuration for syntax errors before reloading",
+          "command": "apachectl configtest",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Gracefully reload Apache to apply the new cookie header rules",
+          "command": "systemctl reload httpd",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "curl -sI https://<your-app>/ | grep -i 'set-cookie' | grep -i 'samesite'",
+      "references": [
+        {
+          "source": "Apache mod_headers — Header Directive",
+          "url": "https://httpd.apache.org/docs/2.4/mod/mod_headers.html"
+        }
+      ]
+    },
+    {
+      "id": "nginx-samesite-enforcement",
+      "name": "nginx proxy_cookie_flags SameSite=Lax enforcement on all proxied cookies",
+      "platform": "linux",
+      "precondition": "nginx -v >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create an nginx drop-in config snippet that adds the SameSite=Lax flag to all cookies set by upstream backends via proxy_cookie_flags. Requires nginx 1.19.3+ (included in RHEL 9+, Fedora, Ubuntu 22.04+).",
+          "command": "printf 'proxy_cookie_flags ~ samesite=lax;\\n' > /etc/nginx/conf.d/cme-916-samesite.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/nginx/conf.d/cme-916-samesite.conf"
+        },
+        {
+          "description": "Test the nginx configuration for syntax errors before reloading",
+          "command": "nginx -t",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Gracefully reload nginx to apply the new cookie flag rules",
+          "command": "systemctl reload nginx",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "curl -sI https://<your-app>/ | grep -i 'set-cookie' | grep -i 'samesite'",
+      "references": [
+        {
+          "source": "nginx proxy_cookie_flags directive",
+          "url": "https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cookie_flags"
+        }
+      ]
+    }
+  ],
+  "scf_identifiers": [
+    "WEB-04",
+    "WEB-05"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-346",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-352",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-1275",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "WEB-04",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "WEB-05",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

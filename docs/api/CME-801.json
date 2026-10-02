@@ -1,0 +1,232 @@
+{
+  "cme_id": "CME-801",
+  "control_name": "Multi-Factor Authentication (MFA)",
+  "description": "Enforce multi-factor authentication (MFA) requiring two or more independent authentication factors before granting access. Supported second factors include time-based one-time passwords (TOTP via authenticator apps), FIDO2/WebAuthn hardware security keys, smart cards (PIV/CAC via PKCS#11), and push-based approval. MFA ensures that a compromised password alone is insufficient for account access — the attacker must also obtain or bypass the second factor through a separate channel (physical theft, real-time phishing proxy, SIM swap), each of which adds substantial complexity. FIDO2 keys provide the strongest protection as they are bound to the origin and resistant to phishing. TOTP is vulnerable to real-time proxy phishing (e.g., EvilGinx2) but still requires significantly more attack infrastructure than password-only attacks. MFA is enforced at the authentication layer via PAM modules (Linux), conditional access policies (Azure AD/Entra ID), or IdP configuration (Keycloak, Okta, FreeIPA).",
+  "tactic": "Harden",
+  "category": "Credential Hardening",
+  "category_id": "credential-hardening",
+  "function_id": "authentication-methods",
+  "control_layer": "Identity",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "A stolen password alone cannot authenticate — the attacker must also obtain the second factor through a separate channel (physical theft of a hardware key, real-time phishing proxy to capture TOTP, SIM swap for SMS codes). Each bypass requires substantially more infrastructure and attacker proximity than password-only credential abuse, raising exploitation complexity from trivial replay to a multi-stage attack"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-287",
+    "CWE-521",
+    "CWE-303",
+    "CWE-305",
+    "CWE-798"
+  ],
+  "verification": {
+    "method": "Verify MFA enforcement via PAM modules, SSSD/FreeIPA OTP, smart card, or IdP conditional access policy",
+    "commands": [
+      {
+        "command": "grep -rE 'pam_google_authenticator|pam_oath|pam_u2f|pam_duo' /etc/pam.d/ 2>/dev/null | grep -c 'auth.*required'",
+        "expected": ">=1",
+        "platform": "linux"
+      },
+      {
+        "command": "grep -c 'pam_sss' /etc/pam.d/system-auth 2>/dev/null && ipa user-show admin --all 2>/dev/null | grep -i 'authentication types' | grep -ic 'otp'",
+        "expected": ">=1",
+        "platform": "rhel"
+      },
+      {
+        "command": "grep -rE 'pam_pkcs11|pam_p11' /etc/pam.d/ 2>/dev/null | grep -c 'auth'",
+        "expected": ">=1",
+        "platform": "linux"
+      },
+      {
+        "command": "Get-MgIdentityConditionalAccessPolicy | Where-Object {$_.GrantControls.BuiltInControls -contains 'mfa' -and $_.State -eq 'enabled'} | Measure-Object | Select-Object -ExpandProperty Count",
+        "expected": ">=1",
+        "platform": "windows"
+      }
+    ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "Any"
+  ],
+  "remediation": [
+    {
+      "id": "pam-totp-google-authenticator",
+      "name": "PAM TOTP via google-authenticator module",
+      "platform": "linux",
+      "precondition": "command -v google-authenticator >/dev/null 2>&1 || command -v dnf >/dev/null 2>&1 || command -v apt >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Install google-authenticator PAM module (RHEL/Fedora uses google-authenticator, Debian/Ubuntu uses libpam-google-authenticator)",
+          "command": "dnf install -y google-authenticator || apt install -y libpam-google-authenticator",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "dnf remove -y google-authenticator || apt remove -y libpam-google-authenticator"
+        },
+        {
+          "description": "Add pam_google_authenticator as a required auth module for system-auth (insert after pam_unix or pam_sss)",
+          "command": "grep -q 'pam_google_authenticator' /etc/pam.d/system-auth 2>/dev/null || sed -i '/^auth.*pam_unix/a auth       required     pam_google_authenticator.so nullok' /etc/pam.d/system-auth",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "sed -i '/pam_google_authenticator/d' /etc/pam.d/system-auth"
+        },
+        {
+          "description": "Configure SSH to require both publickey and keyboard-interactive (TOTP) for authentication",
+          "command": "grep -q '^AuthenticationMethods' /etc/ssh/sshd_config 2>/dev/null || printf 'AuthenticationMethods publickey,keyboard-interactive\\nChallengeResponseAuthentication yes\\n' >> /etc/ssh/sshd_config",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "sed -i '/^AuthenticationMethods publickey,keyboard-interactive/d; /^ChallengeResponseAuthentication yes/d' /etc/ssh/sshd_config"
+        },
+        {
+          "description": "Restart sshd to apply authentication method changes",
+          "command": "systemctl restart sshd",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "grep -rE 'pam_google_authenticator' /etc/pam.d/ | grep -c 'auth.*required'",
+      "references": [
+        {
+          "source": "RHEL 9 — Configuring authentication and authorization",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/configuring_authentication_and_authorization_in_rhel/index"
+        },
+        {
+          "source": "google-authenticator-libpam — GitHub",
+          "url": "https://github.com/google/google-authenticator-libpam"
+        }
+      ]
+    },
+    {
+      "id": "pam-fido2-u2f",
+      "name": "PAM FIDO2/U2F via pam_u2f module",
+      "platform": "linux",
+      "precondition": "command -v pamu2fcfg >/dev/null 2>&1 || command -v dnf >/dev/null 2>&1 || command -v apt >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Install pam-u2f module (provides pam_u2f.so for FIDO2/U2F hardware security key authentication)",
+          "command": "dnf install -y pam-u2f || apt install -y libpam-u2f",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "dnf remove -y pam-u2f || apt remove -y libpam-u2f"
+        },
+        {
+          "description": "Add pam_u2f as a required auth module for system-auth (requires user to have registered a key via pamu2fcfg > ~/.config/Yubico/u2f_keys)",
+          "command": "grep -q 'pam_u2f' /etc/pam.d/system-auth 2>/dev/null || sed -i '/^auth.*pam_unix/a auth       required     pam_u2f.so' /etc/pam.d/system-auth",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "sed -i '/pam_u2f/d' /etc/pam.d/system-auth"
+        }
+      ],
+      "verify": "grep -rE 'pam_u2f' /etc/pam.d/ | grep -c 'auth.*required'",
+      "references": [
+        {
+          "source": "Yubico — pam-u2f documentation",
+          "url": "https://developers.yubico.com/pam-u2f/"
+        },
+        {
+          "source": "RHEL 9 — Configuring smart card authentication",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/managing_smart_card_authentication/index"
+        }
+      ]
+    }
+  ],
+  "scf_identifiers": [
+    "IAC-06",
+    "IAC-06.1"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-287",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-521",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-303",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-305",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-798",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "rationale": "Hard-coded credentials alone are insufficient when MFA is enforced; attacker must also obtain the second factor",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "ATT&CK",
+      "target_id": "T1021",
+      "relationship_type": "mitigates",
+      "method": "crosswalk",
+      "rationale": "Derived from ATT&CK mitigation M1032 mapped to CME-801; MFA raises the bar for Enterprise remote service abuse.",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "ATT&CK",
+      "identifier": "M1032",
+      "value": "Multi-factor Authentication",
+      "relationship_type": "maps_to",
+      "rationale": "Concrete ATT&CK Multi-factor Authentication control with verification guidance."
+    },
+    {
+      "namespace": "ATT&CK",
+      "identifier": "M0932",
+      "value": "Multi-factor Authentication",
+      "relationship_type": "maps_to",
+      "rationale": "Concrete ATT&CK ICS Multi-factor Authentication control."
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "IAC-06",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "IAC-06.1",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

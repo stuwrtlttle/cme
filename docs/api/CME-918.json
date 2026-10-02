@@ -1,0 +1,242 @@
+{
+  "cme_id": "CME-918",
+  "control_name": "URL Path Authorization Enforcement (Forced Browsing Prevention)",
+  "description": "Enforce URL-pattern-based authorization at the web server or reverse proxy layer so that restricted paths (administrative consoles, debug endpoints, configuration panels, internal APIs, backup files, and deployment artifacts) are denied to unauthorized requesters before the request reaches application code. The control operates as a default-deny URL filter: only explicitly permitted URL patterns are accessible to each authenticated role, and any request to an undefined or restricted path returns 403 Forbidden. This complements application-layer authorization (CME-907, CME-909) by providing infrastructure-level defense-in-depth against forced browsing, where an attacker discovers and directly requests URLs that bypass application navigation and menu-driven access control. Configuration is enforced via web server directives (Apache httpd Location/Directory with Require, nginx location blocks with deny/allow, IIS URL Authorization rules) or Java EE security-constraint elements in web.xml with deny-uncovered-http-methods enabled.",
+  "tactic": "Harden",
+  "category": "Application Controls",
+  "category_id": "application-controls",
+  "function_id": "authorization-controls",
+  "control_layer": "Application",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "PR",
+      "from": "N",
+      "to": "L",
+      "rationale": "Forced browsing to administrative or internal endpoints fails because the web server rejects unauthenticated requests to restricted URL patterns before the application processes them; the attacker must first obtain valid credentials to reach any protected path"
+    },
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Discovering and accessing a restricted endpoint requires bypassing both the web server URL authorization rules and the application-layer authorization checks; simply guessing or enumerating URLs is insufficient because the infrastructure layer denies access to any path not explicitly permitted for the caller's role"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-425",
+    "CWE-862",
+    "CWE-306",
+    "CWE-284"
+  ],
+  "verification": {
+    "method": "Verify that the web server or reverse proxy enforces URL-pattern-based authorization on restricted paths, and that unauthenticated requests to administrative or internal endpoints are denied",
+    "commands": [
+      {
+        "command": "grep -rn '<Location\\|<Directory\\|Require valid-user\\|Require group\\|AuthType' /etc/httpd/conf.d/ /etc/httpd/conf/httpd.conf",
+        "expected": "Non-empty output — Apache Location/Directory blocks with Require directives on restricted paths",
+        "platform": "rhel"
+      },
+      {
+        "command": "grep -rn 'location.*/admin\\|location.*/console\\|deny all\\|auth_basic\\|auth_request' /etc/nginx/conf.d/ /etc/nginx/nginx.conf",
+        "expected": "Non-empty output — nginx location blocks with auth_basic, auth_request, or deny directives on restricted paths",
+        "platform": "linux"
+      },
+      {
+        "command": "curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/admin/",
+        "expected": "401 or 403 (access denied without valid credentials)",
+        "platform": "any"
+      },
+      {
+        "command": "Get-WebConfigurationProperty -Filter '/system.webServer/security/authorization' -PSPath 'IIS:\\Sites\\Default Web Site\\admin' -Name 'collection' | Format-Table",
+        "expected": "Non-empty output — IIS URL Authorization rules with role-based access restrictions on admin paths",
+        "platform": "windows"
+      }
+    ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "Any"
+  ],
+  "remediation": [
+    {
+      "id": "httpd-location-auth",
+      "name": "Apache httpd Location-based authorization with Require directives",
+      "platform": "rhel",
+      "precondition": "command -v apachectl >/dev/null 2>&1 || command -v httpd >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create a drop-in config that restricts /admin and /console paths to authenticated users with the 'admin' group, and denies access to common sensitive file extensions",
+          "command": "printf '<Location /admin>\n  AuthType Basic\n  AuthName \"Restricted\"\n  AuthUserFile /etc/httpd/.htpasswd\n  Require group admin\n</Location>\n<Location /console>\n  AuthType Basic\n  AuthName \"Restricted\"\n  AuthUserFile /etc/httpd/.htpasswd\n  Require group admin\n</Location>\n<FilesMatch \"\\.(bak|old|orig|swp|sql|tar|gz|zip)$\">\n  Require all denied\n</FilesMatch>\n' > /etc/httpd/conf.d/cme-918-url-auth.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/httpd/conf.d/cme-918-url-auth.conf"
+        },
+        {
+          "description": "Test Apache configuration for syntax errors",
+          "command": "apachectl configtest",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Reload Apache to apply the new authorization rules",
+          "command": "systemctl reload httpd",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "curl -s -o /dev/null -w '%{http_code}' http://localhost/admin/",
+      "references": [
+        {
+          "source": "Apache httpd — Authorization and Access Control",
+          "url": "https://httpd.apache.org/docs/2.4/howto/access.html"
+        }
+      ]
+    },
+    {
+      "id": "nginx-location-auth",
+      "name": "nginx location-based authorization with deny/auth_basic directives",
+      "platform": "linux",
+      "precondition": "command -v nginx >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create a drop-in config that restricts /admin and /console paths with HTTP Basic auth and denies access to backup/artifact files",
+          "command": "printf 'location /admin {\n  auth_basic \"Restricted\";\n  auth_basic_user_file /etc/nginx/.htpasswd;\n}\nlocation /console {\n  auth_basic \"Restricted\";\n  auth_basic_user_file /etc/nginx/.htpasswd;\n}\nlocation ~* \\.(bak|old|orig|swp|sql|tar|gz|zip)$ {\n  deny all;\n  return 403;\n}\n' > /etc/nginx/conf.d/cme-918-url-auth.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/nginx/conf.d/cme-918-url-auth.conf"
+        },
+        {
+          "description": "Test nginx configuration for syntax errors",
+          "command": "nginx -t",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Reload nginx to apply the new authorization rules",
+          "command": "systemctl reload nginx",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "curl -s -o /dev/null -w '%{http_code}' http://localhost/admin/",
+      "references": [
+        {
+          "source": "nginx — Restricting Access",
+          "url": "https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-http-basic-authentication/"
+        }
+      ]
+    },
+    {
+      "id": "iis-url-authorization",
+      "name": "IIS URL Authorization rules for restricted paths",
+      "platform": "windows",
+      "precondition": "Get-WindowsFeature Web-Url-Auth -ErrorAction SilentlyContinue",
+      "steps": [
+        {
+          "description": "Install the IIS URL Authorization feature if not already present",
+          "command": "Install-WindowsFeature Web-Url-Auth",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "Uninstall-WindowsFeature Web-Url-Auth"
+        },
+        {
+          "description": "Remove the default allow-all rule on the admin virtual directory and add a role-based allow rule for administrators only",
+          "command": "Remove-WebConfigurationProperty -Filter '/system.webServer/security/authorization' -PSPath 'IIS:\\Sites\\Default Web Site\\admin' -Name 'collection' -AtElement @{users='*';roles='';verbs=''} -ErrorAction SilentlyContinue; Add-WebConfigurationProperty -Filter '/system.webServer/security/authorization' -PSPath 'IIS:\\Sites\\Default Web Site\\admin' -Name 'collection' -Value @{accessType='Allow';roles='Administrators'}",
+          "idempotent": false,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "Remove-WebConfigurationProperty -Filter '/system.webServer/security/authorization' -PSPath 'IIS:\\Sites\\Default Web Site\\admin' -Name 'collection' -AtElement @{roles='Administrators'}"
+        },
+        {
+          "description": "Add a deny-all rule so that only explicitly allowed roles can access the admin path",
+          "command": "Add-WebConfigurationProperty -Filter '/system.webServer/security/authorization' -PSPath 'IIS:\\Sites\\Default Web Site\\admin' -Name 'collection' -Value @{accessType='Deny';users='*'}",
+          "idempotent": false,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "Remove-WebConfigurationProperty -Filter '/system.webServer/security/authorization' -PSPath 'IIS:\\Sites\\Default Web Site\\admin' -Name 'collection' -AtElement @{accessType='Deny';users='*'}"
+        }
+      ],
+      "verify": "Get-WebConfigurationProperty -Filter '/system.webServer/security/authorization' -PSPath 'IIS:\\Sites\\Default Web Site\\admin' -Name 'collection' | Format-Table",
+      "references": [
+        {
+          "source": "Microsoft — IIS URL Authorization",
+          "url": "https://learn.microsoft.com/en-us/iis/configuration/system.webServer/security/authorization/"
+        }
+      ]
+    }
+  ],
+  "scf_identifiers": [
+    "IAC-20",
+    "WEB-04"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-425",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-862",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-306",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-284",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/PR",
+      "value": "N->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "IAC-20",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "WEB-04",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

@@ -1,0 +1,122 @@
+{
+  "cme_id": "CME-108",
+  "control_name": "kptr_restrict (Kernel Pointer Restriction)",
+  "description": "Hides kernel pointer addresses from unprivileged users, denying the address leaks needed to exploit kernel vulnerabilities when KASLR is active.",
+  "tactic": "Harden",
+  "category": "Kernel Hardening",
+  "category_id": "kernel-hardening",
+  "function_id": "kernel-attack-surface",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Removes trivial kernel address leak vector via /proc/kallsyms"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-200",
+    "CWE-119"
+  ],
+  "verification": {
+    "method": "Check kptr_restrict sysctl is 1 or 2",
+    "commands": [
+      {
+        "command": "cat /proc/sys/kernel/kptr_restrict",
+        "expected": "1",
+        "platform": "linux"
+      }
+    ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 8",
+    "Ubuntu 24.04"
+  ],
+  "remediation": [
+    {
+      "id": "sysctl-kptr-restrict",
+      "name": "Hide kernel pointers from unprivileged users via sysctl",
+      "platform": "linux",
+      "precondition": "test -f /proc/sys/kernel/kptr_restrict",
+      "steps": [
+        {
+          "description": "Set kptr_restrict to 1 (hide kernel pointers from unprivileged users) or 2 (hide from all users including root). Value 1 is recommended for most systems; value 2 may break debugging tools.",
+          "command": "sysctl -w kernel.kptr_restrict=1",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "sysctl -w kernel.kptr_restrict=0"
+        },
+        {
+          "description": "Persist kptr_restrict across reboots via sysctl.d drop-in",
+          "command": "printf 'kernel.kptr_restrict = 1\\n' > /etc/sysctl.d/99-cme-108-kptr-restrict.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/sysctl.d/99-cme-108-kptr-restrict.conf && sysctl --system"
+        }
+      ],
+      "verify": "cat /proc/sys/kernel/kptr_restrict",
+      "references": [
+        {
+          "source": "RHEL 9 — Security Hardening",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/index"
+        },
+        {
+          "source": "kernel.org — sysctl/kernel.txt",
+          "url": "https://www.kernel.org/doc/Documentation/sysctl/kernel.txt"
+        }
+      ]
+    }
+  ],
+  "scf_identifiers": [
+    "CFG-02",
+    "SEA-10"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-200",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-119",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "CFG-02",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "SEA-10",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

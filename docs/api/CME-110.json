@@ -1,0 +1,109 @@
+{
+  "cme_id": "CME-110",
+  "control_name": "KEXEC Restriction",
+  "description": "Prevents loading a new kernel at runtime via kexec, blocking a vector for kernel-level persistence and Secure Boot bypass.",
+  "tactic": "Harden",
+  "category": "Kernel Hardening",
+  "category_id": "kernel-hardening",
+  "function_id": "kernel-attack-surface",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Cannot replace running kernel to bypass security controls"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-269"
+  ],
+  "verification": {
+    "method": "Check kexec_load_disabled sysctl",
+    "commands": [
+      {
+        "command": "cat /proc/sys/kernel/kexec_load_disabled",
+        "expected": "1",
+        "platform": "linux"
+      }
+    ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 8",
+    "Ubuntu 24.04"
+  ],
+  "remediation": [
+    {
+      "id": "sysctl-kexec-disable",
+      "name": "Disable kexec_load via sysctl (one-way latch)",
+      "platform": "linux",
+      "precondition": "test -f /proc/sys/kernel/kexec_load_disabled",
+      "steps": [
+        {
+          "description": "Disable kexec_load immediately. WARNING: this is a one-way kernel latch — once set to 1, it cannot be reverted to 0 without a full system reboot",
+          "command": "sysctl -w kernel.kexec_load_disabled=1",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Persist the setting so kexec is disabled on every boot (applied early by systemd-sysctl)",
+          "command": "printf 'kernel.kexec_load_disabled = 1\n' > /etc/sysctl.d/99-cme-110-kexec.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/sysctl.d/99-cme-110-kexec.conf"
+        }
+      ],
+      "verify": "cat /proc/sys/kernel/kexec_load_disabled",
+      "references": [
+        {
+          "source": "RHEL 9 Security Hardening — Protecting the kernel",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/protecting-the-kernel_security-hardening"
+        }
+      ]
+    }
+  ],
+  "scf_identifiers": [
+    "CFG-03",
+    "END-06.5"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-269",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "CFG-03",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "END-06.5",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

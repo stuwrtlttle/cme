@@ -1,0 +1,132 @@
+{
+  "cme_id": "CME-305",
+  "control_name": "macOS System Integrity Protection (SIP)",
+  "description": "Kernel-enforced protection that restricts root-level modification of protected system paths, kernel extensions, and system processes. Even processes running as root cannot modify /System, /usr (excluding /usr/local), pre-installed Apple applications, or inject code into system processes. Prevents rootkit installation, system file tampering, and kernel extension abuse. SIP is enforced by the kernel and cannot be disabled from within macOS; requires Recovery Mode boot to disable.",
+  "tactic": "Harden",
+  "category": "Mandatory Access Control",
+  "category_id": "mandatory-access-control",
+  "function_id": "kernel-attack-surface",
+  "effect_mode": "preventive",
+  "evidence_state": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Requires SIP bypass exploit; root privilege insufficient to modify system files"
+    },
+    {
+      "metric": "I",
+      "from": "H",
+      "to": "N",
+      "rationale": "System file modification prevented even with root access; tampering blocked at kernel level"
+    },
+    {
+      "metric": "PR",
+      "from": "H",
+      "to": "H",
+      "rationale": "Root privilege retained but system modification rights restricted"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-732",
+    "CWE-669",
+    "CWE-250"
+  ],
+  "verification": {
+    "method": "Verify SIP status and individual protection flags",
+    "commands": [
+      {
+        "command": "csrutil status",
+        "expected": "System Integrity Protection status: enabled.",
+        "platform": "macos"
+      },
+      {
+        "command": "csrutil status | grep -c enabled",
+        "expected": "1",
+        "platform": "macos"
+      },
+      {
+        "command": "nvram -p | grep csr-active-config",
+        "expected": "No output (SIP fully enabled) or csr-active-config=%00%00%00%00",
+        "platform": "macos"
+      }
+    ]
+  },
+  "references": [
+    {
+      "source": "Apple Platform Deployment - System Security",
+      "url": "https://support.apple.com/guide/deployment/system-security-settings-dep5fff0992e/web"
+    },
+    {
+      "source": "Apple Developer - System Integrity Protection",
+      "url": "https://developer.apple.com/documentation/security/disabling_and_enabling_system_integrity_protection"
+    }
+  ],
+  "platforms": [
+    "macOS 10.11+",
+    "macOS 11+",
+    "macOS 12+",
+    "macOS 13+",
+    "macOS 14+",
+    "macOS 15+"
+  ],
+  "scf_identifiers": [
+    "STA-01",
+    "STA-01.1"
+  ],
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-732",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "Prevents incorrect permission assignment by enforcing mandatory access control on system paths",
+      "evidence_state": "deterministic"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-669",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "Prevents incorrect resource transfer between user space and protected system sphere",
+      "evidence_state": "deterministic"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-250",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "rationale": "Reduces privilege scope; root cannot modify protected system resources",
+      "evidence_state": "deterministic"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/I",
+      "value": "H->N",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "STA-01",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "D3FEND",
+      "identifier": "D3-MAC",
+      "value": "Mandatory Access Control",
+      "relationship_type": "maps_to",
+      "rationale": "SIP implements MAC semantics for macOS system resources"
+    }
+  ]
+}

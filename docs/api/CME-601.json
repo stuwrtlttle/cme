@@ -1,0 +1,107 @@
+{
+  "cme_id": "CME-601",
+  "control_name": "Kernel-Level Syscall Filtering (seccomp)",
+  "description": "Restricts the set of system calls a process can make to the kernel. Reduces kernel attack surface by blocking syscalls the application doesn't need, preventing exploitation of kernel vulnerabilities through unused syscall handlers.",
+  "tactic": "Harden",
+  "category": "Syscall & BPF Controls",
+  "category_id": "syscall-bpf-controls",
+  "function_id": "seccomp",
+  "control_layer": "OS/Kernel",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "S",
+      "from": "C",
+      "to": "U",
+      "rationale": "Process cannot invoke blocked syscalls to escape to host kernel"
+    },
+    {
+      "metric": "I",
+      "from": "H",
+      "to": "L",
+      "rationale": "Blocked syscalls like execve/ptrace prevent shell breakout"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-119",
+    "CWE-78",
+    "CWE-653"
+  ],
+  "verification": {
+    "method": "Check process seccomp status",
+    "commands": [
+      {
+        "command": "grep Seccomp /proc/<pid>/status",
+        "expected": "Seccomp:\t2",
+        "platform": "linux"
+      }
+    ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "RHEL 9",
+    "RHEL 8",
+    "Ubuntu 24.04",
+    "Kubernetes"
+  ],
+  "scf_identifiers": [
+    "CFG-03",
+    "SEA-04"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-119",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-78",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-653",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/S",
+      "value": "C->U",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/I",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "CFG-03",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "SEA-04",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

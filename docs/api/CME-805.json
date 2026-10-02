@@ -1,0 +1,135 @@
+{
+  "cme_id": "CME-805",
+  "control_name": "Credential Rotation Policy",
+  "description": "Enforce credential lifecycle limits through automated rotation of passwords, API keys, service account tokens, and secrets. Two distinct tiers of effectiveness: (1) OS-level password aging (chage on Linux, Group Policy on Windows) forces periodic password changes, typically every 90 days — this limits the maximum validity window of compromised credentials but provides minimal protection against immediate credential abuse since attackers typically exploit stolen credentials within hours. NIST SP 800-63B recommends against mandatory periodic rotation for human users due to the pattern of progressively weaker passwords (Password1!, Password2!). (2) Automated short-lived secret rotation via secrets managers (HashiCorp Vault dynamic secrets, AWS STS temporary credentials, Kubernetes service account token projection) with TTLs measured in hours — this genuinely limits the exploitation window because credentials may expire before an attacker can extract and replay them. The attenuation strength is directly proportional to the rotation frequency: 1-hour TTLs provide strong protection, 90-day aging provides weak protection.",
+  "tactic": "Harden",
+  "category": "Credential Hardening",
+  "category_id": "credential-hardening",
+  "function_id": "password-policy",
+  "control_layer": "Identity",
+  "attenuation_type": "probabilistic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Effectiveness is proportional to rotation frequency. For automated short-lived secrets (Vault dynamic secrets with 1-hour TTL, STS temporary credentials), the credential may expire before an attacker can extract and replay it — requiring the attacker to maintain persistent access to the credential source rather than using a one-time theft. For 90-day password aging, the protection window is too large to prevent most credential abuse (attackers act within hours), providing only residual protection against very slow-developing compromises such as leaked credential databases discovered months after breach"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-262",
+    "CWE-263",
+    "CWE-798"
+  ],
+  "verification": {
+    "method": "Verify credential rotation enforcement via password aging (OS-level) and secret TTL policies (application-level)",
+    "commands": [
+      {
+        "command": "grep '^PASS_MAX_DAYS' /etc/login.defs | grep -oE '[0-9]+'",
+        "expected": "<=90",
+        "platform": "linux"
+      },
+      {
+        "command": "chage -l root | grep 'Maximum' | grep -oE '[0-9]+'",
+        "expected": "<=90",
+        "platform": "linux"
+      },
+      {
+        "command": "net accounts | Select-String 'Maximum password age'",
+        "expected": "Maximum password age (days)              90",
+        "platform": "windows"
+      }
+    ]
+  },
+  "confidence": "Low",
+  "platforms": [
+    "RHEL 8",
+    "RHEL 9",
+    "RHEL 10",
+    "Fedora",
+    "Ubuntu 24.04",
+    "Windows 10",
+    "Windows 11",
+    "Windows Server 2022"
+  ],
+  "cve_schema_version": "5.2.0",
+  "cve_affected": [
+    {
+      "vendor": "redhat",
+      "product": "enterprise_linux",
+      "cpes": [
+        "cpe:2.3:o:redhat:enterprise_linux:8:*:*:*:*:*:*:*",
+        "cpe:2.3:o:redhat:enterprise_linux:9:*:*:*:*:*:*:*",
+        "cpe:2.3:o:redhat:enterprise_linux:10:*:*:*:*:*:*:*"
+      ],
+      "defaultStatus": "applicable"
+    },
+    {
+      "vendor": "microsoft",
+      "product": "windows",
+      "cpes": [
+        "cpe:2.3:o:microsoft:windows_10:*:*:*:*:*:*:*:*",
+        "cpe:2.3:o:microsoft:windows_11:*:*:*:*:*:*:*:*",
+        "cpe:2.3:o:microsoft:windows_server_2019:*:*:*:*:*:*:*",
+        "cpe:2.3:o:microsoft:windows_server_2022:*:*:*:*:*:*:*"
+      ],
+      "defaultStatus": "applicable"
+    }
+  ],
+  "scf_identifiers": [
+    "CRY-09",
+    "IAC-10.13"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-262",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "Directly addresses the absence of password aging by enforcing maximum credential lifetimes",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-263",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "Prevents excessively long credential lifetimes by enforcing rotation schedules",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-798",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "rationale": "Limits the validity window of hard-coded credentials if the server-side credential is rotated, though the hard-coded value in code remains unchanged",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "CRY-09",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "IAC-10.13",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

@@ -1,0 +1,199 @@
+{
+  "cme_id": "CME-1314",
+  "control_name": "Input Canonicalization Before Security Decision",
+  "description": "Normalize and canonicalize all user-supplied structured input (URLs, IP addresses, domain names, file paths, type identifiers, protocol schemes) to a standard form before applying any security decision such as allowlist matching, denylist checking, or policy evaluation. Decoding, case folding, Unicode normalization, IP address format unification (dotted-decimal, hex, octal, IPv4-mapped IPv6), and scheme normalization must occur before the security check — not after. This prevents attackers from using encoding variants, aliasing, or alternate representations to bypass list-based security controls. The canonicalization order must be: decode all layers → normalize → validate against security policy → sanitize.",
+  "tactic": "Harden",
+  "category": "Application Input Validation",
+  "category_id": "application-input-validation",
+  "function_id": "input-validation",
+  "control_layer": "Application",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "The attacker must find an input representation that survives full canonicalization while still bypassing the security check — encoding tricks (URL-encoding, Unicode homoglyphs, octal IP notation, mixed-case evasion) are neutralized before the security decision is made, requiring the attacker to discover a novel bypass that operates at the semantic level rather than the syntactic level"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-184",
+    "CWE-183",
+    "CWE-20",
+    "CWE-180",
+    "CWE-1289",
+    "CWE-176"
+  ],
+  "verification": {
+    "method": "Review application source code for canonicalization/normalization calls that execute before security-relevant comparisons (allowlist checks, denylist checks, policy evaluations). Verify that the canonicalized form — not the raw input — is used in all subsequent security decisions.",
+    "commands": [
+      {
+        "command": "grep -rn 'urllib.parse\\|urlparse\\|URL.parse\\|new URL\\|InetAddress.getByName\\|canonicalize\\|NFC\\|NFKC\\|unicodedata.normalize\\|Normalizer.normalize\\|os.path.realpath\\|Path.*resolve' <app_source>/ | grep -i 'input\\|request\\|param\\|user\\|url\\|path\\|host\\|addr'",
+        "expected": "Canonicalization/normalization calls present in input-handling code paths that feed into security decisions",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'allowlist\\|blocklist\\|denylist\\|whitelist\\|blacklist' <app_source>/ | grep -i 'request\\|req\\.\\|params\\|raw\\|input\\|getParameter' | head -10",
+        "expected": "Zero matches — security list checks should operate on canonicalized values, not raw request parameters",
+        "platform": "any"
+      },
+      {
+        "command": "curl -s -o /dev/null -w '%{http_code}' '<app_endpoint>/%2e%2e/%2e%2e/etc/passwd' && echo ' ' && curl -s -o /dev/null -w '%{http_code}' '<app_endpoint>/../../etc/passwd'",
+        "expected": "Both requests return identical response codes (both blocked or both canonicalized and rejected)",
+        "platform": "any"
+      }
+    ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "Any"
+  ],
+  "remediation": [
+    {
+      "id": "nginx-url-normalization",
+      "name": "nginx URL canonicalization and encoded-path normalization",
+      "platform": "linux",
+      "precondition": "command -v nginx >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create an nginx config snippet that enables merge_slashes (collapses // to /), and adds a rewrite rule to reject requests containing percent-encoded path separators (%2f, %2e) that could bypass path-based security checks",
+          "command": "printf 'merge_slashes on;\\nlocation ~* \"%%2[ef]\" {\\n    return 400;\\n}\\n' > /etc/nginx/conf.d/cme-1314-canonicalization.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/nginx/conf.d/cme-1314-canonicalization.conf"
+        },
+        {
+          "description": "Test nginx configuration for syntax errors",
+          "command": "nginx -t",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Reload nginx to apply the canonicalization rules",
+          "command": "nginx -s reload",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "curl -s -o /dev/null -w '%{http_code}' 'http://localhost/%2e%2e/%2e%2e/etc/passwd'",
+      "references": [
+        {
+          "source": "nginx — merge_slashes directive",
+          "url": "https://nginx.org/en/docs/http/ngx_http_core_module.html#merge_slashes"
+        }
+      ]
+    },
+    {
+      "id": "httpd-url-canonicalization",
+      "name": "Apache httpd URL decoding enforcement and path traversal blocking",
+      "platform": "linux",
+      "precondition": "command -v apachectl >/dev/null 2>&1 || command -v httpd >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create an Apache config snippet that denies AllowEncodedSlashes (forces URL decoding before path matching) and adds a mod_rewrite rule to block double-encoded traversal attempts",
+          "command": "printf '<IfModule mod_rewrite.c>\\n  RewriteEngine On\\n  # Block percent-encoded path traversal sequences\\n  RewriteCond %%{THE_REQUEST} %%2[eE]%%2[eE] [OR]\\n  RewriteCond %%{THE_REQUEST} %%2[fF]\\n  RewriteRule .* - [F,L]\\n</IfModule>\\nAllowEncodedSlashes NoDecode\\n' > /etc/httpd/conf.d/cme-1314-canonicalization.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/httpd/conf.d/cme-1314-canonicalization.conf"
+        },
+        {
+          "description": "Test Apache configuration for syntax errors",
+          "command": "apachectl configtest 2>&1 || httpd -t 2>&1",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Reload Apache to apply the canonicalization rules",
+          "command": "systemctl reload httpd 2>/dev/null || systemctl reload apache2 2>/dev/null",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "curl -s -o /dev/null -w '%{http_code}' 'http://localhost/%2e%2e/%2e%2e/etc/passwd'",
+      "references": [
+        {
+          "source": "Apache — AllowEncodedSlashes directive",
+          "url": "https://httpd.apache.org/docs/2.4/mod/core.html#allowencodedslashes"
+        },
+        {
+          "source": "Apache — mod_rewrite",
+          "url": "https://httpd.apache.org/docs/2.4/mod/mod_rewrite.html"
+        }
+      ]
+    }
+  ],
+  "scf_identifiers": [
+    "WEB-09"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-184",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-183",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-20",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-180",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-1289",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-176",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "WEB-09",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

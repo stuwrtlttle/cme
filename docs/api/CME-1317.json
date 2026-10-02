@@ -1,0 +1,223 @@
+{
+  "cme_id": "CME-1317",
+  "control_name": "XML External Entity Prevention (Secure XML Parser Configuration)",
+  "description": "Configures XML parsers to disable external entity resolution, DTD processing, and XInclude expansion, preventing XXE attacks that exploit default-permissive XML parser behavior to read local files, perform SSRF, or cause denial of service via entity expansion (billion laughs). Covers all major XML parsing APIs: Java (DocumentBuilderFactory, SAXParserFactory, XMLInputFactory with FEATURE_SECURE_PROCESSING and disallow-doctype-decl), Python (defusedxml, lxml with resolve_entities=False), .NET (XmlReaderSettings with DtdProcessing.Prohibit), PHP (libxml_disable_entity_loader), C/C++ (libxml2 without XML_PARSE_NOENT), and Go (xml.Decoder with strict mode). The control must be applied at parser instantiation — not as post-parse validation — because entity resolution occurs during parsing. When XML input is required but DTDs are needed for schema validation, use catalog-based resolution with a local-only catalog that rejects network fetches.",
+  "tactic": "Harden",
+  "category": "Application Input Validation",
+  "category_id": "application-input-validation",
+  "function_id": "injection-prevention",
+  "control_layer": "Application",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "C",
+      "from": "H",
+      "to": "N",
+      "rationale": "External entity resolution is disabled at the parser level; the attacker cannot use file:// or http:// entity references to read local files or probe internal services because the parser rejects all external entity declarations before resolution occurs"
+    },
+    {
+      "metric": "A",
+      "from": "H",
+      "to": "N",
+      "rationale": "DTD processing is disabled, preventing entity expansion bombs (billion laughs) that cause exponential memory consumption; the parser rejects DOCTYPE declarations before recursive entity expansion begins"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-611",
+    "CWE-776",
+    "CWE-827"
+  ],
+  "verification": {
+    "method": "Verify that XML parsers are configured to disable external entities and DTD processing across all application languages in use",
+    "commands": [
+      {
+        "command": "grep -rn 'FEATURE_SECURE_PROCESSING\\|disallow-doctype-decl\\|ACCESS_EXTERNAL_DTD\\|ACCESS_EXTERNAL_SCHEMA\\|IS_SUPPORTING_EXTERNAL_ENTITIES\\|SUPPORT_DTD' <app_source>/",
+        "expected": "Java XML parser configured with XXE-prevention features (external DTD/schema access disabled, entity support disabled)",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'defusedxml\\|resolve_entities.*False\\|no_network.*True\\|etree.XMLParser.*resolve_entities' <app_source>/",
+        "expected": "Python XML parsing uses defusedxml or explicitly disables entity resolution",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'DtdProcessing.Prohibit\\|ProhibitDtd.*true\\|XmlResolver.*null' <app_source>/",
+        "expected": ".NET XML parsing prohibits DTD processing or sets XmlResolver to null",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'libxml_disable_entity_loader' <app_source>/",
+        "expected": "PHP XML parsing has external entity loading disabled via libxml_disable_entity_loader(true)",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'LIBXML_NOENT\\|XML_PARSE_NOENT' <app_source>/",
+        "expected": "Zero matches — LIBXML_NOENT/XML_PARSE_NOENT enables entity substitution (misleading name) and is a vulnerability indicator, not a safety control",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'xml\\.NewDecoder\\|xml\\.Decoder\\|encoding/xml' <app_source>/ | head -10",
+        "expected": "Go XML parsing present — verify no external entity resolution configuration (Go xml.Decoder does not resolve external entities by default)",
+        "platform": "any"
+      },
+      {
+        "command": "printf '<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///etc/hostname\">]><root>&xxe;</root>' | curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/xml' -d @- <app_endpoint>",
+        "expected": "^(400|403|422)$",
+        "platform": "any"
+      }
+    ]
+  },
+  "confidence": "High",
+  "platforms": [
+    "Any"
+  ],
+  "remediation": [
+    {
+      "id": "java-xxe-prevention",
+      "name": "Java XML parser XXE hardening (DocumentBuilderFactory / SAXParserFactory)",
+      "platform": "any",
+      "precondition": "grep -rql 'DocumentBuilderFactory\\|SAXParserFactory\\|XMLInputFactory' <app_source>/ 2>/dev/null",
+      "steps": [
+        {
+          "description": "Create a secure XML parser factory wrapper that disables external entities, DTD processing, and external schema access for all DocumentBuilderFactory and SAXParserFactory instances (place in application source and replace all direct factory instantiations)",
+          "command": "cat > <app_source>/src/main/java/com/example/SecureXmlParser.java << 'JAVA'\nimport javax.xml.parsers.DocumentBuilderFactory;\nimport javax.xml.XMLConstants;\npublic class SecureXmlParser {\n  public static DocumentBuilderFactory newSecureDocumentBuilderFactory() throws Exception {\n    DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();\n    dbf.setFeature(\"http://apache.org/xml/features/disallow-doctype-decl\", true);\n    dbf.setFeature(\"http://xml.org/sax/features/external-general-entities\", false);\n    dbf.setFeature(\"http://xml.org/sax/features/external-parameter-entities\", false);\n    dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);\n    dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, \"\");\n    dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, \"\");\n    dbf.setXIncludeAware(false);\n    dbf.setExpandEntityReferences(false);\n    return dbf;\n  }\n}\nJAVA",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm <app_source>/src/main/java/com/example/SecureXmlParser.java"
+        }
+      ],
+      "verify": "grep -rn 'disallow-doctype-decl\\|FEATURE_SECURE_PROCESSING\\|ACCESS_EXTERNAL_DTD' <app_source>/",
+      "references": [
+        {
+          "source": "OWASP XXE Prevention Cheat Sheet — Java",
+          "url": "https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html#java"
+        }
+      ]
+    },
+    {
+      "id": "python-defusedxml",
+      "name": "Python XML parsing via defusedxml (drop-in safe replacement)",
+      "platform": "any",
+      "precondition": "grep -rql 'xml.etree\\|lxml\\|xml.dom\\|xml.sax' <app_source>/ 2>/dev/null",
+      "steps": [
+        {
+          "description": "Install defusedxml — a drop-in replacement for Python stdlib XML parsers that disables external entity resolution, DTD processing, and entity expansion by default",
+          "command": "pip install defusedxml",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "pip uninstall -y defusedxml"
+        },
+        {
+          "description": "Replace stdlib XML imports with defusedxml equivalents in application source (xml.etree.ElementTree -> defusedxml.ElementTree, xml.sax -> defusedxml.sax, xml.dom.minidom -> defusedxml.minidom)",
+          "command": "find <app_source>/ -name '*.py' -exec sed -i 's/from xml\\.etree import ElementTree/import defusedxml.ElementTree as ElementTree/g; s/import xml\\.etree\\.ElementTree/import defusedxml.ElementTree/g; s/from xml\\.sax /from defusedxml.sax /g' {} +",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": false
+        }
+      ],
+      "verify": "grep -rn 'defusedxml' <app_source>/",
+      "references": [
+        {
+          "source": "defusedxml documentation",
+          "url": "https://github.com/tiran/defusedxml"
+        },
+        {
+          "source": "OWASP XXE Prevention Cheat Sheet — Python",
+          "url": "https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html#python"
+        }
+      ]
+    },
+    {
+      "id": "modsecurity-xxe-block",
+      "name": "ModSecurity WAF rule to block XXE payloads at the reverse proxy",
+      "platform": "linux",
+      "precondition": "apachectl -M 2>/dev/null | grep -q security2 || nginx -V 2>&1 | grep -q modsecurity",
+      "steps": [
+        {
+          "description": "Deploy a ModSecurity rule that inspects XML request bodies for DOCTYPE declarations containing ENTITY or SYSTEM keywords and blocks them before they reach the application parser",
+          "command": "printf 'SecRule REQUEST_BODY \"<!DOCTYPE[^>]*(?:ENTITY|SYSTEM|PUBLIC)\" \"id:1317001,phase:2,deny,status:403,log,msg:XXE attempt blocked by CME-1317,severity:CRITICAL\"\nSecRule REQUEST_BODY \"<!\\[CDATA\\[\" \"id:1317002,phase:2,deny,status:403,log,msg:CDATA injection blocked by CME-1317,severity:CRITICAL,chain\"\nSecRule REQUEST_HEADERS:Content-Type \"(?:text|application)/xml\" \"\"\n' > /etc/httpd/modsecurity.d/local_rules/cme-1317-xxe-block.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/httpd/modsecurity.d/local_rules/cme-1317-xxe-block.conf"
+        },
+        {
+          "description": "Test configuration and reload the web server to activate the XXE blocking rule",
+          "command": "apachectl configtest && apachectl graceful || { nginx -t && nginx -s reload; }",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "printf '<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///etc/hostname\">]><root>&xxe;</root>' | curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/xml' -d @- http://localhost/ | grep -c '403'",
+      "references": [
+        {
+          "source": "OWASP ModSecurity Core Rule Set — XXE rules",
+          "url": "https://coreruleset.org/docs/"
+        }
+      ]
+    }
+  ],
+  "scf_identifiers": [
+    "WEB-07",
+    "WEB-09"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Legacy entry migrated pending evidence review; it is surfaced but receives no automated scoring credit."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-611",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-776",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-827",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/C",
+      "value": "H->N",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/A",
+      "value": "H->N",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "WEB-07",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "WEB-09",
+      "relationship_type": "maps_to"
+    }
+  ]
+}

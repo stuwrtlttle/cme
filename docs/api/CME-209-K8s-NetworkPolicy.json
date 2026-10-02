@@ -1,0 +1,126 @@
+{
+  "cme_id": "CME-209",
+  "control_name": "Kubernetes NetworkPolicy Enforcement",
+  "description": "Kubernetes-native network segmentation via NetworkPolicy resources that define pod-level ingress and egress rules. Enforces default-deny network posture and explicit allow rules based on pod selectors, namespace selectors, and IP blocks. Prevents lateral movement within cluster by restricting pod-to-pod communication to explicitly allowed paths. Requires CNI plugin support (Calico, Cilium, Weave, Antrea). Policies are namespace-scoped and stack additively.",
+  "tactic": "Isolate",
+  "category": "Network Isolation",
+  "category_id": "network-isolation",
+  "function_id": "network-filtering",
+  "effect_mode": "preventive",
+  "evidence_state": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AV",
+      "from": "N",
+      "to": "A",
+      "rationale": "Network attack vector restricted to adjacent pods/namespaces; default-deny blocks lateral movement"
+    },
+    {
+      "metric": "S",
+      "from": "C",
+      "to": "U",
+      "rationale": "Scope change prevented; compromised pod cannot reach other namespaces without explicit policy"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-284",
+    "CWE-923",
+    "CWE-669"
+  ],
+  "verification": {
+    "method": "Verify NetworkPolicy resources exist and CNI enforces them",
+    "commands": [
+      {
+        "command": "kubectl get networkpolicy -A",
+        "expected": "NetworkPolicy resources exist for sensitive namespaces",
+        "platform": "kubernetes"
+      },
+      {
+        "command": "kubectl describe networkpolicy <policy-name> -n <namespace> | grep -E 'policyTypes|Ingress|Egress'",
+        "expected": "policyTypes includes Ingress and/or Egress with rules defined",
+        "platform": "kubernetes"
+      },
+      {
+        "command": "kubectl get networkpolicy -n <namespace> -o jsonpath='{.items[?(@.spec.podSelector.matchLabels=={})].metadata.name}'",
+        "expected": "default-deny policy exists (empty podSelector = all pods)",
+        "platform": "kubernetes"
+      },
+      {
+        "command": "kubectl get pods -n kube-system -l 'k8s-app in (calico-node, cilium, weave-net, antrea-agent)' | grep -c Running",
+        "expected": ">0 (CNI plugin running)",
+        "platform": "kubernetes"
+      }
+    ]
+  },
+  "references": [
+    {
+      "source": "Kubernetes NetworkPolicy Documentation",
+      "url": "https://kubernetes.io/docs/concepts/services-networking/network-policies/"
+    },
+    {
+      "source": "Kubernetes Network Policy Recipes",
+      "url": "https://github.com/ahmetb/kubernetes-network-policy-recipes"
+    }
+  ],
+  "platforms": [
+    "Kubernetes with CNI plugin (Calico, Cilium, Weave, Antrea)",
+    "OpenShift 4.x"
+  ],
+  "scf_identifiers": [
+    "NET-04",
+    "NET-04.1",
+    "CLD-02"
+  ],
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-284",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "Enforces pod-level access control for network communication",
+      "evidence_state": "deterministic"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-923",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "Restricts communication channel to intended endpoints via explicit allow rules",
+      "evidence_state": "deterministic"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-669",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "rationale": "Prevents incorrect resource transfer between pod security contexts",
+      "evidence_state": "deterministic"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AV",
+      "value": "N->A",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/S",
+      "value": "C->U",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "NET-04",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "CLD-02",
+      "relationship_type": "maps_to"
+    }
+  ]
+}
