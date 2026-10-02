@@ -2,6 +2,12 @@
 
 All notable changes to the CME (Common Mitigation Enumeration) project are documented here.
 
+## 2026-10-02
+
+### Auto-generated changelog
+
+- `8b9fa43` Add static JSON API endpoints for CME entries
+
 ## 2026-09-28
 
 ### Auto-generated changelog
