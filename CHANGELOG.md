@@ -2,6 +2,13 @@
 
 All notable changes to the CME (Common Mitigation Enumeration) project are documented here.
 
+## 2026-10-05
+
+### Auto-generated changelog
+
+- `0f794c8` Fix deploy.sh silent failures: add ERR trap and explicit error messages
+- `3626650` Add remediation variants to 41 CME entries; enrich verification commands for 10 entries
+
 ## 2026-10-02
 
 ### Auto-generated changelog
