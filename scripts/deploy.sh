@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+trap 'echo -e "\n${RED}ERROR: deploy.sh failed at line $LINENO${NC}" >&2' ERR
 
 # Deploy CME entries: commit, push, rebuild MCP server + docs site on VPS.
 #
@@ -104,8 +105,12 @@ if [ "$VPS_ONLY" = false ]; then
 
     step "Pushing to GitHub"
     # Pull first in case remote is ahead
-    git pull --rebase origin main 2>/dev/null || true
-    git push origin main
+    if ! git pull --rebase origin main; then
+      fail "git pull --rebase failed. Resolve conflicts and retry."
+    fi
+    if ! git push origin main; then
+      fail "git push failed. Check authentication and remote state."
+    fi
     ok "Pushed"
   fi
 fi
@@ -113,7 +118,7 @@ fi
 # ── VPS: pull, rebuild, seed, docs ────────────────────────────
 step "Deploying to VPS"
 
-ssh "$VPS_HOST" bash -s <<'REMOTE'
+ssh "$VPS_HOST" bash -s <<'REMOTE' || fail "VPS deploy failed — check output above"
 set -euo pipefail
 
 cd ~/cme
