@@ -32,6 +32,21 @@
         "command": "ls -la /proc/<pid>/ns/",
         "expected": "user mnt pid net",
         "platform": "linux"
+      },
+      {
+        "command": "lsns -t pid -t net -t mnt -t user --no-headings | wc -l",
+        "expected": ">1 (multiple namespaces in use beyond init)",
+        "platform": "linux"
+      },
+      {
+        "command": "test \"$(readlink /proc/<pid>/ns/user)\" != \"$(readlink /proc/1/ns/user)\" && echo 'PASS: separate user namespace'",
+        "expected": "PASS: separate user namespace",
+        "platform": "linux"
+      },
+      {
+        "command": "cat /proc/sys/user/max_user_namespaces",
+        "expected": ">0 (user namespaces enabled)",
+        "platform": "linux"
       }
     ]
   },

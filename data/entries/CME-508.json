@@ -53,6 +53,49 @@
     "Windows Server 2019",
     "Windows Server 2022"
   ],
+  "remediation": [
+    {
+      "id": "windows-quoted-service-paths",
+      "name": "Quote unquoted Windows service executable paths via registry",
+      "platform": "windows",
+      "precondition": "Get-Command Set-ItemProperty -ErrorAction SilentlyContinue",
+      "steps": [
+        {
+          "description": "Identify all services with unquoted paths containing spaces",
+          "command": "Get-WmiObject win32_service | Where-Object { $_.PathName -notlike '\"*' -and $_.PathName -match '\\s' } | Select-Object Name, PathName | Format-Table -AutoSize",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Quote the service executable path in the registry for a specific service; original unquoted path is not preserved — record it before applying",
+          "command": "Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\<service_name>' -Name ImagePath -Value '\"<path_to_exe>\" <arguments>'",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\<service_name>' -Name ImagePath -Value '<original_unquoted_path>'"
+        },
+        {
+          "description": "Verify no services remain with unquoted paths containing spaces",
+          "command": "Get-WmiObject win32_service | Where-Object { $_.PathName -notlike '\"*' -and $_.PathName -match '\\s' } | Measure-Object | Select-Object -ExpandProperty Count",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "Get-WmiObject win32_service | Where-Object { $_.PathName -notlike '\"*' -and $_.PathName -match '\\s' } | Select-Object Name, PathName",
+      "references": [
+        {
+          "source": "Microsoft — Service path security",
+          "url": "https://learn.microsoft.com/en-us/windows/win32/services/service-security-and-access-rights"
+        },
+        {
+          "source": "CWE-428 — Unquoted Search Path or Element",
+          "url": "https://cwe.mitre.org/data/definitions/428.html"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CFG-02",
     "END-02"

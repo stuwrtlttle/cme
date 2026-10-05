@@ -42,6 +42,42 @@
     "Ubuntu 24.04",
     "SLES 15"
   ],
+  "remediation": [
+    {
+      "id": "grub-kaslr-enable",
+      "name": "Ensure KASLR is active by removing nokaslr from GRUB boot parameters",
+      "platform": "linux",
+      "precondition": "test -f /etc/default/grub",
+      "steps": [
+        {
+          "description": "Remove nokaslr from GRUB_CMDLINE_LINUX in /etc/default/grub if present; KASLR is enabled by default on modern kernels so removing this flag restores the default",
+          "command": "sed -i 's/ *nokaslr//g' /etc/default/grub",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "sed -i 's/\\(GRUB_CMDLINE_LINUX=\"[^\"]*\\)/\\1 nokaslr/' /etc/default/grub"
+        },
+        {
+          "description": "Rebuild GRUB configuration to apply the updated boot parameters; requires a system reboot to take effect",
+          "command": "grub2-mkconfig -o /boot/grub2/grub.cfg",
+          "idempotent": true,
+          "requires_restart": "system",
+          "reversible": false
+        }
+      ],
+      "verify": "cat /proc/cmdline | grep -v nokaslr && echo 'KASLR active'",
+      "references": [
+        {
+          "source": "RHEL 9 Security Hardening — Kernel boot parameters",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/overview-of-security-hardening-security-hardening"
+        },
+        {
+          "source": "Kernel.org — KASLR documentation",
+          "url": "https://www.kernel.org/doc/html/latest/admin-guide/kernel-parameters.html"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "SEA-10",
     "SEA-14.1"

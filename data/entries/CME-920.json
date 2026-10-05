@@ -64,6 +64,92 @@
     "RHEL 9",
     "Windows Server 2022"
   ],
+  "remediation": [
+    {
+      "id": "postgresql-least-privilege",
+      "name": "PostgreSQL dedicated application user with DML-only grants",
+      "platform": "linux",
+      "precondition": "psql --version >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create a dedicated application database user with no superuser, createdb, or createrole privileges; uses CREATE/ALTER pattern for idempotency",
+          "command": "psql -h localhost -U postgres -c \"DO \\$\\$ BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '<app_user>') THEN CREATE USER <app_user> WITH PASSWORD '<password>' NOSUPERUSER NOCREATEDB NOCREATEROLE; END IF; END \\$\\$;\"",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Grant only SELECT, INSERT, UPDATE, DELETE on application tables in the target schema; no DDL or GRANT privileges",
+          "command": "psql -h localhost -U postgres -d <database> -c \"GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA <schema> TO <app_user>; ALTER DEFAULT PRIVILEGES IN SCHEMA <schema> GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO <app_user>;\"",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "psql -h localhost -U postgres -d <database> -c \"REVOKE ALL ON ALL TABLES IN SCHEMA <schema> FROM <app_user>;\""
+        },
+        {
+          "description": "Revoke CREATE privilege on public schema from PUBLIC role to prevent the application user from creating new tables",
+          "command": "psql -h localhost -U postgres -d <database> -c \"REVOKE CREATE ON SCHEMA public FROM PUBLIC;\"",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "psql -h localhost -U postgres -d <database> -c \"GRANT CREATE ON SCHEMA public TO PUBLIC;\""
+        }
+      ],
+      "verify": "psql -h localhost -U <app_user> -d <database> -c \"SELECT rolsuper, rolcreatedb, rolcreaterole FROM pg_roles WHERE rolname='<app_user>'\"",
+      "references": [
+        {
+          "source": "PostgreSQL — GRANT",
+          "url": "https://www.postgresql.org/docs/current/sql-grant.html"
+        },
+        {
+          "source": "PostgreSQL — Database Roles",
+          "url": "https://www.postgresql.org/docs/current/user-manag.html"
+        }
+      ]
+    },
+    {
+      "id": "mysql-least-privilege",
+      "name": "MySQL dedicated application user with DML-only grants",
+      "platform": "linux",
+      "precondition": "mysql --version >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create a dedicated application database user restricted to localhost connections",
+          "command": "mysql -u root -e \"CREATE USER IF NOT EXISTS '<app_user>'@'localhost' IDENTIFIED BY '<password>';\"",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "mysql -u root -e \"DROP USER IF EXISTS '<app_user>'@'localhost';\""
+        },
+        {
+          "description": "Grant only SELECT, INSERT, UPDATE, DELETE on the application database; no DDL, GRANT, or SUPER privileges",
+          "command": "mysql -u root -e \"GRANT SELECT, INSERT, UPDATE, DELETE ON <database>.* TO '<app_user>'@'localhost';\"",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "mysql -u root -e \"REVOKE ALL PRIVILEGES ON <database>.* FROM '<app_user>'@'localhost';\""
+        },
+        {
+          "description": "Reload grant tables to ensure privilege changes take effect immediately",
+          "command": "mysql -u root -e \"FLUSH PRIVILEGES;\"",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "mysql -u <app_user> -e \"SHOW GRANTS FOR CURRENT_USER()\" | grep -iE 'ALL PRIVILEGES|SUPER|CREATE|DROP|ALTER|GRANT'",
+      "references": [
+        {
+          "source": "MySQL — Adding User Accounts",
+          "url": "https://dev.mysql.com/doc/refman/8.0/en/creating-accounts.html"
+        },
+        {
+          "source": "MySQL — GRANT Statement",
+          "url": "https://dev.mysql.com/doc/refman/8.0/en/grant.html"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "IAC-25",
     "DCE-06"

@@ -57,6 +57,100 @@
       }
     ]
   },
+  "remediation": [
+    {
+      "id": "nginx-path-canonicalization",
+      "name": "Nginx path canonicalization and traversal rejection via drop-in config",
+      "platform": "linux",
+      "precondition": "nginx -v >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create an Nginx drop-in config that explicitly enables merge_slashes and rejects requests containing path traversal sequences (dot-segments, encoded path separators, matrix parameters)",
+          "command": "printf '# CME-921: URL path canonicalization before authorization\\nmerge_slashes on;\\n\\nmap $request_uri $cme921_block {\\n    default 0;\\n    \"~*\\\\.\\\\.\"          1;\\n    \"~*%%2[eE]\"        1;\\n    \"~*%%2[fF]\"        1;\\n    \"~*%%5[cC]\"        1;\\n    \"~*;[^/]*=\"        1;\\n}\\n' > /etc/nginx/conf.d/cme-921-canonicalization.conf",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f /etc/nginx/conf.d/cme-921-canonicalization.conf"
+        },
+        {
+          "description": "Add a rejection block to the server context that returns 400 for flagged requests (add this inside each server {} block or a shared include)",
+          "command": "printf '# Include inside server {} blocks:\\n# if ($cme921_block) { return 400; }\\n' >> /etc/nginx/conf.d/cme-921-canonicalization.conf",
+          "idempotent": false,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f /etc/nginx/conf.d/cme-921-canonicalization.conf"
+        },
+        {
+          "description": "Validate Nginx configuration syntax",
+          "command": "nginx -t",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "true"
+        },
+        {
+          "description": "Reload Nginx to apply the new canonicalization rules",
+          "command": "systemctl reload nginx",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "grep -E 'merge_slashes|cme921_block' /etc/nginx/conf.d/cme-921-canonicalization.conf && curl -s -o /dev/null -w '%{http_code}' 'http://localhost/./admin/' | grep -qE '^(400|403)$' && echo 'PASS: non-canonical paths rejected'",
+      "references": [
+        {
+          "source": "Nginx — merge_slashes directive",
+          "url": "https://nginx.org/en/docs/http/ngx_http_core_module.html#merge_slashes"
+        },
+        {
+          "source": "Nginx — map module",
+          "url": "https://nginx.org/en/docs/http/ngx_http_map_module.html"
+        }
+      ]
+    },
+    {
+      "id": "apache-path-canonicalization",
+      "name": "Apache HTTPD path canonicalization via AllowEncodedSlashes and mod_rewrite",
+      "platform": "linux",
+      "precondition": "httpd -v >/dev/null 2>&1 || apachectl -v >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create an Apache drop-in config that prevents encoded slash decoding and rejects requests containing path traversal sequences via mod_rewrite",
+          "command": "printf '# CME-921: URL path canonicalization before authorization\\nAllowEncodedSlashes NoDecode\\n\\nRewriteEngine On\\n# Reject dot-segment traversal sequences\\nRewriteCond %%{REQUEST_URI} (\\\\.\\\\.) [OR]\\nRewriteCond %%{REQUEST_URI} (%%2[eE]\\\\.) [OR]\\nRewriteCond %%{REQUEST_URI} (\\\\.%%2[eE]) [OR]\\n# Reject matrix parameters that could bypass path matching\\nRewriteCond %%{REQUEST_URI} (;[^/]*=)\\nRewriteRule .* - [F]\\n' > /etc/httpd/conf.d/cme-921-canonicalization.conf",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f /etc/httpd/conf.d/cme-921-canonicalization.conf"
+        },
+        {
+          "description": "Validate Apache configuration syntax",
+          "command": "httpd -t 2>&1 || apachectl configtest 2>&1",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "true"
+        },
+        {
+          "description": "Reload Apache to apply the new canonicalization rules",
+          "command": "systemctl reload httpd",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "grep -E 'AllowEncodedSlashes|RewriteCond.*2[eE]' /etc/httpd/conf.d/cme-921-canonicalization.conf && curl -s -o /dev/null -w '%{http_code}' 'http://localhost/./admin/' | grep -qE '^(400|403)$' && echo 'PASS: non-canonical paths rejected'",
+      "references": [
+        {
+          "source": "Apache — AllowEncodedSlashes directive",
+          "url": "https://httpd.apache.org/docs/2.4/mod/core.html#allowencodedslashes"
+        },
+        {
+          "source": "Apache — mod_rewrite",
+          "url": "https://httpd.apache.org/docs/2.4/mod/mod_rewrite.html"
+        }
+      ]
+    }
+  ],
   "confidence": "High",
   "platforms": [
     "Any"

@@ -27,6 +27,21 @@
         "command": "grep NoNewPrivs /proc/<pid>/status",
         "expected": "NoNewPrivs:\t1",
         "platform": "linux"
+      },
+      {
+        "command": "systemctl show <service> -p NoNewPrivileges",
+        "expected": "NoNewPrivileges=yes",
+        "platform": "linux"
+      },
+      {
+        "command": "kubectl get pod <pod> -n <namespace> -o jsonpath='{.spec.containers[0].securityContext.allowPrivilegeEscalation}'",
+        "expected": "false",
+        "platform": "kubernetes"
+      },
+      {
+        "command": "grep -r 'NoNewPrivileges=yes' /etc/systemd/system/*.service /etc/systemd/system/*.service.d/ 2>/dev/null | wc -l",
+        "expected": ">=1",
+        "platform": "linux"
       }
     ]
   },
@@ -36,6 +51,57 @@
     "RHEL 8",
     "Ubuntu 24.04",
     "Kubernetes"
+  ],
+  "remediation": [
+    {
+      "id": "systemd-no-new-privileges",
+      "name": "systemd drop-in with NoNewPrivileges=yes",
+      "platform": "linux",
+      "precondition": "systemctl --version >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create a systemd drop-in directory for the target service",
+          "command": "mkdir -p /etc/systemd/system/<service>.service.d",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rmdir /etc/systemd/system/<service>.service.d 2>/dev/null"
+        },
+        {
+          "description": "Write a drop-in that sets NoNewPrivileges=yes, preventing child processes from gaining privileges via SUID bits, file capabilities, or setuid transitions",
+          "command": "printf '[Service]\\nNoNewPrivileges=yes\\n' > /etc/systemd/system/<service>.service.d/no-new-privileges.conf",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f /etc/systemd/system/<service>.service.d/no-new-privileges.conf"
+        },
+        {
+          "description": "Reload systemd manager configuration to pick up the drop-in",
+          "command": "systemctl daemon-reload",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Restart the service to apply the NoNewPrivileges flag",
+          "command": "systemctl restart <service>",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "systemctl show <service> -p NoNewPrivileges",
+      "references": [
+        {
+          "source": "systemd.exec(5) — NoNewPrivileges",
+          "url": "https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html#NoNewPrivileges="
+        },
+        {
+          "source": "RHEL 9 — Configuring systemd unit files",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/using_systemd_unit_files_to_customize_and_optimize_your_system/assembly_working-with-systemd-unit-files_working-with-systemd"
+        }
+      ]
+    }
   ],
   "scf_identifiers": [
     "IAC-21",

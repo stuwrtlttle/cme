@@ -40,6 +40,75 @@
     "RHEL 8",
     "Ubuntu 24.04"
   ],
+  "remediation": [
+    {
+      "id": "mount-nosuid",
+      "name": "Mount /home, /var, and /tmp with nosuid to block SUID privilege escalation",
+      "platform": "linux",
+      "precondition": "test -f /etc/fstab",
+      "steps": [
+        {
+          "description": "Remount /home immediately with nosuid to prevent SUID/SGID binaries from taking effect",
+          "command": "mount -o remount,nosuid /home",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "mount -o remount,suid /home"
+        },
+        {
+          "description": "Remount /var immediately with nosuid",
+          "command": "mount -o remount,nosuid /var",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "mount -o remount,suid /var"
+        },
+        {
+          "description": "Remount /tmp immediately with nosuid",
+          "command": "mount -o remount,nosuid /tmp",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "mount -o remount,suid /tmp"
+        },
+        {
+          "description": "Persist nosuid for /home in /etc/fstab; add the option if /home is listed, or append an entry if not",
+          "command": "grep -q '[[:space:]]/home[[:space:]]' /etc/fstab && sed -i '/[[:space:]]\/home[[:space:]]/ s/defaults/defaults,nosuid/' /etc/fstab || echo '# CME-503: nosuid on /home — add nosuid to existing /home mount entry manually'",
+          "idempotent": false,
+          "requires_restart": "system",
+          "reversible": true,
+          "undo": "sed -i '/[[:space:]]\/home[[:space:]]/ s/,nosuid//' /etc/fstab"
+        },
+        {
+          "description": "Persist nosuid for /var in /etc/fstab",
+          "command": "grep -q '[[:space:]]/var[[:space:]]' /etc/fstab && sed -i '/[[:space:]]\/var[[:space:]]/ s/defaults/defaults,nosuid/' /etc/fstab || echo '# CME-503: nosuid on /var — add nosuid to existing /var mount entry manually'",
+          "idempotent": false,
+          "requires_restart": "system",
+          "reversible": true,
+          "undo": "sed -i '/[[:space:]]\/var[[:space:]]/ s/,nosuid//' /etc/fstab"
+        },
+        {
+          "description": "Persist nosuid for /tmp in /etc/fstab",
+          "command": "grep -q '[[:space:]]/tmp[[:space:]]' /etc/fstab && sed -i '/[[:space:]]\/tmp[[:space:]]/ s/defaults/defaults,nosuid/' /etc/fstab || echo 'tmpfs /tmp tmpfs defaults,nosuid 0 0' >> /etc/fstab",
+          "idempotent": false,
+          "requires_restart": "system",
+          "reversible": true,
+          "undo": "sed -i '/[[:space:]]\/tmp[[:space:]]/ s/,nosuid//' /etc/fstab"
+        }
+      ],
+      "verify": "mount | grep '/tmp ' | grep nosuid && mount | grep '/home ' | grep nosuid && mount | grep '/var ' | grep nosuid",
+      "references": [
+        {
+          "source": "CIS RHEL 9 Benchmark — 1.1.x Filesystem Configuration",
+          "url": "https://www.cisecurity.org/benchmark/red_hat_linux"
+        },
+        {
+          "source": "RHEL 9 Security Hardening — Securing mount points",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/index"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CFG-02",
     "IAC-21"

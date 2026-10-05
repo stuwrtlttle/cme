@@ -67,6 +67,51 @@
     "Windows 11",
     "Windows Server 2016+"
   ],
+  "remediation": [
+    {
+      "id": "wdac-audit-mode",
+      "name": "WDAC policy deployment in audit mode (logging only, no blocking)",
+      "platform": "windows",
+      "precondition": "Get-Command New-CIPolicy -ErrorAction SilentlyContinue",
+      "steps": [
+        {
+          "description": "Create a baseline WDAC policy from the current system state using publisher-level trust with hash fallback. Audit mode logs violations without blocking execution, allowing safe evaluation before enforcement.",
+          "command": "New-CIPolicy -Level Publisher -Fallback Hash -FilePath $env:TEMP\\CME925Policy.xml -UserPEs -Audit",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "Remove-Item $env:TEMP\\CME925Policy.xml -ErrorAction SilentlyContinue"
+        },
+        {
+          "description": "Convert the XML policy to binary format for deployment",
+          "command": "ConvertFrom-CIPolicy -XmlFilePath $env:TEMP\\CME925Policy.xml -BinaryFilePath $env:TEMP\\CME925Policy.cip",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "Remove-Item $env:TEMP\\CME925Policy.cip -ErrorAction SilentlyContinue"
+        },
+        {
+          "description": "Deploy the binary policy to the Code Integrity active policies directory. A reboot is required for the policy to take full effect.",
+          "command": "Copy-Item $env:TEMP\\CME925Policy.cip C:\\Windows\\System32\\CodeIntegrity\\CiPolicies\\Active\\ -Force",
+          "idempotent": true,
+          "requires_restart": "system",
+          "reversible": true,
+          "undo": "Remove-Item C:\\Windows\\System32\\CodeIntegrity\\CiPolicies\\Active\\CME925Policy.cip -ErrorAction SilentlyContinue"
+        }
+      ],
+      "verify": "Get-CimInstance -ClassName Win32_DeviceGuard -Namespace root\\Microsoft\\Windows\\DeviceGuard | Select-Object -ExpandProperty UsermodeCodeIntegrityPolicyEnforcementStatus",
+      "references": [
+        {
+          "source": "Microsoft — Deploy WDAC policies",
+          "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/deployment/wdac-deployment-guide"
+        },
+        {
+          "source": "Microsoft — Audit WDAC policies",
+          "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/deployment/audit-wdac-policies"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "STA-02",
     "STA-02.2"

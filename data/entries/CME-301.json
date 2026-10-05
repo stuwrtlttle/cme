@@ -91,6 +91,43 @@
       "defaultStatus": "applicable"
     }
   ],
+  "remediation": [
+    {
+      "id": "selinux-enforcing",
+      "name": "Enable SELinux enforcing mode and persist across reboots",
+      "platform": "rhel",
+      "precondition": "command -v getenforce >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Set SELinux to enforcing mode immediately (takes effect without reboot)",
+          "command": "setenforce 1",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "setenforce 0"
+        },
+        {
+          "description": "Persist enforcing mode across reboots by updating /etc/selinux/config; change takes effect at next boot but Step 1 already activated enforcing for the current session",
+          "command": "sed -i 's/^SELINUX=.*/SELINUX=enforcing/' /etc/selinux/config",
+          "idempotent": true,
+          "requires_restart": "system",
+          "reversible": true,
+          "undo": "sed -i 's/^SELINUX=.*/SELINUX=permissive/' /etc/selinux/config"
+        }
+      ],
+      "verify": "getenforce",
+      "references": [
+        {
+          "source": "RHEL 9 — Using SELinux",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/using_selinux/changing-selinux-states-and-modes_using-selinux"
+        },
+        {
+          "source": "CIS RHEL 9 Benchmark — Ensure SELinux is not disabled in bootloader configuration",
+          "url": "https://www.cisecurity.org/benchmark/red_hat_linux"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "END-16",
     "IAC-20",

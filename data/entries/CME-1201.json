@@ -24,8 +24,24 @@
   ],
   "cwe_relationships": [],
   "verification": {
-    "method": "Verify deployment pipeline builds from golden images",
-    "commands": []
+    "method": "Verify deployment pipeline builds from golden images and system root is immutable",
+    "commands": [
+      {
+        "command": "mount | grep 'on / ' | grep -c 'ro,'",
+        "expected": "1",
+        "platform": "linux"
+      },
+      {
+        "command": "rpm-ostree status 2>/dev/null | grep -c 'Version'",
+        "expected": ">=1 (ostree-based immutable OS)",
+        "platform": "linux"
+      },
+      {
+        "command": "kubectl exec <pod> -- sh -c 'which apt-get yum dnf apk 2>/dev/null | wc -l'",
+        "expected": "0 (no package manager in container image)",
+        "platform": "kubernetes"
+      }
+    ]
   },
   "confidence": "Medium",
   "platforms": [

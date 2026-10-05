@@ -32,6 +32,50 @@
       }
     ]
   },
+  "remediation": [
+    {
+      "id": "falco-install",
+      "name": "Falco eBPF runtime security installation and configuration",
+      "platform": "linux",
+      "precondition": "command -v dnf >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Import the Falco GPG key and add the Falco RPM repository, then install the falco package",
+          "command": "rpm --import https://falco.org/repo/falcosecurity-packages.asc && curl -s -o /etc/yum.repos.d/falcosecurity.repo https://falco.org/repo/falcosecurity-rpm.repo && dnf install -y falco",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "dnf remove -y falco && rm -f /etc/yum.repos.d/falcosecurity.repo"
+        },
+        {
+          "description": "Configure Falco to use the modern eBPF driver (no kernel module needed, works on RHEL 9+ / 5.8+ kernels)",
+          "command": "falcoctl driver install --type modern_ebpf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Enable and start the Falco service with the modern eBPF driver",
+          "command": "systemctl enable --now falco-modern-bpf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "systemctl disable --now falco-modern-bpf"
+        }
+      ],
+      "verify": "systemctl is-active falco-modern-bpf && falco --list 2>/dev/null | head -5",
+      "references": [
+        {
+          "source": "Falco — Installation on Linux",
+          "url": "https://falco.org/docs/install-operate/installation/"
+        },
+        {
+          "source": "Falco — Modern eBPF Driver",
+          "url": "https://falco.org/docs/install-operate/running/#modern-ebpf"
+        }
+      ]
+    }
+  ],
   "confidence": "Medium",
   "platforms": [
     "RHEL 9",

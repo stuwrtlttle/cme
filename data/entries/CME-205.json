@@ -34,6 +34,38 @@
   "platforms": [
     "Any"
   ],
+  "remediation": [
+    {
+      "id": "bind-localhost-config",
+      "name": "Configure service listen address to localhost only",
+      "platform": "linux",
+      "precondition": "test -f <config_file>",
+      "steps": [
+        {
+          "description": "Update the service configuration to bind to 127.0.0.1 instead of 0.0.0.0. Common config directives: PostgreSQL listen_addresses in postgresql.conf, Redis bind in redis.conf, MySQL bind-address in my.cnf, application server host/bind settings",
+          "command": "sed -i 's/^\\(\\s*bind_address\\s*=\\s*\\)0\\.0\\.0\\.0/\\1127.0.0.1/' <config_file>",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "sed -i 's/^\\(\\s*bind_address\\s*=\\s*\\)127\\.0\\.0\\.1/\\10.0.0.0/' <config_file>"
+        },
+        {
+          "description": "Restart the service to apply the new listen address",
+          "command": "systemctl restart <service>",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "ss -tlnp | grep ':<port>' | grep -c '127.0.0.1'",
+      "references": [
+        {
+          "source": "CIS Benchmark — Network Configuration",
+          "url": "https://www.cisecurity.org/benchmark"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CFG-03",
     "NET-03.3"

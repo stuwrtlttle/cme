@@ -55,6 +55,73 @@
   "platforms": [
     "Any"
   ],
+  "remediation": [
+    {
+      "id": "sshd-session-timeout",
+      "name": "SSH and shell idle session timeout via sshd drop-in and TMOUT",
+      "platform": "linux",
+      "precondition": "test -f /etc/ssh/sshd_config",
+      "steps": [
+        {
+          "description": "Create sshd drop-in that sends keepalive probes every 300s and disconnects after 3 missed probes (15-minute idle timeout for SSH sessions)",
+          "command": "printf 'ClientAliveInterval 300\nClientAliveCountMax 3\n' > /etc/ssh/sshd_config.d/99-cme-807-session-timeout.conf",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f /etc/ssh/sshd_config.d/99-cme-807-session-timeout.conf && systemctl reload sshd"
+        },
+        {
+          "description": "Set a 15-minute shell idle timeout for all login shells via /etc/profile.d drop-in; the shell exits automatically after 900 seconds of inactivity",
+          "command": "printf 'readonly TMOUT=900\\nexport TMOUT\\n' > /etc/profile.d/cme-807-timeout.sh && chmod 644 /etc/profile.d/cme-807-timeout.sh",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/profile.d/cme-807-timeout.sh"
+        },
+        {
+          "description": "Reload sshd to apply the ClientAliveInterval drop-in without dropping existing connections",
+          "command": "systemctl reload sshd",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "sshd -T | grep -E 'clientaliveinterval|clientalivecountmax'",
+      "references": [
+        {
+          "source": "RHEL 9 Security Hardening — Configuring OpenSSH",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/assembly_using-the-system-wide-cryptographic-policies_security-hardening"
+        },
+        {
+          "source": "sshd_config(5) — ClientAliveInterval",
+          "url": "https://man.openbsd.org/sshd_config#ClientAliveInterval"
+        }
+      ]
+    },
+    {
+      "id": "windows-inactivity-timeout",
+      "name": "Windows interactive session inactivity timeout via registry policy",
+      "platform": "windows",
+      "precondition": "Get-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion' -ErrorAction SilentlyContinue | Out-Null",
+      "steps": [
+        {
+          "description": "Set the machine inactivity timeout to 900 seconds (15 minutes) via the local security policy registry key; the lock screen activates after this period of no input",
+          "command": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\CurrentVersion\\Policies\\System' -Name InactivityTimeoutSecs -Value 900 -Type DWord",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "Remove-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\CurrentVersion\\Policies\\System' -Name InactivityTimeoutSecs -ErrorAction SilentlyContinue"
+        }
+      ],
+      "verify": "Get-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\CurrentVersion\\Policies\\System' -Name InactivityTimeoutSecs -ErrorAction SilentlyContinue | Select-Object InactivityTimeoutSecs",
+      "references": [
+        {
+          "source": "Microsoft — Interactive logon: Machine inactivity limit",
+          "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/interactive-logon-machine-inactivity-limit"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "IAC-24",
     "IAC-25",

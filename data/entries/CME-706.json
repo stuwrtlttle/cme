@@ -33,6 +33,21 @@
         "command": "kubectl get namespace <ns> -o jsonpath='{.metadata.labels.pod-security\\.kubernetes\\.io/enforce}'",
         "expected": "restricted",
         "platform": "kubernetes"
+      },
+      {
+        "command": "kubectl get namespace <ns> -o jsonpath='{.metadata.labels.pod-security\\.kubernetes\\.io/enforce-version}'",
+        "expected": "latest (or a specific version such as v1.28)",
+        "platform": "kubernetes"
+      },
+      {
+        "command": "kubectl run cme-pss-test --image=busybox --restart=Never --dry-run=server --overrides='{\"spec\":{\"containers\":[{\"name\":\"test\",\"image\":\"busybox\",\"securityContext\":{\"runAsNonRoot\":false,\"allowPrivilegeEscalation\":true}}]}}' -n <ns> 2>&1 | grep -c -i 'forbidden\\|violated'",
+        "expected": ">=1 (restricted PSS rejects non-compliant workloads)",
+        "platform": "kubernetes"
+      },
+      {
+        "command": "kubectl get namespace <ns> -o jsonpath='{.metadata.labels.pod-security\\.kubernetes\\.io/warn}'",
+        "expected": "restricted",
+        "platform": "kubernetes"
       }
     ]
   },
@@ -40,6 +55,35 @@
   "platforms": [
     "Kubernetes 1.25+",
     "OpenShift 4.12+"
+  ],
+  "remediation": [
+    {
+      "id": "k8s-pss-restricted-label",
+      "name": "Kubernetes Pod Security Standards restricted enforcement via namespace labels",
+      "platform": "kubernetes",
+      "precondition": "kubectl version --client >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Apply Pod Security Standards restricted enforcement, warning, and audit labels to the target namespace; all non-compliant pods will be rejected at admission",
+          "command": "kubectl label namespace <namespace> pod-security.kubernetes.io/enforce=restricted pod-security.kubernetes.io/enforce-version=latest pod-security.kubernetes.io/warn=restricted pod-security.kubernetes.io/audit=restricted --overwrite",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "kubectl label namespace <namespace> pod-security.kubernetes.io/enforce- pod-security.kubernetes.io/enforce-version- pod-security.kubernetes.io/warn- pod-security.kubernetes.io/audit-"
+        }
+      ],
+      "verify": "kubectl get namespace <namespace> -o jsonpath='{.metadata.labels.pod-security\\.kubernetes\\.io/enforce}'",
+      "references": [
+        {
+          "source": "Kubernetes — Pod Security Standards",
+          "url": "https://kubernetes.io/docs/concepts/security/pod-security-standards/"
+        },
+        {
+          "source": "Kubernetes — Enforce Pod Security Standards with Namespace Labels",
+          "url": "https://kubernetes.io/docs/tasks/configure-pod-container/enforce-standards-namespace-labels/"
+        }
+      ]
+    }
   ],
   "scf_identifiers": [
     "CLD-02",

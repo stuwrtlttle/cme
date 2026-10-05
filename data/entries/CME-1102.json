@@ -40,6 +40,47 @@
     "RHEL 8",
     "Ubuntu Pro"
   ],
+  "remediation": [
+    {
+      "id": "kpatch-enable",
+      "name": "RHEL kpatch live kernel patching",
+      "platform": "rhel",
+      "precondition": "command -v dnf >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Install kpatch client and dnf plugin for automatic live patch management",
+          "command": "dnf install -y kpatch kpatch-dnf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "dnf remove -y kpatch kpatch-dnf"
+        },
+        {
+          "description": "Install the live patch module for the currently running kernel; requires an active RHEL subscription",
+          "command": "dnf install -y kpatch-patch-$(uname -r | sed 's/\\.[^.]*$//')",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "dnf remove -y kpatch-patch-*"
+        },
+        {
+          "description": "Enable the kpatch systemd service to automatically apply live patches at boot",
+          "command": "systemctl enable kpatch",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "systemctl disable kpatch"
+        }
+      ],
+      "verify": "kpatch list && rpm -qa | grep kpatch-patch",
+      "references": [
+        {
+          "source": "RHEL 9 — Managing, monitoring, and updating the kernel — Applying kernel live patches",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/managing_monitoring_and_updating_the_kernel/applying-patches-with-kernel-live-patching_managing-monitoring-and-updating-the-kernel"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "VPM-05",
     "VPM-05.7"

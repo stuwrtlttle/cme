@@ -52,6 +52,90 @@
       }
     ]
   },
+  "remediation": [
+    {
+      "id": "nginx-cors-allowlist",
+      "name": "nginx CORS origin allowlist via map and conditional headers",
+      "platform": "linux",
+      "precondition": "nginx -v >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create an nginx drop-in that maps approved origins to CORS response headers. Replace the placeholder origins with your actual allowed origins. Unapproved origins receive no CORS headers.",
+          "command": "cat > /etc/nginx/conf.d/cme-914-cors.conf <<'EOF'\nmap $http_origin $cors_origin {\n    default \"\";\n    \"https://<allowed_origin_1>\" $http_origin;\n    \"https://<allowed_origin_2>\" $http_origin;\n}\n\nmap $cors_origin $cors_credentials {\n    default \"\";\n    \"~.+\" \"true\";\n}\n\n# Apply in server or location blocks:\n# add_header Access-Control-Allow-Origin $cors_origin always;\n# add_header Access-Control-Allow-Credentials $cors_credentials always;\n# add_header Access-Control-Allow-Methods \"GET, POST, OPTIONS\" always;\n# add_header Access-Control-Allow-Headers \"Authorization, Content-Type\" always;\n# if ($request_method = OPTIONS) { return 204; }\nEOF",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f /etc/nginx/conf.d/cme-914-cors.conf"
+        },
+        {
+          "description": "Validate nginx configuration syntax before applying",
+          "command": "nginx -t",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Reload nginx to apply the CORS configuration without dropping connections",
+          "command": "systemctl reload nginx",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "curl -sI -H 'Origin: https://evil.example.com' http://<target>/api/ | grep -i 'access-control-allow-origin'",
+      "references": [
+        {
+          "source": "nginx — map module",
+          "url": "https://nginx.org/en/docs/http/ngx_http_map_module.html"
+        },
+        {
+          "source": "MDN — Cross-Origin Resource Sharing (CORS)",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS"
+        }
+      ]
+    },
+    {
+      "id": "apache-cors-allowlist",
+      "name": "Apache CORS origin allowlist via mod_headers and SetEnvIf",
+      "platform": "linux",
+      "precondition": "httpd -v >/dev/null 2>&1 || apachectl -v >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create an Apache drop-in that uses SetEnvIf to match approved origins and conditionally sets CORS headers. Replace placeholder origins with your actual allowed origins.",
+          "command": "cat > /etc/httpd/conf.d/cme-914-cors.conf <<'EOF'\n<IfModule mod_headers.c>\n    SetEnvIfNoCase Origin \"^https://<allowed_origin_1>$\" CORS_ORIGIN=$0\n    SetEnvIfNoCase Origin \"^https://<allowed_origin_2>$\" CORS_ORIGIN=$0\n\n    Header always set Access-Control-Allow-Origin %{CORS_ORIGIN}e env=CORS_ORIGIN\n    Header always set Access-Control-Allow-Credentials \"true\" env=CORS_ORIGIN\n    Header always set Access-Control-Allow-Methods \"GET, POST, OPTIONS\" env=CORS_ORIGIN\n    Header always set Access-Control-Allow-Headers \"Authorization, Content-Type\" env=CORS_ORIGIN\n\n    # Handle preflight\n    RewriteEngine On\n    RewriteCond %{REQUEST_METHOD} OPTIONS\n    RewriteCond %{ENV:CORS_ORIGIN} .+\n    RewriteRule ^(.*)$ $1 [R=204,L]\n</IfModule>\nEOF",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f /etc/httpd/conf.d/cme-914-cors.conf"
+        },
+        {
+          "description": "Validate Apache configuration syntax before applying",
+          "command": "httpd -t 2>&1 || apachectl configtest 2>&1",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Reload Apache to apply the CORS configuration without dropping connections",
+          "command": "systemctl reload httpd",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "curl -sI -H 'Origin: https://evil.example.com' http://<target>/api/ | grep -i 'access-control-allow-origin'",
+      "references": [
+        {
+          "source": "Apache mod_headers — Header directive",
+          "url": "https://httpd.apache.org/docs/2.4/mod/mod_headers.html"
+        },
+        {
+          "source": "MDN — Cross-Origin Resource Sharing (CORS)",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "WEB-04",
     "WEB-07",

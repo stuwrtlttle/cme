@@ -67,6 +67,49 @@
       "defaultStatus": "applicable"
     }
   ],
+  "remediation": [
+    {
+      "id": "uefi-secure-boot-mok",
+      "name": "UEFI Secure Boot verification and MOK key enrollment",
+      "platform": "linux",
+      "precondition": "command -v mokutil >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Verify Secure Boot is enabled in UEFI firmware; if disabled, it must be enabled via the UEFI/BIOS setup menu (cannot be toggled from the OS)",
+          "command": "mokutil --sb-state | grep -q 'SecureBoot enabled' && echo 'PASS: Secure Boot enabled' || echo 'FAIL: Secure Boot disabled — enable in UEFI firmware settings'",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Import a Machine Owner Key (MOK) for signing custom kernel modules; the key enrollment completes on next reboot via the shim MokManager prompt",
+          "command": "mokutil --import <mok_public_key>.der",
+          "idempotent": false,
+          "requires_restart": "system",
+          "reversible": true,
+          "undo": "mokutil --delete <mok_public_key>.der"
+        },
+        {
+          "description": "Sign a custom kernel module with the enrolled MOK key so it loads under Secure Boot",
+          "command": "sign-file sha256 <private_key>.priv <mok_public_key>.der <module>.ko",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "mokutil --sb-state",
+      "references": [
+        {
+          "source": "RHEL 9 — Using Secure Boot",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/managing_monitoring_and_updating_the_kernel/signing-a-kernel-and-modules-for-secure-boot_managing-monitoring-and-updating-the-kernel"
+        },
+        {
+          "source": "mokutil(1) man page",
+          "url": "https://man7.org/linux/man-pages/man1/mokutil.1.html"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CRY-13",
     "END-06.5",

@@ -56,6 +56,92 @@
     "Kubernetes 1.25+",
     "OpenShift 4.12+"
   ],
+  "remediation": [
+    {
+      "id": "kyverno-block-privileged",
+      "name": "Kyverno ClusterPolicy blocking privileged containers",
+      "platform": "kubernetes",
+      "precondition": "kubectl version --client >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Install Kyverno admission controller into the cluster",
+          "command": "kubectl apply -f https://github.com/kyverno/kyverno/releases/download/<version>/install.yaml",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "kubectl delete -f https://github.com/kyverno/kyverno/releases/download/<version>/install.yaml"
+        },
+        {
+          "description": "Wait for Kyverno pods to become ready before applying policies",
+          "command": "kubectl wait --for=condition=Ready pods -l app.kubernetes.io/part-of=kyverno -n kyverno --timeout=120s",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Apply a ClusterPolicy that denies any pod requesting privileged securityContext",
+          "command": "kubectl apply -f - <<'EOF'\napiVersion: kyverno.io/v1\nkind: ClusterPolicy\nmetadata:\n  name: disallow-privileged-containers\nspec:\n  validationFailureAction: Enforce\n  background: true\n  rules:\n    - name: deny-privileged\n      match:\n        any:\n          - resources:\n              kinds:\n                - Pod\n      validate:\n        message: \"Privileged containers are not allowed.\"\n        pattern:\n          spec:\n            containers:\n              - securityContext:\n                  privileged: \"!true\"\nEOF",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "kubectl delete clusterpolicy disallow-privileged-containers"
+        }
+      ],
+      "verify": "kubectl run cme-test --image=busybox --restart=Never --dry-run=server --overrides='{\"spec\":{\"containers\":[{\"name\":\"test\",\"image\":\"busybox\",\"securityContext\":{\"privileged\":true}}]}}' 2>&1 | grep -c -i 'denied\\|forbidden\\|violated'",
+      "references": [
+        {
+          "source": "Kyverno — Installation",
+          "url": "https://kyverno.io/docs/installation/"
+        },
+        {
+          "source": "Kyverno — Disallow Privileged Containers Policy",
+          "url": "https://kyverno.io/policies/pod-security/baseline/disallow-privileged-containers/disallow-privileged-containers/"
+        }
+      ]
+    },
+    {
+      "id": "openshift-scc",
+      "name": "OpenShift SecurityContextConstraints enforcement (restricted-v2)",
+      "platform": "kubernetes",
+      "precondition": "oc version --client >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Verify that restricted-v2 SCC is present and is the default for authenticated users (ships by default on OpenShift 4.12+)",
+          "command": "oc get scc restricted-v2 -o name",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Remove anyuid SCC grants from service accounts in the target namespace to enforce restricted-v2 as the effective SCC",
+          "command": "oc adm policy remove-scc-from-user anyuid system:serviceaccount:<namespace>:<serviceaccount>",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "oc adm policy add-scc-to-user anyuid system:serviceaccount:<namespace>:<serviceaccount>"
+        },
+        {
+          "description": "Remove privileged SCC grants from service accounts in the target namespace",
+          "command": "oc adm policy remove-scc-from-user privileged system:serviceaccount:<namespace>:<serviceaccount>",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "oc adm policy add-scc-to-user privileged system:serviceaccount:<namespace>:<serviceaccount>"
+        }
+      ],
+      "verify": "oc get scc --no-headers && kubectl run cme-test --image=busybox --restart=Never --dry-run=server --overrides='{\"spec\":{\"containers\":[{\"name\":\"test\",\"image\":\"busybox\",\"securityContext\":{\"privileged\":true}}]}}' 2>&1 | grep -c -i 'denied\\|forbidden\\|violated'",
+      "references": [
+        {
+          "source": "OpenShift — Managing Security Context Constraints",
+          "url": "https://docs.openshift.com/container-platform/4.14/authentication/managing-security-context-constraints.html"
+        },
+        {
+          "source": "OpenShift — Default SCCs",
+          "url": "https://docs.openshift.com/container-platform/4.14/authentication/managing-security-context-constraints.html#default-sccs_configuring-internal-oauth"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CFG-06",
     "CLD-02"

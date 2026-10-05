@@ -47,6 +47,59 @@
     "RHEL 8",
     "Ubuntu 24.04"
   ],
+  "remediation": [
+    {
+      "id": "mount-noexec",
+      "name": "Mount /tmp and /dev/shm with noexec,nosuid,nodev options",
+      "platform": "linux",
+      "precondition": "test -f /etc/fstab",
+      "steps": [
+        {
+          "description": "Remount /tmp immediately with noexec, nosuid, and nodev to block execution of attacker-dropped payloads",
+          "command": "mount -o remount,noexec,nosuid,nodev /tmp",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "mount -o remount,exec,suid,dev /tmp"
+        },
+        {
+          "description": "Remount /dev/shm immediately with noexec, nosuid, and nodev",
+          "command": "mount -o remount,noexec,nosuid,nodev /dev/shm",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "mount -o remount,exec,suid,dev /dev/shm"
+        },
+        {
+          "description": "Persist noexec,nosuid,nodev for /tmp in /etc/fstab so it survives reboot; add the entry if /tmp is not already listed",
+          "command": "grep -q '[[:space:]]/tmp[[:space:]]' /etc/fstab && sed -i '/[[:space:]]\/tmp[[:space:]]/ s/defaults/defaults,noexec,nosuid,nodev/' /etc/fstab || echo 'tmpfs /tmp tmpfs defaults,noexec,nosuid,nodev 0 0' >> /etc/fstab",
+          "idempotent": false,
+          "requires_restart": "system",
+          "reversible": true,
+          "undo": "sed -i '/[[:space:]]\/tmp[[:space:]]/ s/,noexec,nosuid,nodev//' /etc/fstab"
+        },
+        {
+          "description": "Persist noexec,nosuid,nodev for /dev/shm in /etc/fstab",
+          "command": "grep -q '[[:space:]]/dev/shm[[:space:]]' /etc/fstab && sed -i '/[[:space:]]\/dev\/shm[[:space:]]/ s/defaults/defaults,noexec,nosuid,nodev/' /etc/fstab || echo 'tmpfs /dev/shm tmpfs defaults,noexec,nosuid,nodev 0 0' >> /etc/fstab",
+          "idempotent": false,
+          "requires_restart": "system",
+          "reversible": true,
+          "undo": "sed -i '/[[:space:]]\/dev\/shm[[:space:]]/ s/,noexec,nosuid,nodev//' /etc/fstab"
+        }
+      ],
+      "verify": "mount | grep '/tmp ' | grep noexec && mount | grep '/dev/shm ' | grep noexec",
+      "references": [
+        {
+          "source": "CIS RHEL 9 Benchmark — 1.1.4-1.1.9",
+          "url": "https://www.cisecurity.org/benchmark/red_hat_linux"
+        },
+        {
+          "source": "RHEL 9 Security Hardening — Securing mount points",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/index"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CFG-02",
     "SEA-06"

@@ -18,8 +18,24 @@
   ],
   "cwe_relationships": [],
   "verification": {
-    "method": "Verify failover configuration and last failover test",
-    "commands": []
+    "method": "Verify replication is active and failover has been tested within the last 90 days",
+    "commands": [
+      {
+        "command": "psql -c \"SELECT state FROM pg_stat_replication\" 2>/dev/null | grep -c 'streaming'",
+        "expected": ">=1 (database replication active)",
+        "platform": "linux"
+      },
+      {
+        "command": "kubectl get endpoints <failover-service> -o jsonpath='{.subsets[*].addresses[*].ip}' 2>/dev/null | wc -w",
+        "expected": ">=2 (multiple endpoints behind failover service)",
+        "platform": "kubernetes"
+      },
+      {
+        "command": "test -f <dr_test_log> && find <dr_test_log> -mtime -90 -print | wc -l",
+        "expected": "1 (DR test performed within last 90 days)",
+        "platform": "any"
+      }
+    ]
   },
   "confidence": "Medium",
   "platforms": [

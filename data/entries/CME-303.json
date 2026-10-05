@@ -26,6 +26,21 @@
         "command": "getsebool httpd_can_network_connect",
         "expected": "httpd_can_network_connect --> off",
         "platform": "rhel"
+      },
+      {
+        "command": "getsebool -a | grep -E 'httpd_can_network_connect|httpd_execmem|allow_user_exec_content|selinuxuser_execmod' | grep -c ' off$'",
+        "expected": ">=3",
+        "platform": "rhel"
+      },
+      {
+        "command": "getsebool virt_sandbox_use_all_caps",
+        "expected": "virt_sandbox_use_all_caps --> off",
+        "platform": "rhel"
+      },
+      {
+        "command": "semanage boolean -l | grep httpd_can_network_connect",
+        "expected": "(off , off)",
+        "platform": "rhel"
       }
     ]
   },
@@ -34,6 +49,59 @@
     "RHEL 9",
     "RHEL 8",
     "Fedora"
+  ],
+  "remediation": [
+    {
+      "id": "selinux-restrictive-booleans",
+      "name": "Set security-relevant SELinux booleans to restrictive (off) values",
+      "platform": "rhel",
+      "precondition": "command -v setsebool >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Disable httpd outbound network connections — prevents SSRF and reverse shell from web server processes",
+          "command": "setsebool -P httpd_can_network_connect off",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "setsebool -P httpd_can_network_connect on"
+        },
+        {
+          "description": "Disable httpd executable memory — blocks JIT and shellcode execution in web server processes",
+          "command": "setsebool -P httpd_execmem off",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "setsebool -P httpd_execmem on"
+        },
+        {
+          "description": "Disable user executable content in home directories — prevents execution of user-uploaded binaries",
+          "command": "setsebool -P allow_user_exec_content off",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "setsebool -P allow_user_exec_content on"
+        },
+        {
+          "description": "Disable container full capabilities — restricts container processes from acquiring all Linux capabilities",
+          "command": "setsebool -P virt_sandbox_use_all_caps off",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "setsebool -P virt_sandbox_use_all_caps on"
+        }
+      ],
+      "verify": "getsebool httpd_can_network_connect httpd_execmem allow_user_exec_content virt_sandbox_use_all_caps",
+      "references": [
+        {
+          "source": "RHEL 9 — Using SELinux Booleans",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/using_selinux/managing-confined-and-unconfined-users_using-selinux#managing-selinux-booleans_managing-confined-and-unconfined-users"
+        },
+        {
+          "source": "CIS RHEL 9 Benchmark — SELinux Boolean Hardening",
+          "url": "https://www.cisecurity.org/benchmark/red_hat_linux"
+        }
+      ]
+    }
   ],
   "scf_identifiers": [
     "CFG-02",

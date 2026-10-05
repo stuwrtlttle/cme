@@ -68,6 +68,52 @@
     "Debian 10+",
     "Ubuntu 20.04+"
   ],
+  "remediation": [
+    {
+      "id": "usbguard-default-block",
+      "name": "USBGuard default-block policy from currently connected devices",
+      "platform": "linux",
+      "precondition": "command -v dnf >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Install USBGuard package",
+          "command": "dnf install -y usbguard",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "dnf remove -y usbguard"
+        },
+        {
+          "description": "Generate an allowlist policy from currently connected USB devices; any device NOT connected at generation time will be blocked when the service starts",
+          "command": "usbguard generate-policy > /etc/usbguard/rules.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/usbguard/rules.conf"
+        },
+        {
+          "description": "Enable and start USBGuard to enforce the generated policy",
+          "command": "systemctl enable --now usbguard",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "systemctl disable --now usbguard"
+        }
+      ],
+      "verify": "systemctl is-active usbguard && usbguard list-rules | wc -l",
+      "references": [
+        {
+          "source": "USBGuard Documentation",
+          "url": "https://usbguard.github.io/"
+        },
+        {
+          "source": "RHEL 10 Security Hardening — Protecting Against Intrusive USB Devices",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/security_hardening/index",
+          "section": "Chapter 11"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "PES-02",
     "PES-02.1"

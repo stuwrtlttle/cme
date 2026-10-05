@@ -26,6 +26,16 @@
         "command": "systemctl show <service> -p DynamicUser",
         "expected": "DynamicUser=yes",
         "platform": "linux"
+      },
+      {
+        "command": "grep -r 'DynamicUser=yes' /etc/systemd/system/<service>.service /etc/systemd/system/<service>.service.d/ /usr/lib/systemd/system/<service>.service 2>/dev/null | wc -l",
+        "expected": ">=1",
+        "platform": "linux"
+      },
+      {
+        "command": "systemctl show <service> -p ProtectSystem,PrivateTmp,RemoveIPC",
+        "expected": "ProtectSystem=strict; PrivateTmp=yes; RemoveIPC=yes (DynamicUser implies these)",
+        "platform": "linux"
       }
     ]
   },
@@ -34,6 +44,57 @@
     "RHEL 9",
     "RHEL 8",
     "Ubuntu 24.04"
+  ],
+  "remediation": [
+    {
+      "id": "systemd-dynamic-user",
+      "name": "systemd drop-in with DynamicUser=yes",
+      "platform": "linux",
+      "precondition": "systemctl --version >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create a systemd drop-in directory for the target service",
+          "command": "mkdir -p /etc/systemd/system/<service>.service.d",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rmdir /etc/systemd/system/<service>.service.d 2>/dev/null"
+        },
+        {
+          "description": "Write a drop-in that enables DynamicUser=yes, which allocates an ephemeral UID/GID per service instance and implies ProtectSystem=strict, PrivateTmp=yes, and RemoveIPC=yes",
+          "command": "printf '[Service]\\nDynamicUser=yes\\n' > /etc/systemd/system/<service>.service.d/dynamic-user.conf",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f /etc/systemd/system/<service>.service.d/dynamic-user.conf"
+        },
+        {
+          "description": "Reload systemd manager configuration to pick up the drop-in",
+          "command": "systemctl daemon-reload",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Restart the service to apply DynamicUser allocation",
+          "command": "systemctl restart <service>",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "systemctl show <service> -p DynamicUser",
+      "references": [
+        {
+          "source": "systemd.exec(5) — DynamicUser",
+          "url": "https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html#DynamicUser="
+        },
+        {
+          "source": "RHEL 9 — Configuring systemd unit files",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/using_systemd_unit_files_to_customize_and_optimize_your_system/assembly_working-with-systemd-unit-files_working-with-systemd"
+        }
+      ]
+    }
   ],
   "scf_identifiers": [
     "IAC-09",
