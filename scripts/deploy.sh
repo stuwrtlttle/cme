@@ -99,7 +99,7 @@ if [ "$VPS_ONLY" = false ]; then
     fi
 
     step "Committing: ${COMMIT_MSG}"
-    git add --all -- ':!.DS_Store' ':!data/.DS_Store' 2>/dev/null
+    git add --all -- ':!.DS_Store' ':!data/.DS_Store' 2>/dev/null || true
     git commit -m "$COMMIT_MSG"
     ok "Committed"
 
@@ -133,7 +133,7 @@ echo "  Rebuilding CME server image..."
 docker compose build --quiet seed server
 
 echo "  Re-seeding database..."
-docker compose run --rm seed
+docker compose run --rm -T seed < /dev/null
 
 echo "  Restarting MCP server..."
 docker compose up -d server

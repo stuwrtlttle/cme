@@ -1,5 +1,5 @@
 {
-  "cme_id": "CME-1012",
+  "cme_id": "CME-1013",
   "control_name": "USBGuard — USB Device Access Control",
   "description": "Kernel-level USB device authorization framework that enforces allow/deny/block policies for USB peripheral attachment. Prevents BadUSB attacks (malicious USB devices that emulate keyboards/network adapters), DMA-based attacks via Thunderbolt/USB-C, and unauthorized data exfiltration via USB storage. Integrates with udev and auditd for USB event logging and policy enforcement. Policies can be defined per device class, vendor ID, product ID, or serial number.",
   "tactic": "Detect",
