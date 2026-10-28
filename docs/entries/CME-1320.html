@@ -139,6 +139,40 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">rhel</span>
+          <span class="remediation-name">RPM global build macros with format-security enforcement</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;%%global optflags %%{optflags} -Wformat -Wformat-security -Werror=format-security\n&#39; &gt; /etc/rpm/macros.cme-1320-format-security</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">GCC specs file override for system-wide format-security enforcement</span>
+        </div>
+        <pre class="remediation-commands"><code>
+gcc -dumpspecs &gt; /tmp/cme-1320-specs.tmp
+sed &#39;s/^\*cc1:$/&amp;\n-Wformat -Wformat-security -Werror=format-security/&#39; /tmp/cme-1320-specs.tmp &gt; $(gcc -print-search-dirs | grep install | awk &#39;{print $2}&#39;)specs
+rm -f /tmp/cme-1320-specs.tmp</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">any</span>
+          <span class="remediation-name">CMake project format-security compiler flags</span>
+        </div>
+        <pre class="remediation-commands"><code>
+grep -q &#39;Werror=format-security&#39; CMakeLists.txt 2&gt;/dev/null || sed -i &#39;1a add_compile_options(-Wformat -Wformat-security -Werror=format-security)&#39; CMakeLists.txt</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -229,7 +263,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
+    Generated 2026-10-28 18:49 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

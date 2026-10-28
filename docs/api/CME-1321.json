@@ -115,6 +115,117 @@
       }
     ]
   },
+  "remediation": [
+    {
+      "id": "jvm-serial-filter",
+      "name": "JVM-wide deserialization type filter via java.security",
+      "platform": "any",
+      "steps": [
+        {
+          "command": "JAVA_SEC=$(java -XshowSettings:all 2>&1 | grep 'java.home' | awk '{print $NF}')/conf/security/java.security; echo \"Using $JAVA_SEC\"",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false,
+          "description": "Locate the JVM's java.security configuration file. This is the global policy file that controls deserialization filtering for all Java applications on this system."
+        },
+        {
+          "command": "cp \"$JAVA_SEC\" \"${JAVA_SEC}.bak-cme-1321-$(date +%Y%m%d)\"",
+          "idempotent": false,
+          "requires_restart": "none",
+          "reversible": false,
+          "description": "Back up the existing java.security file before modification"
+        },
+        {
+          "command": "grep -q '^jdk.serialFilter=' \"$JAVA_SEC\" && sed -i 's|^jdk.serialFilter=.*|jdk.serialFilter=!*|' \"$JAVA_SEC\" || echo 'jdk.serialFilter=!*' >> \"$JAVA_SEC\"",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "description": "Set a global deserialization filter that rejects ALL types by default (!*). Applications must explicitly configure their own ObjectInputFilter allowlists to permit specific types. This enforces trust boundary validation at the JVM level — any deserialization of an unapproved type is blocked before the object is instantiated. Adjust the filter pattern to allow specific trusted types as needed (e.g., jdk.serialFilter=com.example.dto.*;!*).",
+          "undo": "cp \"${JAVA_SEC}.bak-cme-1321-*\" \"$JAVA_SEC\" 2>/dev/null"
+        }
+      ],
+      "precondition": "command -v java >/dev/null 2>&1 && java -version 2>&1 | grep -qE '(17|21|22|23)'",
+      "verify": "java -XshowSettings:all 2>&1 | grep serialFilter || grep 'jdk.serialFilter' $(java -XshowSettings:all 2>&1 | grep 'java.home' | awk '{print $NF}')/conf/security/java.security",
+      "references": [
+        {
+          "source": "JDK 17 — Serialization Filtering",
+          "url": "https://docs.oracle.com/en/java/javase/17/core/serialization-filtering1.html"
+        },
+        {
+          "source": "JEP 290 — Filter Incoming Serialization Data",
+          "url": "https://openjdk.org/jeps/290"
+        }
+      ]
+    },
+    {
+      "id": "python-yaml-safe-default",
+      "name": "Python YAML safe_load enforcement via sitecustomize",
+      "platform": "any",
+      "steps": [
+        {
+          "command": "SITE_DIR=$(python3 -c 'import site; print(site.getsitepackages()[0])'); echo \"Using $SITE_DIR\"",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false,
+          "description": "Locate the Python site-packages directory for the system Python installation"
+        },
+        {
+          "command": "printf 'import yaml\\nyaml.warnings({\"YAMLLoadWarning\": True})\\n# CME-1321: Override yaml.load to require explicit Loader argument\\n_original_load = yaml.load\\ndef _safe_load_wrapper(data, Loader=None):\\n    if Loader is None:\\n        raise TypeError(\"yaml.load() requires an explicit Loader argument. Use yaml.safe_load() or pass Loader=yaml.SafeLoader for untrusted data.\")\\n    return _original_load(data, Loader=Loader)\\nyaml.load = _safe_load_wrapper\\n' > \"$SITE_DIR/cme_1321_yaml_safe.pth\"",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "description": "Install a site-packages hook that overrides yaml.load() to require an explicit Loader argument, preventing accidental use of the unsafe default. Applications must explicitly choose yaml.SafeLoader (trusted boundary enforcement) or yaml.FullLoader. This catches trust boundary violations where external YAML data is loaded without sanitization.",
+          "undo": "rm -f \"$SITE_DIR/cme_1321_yaml_safe.pth\""
+        }
+      ],
+      "precondition": "python3 -c 'import yaml' 2>/dev/null",
+      "verify": "python3 -c \"import yaml; yaml.load('test: 1')\" 2>&1 | grep -q 'TypeError'",
+      "references": [
+        {
+          "source": "PyYAML Documentation — Loading YAML",
+          "url": "https://pyyaml.org/wiki/PyYAMLDocumentation"
+        },
+        {
+          "source": "CWE-502 — Deserialization of Untrusted Data",
+          "url": "https://cwe.mitre.org/data/definitions/502.html"
+        }
+      ]
+    },
+    {
+      "id": "spring-validation-enforcement",
+      "name": "Spring Boot global validation enforcement via application properties",
+      "platform": "any",
+      "steps": [
+        {
+          "command": "grep -q 'spring.mvc.throw-exception-if-no-handler-found' <app>/src/main/resources/application.properties 2>/dev/null || printf '# CME-1321: Trust boundary validation enforcement\\nspring.mvc.throw-exception-if-no-handler-found=true\\nserver.error.whitelabel.enabled=false\\n' >> <app>/src/main/resources/application.properties",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "description": "Enable strict request handling in Spring Boot — unmatched requests raise exceptions rather than falling through to default handlers, preventing trust boundary bypass via unexpected endpoints",
+          "undo": "sed -i '/CME-1321/,+2d' <app>/src/main/resources/application.properties"
+        },
+        {
+          "command": "grep -q '@Validated' <app>/src/main/java/**/controller/*.java 2>/dev/null || echo 'WARNING: Controllers missing @Validated annotation — add @Validated to controller classes to enforce @Valid on request bodies at trust boundaries'",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false,
+          "description": "Audit Spring controllers for @Validated annotation. Without it, @Valid on method parameters is silently ignored, leaving trust boundary input unsanitized. This step reports missing annotations rather than auto-fixing — controller changes require code review."
+        }
+      ],
+      "precondition": "test -f <app>/src/main/resources/application.properties",
+      "verify": "grep -rn '@Valid\\|@Validated' <app>/src/main/java/ | head -10",
+      "references": [
+        {
+          "source": "Spring Boot — Validation",
+          "url": "https://docs.spring.io/spring-boot/reference/io/validation.html"
+        },
+        {
+          "source": "OWASP Input Validation Cheat Sheet",
+          "url": "https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html"
+        }
+      ]
+    }
+  ],
   "references": [
     {
       "source": "CWE-501: Trust Boundary Violation",

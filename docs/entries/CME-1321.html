@@ -142,6 +142,42 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">any</span>
+          <span class="remediation-name">JVM-wide deserialization type filter via java.security</span>
+        </div>
+        <pre class="remediation-commands"><code>
+JAVA_SEC=$(java -XshowSettings:all 2&gt;&amp;1 | grep &#39;java.home&#39; | awk &#39;{print $NF}&#39;)/conf/security/java.security; echo &#34;Using $JAVA_SEC&#34;
+cp &#34;$JAVA_SEC&#34; &#34;${JAVA_SEC}.bak-cme-1321-$(date +%Y%m%d)&#34;
+grep -q &#39;^jdk.serialFilter=&#39; &#34;$JAVA_SEC&#34; &amp;&amp; sed -i &#39;s|^jdk.serialFilter=.*|jdk.serialFilter=!*|&#39; &#34;$JAVA_SEC&#34; || echo &#39;jdk.serialFilter=!*&#39; &gt;&gt; &#34;$JAVA_SEC&#34;</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">any</span>
+          <span class="remediation-name">Python YAML safe_load enforcement via sitecustomize</span>
+        </div>
+        <pre class="remediation-commands"><code>
+SITE_DIR=$(python3 -c &#39;import site; print(site.getsitepackages()[0])&#39;); echo &#34;Using $SITE_DIR&#34;
+printf &#39;import yaml\nyaml.warnings({&#34;YAMLLoadWarning&#34;: True})\n# CME-1321: Override yaml.load to require explicit Loader argument\n_original_load = yaml.load\ndef _safe_load_wrapper(data, Loader=None):\n    if Loader is None:\n        raise TypeError(&#34;yaml.load() requires an explicit Loader argument. Use yaml.safe_load() or pass Loader=yaml.SafeLoader for untrusted data.&#34;)\n    return _original_load(data, Loader=Loader)\nyaml.load = _safe_load_wrapper\n&#39; &gt; &#34;$SITE_DIR/cme_1321_yaml_safe.pth&#34;</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">any</span>
+          <span class="remediation-name">Spring Boot global validation enforcement via application properties</span>
+        </div>
+        <pre class="remediation-commands"><code>
+grep -q &#39;spring.mvc.throw-exception-if-no-handler-found&#39; &lt;app&gt;/src/main/resources/application.properties 2&gt;/dev/null || printf &#39;# CME-1321: Trust boundary validation enforcement\nspring.mvc.throw-exception-if-no-handler-found=true\nserver.error.whitelabel.enabled=false\n&#39; &gt;&gt; &lt;app&gt;/src/main/resources/application.properties
+grep -q &#39;@Validated&#39; &lt;app&gt;/src/main/java/**/controller/*.java 2&gt;/dev/null || echo &#39;WARNING: Controllers missing @Validated annotation — add @Validated to controller classes to enforce @Valid on request bodies at trust boundaries&#39;</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -232,7 +268,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
+    Generated 2026-10-28 18:49 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

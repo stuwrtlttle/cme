@@ -100,6 +100,100 @@
       }
     ]
   },
+  "remediation": [
+    {
+      "id": "rpm-build-macros",
+      "name": "RPM global build macros with format-security enforcement",
+      "platform": "rhel",
+      "steps": [
+        {
+          "command": "printf '%%global optflags %%{optflags} -Wformat -Wformat-security -Werror=format-security\\n' > /etc/rpm/macros.cme-1320-format-security",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "description": "Create an RPM macros drop-in that appends -Wformat-security and -Werror=format-security to the default compiler flags for all RPM builds on this system. This ensures any package rebuilt locally will reject non-literal format strings at compile time.",
+          "undo": "rm -f /etc/rpm/macros.cme-1320-format-security"
+        }
+      ],
+      "precondition": "command -v rpmbuild >/dev/null 2>&1",
+      "verify": "rpmbuild --eval '%{optflags}' | grep -q 'Werror=format-security' && echo 'format-security enforced'",
+      "references": [
+        {
+          "source": "RPM Packaging Guide — Macros",
+          "url": "https://rpm-packaging-guide.github.io/#rpm-macros"
+        },
+        {
+          "source": "Fedora Packaging Guidelines — Compiler Flags",
+          "url": "https://docs.fedoraproject.org/en-US/packaging-guidelines/#_compiler_flags"
+        }
+      ]
+    },
+    {
+      "id": "gcc-specs-override",
+      "name": "GCC specs file override for system-wide format-security enforcement",
+      "platform": "linux",
+      "steps": [
+        {
+          "command": "gcc -dumpspecs > /tmp/cme-1320-specs.tmp",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false,
+          "description": "Dump the current GCC specs to a temporary file as a baseline for modification"
+        },
+        {
+          "command": "sed 's/^\\*cc1:$/&\\n-Wformat -Wformat-security -Werror=format-security/' /tmp/cme-1320-specs.tmp > $(gcc -print-search-dirs | grep install | awk '{print $2}')specs",
+          "idempotent": false,
+          "requires_restart": "none",
+          "reversible": true,
+          "description": "Install a modified GCC specs file that injects -Wformat-security -Werror=format-security into every compilation. All gcc invocations on this system will enforce format-string safety by default. WARNING: this affects all compilations system-wide; some third-party code may fail to compile if it uses non-literal format strings.",
+          "undo": "rm -f $(gcc -print-search-dirs | grep install | awk '{print $2}')specs"
+        },
+        {
+          "command": "rm -f /tmp/cme-1320-specs.tmp",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false,
+          "description": "Clean up the temporary specs baseline file"
+        }
+      ],
+      "precondition": "command -v gcc >/dev/null 2>&1",
+      "verify": "gcc -Werror=format-security -fsyntax-only -xc - <<< 'int main(){char *s=\"%x\"; printf(s);}' 2>&1 | grep -q 'format-security'",
+      "references": [
+        {
+          "source": "GCC — Spec Files",
+          "url": "https://gcc.gnu.org/onlinedocs/gcc/Spec-Files.html"
+        },
+        {
+          "source": "GCC Warning Options — -Wformat-security",
+          "url": "https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html",
+          "section": "-Wformat-security"
+        }
+      ]
+    },
+    {
+      "id": "cmake-compile-options",
+      "name": "CMake project format-security compiler flags",
+      "platform": "any",
+      "steps": [
+        {
+          "command": "grep -q 'Werror=format-security' CMakeLists.txt 2>/dev/null || sed -i '1a add_compile_options(-Wformat -Wformat-security -Werror=format-security)' CMakeLists.txt",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "description": "Add format-security compiler options to the top-level CMakeLists.txt if not already present. This enforces the control for all targets in the CMake project.",
+          "undo": "sed -i '/add_compile_options.*format-security/d' CMakeLists.txt"
+        }
+      ],
+      "precondition": "test -f CMakeLists.txt",
+      "verify": "grep -rE '(-Wformat-security|-Werror=format-security)' CMakeLists.txt",
+      "references": [
+        {
+          "source": "CMake Documentation — add_compile_options",
+          "url": "https://cmake.org/cmake/help/latest/command/add_compile_options.html"
+        }
+      ]
+    }
+  ],
   "references": [
     {
       "source": "CWE-134: Use of Externally-Controlled Format String",
