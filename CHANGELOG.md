@@ -2,6 +2,12 @@
 
 All notable changes to the CME (Common Mitigation Enumeration) project are documented here.
 
+## 2026-10-28
+
+### Auto-generated changelog
+
+- `5858bb7` Add CME-1320/1321 (format string, trust boundary); fix Dockerfile; remove proposal tools from MCP server
+
 ## 2026-10-05
 
 ### Auto-generated changelog
