@@ -8,6 +8,11 @@ All notable changes to the CME (Common Mitigation Enumeration) project are docum
 
 - `5858bb7` Add CME-1320/1321 (format string, trust boundary); fix Dockerfile; remove proposal tools from MCP server
 
+
+### Auto-generated changelog
+
+- `da53bce` Add remediation variants to CME-1320 and CME-1321
+
 ## 2026-10-05
 
 ### Auto-generated changelog
