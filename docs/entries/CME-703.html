@@ -115,9 +115,55 @@
       <div class="cmd-platform">Platform: linux</div>
       
       
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> podman info --format &#39;{{.Host.Security.Rootless}}&#39;
+        
+        <br><span class="cmd-expected"># Expected: true</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> ps -eo user,comm | grep -E &#39;conmon|crun|runc&#39; | grep -vc root
+        
+        <br><span class="cmd-expected"># Expected: &gt;=1 (container runtime processes running as non-root)</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -c &#39;&lt;username&gt;&#39; /etc/subuid
+        
+        <br><span class="cmd-expected"># Expected: 1 (subordinate UIDs allocated for rootless user)</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
     </section>
     
 
+    
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Podman rootless container setup with subordinate UID/GID allocation</span>
+        </div>
+        <pre class="remediation-commands"><code>
+usermod --add-subuids 100000-165535 --add-subgids 100000-165535 &lt;username&gt;
+loginctl enable-linger &lt;username&gt;
+su - &lt;username&gt; -c &#39;podman system migrate&#39;</code></pre>
+      </div>
+      
+    </section>
     
 
     
@@ -198,7 +244,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

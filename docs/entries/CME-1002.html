@@ -115,6 +115,38 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Enable auditd with base security audit rules</span>
+        </div>
+        <pre class="remediation-commands"><code>
+systemctl enable --now auditd
+cat &gt; /etc/audit/rules.d/99-cme-1002.rules &lt;&lt;&#39;EOF&#39;
+## Sensitive file access
+-w /etc/shadow -p wa -k shadow_access
+-w /etc/passwd -p wa -k passwd_access
+-w /etc/sudoers -p wa -k sudoers_access
+-w /etc/sudoers.d/ -p wa -k sudoers_access
+
+## Privileged command execution
+-a always,exit -F arch=b64 -S execve -F euid=0 -F auid&gt;=1000 -F auid!=unset -k priv_exec
+-a always,exit -F arch=b32 -S execve -F euid=0 -F auid&gt;=1000 -F auid!=unset -k priv_exec
+
+## Kernel module loading
+-w /sbin/insmod -p x -k module_load
+-w /sbin/modprobe -p x -k module_load
+-w /sbin/rmmod -p x -k module_load
+-a always,exit -F arch=b64 -S init_module,finit_module,delete_module -k module_load
+EOF
+augenrules --load</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -215,7 +247,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

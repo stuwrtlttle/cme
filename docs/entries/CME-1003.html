@@ -105,6 +105,22 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Falco eBPF runtime security installation and configuration</span>
+        </div>
+        <pre class="remediation-commands"><code>
+rpm --import https://falco.org/repo/falcosecurity-packages.asc &amp;&amp; curl -s -o /etc/yum.repos.d/falcosecurity.repo https://falco.org/repo/falcosecurity-rpm.repo &amp;&amp; dnf install -y falco
+falcoctl driver install --type modern_ebpf
+systemctl enable --now falco-modern-bpf</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -184,7 +200,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

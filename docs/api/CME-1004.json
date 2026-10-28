@@ -41,6 +41,50 @@
     "RHEL 8",
     "Ubuntu 24.04"
   ],
+  "remediation": [
+    {
+      "id": "aide-setup",
+      "name": "AIDE file integrity monitoring with systemd timer",
+      "platform": "linux",
+      "precondition": "command -v aide >/dev/null 2>&1 || command -v dnf >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Install AIDE",
+          "command": "dnf install -y aide",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "dnf remove -y aide"
+        },
+        {
+          "description": "Initialize the AIDE database from the current filesystem state; this overwrites any existing baseline",
+          "command": "aide --init && mv /var/lib/aide/aide.db.new.gz /var/lib/aide/aide.db.gz",
+          "idempotent": false,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Create a systemd service and daily timer for automated integrity checks",
+          "command": "printf '[Unit]\\nDescription=AIDE integrity check\\n\\n[Service]\\nType=oneshot\\nExecStart=/usr/sbin/aide --check\\n' > /etc/systemd/system/aide-check.service && printf '[Unit]\\nDescription=Daily AIDE integrity check\\n\\n[Timer]\\nOnCalendar=daily\\nPersistent=true\\n\\n[Install]\\nWantedBy=timers.target\\n' > /etc/systemd/system/aide-check.timer && systemctl daemon-reload && systemctl enable --now aide-check.timer",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "systemctl disable --now aide-check.timer && rm -f /etc/systemd/system/aide-check.service /etc/systemd/system/aide-check.timer && systemctl daemon-reload"
+        }
+      ],
+      "verify": "aide --check 2>/dev/null; echo $? && systemctl is-active aide-check.timer",
+      "references": [
+        {
+          "source": "RHEL 9 Security Hardening — Checking integrity with AIDE",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/checking-integrity-with-aide_security-hardening"
+        },
+        {
+          "source": "CIS RHEL 9 Benchmark — 1.3 Filesystem Integrity Checking",
+          "url": "https://www.cisecurity.org/benchmark/red_hat_linux"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "END-06",
     "END-06.3",

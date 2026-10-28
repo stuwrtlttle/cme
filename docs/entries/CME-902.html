@@ -118,6 +118,20 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Disable and mask legacy network services (Linux)</span>
+        </div>
+        <pre class="remediation-commands"><code>
+for svc in rpcbind rsh rlogin telnet vsftpd avahi-daemon; do systemctl disable --now &#34;$svc&#34; 2&gt;/dev/null; systemctl mask &#34;$svc&#34; 2&gt;/dev/null; done</code></pre>
+      </div>
+      
+    </section>
+    
 
     
     <section>
@@ -252,7 +266,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

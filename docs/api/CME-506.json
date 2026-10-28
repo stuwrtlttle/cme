@@ -39,6 +39,16 @@
         "command": "grep Landlock /proc/self/status",
         "expected": "Landlock",
         "platform": "linux"
+      },
+      {
+        "command": "cat /sys/kernel/security/lsm | grep -c landlock",
+        "expected": "1",
+        "platform": "linux"
+      },
+      {
+        "command": "test -d /sys/kernel/security/landlock && echo 'available'",
+        "expected": "available",
+        "platform": "linux"
       }
     ]
   },

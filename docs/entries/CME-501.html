@@ -116,6 +116,33 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">systemd ProtectSystem=strict drop-in for per-service read-only root</span>
+        </div>
+        <pre class="remediation-commands"><code>
+mkdir -p /etc/systemd/system/&lt;service&gt;.service.d
+printf &#39;[Service]\nProtectSystem=strict\nReadWritePaths=&lt;writable_paths&gt;\n&#39; &gt; /etc/systemd/system/&lt;service&gt;.service.d/readonly-root.conf
+systemctl daemon-reload
+systemctl restart &lt;service&gt;</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">kubernetes</span>
+          <span class="remediation-name">Kubernetes readOnlyRootFilesystem securityContext</span>
+        </div>
+        <pre class="remediation-commands"><code>
+kubectl patch deployment &lt;deployment&gt; -n &lt;namespace&gt; --type=json -p &#39;[{&#34;op&#34;:&#34;add&#34;,&#34;path&#34;:&#34;/spec/template/spec/containers/0/securityContext/readOnlyRootFilesystem&#34;,&#34;value&#34;:true}]&#39;
+kubectl patch deployment &lt;deployment&gt; -n &lt;namespace&gt; --type=json -p &#39;[{&#34;op&#34;:&#34;add&#34;,&#34;path&#34;:&#34;/spec/template/spec/volumes/-&#34;,&#34;value&#34;:{&#34;name&#34;:&#34;tmp&#34;,&#34;emptyDir&#34;:{}}},{&#34;op&#34;:&#34;add&#34;,&#34;path&#34;:&#34;/spec/template/spec/containers/0/volumeMounts/-&#34;,&#34;value&#34;:{&#34;name&#34;:&#34;tmp&#34;,&#34;mountPath&#34;:&#34;/tmp&#34;}}]&#39;</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -195,7 +222,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

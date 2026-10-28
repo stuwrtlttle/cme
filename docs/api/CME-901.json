@@ -48,6 +48,49 @@
     "RHEL 8",
     "Ubuntu 24.04"
   ],
+  "remediation": [
+    {
+      "id": "sshd-config-drop-in",
+      "name": "SSH hardening via sshd_config.d drop-in",
+      "platform": "linux",
+      "precondition": "test -d /etc/ssh/sshd_config.d",
+      "steps": [
+        {
+          "description": "Create a drop-in config that disables root login, restricts auth attempts, disables forwarding, and limits ciphers to AEAD-only",
+          "command": "printf 'PermitRootLogin no\\nMaxAuthTries 4\\nX11Forwarding no\\nAllowAgentForwarding no\\nLoginGraceTime 60\\nCiphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com\\n' > /etc/ssh/sshd_config.d/99-cme-901-hardening.conf",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f /etc/ssh/sshd_config.d/99-cme-901-hardening.conf"
+        },
+        {
+          "description": "Validate the combined sshd configuration for syntax errors before reloading",
+          "command": "sshd -t",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Reload sshd to apply the new configuration without dropping existing connections",
+          "command": "systemctl reload sshd",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "sshd -T | grep -E 'permitrootlogin|maxauthtries|x11forwarding'",
+      "references": [
+        {
+          "source": "RHEL 9 Security Hardening — Configuring OpenSSH",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/assembly_using-the-openssh-suite_security-hardening"
+        },
+        {
+          "source": "CIS RHEL 9 Benchmark — 5.2 Configure SSH Server",
+          "url": "https://www.cisecurity.org/benchmark/red_hat_linux"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CFG-02",
     "CRY-06",

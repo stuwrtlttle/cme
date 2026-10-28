@@ -172,6 +172,88 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">kubernetes</span>
+          <span class="remediation-name">Kyverno ClusterPolicy with cosign image signature verification</span>
+        </div>
+        <pre class="remediation-commands"><code>
+cat &lt;&lt;&#39;POLICY&#39; | kubectl apply -f -
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-image-signature
+spec:
+  validationFailureAction: Enforce
+  background: false
+  rules:
+    - name: verify-image-signature
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      verifyImages:
+        - imageReferences:
+            - &#34;&lt;registry&gt;/*&#34;
+          attestors:
+            - entries:
+                - keys:
+                    publicKeys: |-
+                      &lt;cosign_public_key&gt;
+POLICY</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Podman/CRI-O container image trust policy via policy.json</span>
+        </div>
+        <pre class="remediation-commands"><code>
+cp /etc/containers/policy.json /etc/containers/policy.json.bak 2&gt;/dev/null; cat &gt; /etc/containers/policy.json &lt;&lt;&#39;POLICY&#39;
+{
+  &#34;default&#34;: [
+    {
+      &#34;type&#34;: &#34;reject&#34;
+    }
+  ],
+  &#34;transports&#34;: {
+    &#34;docker&#34;: {
+      &#34;&lt;registry&gt;&#34;: [
+        {
+          &#34;type&#34;: &#34;signedBy&#34;,
+          &#34;keyType&#34;: &#34;GPGKeys&#34;,
+          &#34;keyPath&#34;: &#34;/etc/pki/rpm-gpg/&lt;signing_key_file&gt;&#34;
+        }
+      ],
+      &#34;registry.access.redhat.com&#34;: [
+        {
+          &#34;type&#34;: &#34;signedBy&#34;,
+          &#34;keyType&#34;: &#34;GPGKeys&#34;,
+          &#34;keyPath&#34;: &#34;/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release&#34;
+        }
+      ]
+    },
+    &#34;atomic&#34;: {
+      &#34;&lt;registry&gt;&#34;: [
+        {
+          &#34;type&#34;: &#34;signedBy&#34;,
+          &#34;keyType&#34;: &#34;GPGKeys&#34;,
+          &#34;keyPath&#34;: &#34;/etc/pki/rpm-gpg/&lt;signing_key_file&gt;&#34;
+        }
+      ]
+    }
+  }
+}
+POLICY
+cp &lt;path_to_signing_public_key&gt; /etc/pki/rpm-gpg/&lt;signing_key_file&gt;</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -253,7 +335,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

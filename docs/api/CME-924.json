@@ -63,6 +63,35 @@
     "Windows 11",
     "Windows Server 2016+"
   ],
+  "remediation": [
+    {
+      "id": "windows-acg-per-process",
+      "name": "Enable Arbitrary Code Guard (ACG) per-process via Set-ProcessMitigation",
+      "platform": "windows",
+      "precondition": "Get-Command Set-ProcessMitigation -ErrorAction SilentlyContinue",
+      "steps": [
+        {
+          "description": "Enable ACG (DisableDynamicCode) for a specific process; blocks RWX page allocations and JIT code generation. Applications that rely on JIT compilation (e.g., .NET, JavaScript engines) may break — test in audit mode first",
+          "command": "Set-ProcessMitigation -Name <process>.exe -Enable DisableDynamicCode",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "Set-ProcessMitigation -Name <process>.exe -Disable DisableDynamicCode"
+        }
+      ],
+      "verify": "Get-ProcessMitigation -Name <process>.exe | Select-Object -ExpandProperty DynamicCode",
+      "references": [
+        {
+          "source": "Microsoft — Exploit Protection Reference",
+          "url": "https://learn.microsoft.com/en-us/defender-endpoint/exploit-protection-reference"
+        },
+        {
+          "source": "Microsoft — Customize Exploit Protection",
+          "url": "https://learn.microsoft.com/en-us/defender-endpoint/customize-exploit-protection"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "STA-02",
     "STA-02.1"

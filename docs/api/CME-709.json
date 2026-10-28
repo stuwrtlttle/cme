@@ -51,6 +51,57 @@
     "Ubuntu 24.04",
     "Fedora"
   ],
+  "remediation": [
+    {
+      "id": "systemd-sandbox-drop-in",
+      "name": "systemd drop-in with ProtectSystem, PrivateTmp, PrivateDevices, and ProtectHome",
+      "platform": "linux",
+      "precondition": "systemctl --version >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create a systemd drop-in directory for the target service",
+          "command": "mkdir -p /etc/systemd/system/<service>.service.d",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rmdir /etc/systemd/system/<service>.service.d 2>/dev/null"
+        },
+        {
+          "description": "Write a drop-in that enables filesystem isolation (ProtectSystem=strict makes / read-only), private /tmp, blocks device access, hides /home, prevents privilege escalation via NoNewPrivileges, and protects kernel tunables and module loading",
+          "command": "printf '[Service]\\nProtectSystem=strict\\nPrivateTmp=true\\nPrivateDevices=true\\nProtectHome=true\\nNoNewPrivileges=true\\nProtectKernelTunables=true\\nProtectKernelModules=true\\n' > /etc/systemd/system/<service>.service.d/sandbox.conf",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f /etc/systemd/system/<service>.service.d/sandbox.conf"
+        },
+        {
+          "description": "Reload systemd manager configuration to pick up the drop-in",
+          "command": "systemctl daemon-reload",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Restart the service to apply sandbox directives",
+          "command": "systemctl restart <service>",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "systemctl show <service> -p ProtectSystem,PrivateTmp,PrivateDevices,ProtectHome",
+      "references": [
+        {
+          "source": "systemd.exec(5) — Sandboxing directives",
+          "url": "https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html#Sandboxing"
+        },
+        {
+          "source": "RHEL 9 — Configuring systemd unit files",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/using_systemd_unit_files_to_customize_and_optimize_your_system/assembly_working-with-systemd-unit-files_working-with-systemd"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CFG-02",
     "SEA-04"

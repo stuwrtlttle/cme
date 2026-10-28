@@ -119,6 +119,22 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">SSH hardening via sshd_config.d drop-in</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;PermitRootLogin no\nMaxAuthTries 4\nX11Forwarding no\nAllowAgentForwarding no\nLoginGraceTime 60\nCiphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com\n&#39; &gt; /etc/ssh/sshd_config.d/99-cme-901-hardening.conf
+sshd -t
+systemctl reload sshd</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -212,7 +228,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

@@ -199,6 +199,21 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">windows</span>
+          <span class="remediation-name">PowerShell Constrained Language Mode and AllSigned execution policy</span>
+        </div>
+        <pre class="remediation-commands"><code>
+Set-ExecutionPolicy -ExecutionPolicy AllSigned -Scope LocalMachine -Force
+[Environment]::SetEnvironmentVariable(&#39;__PSLockdownPolicy&#39;, &#39;4&#39;, &#39;Machine&#39;)</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -274,7 +289,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

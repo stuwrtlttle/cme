@@ -152,6 +152,22 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">windows</span>
+          <span class="remediation-name">Windows LAPS policy configuration via registry</span>
+        </div>
+        <pre class="remediation-commands"><code>
+New-Item -Path &#39;HKLM:\SOFTWARE\Policies\Microsoft Services\AdmPwd&#39; -Force | Out-Null; Set-ItemProperty -Path &#39;HKLM:\SOFTWARE\Policies\Microsoft Services\AdmPwd&#39; -Name AdmPwdEnabled -Value 1 -Type DWord
+Set-ItemProperty -Path &#39;HKLM:\SOFTWARE\Policies\Microsoft Services\AdmPwd&#39; -Name PasswordComplexity -Value 4 -Type DWord; Set-ItemProperty -Path &#39;HKLM:\SOFTWARE\Policies\Microsoft Services\AdmPwd&#39; -Name PasswordLength -Value 20 -Type DWord; Set-ItemProperty -Path &#39;HKLM:\SOFTWARE\Policies\Microsoft Services\AdmPwd&#39; -Name PasswordAgeDays -Value 30 -Type DWord
+Reset-LapsPassword -ErrorAction SilentlyContinue; gpupdate /force</code></pre>
+      </div>
+      
+    </section>
+    
 
     
     <section>
@@ -302,7 +318,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

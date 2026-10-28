@@ -64,6 +64,35 @@
       "defaultStatus": "applicable"
     }
   ],
+  "remediation": [
+    {
+      "id": "disable-legacy-services",
+      "name": "Disable and mask legacy network services (Linux)",
+      "platform": "linux",
+      "precondition": "systemctl --version >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Disable, stop, and mask common legacy network services (rpcbind, rsh, rlogin, telnet, vsftpd, avahi-daemon) to prevent them from starting automatically or being activated by socket activation",
+          "command": "for svc in rpcbind rsh rlogin telnet vsftpd avahi-daemon; do systemctl disable --now \"$svc\" 2>/dev/null; systemctl mask \"$svc\" 2>/dev/null; done",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "for svc in rpcbind rsh rlogin telnet vsftpd avahi-daemon; do systemctl unmask \"$svc\" 2>/dev/null; done"
+        }
+      ],
+      "verify": "systemctl is-active rpcbind rsh rlogin telnet vsftpd avahi-daemon 2>&1 | grep -c '^active'",
+      "references": [
+        {
+          "source": "CIS RHEL 9 Benchmark — Section 2: Services",
+          "url": "https://www.cisecurity.org/benchmark/red_hat_linux"
+        },
+        {
+          "source": "RHEL 9 Security Hardening — Disabling Services",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/assembly_securing-rhel-during-installation-security-hardening"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CFG-03",
     "CFG-03.1"

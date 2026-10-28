@@ -42,6 +42,50 @@
     "SLES 15",
     "Debian 12"
   ],
+  "remediation": [
+    {
+      "id": "apparmor-enforce",
+      "name": "AppArmor profile enforcement via aa-enforce",
+      "platform": "debian",
+      "precondition": "command -v aa-status >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Install AppArmor and management utilities if not already present",
+          "command": "apt-get install -y apparmor apparmor-utils",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "apt-get remove -y apparmor-utils"
+        },
+        {
+          "description": "Set all loaded AppArmor profiles to enforce mode, blocking any access not explicitly permitted by the profile",
+          "command": "aa-enforce /etc/apparmor.d/*",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "aa-complain /etc/apparmor.d/*"
+        },
+        {
+          "description": "Reload AppArmor to ensure all profiles are active",
+          "command": "systemctl reload apparmor",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "aa-status --enforced 2>/dev/null | head -5",
+      "references": [
+        {
+          "source": "Ubuntu — AppArmor",
+          "url": "https://ubuntu.com/server/docs/apparmor"
+        },
+        {
+          "source": "Debian Wiki — AppArmor/HowToUse",
+          "url": "https://wiki.debian.org/AppArmor/HowToUse"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "IAC-20",
     "SEA-04"

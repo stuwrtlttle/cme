@@ -78,7 +78,37 @@
     <section>
       <h2>Verification</h2>
       
-      <p class="verification-method">Verify failover configuration and last failover test</p>
+      <p class="verification-method">Verify replication is active and failover has been tested within the last 90 days</p>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> psql -c &#34;SELECT state FROM pg_stat_replication&#34; 2&gt;/dev/null | grep -c &#39;streaming&#39;
+        
+        <br><span class="cmd-expected"># Expected: &gt;=1 (database replication active)</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> kubectl get endpoints &lt;failover-service&gt; -o jsonpath=&#39;{.subsets[*].addresses[*].ip}&#39; 2&gt;/dev/null | wc -w
+        
+        <br><span class="cmd-expected"># Expected: &gt;=2 (multiple endpoints behind failover service)</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: kubernetes</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> test -f &lt;dr_test_log&gt; &amp;&amp; find &lt;dr_test_log&gt; -mtime -90 -print | wc -l
+        
+        <br><span class="cmd-expected"># Expected: 1 (DR test performed within last 90 days)</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
       
       
     </section>
@@ -162,7 +192,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

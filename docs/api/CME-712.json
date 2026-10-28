@@ -68,6 +68,70 @@
     "OpenShift 4.12+",
     "Podman"
   ],
+  "remediation": [
+    {
+      "id": "kyverno-image-verification",
+      "name": "Kyverno ClusterPolicy with cosign image signature verification",
+      "platform": "kubernetes",
+      "precondition": "kubectl get deployment kyverno -n kyverno >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create a Kyverno ClusterPolicy that requires cosign signature verification for all images pulled from the target registry. Images without a valid signature matching the specified public key are rejected at admission.",
+          "command": "cat <<'POLICY' | kubectl apply -f -\napiVersion: kyverno.io/v1\nkind: ClusterPolicy\nmetadata:\n  name: require-image-signature\nspec:\n  validationFailureAction: Enforce\n  background: false\n  rules:\n    - name: verify-image-signature\n      match:\n        any:\n          - resources:\n              kinds:\n                - Pod\n      verifyImages:\n        - imageReferences:\n            - \"<registry>/*\"\n          attestors:\n            - entries:\n                - keys:\n                    publicKeys: |-\n                      <cosign_public_key>\nPOLICY",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "kubectl delete clusterpolicy require-image-signature"
+        }
+      ],
+      "verify": "kubectl run cme-unsigned-test --image=docker.io/library/busybox:latest --restart=Never --dry-run=server 2>&1 | grep -c -i 'denied\\|forbidden\\|failed.*verif\\|signature'",
+      "references": [
+        {
+          "source": "Kyverno — Verify Images",
+          "url": "https://kyverno.io/docs/writing-policies/verify-images/"
+        },
+        {
+          "source": "Sigstore — Cosign Key Management",
+          "url": "https://docs.sigstore.dev/cosign/key_management/overview/"
+        }
+      ]
+    },
+    {
+      "id": "podman-policy-json",
+      "name": "Podman/CRI-O container image trust policy via policy.json",
+      "platform": "linux",
+      "precondition": "command -v podman >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Back up existing container image trust policy and write a new policy.json that requires GPG-signed images from the target registry while allowing default insecure pulls only for explicitly trusted registries",
+          "command": "cp /etc/containers/policy.json /etc/containers/policy.json.bak 2>/dev/null; cat > /etc/containers/policy.json <<'POLICY'\n{\n  \"default\": [\n    {\n      \"type\": \"reject\"\n    }\n  ],\n  \"transports\": {\n    \"docker\": {\n      \"<registry>\": [\n        {\n          \"type\": \"signedBy\",\n          \"keyType\": \"GPGKeys\",\n          \"keyPath\": \"/etc/pki/rpm-gpg/<signing_key_file>\"\n        }\n      ],\n      \"registry.access.redhat.com\": [\n        {\n          \"type\": \"signedBy\",\n          \"keyType\": \"GPGKeys\",\n          \"keyPath\": \"/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release\"\n        }\n      ]\n    },\n    \"atomic\": {\n      \"<registry>\": [\n        {\n          \"type\": \"signedBy\",\n          \"keyType\": \"GPGKeys\",\n          \"keyPath\": \"/etc/pki/rpm-gpg/<signing_key_file>\"\n        }\n      ]\n    }\n  }\n}\nPOLICY",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "cp /etc/containers/policy.json.bak /etc/containers/policy.json"
+        },
+        {
+          "description": "Install the GPG public key used to sign container images into the system keyring directory",
+          "command": "cp <path_to_signing_public_key> /etc/pki/rpm-gpg/<signing_key_file>",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/pki/rpm-gpg/<signing_key_file>"
+        }
+      ],
+      "verify": "podman image trust show 2>/dev/null | grep -c 'signedBy' && cat /etc/containers/policy.json 2>/dev/null | grep -c 'signedBy'",
+      "references": [
+        {
+          "source": "Podman — Signing and Verifying Container Images",
+          "url": "https://docs.podman.io/en/latest/markdown/podman-image-trust.1.html"
+        },
+        {
+          "source": "RHEL 9 — Signing Container Images",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/building_running_and_managing_containers/assembly_signing-container-images_building-running-and-managing-containers"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CFG-09.2",
     "CLD-05",

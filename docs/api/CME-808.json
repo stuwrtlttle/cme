@@ -76,6 +76,50 @@
     "Windows Server 2019",
     "Windows Server 2022"
   ],
+  "remediation": [
+    {
+      "id": "windows-laps",
+      "name": "Windows LAPS policy configuration via registry",
+      "platform": "windows",
+      "precondition": "Get-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion' -Name CurrentBuildNumber -ErrorAction SilentlyContinue",
+      "steps": [
+        {
+          "description": "Enable legacy LAPS (AdmPwd.E) via registry policy. For Windows LAPS (built-in to Server 2022+/Win 11 22H2+), the built-in client is already present and this step configures the policy backing store.",
+          "command": "New-Item -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft Services\\AdmPwd' -Force | Out-Null; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft Services\\AdmPwd' -Name AdmPwdEnabled -Value 1 -Type DWord",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft Services\\AdmPwd' -Name AdmPwdEnabled -Value 0 -Type DWord"
+        },
+        {
+          "description": "Set password complexity to large letters + small letters + numbers + specials (complexity 4), length 20 characters, and 30-day rotation",
+          "command": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft Services\\AdmPwd' -Name PasswordComplexity -Value 4 -Type DWord; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft Services\\AdmPwd' -Name PasswordLength -Value 20 -Type DWord; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft Services\\AdmPwd' -Name PasswordAgeDays -Value 30 -Type DWord",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "Remove-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft Services\\AdmPwd' -Name PasswordComplexity,PasswordLength,PasswordAgeDays -ErrorAction SilentlyContinue"
+        },
+        {
+          "description": "Trigger an immediate password rotation to apply the new policy to the local administrator account",
+          "command": "Reset-LapsPassword -ErrorAction SilentlyContinue; gpupdate /force",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "Get-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft Services\\AdmPwd' -Name AdmPwdEnabled -ErrorAction SilentlyContinue | Select-Object -ExpandProperty AdmPwdEnabled",
+      "references": [
+        {
+          "source": "Microsoft — Windows LAPS overview",
+          "url": "https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-overview"
+        },
+        {
+          "source": "Microsoft — Configure Windows LAPS policy settings",
+          "url": "https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-management-policy-settings"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "IAC-01",
     "IAC-01.2"

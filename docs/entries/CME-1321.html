@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CME-1321: Trust Boundary Input Sanitization (Cross-Boundary Data Validation) — Common Mitigation Enumeration</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="../index.html" class="logo">CME <span>Common Mitigation Enumeration</span></a>
+      <nav>
+        <a href="../index.html" >Home</a>
+        <a href="../by-tactic.html" >By Tactic</a>
+        <a href="../by-cwe.html" >By CWE</a>
+        <a href="../search.html" >Search</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    
+<div class="entry-header">
+  <div class="entry-id">CME-1321</div>
+  <h1>Trust Boundary Input Sanitization (Cross-Boundary Data Validation)</h1>
+  <div class="entry-meta">
+    <span class="badge badge-tactic-harden">Harden</span>
+    <span class="badge badge-layer-application">Application</span>
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
+  </div>
+</div>
+
+<div class="entry-body">
+  <div class="entry-main">
+
+    
+    <section>
+      <h2>Description</h2>
+      <p class="entry-description">Enforce explicit validation and sanitization at every architectural trust boundary — points where data crosses from a less-trusted context into a more-trusted one. Trust boundaries include: user input entering server-side session state, external API responses being incorporated into internal data structures, deserialized objects from untrusted sources being used as trusted application state, and inter-service communication where the calling service has different privilege levels. At each boundary, apply type validation, range checking, schema enforcement, and contextual sanitization before the data is stored or used in the trusted context. This prevents an attacker from injecting malicious data that propagates through the application as if it were trusted — for example, poisoning session attributes via crafted input, or injecting control-plane directives via a deserialized object that bypasses authorization checks. Framework-level enforcement (validation middleware, schema-validated DTOs, explicit trust-zone annotations) is preferred over ad-hoc per-field checks because it provides systematic coverage and fails closed on unannotated boundaries.</p>
+    </section>
+
+    <section>
+      <h2>CVSS Vector Impacts</h2>
+      <table class="cvss-table">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Transition</th>
+            
+            <th>Rationale</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td><strong>Attack Complexity</strong> (AC)</td>
+            <td>
+              <span class="cvss-from">L</span>
+              <span class="cvss-arrow">&rarr;</span>
+              <span class="cvss-to">H</span>
+            </td>
+            
+            <td class="cvss-rationale">The attacker must find a trust boundary crossing that lacks validation — systematic boundary enforcement via framework middleware and schema-validated DTOs eliminates the most common paths, requiring the attacker to discover an unannotated or misconfigured boundary</td>
+          </tr>
+          
+          <tr>
+            <td><strong>Integrity</strong> (I)</td>
+            <td>
+              <span class="cvss-from">H</span>
+              <span class="cvss-arrow">&rarr;</span>
+              <span class="cvss-to">L</span>
+            </td>
+            
+            <td class="cvss-rationale">Untrusted data cannot propagate into trusted application state (session objects, internal data structures, deserialized configuration) because validation and sanitization at the boundary strips or rejects malicious content before it enters the trusted context</td>
+          </tr>
+          
+        </tbody>
+      </table>
+    </section>
+    
+
+    
+    <section>
+      <h2>CWE Relationships</h2>
+      <div class="cwe-list">
+        
+        <a href="https://cwe.mitre.org/data/definitions/501.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-501</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/502.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-502</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/20.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-20</a>
+        
+      </div>
+    </section>
+    
+
+    
+
+    
+    <section>
+      <h2>Verification</h2>
+      
+      <p class="verification-method">Review application architecture documentation for explicit trust boundary identification. Verify that validation middleware or schema enforcement is configured at each identified boundary. Check deserialization paths for type-safe, allowlist-based deserializers.</p>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -rn &#39;@Valid\|@Validated\|ValidationPipe\|validate_on_submit\|Schema.parse\|pydantic.BaseModel&#39; &lt;source&gt;/ --include=&#39;*.java&#39; --include=&#39;*.py&#39; --include=&#39;*.ts&#39; | head -20
+        
+        <br><span class="cmd-expected"># Expected: Trust boundary entry points use framework validation annotations or schema enforcement</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -rn &#39;ObjectInputStream\|pickle.load\|yaml.load\|eval(\|unserialize(&#39; &lt;source&gt;/ --include=&#39;*.java&#39; --include=&#39;*.py&#39; --include=&#39;*.php&#39; | head -10
+        
+        <br><span class="cmd-expected"># Expected: No unsafe deserialization — use type-safe alternatives (ObjectInputFilter, pickle with allowlist, yaml.safe_load)</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -rn &#39;session\[.*request\|session.setAttribute.*getParameter\|req.session.*req.body&#39; &lt;source&gt;/ | head -10
+        
+        <br><span class="cmd-expected"># Expected: No direct assignment of user input to session state without validation</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+    </section>
+    
+
+    
+
+    
+
+    
+    <section>
+      <h2>References</h2>
+      <ul class="sidebar-list">
+        
+        <li>
+          <a href="https://cwe.mitre.org/data/definitions/501.html" target="_blank" rel="noopener">CWE-501: Trust Boundary Violation</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html" target="_blank" rel="noopener">OWASP Input Validation Cheat Sheet</a>
+          
+        </li>
+        
+      </ul>
+    </section>
+    
+
+    <div class="entry-nav">
+      
+      <a href="CME-1320.html">&larr; CME-1320: Format-String-Safe API Enforcement (Compile-Time and Runtime Format Validation)</a>
+      
+      <span></span>
+    </div>
+  </div>
+
+  <aside class="entry-sidebar">
+    <section>
+      <h3>Category</h3>
+      <p>Application Input Validation</p>
+    </section>
+
+    
+    <section>
+      <h3>Function</h3>
+      <p class="function-id">input-validation</p>
+    </section>
+    
+
+    
+    <section>
+      <h3>SCF Controls</h3>
+      <div class="cwe-list">
+        
+        <span class="cwe-link">WEB-09</span>
+        
+        <span class="cwe-link">IAC-15</span>
+        
+      </div>
+    </section>
+    
+
+    
+
+    
+
+    
+    <section>
+      <h3>Platforms</h3>
+      <ul class="sidebar-list">
+        
+        <li>Any</li>
+        
+      </ul>
+    </section>
+    
+
+    <section>
+      <h3>Quick Reference</h3>
+      <ul class="sidebar-list">
+        <li><strong>ID:</strong> CME-1321</li>
+        <li><strong>Tactic:</strong> Harden</li>
+        <li><strong>Layer:</strong> Application</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
+        <li><strong>CWEs:</strong> 3</li>
+        <li><strong>ATT&amp;CK Mappings:</strong> 0</li>
+        <li><strong>CVSS Mods:</strong> 2</li>
+      </ul>
+    </section>
+  </aside>
+</div>
+
+  </main>
+
+  <footer class="site-footer">
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
+    Common Mitigation Enumeration (CME)
+  </footer>
+</body>
+</html>

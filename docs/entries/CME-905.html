@@ -128,6 +128,33 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Content Security Policy header via nginx drop-in configuration</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;add_header Content-Security-Policy &#34;default-src &#39;\&#39;&#39;self&#39;\&#39;&#39;; script-src &#39;\&#39;&#39;self&#39;\&#39;&#39;; style-src &#39;\&#39;&#39;self&#39;\&#39;&#39;; img-src &#39;\&#39;&#39;self&#39;\&#39;&#39; data:; font-src &#39;\&#39;&#39;self&#39;\&#39;&#39;; frame-ancestors &#39;\&#39;&#39;self&#39;\&#39;&#39;; base-uri &#39;\&#39;&#39;self&#39;\&#39;&#39;; form-action &#39;\&#39;&#39;self&#39;\&#39;&#39;&#34; always;\n&#39; &gt; /etc/nginx/conf.d/cme-905-csp.conf
+nginx -t
+systemctl reload nginx</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Content Security Policy header via Apache httpd drop-in configuration</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;&lt;IfModule mod_headers.c&gt;\n  Header always set Content-Security-Policy &#34;default-src &#39;\&#39;&#39;self&#39;\&#39;&#39;; script-src &#39;\&#39;&#39;self&#39;\&#39;&#39;; style-src &#39;\&#39;&#39;self&#39;\&#39;&#39;; img-src &#39;\&#39;&#39;self&#39;\&#39;&#39; data:; font-src &#39;\&#39;&#39;self&#39;\&#39;&#39;; frame-ancestors &#39;\&#39;&#39;self&#39;\&#39;&#39;; base-uri &#39;\&#39;&#39;self&#39;\&#39;&#39;; form-action &#39;\&#39;&#39;self&#39;\&#39;&#39;&#34;\n&lt;/IfModule&gt;\n&#39; &gt; /etc/httpd/conf.d/cme-905-csp.conf
+httpd -t || apachectl configtest
+systemctl reload httpd</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -203,7 +230,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

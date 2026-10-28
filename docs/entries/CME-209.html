@@ -152,6 +152,59 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">kubernetes</span>
+          <span class="remediation-name">Kubernetes default-deny NetworkPolicy with explicit allow rules</span>
+        </div>
+        <pre class="remediation-commands"><code>
+kubectl apply -n &lt;namespace&gt; -f - &lt;&lt;&#39;EOF&#39;
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+EOF
+kubectl apply -n &lt;namespace&gt; -f - &lt;&lt;&#39;EOF&#39;
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-app-traffic
+spec:
+  podSelector:
+    matchLabels:
+      app: &lt;app-label&gt;
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: &lt;allowed-namespace&gt;
+      ports:
+        - protocol: TCP
+          port: &lt;port&gt;
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: &lt;allowed-namespace&gt;
+      ports:
+        - protocol: TCP
+          port: &lt;port&gt;
+EOF</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -248,7 +301,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

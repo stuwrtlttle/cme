@@ -1,12 +1,9 @@
 """CME MCP Server — exposes the Common Mitigation Enumeration database via MCP tools."""
 
 import json
-import subprocess
-import sys
 from pathlib import Path
 
 import anyio
-from jsonschema import Draft202012Validator
 from mcp.server.fastmcp import FastMCP
 
 from . import config
@@ -19,7 +16,6 @@ else:
 
 PROJECT_ROOT = Path(__file__).parent.parent
 ENTRIES_DIR = PROJECT_ROOT / "data" / "entries"
-PROPOSALS_DIR = PROJECT_ROOT / "data" / "proposals"
 SCHEMA_PATH = PROJECT_ROOT / "schema" / "cme-entry.schema.json"
 CATEGORIES_PATH = PROJECT_ROOT / "data" / "categories.json"
 FUNCTIONS_PATH = PROJECT_ROOT / "data" / "functions.json"
@@ -640,10 +636,9 @@ async def get_cme_coverage_summary() -> str:
     return json.dumps(summary, indent=2)
 
 
-# --- Curation Tools ---
+# --- Internal Helpers ---
 
 _categories_cache = None
-_schema_cache = None
 _functions_cache = None
 
 
@@ -664,266 +659,6 @@ def _load_functions() -> dict:
         else:
             _functions_cache = {}
     return _functions_cache
-
-
-def _load_schema() -> dict:
-    global _schema_cache
-    if _schema_cache is None:
-        with open(SCHEMA_PATH) as f:
-            _schema_cache = json.load(f)
-    return _schema_cache
-
-
-def _next_cme_id(conn, category_prefix: int) -> str:
-    """Find the next available CME-ID in a given number range."""
-    cats = _load_categories()
-    all_starts = sorted({c["id_range_start"] for c in cats.values()})
-    idx = all_starts.index(category_prefix)
-    upper = all_starts[idx + 1] - 1 if idx + 1 < len(all_starts) else category_prefix + 99
-
-    if config.DB_BACKEND == "postgres":
-        rows = conn.execute(
-            """SELECT cme_id FROM cme_entries
-               WHERE CAST(SUBSTRING(cme_id FROM 5) AS INTEGER) BETWEEN %(lo)s AND %(hi)s""",
-            {"lo": category_prefix, "hi": upper},
-        ).fetchall()
-    else:
-        rows = conn.execute(
-            """SELECT cme_id FROM cme_entries
-               WHERE CAST(SUBSTR(cme_id, 5) AS INTEGER) BETWEEN ? AND ?""",
-            (category_prefix, upper),
-        ).fetchall()
-
-    used = {int(r["cme_id"].split("-")[1]) for r in rows}
-
-    PROPOSALS_DIR.mkdir(parents=True, exist_ok=True)
-    for path in PROPOSALS_DIR.glob("CME-*.json"):
-        num = int(path.stem.split("-")[1])
-        if category_prefix <= num <= upper:
-            used.add(num)
-
-    if not used:
-        return f"CME-{category_prefix}"
-    next_num = max(used) + 1
-    if next_num > upper:
-        raise ValueError(
-            f"Category range {category_prefix}-{upper} is full "
-            f"({len(used)} IDs used). Expand the range or create a new category."
-        )
-    return f"CME-{next_num}"
-
-
-@mcp.tool()
-async def propose_cme_entry(
-    control_name: str,
-    description: str,
-    tactic: str,
-    effect_mode: str,
-    evidence_state: str,
-    efficacy_json: str,
-    category: str = "",
-    category_id: str = "",
-    control_layer: str = "",
-    cvss_impacts_json: str = "",
-    cwe_ids: list[str] = [],
-    verification_method: str = "",
-    verification_commands_json: str = "[]",
-    platforms: list[str] = [],
-    framework_bindings_json: str = "[]",
-) -> str:
-    """Propose a new CME entry for review.
-
-    Creates a proposal JSON file in the proposals directory. The entry is
-    validated against the CME schema but NOT added to the live database
-    until reviewed and approved.
-
-    Args:
-        control_name: Formal name (e.g., "Kernel-Level Syscall Filtering (seccomp)")
-        description: Technical description of what the control does
-        tactic: D3FEND tactic (Harden, Isolate, Detect, Evict, Restore)
-        effect_mode: Primary control effect (preventive, detective, corrective)
-        evidence_state: Evidence maturity (deterministic, quantified, unquantified)
-        efficacy_json: JSON evidence object. Quantified effects require probability, evidence_basis, and conditions; unquantified effects require conditions.
-        category: Sub-category name (e.g., "Kernel Hardening", "Network Isolation")
-        category_id: Category slug (e.g., "kernel-hardening"). If provided, category name is derived from registry.
-        control_layer: Technology layer (Network, OS/Kernel, Application, Data, Identity)
-        cvss_impacts_json: JSON array of impacts, e.g. [{"metric":"AC","from":"L","to":"H","rationale":"..."}]
-        cwe_ids: List of CWE IDs this mitigates (e.g., ["CWE-119", "CWE-78"])
-        verification_method: Human-readable verification description
-        verification_commands_json: JSON array of commands, e.g. [{"command":"cat /proc/...","expected":"2","platform":"linux"}]
-        platforms: Applicable platforms (e.g., ["RHEL 9", "Ubuntu 24.04"])
-        framework_bindings_json: Optional JSON array of external-framework bindings.
-
-    Returns the proposed entry with a suggested CME-ID and file path.
-    """
-    cats = _load_categories()
-
-    resolved_category_id = category_id
-    resolved_category = category
-
-    if category_id and category_id in cats:
-        resolved_category = cats[category_id]["name"]
-        resolved_category_id = category_id
-    elif category:
-        for cid, cdata in cats.items():
-            if cdata["name"] == category:
-                resolved_category_id = cid
-                break
-        if not resolved_category_id:
-            return json.dumps({"error": f"Unknown category '{category}'. Valid categories: {list(cats.keys())}"})
-    else:
-        return json.dumps({"error": "Either category or category_id is required"})
-
-    prefix = cats[resolved_category_id]["id_range_start"]
-    suggested_id = await _run_db(lambda conn: _next_cme_id(conn, prefix))
-
-    try:
-        cvss_impacts = json.loads(cvss_impacts_json or "[]")
-    except json.JSONDecodeError:
-        return json.dumps({"error": "cvss_impacts_json is not valid JSON"})
-
-    try:
-        verification_commands = json.loads(verification_commands_json)
-    except json.JSONDecodeError:
-        return json.dumps({"error": "verification_commands_json is not valid JSON"})
-
-    try:
-        efficacy = json.loads(efficacy_json)
-        framework_bindings = json.loads(framework_bindings_json)
-    except json.JSONDecodeError:
-        return json.dumps({"error": "efficacy_json or framework_bindings_json is not valid JSON"})
-
-    entry = {
-        "cme_id": suggested_id,
-        "control_name": control_name,
-        "description": description,
-        "tactic": tactic,
-        "category": resolved_category,
-        "category_id": resolved_category_id,
-        "control_layer": control_layer,
-        "effect_mode": effect_mode,
-        "evidence_state": evidence_state,
-        "efficacy": efficacy,
-        "cvss_vector_impacts": cvss_impacts,
-        "cwe_relationships": cwe_ids,
-        "relationships": [
-            {"target_namespace": "CWE", "target_id": cwe, "relationship_type": "mitigates", "method": "supportive", "evidence_state": evidence_state}
-            for cwe in cwe_ids
-        ],
-        "framework_bindings": framework_bindings + [
-            {"namespace": "CVSS", "version": "4.0", "identifier": f"Environmental/{impact['metric']}",
-             "value": f"{impact['from']}->{impact['to']}", "relationship_type": "maps_to"}
-            for impact in cvss_impacts
-        ],
-        "platforms": platforms,
-    }
-
-    if verification_method or verification_commands:
-        entry["verification"] = {
-            "method": verification_method,
-            "commands": verification_commands,
-        }
-
-    schema = _load_schema()
-    validator = Draft202012Validator(schema)
-    errors = [e.message for e in validator.iter_errors(entry)]
-    if errors:
-        return json.dumps({
-            "status": "validation_failed",
-            "errors": errors,
-            "entry": entry,
-        }, indent=2)
-
-    PROPOSALS_DIR.mkdir(parents=True, exist_ok=True)
-    proposal_path = PROPOSALS_DIR / f"{suggested_id}.json"
-    with open(proposal_path, "w") as f:
-        json.dump(entry, f, indent=2)
-        f.write("\n")
-
-    return json.dumps({
-        "status": "proposed",
-        "cme_id": suggested_id,
-        "file": str(proposal_path),
-        "message": f"Proposal written to {proposal_path}. Review and move to data/entries/ to approve, then re-seed the database.",
-        "entry": entry,
-    }, indent=2)
-
-
-@mcp.tool()
-async def approve_cme_proposal(cme_id: str) -> str:
-    """Approve a proposed CME entry — move it from proposals to entries and load into the database.
-
-    Args:
-        cme_id: The CME-ID of the proposal to approve (e.g., "CME-114")
-    """
-    cme_id = cme_id.upper()
-    proposal_path = PROPOSALS_DIR / f"{cme_id}.json"
-    if not proposal_path.exists():
-        return json.dumps({"error": f"No proposal found at {proposal_path}"})
-
-    with open(proposal_path) as f:
-        entry = json.load(f)
-
-    schema = _load_schema()
-    validator = Draft202012Validator(schema)
-    errors = [e.message for e in validator.iter_errors(entry)]
-    if errors:
-        return json.dumps({"error": "Entry fails validation", "details": errors})
-
-    entry_path = ENTRIES_DIR / f"{cme_id}.json"
-    with open(entry_path, "w") as f:
-        json.dump(entry, f, indent=2)
-        f.write("\n")
-    proposal_path.unlink()
-
-    def _insert(conn):
-        with conn.transaction():
-            db.insert_entry(conn, entry)
-
-    await _run_db(_insert)
-
-    site_status = "skipped"
-    build_script = PROJECT_ROOT / "build_site.py"
-    if build_script.exists():
-        try:
-            subprocess.run(
-                [sys.executable, str(build_script)],
-                cwd=str(PROJECT_ROOT),
-                check=True,
-                capture_output=True,
-                text=True,
-            )
-            site_status = "rebuilt"
-        except subprocess.CalledProcessError as e:
-            site_status = f"failed: {e.stderr.strip()}"
-
-    return json.dumps({
-        "status": "approved",
-        "cme_id": cme_id,
-        "entry_file": str(entry_path),
-        "site_rebuild": site_status,
-        "message": f"{cme_id} is now live in the database and saved to {entry_path}.",
-    }, indent=2)
-
-
-@mcp.tool()
-async def list_proposals() -> str:
-    """List all pending CME entry proposals awaiting review."""
-    PROPOSALS_DIR.mkdir(parents=True, exist_ok=True)
-    proposals = []
-    for path in sorted(PROPOSALS_DIR.glob("CME-*.json")):
-        with open(path) as f:
-            entry = json.load(f)
-        proposals.append({
-            "cme_id": entry["cme_id"],
-            "control_name": entry["control_name"],
-            "tactic": entry["tactic"],
-            "category": entry["category"],
-            "file": str(path),
-        })
-    if not proposals:
-        return json.dumps({"message": "No pending proposals."})
-    return json.dumps(proposals, indent=2)
 
 
 # --- Resources ---

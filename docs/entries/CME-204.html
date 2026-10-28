@@ -122,6 +122,34 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">WireGuard encrypted tunnel via wg-quick</span>
+        </div>
+        <pre class="remediation-commands"><code>
+dnf install -y wireguard-tools
+umask 077 &amp;&amp; mkdir -p /etc/wireguard &amp;&amp; wg genkey | tee /etc/wireguard/privatekey | wg pubkey &gt; /etc/wireguard/publickey
+cat &gt; /etc/wireguard/wg0.conf &lt;&lt;&#39;WGEOF&#39;
+[Interface]
+Address = &lt;tunnel_address&gt;/24
+PrivateKey = $(cat /etc/wireguard/privatekey)
+ListenPort = 51820
+
+[Peer]
+PublicKey = &lt;peer_public_key&gt;
+AllowedIPs = &lt;peer_allowed_ips&gt;/32
+Endpoint = &lt;peer_endpoint&gt;:51820
+PersistentKeepalive = 25
+WGEOF
+systemctl enable --now wg-quick@wg0</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -205,7 +233,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

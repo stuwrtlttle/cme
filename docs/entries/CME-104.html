@@ -118,6 +118,21 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Ensure KASLR is active by removing nokaslr from GRUB boot parameters</span>
+        </div>
+        <pre class="remediation-commands"><code>
+sed -i &#39;s/ *nokaslr//g&#39; /etc/default/grub
+grub2-mkconfig -o /boot/grub2/grub.cfg</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -199,7 +214,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

@@ -151,6 +151,55 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">kubernetes</span>
+          <span class="remediation-name">Kyverno ClusterPolicy blocking privileged containers</span>
+        </div>
+        <pre class="remediation-commands"><code>
+kubectl apply -f https://github.com/kyverno/kyverno/releases/download/&lt;version&gt;/install.yaml
+kubectl wait --for=condition=Ready pods -l app.kubernetes.io/part-of=kyverno -n kyverno --timeout=120s
+kubectl apply -f - &lt;&lt;&#39;EOF&#39;
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: disallow-privileged-containers
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: deny-privileged
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: &#34;Privileged containers are not allowed.&#34;
+        pattern:
+          spec:
+            containers:
+              - securityContext:
+                  privileged: &#34;!true&#34;
+EOF</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">kubernetes</span>
+          <span class="remediation-name">OpenShift SecurityContextConstraints enforcement (restricted-v2)</span>
+        </div>
+        <pre class="remediation-commands"><code>
+oc get scc restricted-v2 -o name
+oc adm policy remove-scc-from-user anyuid system:serviceaccount:&lt;namespace&gt;:&lt;serviceaccount&gt;
+oc adm policy remove-scc-from-user privileged system:serviceaccount:&lt;namespace&gt;:&lt;serviceaccount&gt;</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -228,7 +277,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

@@ -131,6 +131,28 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">any</span>
+          <span class="remediation-name">Gitleaks secrets scanner via pre-commit framework</span>
+        </div>
+        <pre class="remediation-commands"><code>
+pip install pre-commit
+cat &gt; .pre-commit-config.yaml &lt;&lt;&#39;EOF&#39;
+repos:
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.21.2
+    hooks:
+      - id: gitleaks
+EOF
+pre-commit install</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -138,10 +160,10 @@
 
     <div class="entry-nav">
       
-      <a href="CME-1012.html">&larr; CME-1012: USBGuard — USB Device Access Control</a>
+      <a href="CME-1011.html">&larr; CME-1011: Kubernetes API Server Audit Policy</a>
       
       
-      <a href="CME-1101.html">CME-1101: Automated Patch Management (dnf-automatic) &rarr;</a>
+      <a href="CME-1013.html">CME-1013: USBGuard — USB Device Access Control &rarr;</a>
       
     </div>
   </div>
@@ -206,7 +228,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

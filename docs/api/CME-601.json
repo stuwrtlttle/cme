@@ -44,6 +44,57 @@
     "Ubuntu 24.04",
     "Kubernetes"
   ],
+  "remediation": [
+    {
+      "id": "systemd-syscall-filter",
+      "name": "systemd SystemCallFilter drop-in restricting syscalls to @system-service set",
+      "platform": "linux",
+      "precondition": "systemctl --version >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create a systemd drop-in directory for the target service",
+          "command": "mkdir -p /etc/systemd/system/<service>.service.d",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rmdir /etc/systemd/system/<service>.service.d 2>/dev/null"
+        },
+        {
+          "description": "Write a drop-in that restricts the service to the @system-service syscall set, returning EPERM for blocked calls; this blocks dangerous syscalls like personality, mount, ptrace, and module loading while allowing standard service operations",
+          "command": "printf '[Service]\\nSystemCallFilter=@system-service\\nSystemCallErrorNumber=EPERM\\n' > /etc/systemd/system/<service>.service.d/seccomp.conf",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f /etc/systemd/system/<service>.service.d/seccomp.conf"
+        },
+        {
+          "description": "Reload systemd manager configuration to pick up the drop-in",
+          "command": "systemctl daemon-reload",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Restart the service to apply the seccomp syscall filter",
+          "command": "systemctl restart <service>",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "systemctl show <service> -p SystemCallFilter",
+      "references": [
+        {
+          "source": "systemd.exec(5) — SystemCallFilter",
+          "url": "https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html#SystemCallFilter="
+        },
+        {
+          "source": "RHEL 9 — Sandboxing services with systemd",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/using_systemd_unit_files_to_customize_and_optimize_your_system/assembly_working-with-systemd-unit-files_working-with-systemd"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CFG-03",
     "SEA-04"

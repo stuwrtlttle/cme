@@ -33,6 +33,21 @@
         "command": "podman info | grep rootless",
         "expected": "rootless: true",
         "platform": "linux"
+      },
+      {
+        "command": "podman info --format '{{.Host.Security.Rootless}}'",
+        "expected": "true",
+        "platform": "linux"
+      },
+      {
+        "command": "ps -eo user,comm | grep -E 'conmon|crun|runc' | grep -vc root",
+        "expected": ">=1 (container runtime processes running as non-root)",
+        "platform": "linux"
+      },
+      {
+        "command": "grep -c '<username>' /etc/subuid",
+        "expected": "1 (subordinate UIDs allocated for rootless user)",
+        "platform": "linux"
       }
     ]
   },
@@ -41,6 +56,50 @@
     "RHEL 9",
     "Fedora",
     "Ubuntu 24.04"
+  ],
+  "remediation": [
+    {
+      "id": "podman-rootless-setup",
+      "name": "Podman rootless container setup with subordinate UID/GID allocation",
+      "platform": "linux",
+      "precondition": "command -v podman >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Allocate subordinate UID range for the target user to enable user namespace mapping in rootless containers",
+          "command": "usermod --add-subuids 100000-165535 --add-subgids 100000-165535 <username>",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "usermod --del-subuids 100000-165535 --del-subgids 100000-165535 <username>"
+        },
+        {
+          "description": "Enable loginctl lingering so rootless containers and systemd user services persist after the user logs out",
+          "command": "loginctl enable-linger <username>",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "loginctl disable-linger <username>"
+        },
+        {
+          "description": "Migrate podman storage to apply the new subordinate UID/GID mappings (run as the target user)",
+          "command": "su - <username> -c 'podman system migrate'",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "su - <username> -c \"podman info --format '{{.Host.Security.Rootless}}'\"",
+      "references": [
+        {
+          "source": "RHEL 9 — Running containers as a non-root user",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/building_running_and_managing_containers/starting-with-containers_building-running-and-managing-containers#proc_setting-up-rootless-containers_assembly_starting-with-containers"
+        },
+        {
+          "source": "Podman — Rootless Tutorial",
+          "url": "https://github.com/containers/podman/blob/main/docs/tutorials/rootless_tutorial.md"
+        }
+      ]
+    }
   ],
   "scf_identifiers": [
     "CLD-05",

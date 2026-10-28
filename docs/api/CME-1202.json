@@ -20,12 +20,77 @@
     "CWE-345"
   ],
   "verification": {
-    "method": "Verify backup schedule and last successful restore test",
-    "commands": []
+    "method": "Verify backup schedule is active, recent backups exist, and integrity verification is configured",
+    "commands": [
+      {
+        "command": "systemctl list-timers --all 2>/dev/null | grep -c -i backup",
+        "expected": ">=1 (backup timer active)",
+        "platform": "linux"
+      },
+      {
+        "command": "find <backup_path> -maxdepth 1 -name '*.tar*' -o -name '*.sql*' -o -name '*.dump' | xargs ls -lt 2>/dev/null | head -1",
+        "expected": "Most recent backup less than 24 hours old",
+        "platform": "linux"
+      },
+      {
+        "command": "grep -rl 'sha256sum\\|checksum\\|integrity' /etc/cron.d/ /etc/systemd/system/ 2>/dev/null | wc -l",
+        "expected": ">=1 (integrity verification configured in backup jobs)",
+        "platform": "linux"
+      }
+    ]
   },
   "confidence": "Medium",
   "platforms": [
     "Any"
+  ],
+  "remediation": [
+    {
+      "id": "systemd-backup-timer",
+      "name": "Daily systemd backup timer with SHA-256 integrity verification",
+      "platform": "linux",
+      "precondition": "systemctl --version >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create backup script that archives the source directory and generates a SHA-256 checksum for integrity verification",
+          "command": "printf '#!/bin/bash\\nset -euo pipefail\\nBACKUP_SRC=\"<backup_source>\"\\nBACKUP_DEST=\"<backup_dest>\"\\nTIMESTAMP=$(date +%%Y%%m%%d-%%H%%M%%S)\\nARCHIVE=\"${BACKUP_DEST}/backup-${TIMESTAMP}.tar.gz\"\\nmkdir -p \"${BACKUP_DEST}\"\\ntar czf \"${ARCHIVE}\" -C \"$(dirname \"${BACKUP_SRC}\")\" \"$(basename \"${BACKUP_SRC}\")\"\\nsha256sum \"${ARCHIVE}\" > \"${ARCHIVE}.sha256\"\\nfind \"${BACKUP_DEST}\" -name \"backup-*.tar.gz\" -mtime +30 -delete\\nfind \"${BACKUP_DEST}\" -name \"backup-*.tar.gz.sha256\" -mtime +30 -delete\\n' > /usr/local/bin/cme-1202-backup.sh && chmod 755 /usr/local/bin/cme-1202-backup.sh",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /usr/local/bin/cme-1202-backup.sh"
+        },
+        {
+          "description": "Create systemd service unit to execute the backup script",
+          "command": "printf '[Unit]\\nDescription=CME-1202 Automated Backup with Integrity Verification\\n\\n[Service]\\nType=oneshot\\nExecStart=/usr/local/bin/cme-1202-backup.sh\\n' > /etc/systemd/system/cme-backup.service",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/systemd/system/cme-backup.service"
+        },
+        {
+          "description": "Create systemd timer to run the backup daily at 02:00",
+          "command": "printf '[Unit]\\nDescription=Daily backup timer for CME-1202\\n\\n[Timer]\\nOnCalendar=*-*-* 02:00:00\\nPersistent=true\\n\\n[Install]\\nWantedBy=timers.target\\n' > /etc/systemd/system/cme-backup.timer",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/systemd/system/cme-backup.timer"
+        },
+        {
+          "description": "Reload systemd and enable the backup timer",
+          "command": "systemctl daemon-reload && systemctl enable --now cme-backup.timer",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "systemctl disable --now cme-backup.timer"
+        }
+      ],
+      "verify": "systemctl list-timers --all | grep cme-backup && sha256sum -c $(ls -t <backup_dest>/backup-*.sha256 | head -1) 2>/dev/null && echo 'PASS: backup exists and integrity verified'",
+      "references": [
+        {
+          "source": "RHEL 9 — systemd timer units",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/using_systemd_unit_files_to_customize_and_optimize_your_system/assembly_working-with-systemd-timer-units_working-with-systemd"
+        }
+      ]
+    }
   ],
   "scf_identifiers": [
     "BCD-11",

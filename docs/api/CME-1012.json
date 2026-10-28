@@ -41,6 +41,51 @@
       }
     ]
   },
+  "remediation": [
+    {
+      "id": "gitleaks-pre-commit",
+      "name": "Gitleaks secrets scanner via pre-commit framework",
+      "platform": "any",
+      "precondition": "command -v git >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Install the pre-commit framework if not already present",
+          "command": "pip install pre-commit",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "pip uninstall -y pre-commit"
+        },
+        {
+          "description": "Create a .pre-commit-config.yaml in the repository root with the gitleaks hook configured to scan every commit for embedded secrets",
+          "command": "cat > .pre-commit-config.yaml <<'EOF'\nrepos:\n  - repo: https://github.com/gitleaks/gitleaks\n    rev: v8.21.2\n    hooks:\n      - id: gitleaks\nEOF",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f .pre-commit-config.yaml"
+        },
+        {
+          "description": "Install the pre-commit hooks into the repository's .git/hooks directory so gitleaks runs automatically on every commit",
+          "command": "pre-commit install",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "pre-commit uninstall"
+        }
+      ],
+      "verify": "test -f .git/hooks/pre-commit && grep -l 'gitleaks' .git/hooks/pre-commit .pre-commit-config.yaml",
+      "references": [
+        {
+          "source": "Gitleaks — Pre-commit Hook",
+          "url": "https://github.com/gitleaks/gitleaks#pre-commit"
+        },
+        {
+          "source": "pre-commit — Installation",
+          "url": "https://pre-commit.com/#install"
+        }
+      ]
+    }
+  ],
   "confidence": "High",
   "platforms": [
     "Any"

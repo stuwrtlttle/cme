@@ -82,6 +82,43 @@
       }
     ]
   },
+  "remediation": [
+    {
+      "id": "powershell-constrained-language",
+      "name": "PowerShell Constrained Language Mode and AllSigned execution policy",
+      "platform": "windows",
+      "precondition": "Get-Command Set-ExecutionPolicy -ErrorAction SilentlyContinue",
+      "steps": [
+        {
+          "description": "Set PowerShell execution policy to AllSigned — only scripts signed by a trusted publisher can run, blocking unsigned malicious scripts",
+          "command": "Set-ExecutionPolicy -ExecutionPolicy AllSigned -Scope LocalMachine -Force",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope LocalMachine -Force"
+        },
+        {
+          "description": "Enable Constrained Language Mode system-wide via environment variable; restricts PowerShell to core language elements, blocking Add-Type, arbitrary .NET, COM, and WMI access",
+          "command": "[Environment]::SetEnvironmentVariable('__PSLockdownPolicy', '4', 'Machine')",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "[Environment]::SetEnvironmentVariable('__PSLockdownPolicy', '0', 'Machine')"
+        }
+      ],
+      "verify": "$ExecutionContext.SessionState.LanguageMode",
+      "references": [
+        {
+          "source": "Microsoft — PowerShell Constrained Language Mode",
+          "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_language_modes"
+        },
+        {
+          "source": "Microsoft — Set-ExecutionPolicy",
+          "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.security/set-executionpolicy"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "SEA-06",
     "WEB-09"

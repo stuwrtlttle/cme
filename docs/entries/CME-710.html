@@ -101,9 +101,46 @@
       <div class="cmd-platform">Platform: linux</div>
       
       
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -r &#39;DynamicUser=yes&#39; /etc/systemd/system/&lt;service&gt;.service /etc/systemd/system/&lt;service&gt;.service.d/ /usr/lib/systemd/system/&lt;service&gt;.service 2&gt;/dev/null | wc -l
+        
+        <br><span class="cmd-expected"># Expected: &gt;=1</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> systemctl show &lt;service&gt; -p ProtectSystem,PrivateTmp,RemoveIPC
+        
+        <br><span class="cmd-expected"># Expected: ProtectSystem=strict; PrivateTmp=yes; RemoveIPC=yes (DynamicUser implies these)</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
     </section>
     
 
+    
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">systemd drop-in with DynamicUser=yes</span>
+        </div>
+        <pre class="remediation-commands"><code>
+mkdir -p /etc/systemd/system/&lt;service&gt;.service.d
+printf &#39;[Service]\nDynamicUser=yes\n&#39; &gt; /etc/systemd/system/&lt;service&gt;.service.d/dynamic-user.conf
+systemctl daemon-reload
+systemctl restart &lt;service&gt;</code></pre>
+      </div>
+      
+    </section>
     
 
     
@@ -184,7 +221,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

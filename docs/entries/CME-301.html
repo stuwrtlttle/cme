@@ -146,6 +146,21 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">rhel</span>
+          <span class="remediation-name">Enable SELinux enforcing mode and persist across reboots</span>
+        </div>
+        <pre class="remediation-commands"><code>
+setenforce 1
+sed -i &#39;s/^SELINUX=.*/SELINUX=enforcing/&#39; /etc/selinux/config</code></pre>
+      </div>
+      
+    </section>
+    
 
     
     <section>
@@ -294,7 +309,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

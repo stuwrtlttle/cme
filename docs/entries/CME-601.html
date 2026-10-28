@@ -122,6 +122,23 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">systemd SystemCallFilter drop-in restricting syscalls to @system-service set</span>
+        </div>
+        <pre class="remediation-commands"><code>
+mkdir -p /etc/systemd/system/&lt;service&gt;.service.d
+printf &#39;[Service]\nSystemCallFilter=@system-service\nSystemCallErrorNumber=EPERM\n&#39; &gt; /etc/systemd/system/&lt;service&gt;.service.d/seccomp.conf
+systemctl daemon-reload
+systemctl restart &lt;service&gt;</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -203,7 +220,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CME-1013: USBGuard — USB Device Access Control — Common Mitigation Enumeration</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="../index.html" class="logo">CME <span>Common Mitigation Enumeration</span></a>
+      <nav>
+        <a href="../index.html" >Home</a>
+        <a href="../by-tactic.html" >By Tactic</a>
+        <a href="../by-cwe.html" >By CWE</a>
+        <a href="../search.html" >Search</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    
+<div class="entry-header">
+  <div class="entry-id">CME-1013</div>
+  <h1>USBGuard — USB Device Access Control</h1>
+  <div class="entry-meta">
+    <span class="badge badge-tactic-detect">Detect</span>
+    <span class="badge badge-layer-"></span>
+    <span class="badge badge-attenuation-deterministic">Deterministic evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
+  </div>
+</div>
+
+<div class="entry-body">
+  <div class="entry-main">
+
+    
+    <section>
+      <h2>Description</h2>
+      <p class="entry-description">Kernel-level USB device authorization framework that enforces allow/deny/block policies for USB peripheral attachment. Prevents BadUSB attacks (malicious USB devices that emulate keyboards/network adapters), DMA-based attacks via Thunderbolt/USB-C, and unauthorized data exfiltration via USB storage. Integrates with udev and auditd for USB event logging and policy enforcement. Policies can be defined per device class, vendor ID, product ID, or serial number.</p>
+    </section>
+
+    <section>
+      <h2>CVSS Vector Impacts</h2>
+      <table class="cvss-table">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Transition</th>
+            
+            <th>Rationale</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td><strong>Attack Vector</strong> (AV)</td>
+            <td>
+              <span class="cvss-from">P</span>
+              <span class="cvss-arrow">&rarr;</span>
+              <span class="cvss-to">L</span>
+            </td>
+            
+            <td class="cvss-rationale">Physical access required but mitigated; unauthorized USB devices blocked at kernel level</td>
+          </tr>
+          
+          <tr>
+            <td><strong>Attack Complexity</strong> (AC)</td>
+            <td>
+              <span class="cvss-from">L</span>
+              <span class="cvss-arrow">&rarr;</span>
+              <span class="cvss-to">H</span>
+            </td>
+            
+            <td class="cvss-rationale">Requires authorized USB device matching policy; rogue devices auto-blocked</td>
+          </tr>
+          
+        </tbody>
+      </table>
+    </section>
+    
+
+    
+    <section>
+      <h2>CWE Relationships</h2>
+      <div class="cwe-list">
+        
+        <a href="https://cwe.mitre.org/data/definitions/1299.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-1299</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/1188.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-1188</a>
+        
+      </div>
+    </section>
+    
+
+    
+
+    
+    <section>
+      <h2>Verification</h2>
+      
+      <p class="verification-method">Verify USBGuard daemon running and policy enforcement active</p>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> systemctl is-active usbguard
+        
+        <br><span class="cmd-expected"># Expected: active</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> usbguard list-devices | head -5
+        
+        <br><span class="cmd-expected"># Expected: Lists devices with allow/block/reject policy</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> usbguard get-parameter InsertedDevicePolicy
+        
+        <br><span class="cmd-expected"># Expected: block (or apply-policy)</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> usbguard get-parameter ImplicitPolicyTarget
+        
+        <br><span class="cmd-expected"># Expected: block (or reject)</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+    </section>
+    
+
+    
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">USBGuard default-block policy from currently connected devices</span>
+        </div>
+        <pre class="remediation-commands"><code>
+dnf install -y usbguard
+usbguard generate-policy &gt; /etc/usbguard/rules.conf
+systemctl enable --now usbguard</code></pre>
+      </div>
+      
+    </section>
+    
+
+    
+
+    
+    <section>
+      <h2>References</h2>
+      <ul class="sidebar-list">
+        
+        <li>
+          <a href="https://usbguard.github.io/" target="_blank" rel="noopener">USBGuard Documentation</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/security_hardening/index" target="_blank" rel="noopener">RHEL 10 Security Hardening Guide</a>
+           &mdash; Chapter 11 - Protecting Systems Against Intrusive USB Devices
+        </li>
+        
+      </ul>
+    </section>
+    
+
+    <div class="entry-nav">
+      
+      <a href="CME-1012.html">&larr; CME-1012: Pre-commit Secrets Detection (gitleaks/trufflehog)</a>
+      
+      
+      <a href="CME-1101.html">CME-1101: Automated Patch Management (dnf-automatic) &rarr;</a>
+      
+    </div>
+  </div>
+
+  <aside class="entry-sidebar">
+    <section>
+      <h3>Category</h3>
+      <p>Runtime Detection</p>
+    </section>
+
+    
+    <section>
+      <h3>Function</h3>
+      <p class="function-id">host-monitoring</p>
+    </section>
+    
+
+    
+    <section>
+      <h3>SCF Controls</h3>
+      <div class="cwe-list">
+        
+        <span class="cwe-link">PES-02</span>
+        
+        <span class="cwe-link">PES-02.1</span>
+        
+      </div>
+    </section>
+    
+
+    
+    <section>
+      <h3>ATT&amp;CK Mitigations</h3>
+      <ul class="sidebar-list">
+        
+        <li>
+          <strong>M1034</strong>
+           — Limit Hardware Installation
+          
+          <div class="framework-detail">USBGuard implements ATT&amp;CK mitigation M1034</div>
+          
+        </li>
+        
+      </ul>
+    </section>
+    
+
+    
+
+    
+    <section>
+      <h3>Platforms</h3>
+      <ul class="sidebar-list">
+        
+        <li>RHEL 8+</li>
+        
+        <li>Fedora</li>
+        
+        <li>Debian 10+</li>
+        
+        <li>Ubuntu 20.04+</li>
+        
+      </ul>
+    </section>
+    
+
+    <section>
+      <h3>Quick Reference</h3>
+      <ul class="sidebar-list">
+        <li><strong>ID:</strong> CME-1013</li>
+        <li><strong>Tactic:</strong> Detect</li>
+        <li><strong>Layer:</strong> </li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> deterministic</li>
+        <li><strong>CWEs:</strong> 2</li>
+        <li><strong>ATT&amp;CK Mappings:</strong> 1</li>
+        <li><strong>CVSS Mods:</strong> 2</li>
+      </ul>
+    </section>
+  </aside>
+</div>
+
+  </main>
+
+  <footer class="site-footer">
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
+    Common Mitigation Enumeration (CME)
+  </footer>
+</body>
+</html>

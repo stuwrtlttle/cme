@@ -118,6 +118,23 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Mount /tmp and /dev/shm with noexec,nosuid,nodev options</span>
+        </div>
+        <pre class="remediation-commands"><code>
+mount -o remount,noexec,nosuid,nodev /tmp
+mount -o remount,noexec,nosuid,nodev /dev/shm
+grep -q &#39;[[:space:]]/tmp[[:space:]]&#39; /etc/fstab &amp;&amp; sed -i &#39;/[[:space:]]/tmp[[:space:]]/ s/defaults/defaults,noexec,nosuid,nodev/&#39; /etc/fstab || echo &#39;tmpfs /tmp tmpfs defaults,noexec,nosuid,nodev 0 0&#39; &gt;&gt; /etc/fstab
+grep -q &#39;[[:space:]]/dev/shm[[:space:]]&#39; /etc/fstab &amp;&amp; sed -i &#39;/[[:space:]]/dev/shm[[:space:]]/ s/defaults/defaults,noexec,nosuid,nodev/&#39; /etc/fstab || echo &#39;tmpfs /dev/shm tmpfs defaults,noexec,nosuid,nodev 0 0&#39; &gt;&gt; /etc/fstab</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -209,7 +226,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

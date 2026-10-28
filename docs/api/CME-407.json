@@ -64,6 +64,92 @@
       "defaultStatus": "applicable"
     }
   ],
+  "remediation": [
+    {
+      "id": "luks-encrypt-partition",
+      "name": "LUKS2 full-disk encryption via cryptsetup",
+      "platform": "linux",
+      "precondition": "command -v cryptsetup >/dev/null 2>&1 || command -v dnf >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Install cryptsetup if not already present",
+          "command": "dnf install -y cryptsetup",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "dnf remove -y cryptsetup"
+        },
+        {
+          "description": "DESTRUCTIVE: Format the target partition with LUKS2 encryption. ALL DATA ON THE PARTITION WILL BE DESTROYED. Back up the partition before running this command. Requires interactive passphrase entry.",
+          "command": "cryptsetup luksFormat --type luks2 --cipher aes-xts-plain64 --key-size 512 --hash sha256 <device>",
+          "idempotent": false,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Open the LUKS volume and create a device-mapper mapping",
+          "command": "cryptsetup luksOpen <device> <name>",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "cryptsetup luksClose <name>"
+        },
+        {
+          "description": "Create an XFS filesystem on the opened LUKS volume",
+          "command": "mkfs.xfs /dev/mapper/<name>",
+          "idempotent": false,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Add the LUKS volume to /etc/crypttab for automatic unlock at boot (passphrase prompt or key file)",
+          "command": "echo '<name> <device> none discard' >> /etc/crypttab",
+          "idempotent": false,
+          "requires_restart": "system",
+          "reversible": true,
+          "undo": "sed -i '/^<name> /d' /etc/crypttab"
+        }
+      ],
+      "verify": "lsblk -o NAME,TYPE,FSTYPE | grep crypt",
+      "references": [
+        {
+          "source": "RHEL 9 Security Hardening — Encrypting block devices using LUKS",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/encrypting-block-devices-using-luks_security-hardening"
+        },
+        {
+          "source": "cryptsetup(8) man page",
+          "url": "https://man7.org/linux/man-pages/man8/cryptsetup.8.html"
+        }
+      ]
+    },
+    {
+      "id": "bitlocker-enable",
+      "name": "BitLocker volume encryption with XTS-AES-256",
+      "platform": "windows",
+      "precondition": "Get-Command Enable-BitLocker -ErrorAction SilentlyContinue",
+      "steps": [
+        {
+          "description": "Enable BitLocker on the system drive with XTS-AES-256 encryption and a recovery password protector. Used-space-only mode encrypts faster on new volumes; for existing data volumes use full encryption.",
+          "command": "Enable-BitLocker -MountPoint 'C:' -EncryptionMethod XtsAes256 -UsedSpaceOnly -RecoveryPasswordProtector",
+          "idempotent": true,
+          "requires_restart": "system",
+          "reversible": true,
+          "undo": "Disable-BitLocker -MountPoint 'C:'"
+        }
+      ],
+      "verify": "Get-BitLockerVolume -MountPoint 'C:' | Select-Object VolumeStatus,EncryptionMethod,ProtectionStatus",
+      "references": [
+        {
+          "source": "Microsoft — BitLocker overview",
+          "url": "https://learn.microsoft.com/en-us/windows/security/operating-system-security/data-protection/bitlocker/"
+        },
+        {
+          "source": "Microsoft — Enable-BitLocker cmdlet",
+          "url": "https://learn.microsoft.com/en-us/powershell/module/bitlocker/enable-bitlocker"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CRY-05",
     "CRY-05.1"

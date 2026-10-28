@@ -135,6 +135,22 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">UEFI Secure Boot verification and MOK key enrollment</span>
+        </div>
+        <pre class="remediation-commands"><code>
+mokutil --sb-state | grep -q &#39;SecureBoot enabled&#39; &amp;&amp; echo &#39;PASS: Secure Boot enabled&#39; || echo &#39;FAIL: Secure Boot disabled — enable in UEFI firmware settings&#39;
+mokutil --import &lt;mok_public_key&gt;.der
+sign-file sha256 &lt;private_key&gt;.priv &lt;mok_public_key&gt;.der &lt;module&gt;.ko</code></pre>
+      </div>
+      
+    </section>
+    
 
     
     <section>
@@ -261,7 +277,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

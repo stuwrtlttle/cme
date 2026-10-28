@@ -151,6 +151,33 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">SSH and shell idle session timeout via sshd drop-in and TMOUT</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;ClientAliveInterval 300
+ClientAliveCountMax 3
+&#39; &gt; /etc/ssh/sshd_config.d/99-cme-807-session-timeout.conf
+printf &#39;readonly TMOUT=900\nexport TMOUT\n&#39; &gt; /etc/profile.d/cme-807-timeout.sh &amp;&amp; chmod 644 /etc/profile.d/cme-807-timeout.sh
+systemctl reload sshd</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">windows</span>
+          <span class="remediation-name">Windows interactive session inactivity timeout via registry policy</span>
+        </div>
+        <pre class="remediation-commands"><code>
+Set-ItemProperty -Path &#39;HKLM:\SOFTWARE\Policies\Microsoft\Windows\CurrentVersion\Policies\System&#39; -Name InactivityTimeoutSecs -Value 900 -Type DWord</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -230,7 +257,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

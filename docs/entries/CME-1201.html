@@ -89,7 +89,37 @@
     <section>
       <h2>Verification</h2>
       
-      <p class="verification-method">Verify deployment pipeline builds from golden images</p>
+      <p class="verification-method">Verify deployment pipeline builds from golden images and system root is immutable</p>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> mount | grep &#39;on / &#39; | grep -c &#39;ro,&#39;
+        
+        <br><span class="cmd-expected"># Expected: 1</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> rpm-ostree status 2&gt;/dev/null | grep -c &#39;Version&#39;
+        
+        <br><span class="cmd-expected"># Expected: &gt;=1 (ostree-based immutable OS)</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> kubectl exec &lt;pod&gt; -- sh -c &#39;which apt-get yum dnf apk 2&gt;/dev/null | wc -l&#39;
+        
+        <br><span class="cmd-expected"># Expected: 0 (no package manager in container image)</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: kubernetes</div>
       
       
     </section>
@@ -173,7 +203,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

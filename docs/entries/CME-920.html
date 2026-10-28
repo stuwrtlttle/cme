@@ -161,6 +161,33 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">PostgreSQL dedicated application user with DML-only grants</span>
+        </div>
+        <pre class="remediation-commands"><code>
+psql -h localhost -U postgres -c &#34;DO \$\$ BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = &#39;&lt;app_user&gt;&#39;) THEN CREATE USER &lt;app_user&gt; WITH PASSWORD &#39;&lt;password&gt;&#39; NOSUPERUSER NOCREATEDB NOCREATEROLE; END IF; END \$\$;&#34;
+psql -h localhost -U postgres -d &lt;database&gt; -c &#34;GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA &lt;schema&gt; TO &lt;app_user&gt;; ALTER DEFAULT PRIVILEGES IN SCHEMA &lt;schema&gt; GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO &lt;app_user&gt;;&#34;
+psql -h localhost -U postgres -d &lt;database&gt; -c &#34;REVOKE CREATE ON SCHEMA public FROM PUBLIC;&#34;</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">MySQL dedicated application user with DML-only grants</span>
+        </div>
+        <pre class="remediation-commands"><code>
+mysql -u root -e &#34;CREATE USER IF NOT EXISTS &#39;&lt;app_user&gt;&#39;@&#39;localhost&#39; IDENTIFIED BY &#39;&lt;password&gt;&#39;;&#34;
+mysql -u root -e &#34;GRANT SELECT, INSERT, UPDATE, DELETE ON &lt;database&gt;.* TO &#39;&lt;app_user&gt;&#39;@&#39;localhost&#39;;&#34;
+mysql -u root -e &#34;FLUSH PRIVILEGES;&#34;</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -240,7 +267,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

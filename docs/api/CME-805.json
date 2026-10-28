@@ -76,6 +76,85 @@
       "defaultStatus": "applicable"
     }
   ],
+  "remediation": [
+    {
+      "id": "linux-password-aging",
+      "name": "Linux password aging via /etc/login.defs and chage",
+      "platform": "linux",
+      "precondition": "test -f /etc/login.defs",
+      "steps": [
+        {
+          "description": "Set maximum password age to 90 days for all new accounts in /etc/login.defs",
+          "command": "sed -i 's/^PASS_MAX_DAYS.*/PASS_MAX_DAYS\t90/' /etc/login.defs",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "sed -i 's/^PASS_MAX_DAYS.*/PASS_MAX_DAYS\t99999/' /etc/login.defs"
+        },
+        {
+          "description": "Set minimum password age to 1 day to prevent rapid cycling through password history",
+          "command": "sed -i 's/^PASS_MIN_DAYS.*/PASS_MIN_DAYS\t1/' /etc/login.defs",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "sed -i 's/^PASS_MIN_DAYS.*/PASS_MIN_DAYS\t0/' /etc/login.defs"
+        },
+        {
+          "description": "Set password expiration warning to 14 days before expiry",
+          "command": "sed -i 's/^PASS_WARN_AGE.*/PASS_WARN_AGE\t14/' /etc/login.defs",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "sed -i 's/^PASS_WARN_AGE.*/PASS_WARN_AGE\t7/' /etc/login.defs"
+        },
+        {
+          "description": "Apply 90-day maximum password age to an existing user account; original aging values are not preserved",
+          "command": "chage --maxdays 90 --mindays 1 --warndays 14 <username>",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "grep '^PASS_MAX_DAYS' /etc/login.defs | grep -oE '[0-9]+' && chage -l <username> | grep 'Maximum'",
+      "references": [
+        {
+          "source": "RHEL 9 Security Hardening — Managing password policies",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/managing-users-and-groups_security-hardening#setting-password-policies_managing-users-and-groups"
+        },
+        {
+          "source": "chage(1) man page",
+          "url": "https://man7.org/linux/man-pages/man1/chage.1.html"
+        }
+      ]
+    },
+    {
+      "id": "windows-password-policy",
+      "name": "Windows password aging via net accounts",
+      "platform": "windows",
+      "precondition": "net accounts >nul 2>&1",
+      "steps": [
+        {
+          "description": "Set maximum password age to 90 days and minimum age to 1 day for all local accounts",
+          "command": "net accounts /maxpwage:90 /minpwage:1",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "net accounts /maxpwage:unlimited /minpwage:0"
+        }
+      ],
+      "verify": "net accounts | Select-String 'Maximum password age'",
+      "references": [
+        {
+          "source": "Microsoft — Net accounts",
+          "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/cc725744(v=ws.11)"
+        },
+        {
+          "source": "Microsoft Security Baselines — Account Policies",
+          "url": "https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-security-baselines"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CRY-09",
     "IAC-10.13"

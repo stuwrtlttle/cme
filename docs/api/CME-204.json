@@ -43,6 +43,58 @@
     "RHEL 8",
     "Ubuntu 24.04"
   ],
+  "remediation": [
+    {
+      "id": "wireguard-tunnel",
+      "name": "WireGuard encrypted tunnel via wg-quick",
+      "platform": "linux",
+      "precondition": "command -v wg >/dev/null 2>&1 || command -v dnf >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Install WireGuard tools",
+          "command": "dnf install -y wireguard-tools",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "dnf remove -y wireguard-tools"
+        },
+        {
+          "description": "Generate a WireGuard private/public keypair; overwrites any existing keys in /etc/wireguard/",
+          "command": "umask 077 && mkdir -p /etc/wireguard && wg genkey | tee /etc/wireguard/privatekey | wg pubkey > /etc/wireguard/publickey",
+          "idempotent": false,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Create the WireGuard interface configuration; replace all <placeholder> values with site-specific settings",
+          "command": "cat > /etc/wireguard/wg0.conf <<'WGEOF'\n[Interface]\nAddress = <tunnel_address>/24\nPrivateKey = $(cat /etc/wireguard/privatekey)\nListenPort = 51820\n\n[Peer]\nPublicKey = <peer_public_key>\nAllowedIPs = <peer_allowed_ips>/32\nEndpoint = <peer_endpoint>:51820\nPersistentKeepalive = 25\nWGEOF",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/wireguard/wg0.conf"
+        },
+        {
+          "description": "Enable and start the WireGuard tunnel as a persistent systemd service",
+          "command": "systemctl enable --now wg-quick@wg0",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "systemctl disable --now wg-quick@wg0"
+        }
+      ],
+      "verify": "wg show wg0 && systemctl is-active wg-quick@wg0",
+      "references": [
+        {
+          "source": "WireGuard — Quick Start",
+          "url": "https://www.wireguard.com/quickstart/"
+        },
+        {
+          "source": "RHEL 9 — Configuring a WireGuard VPN",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/configuring_and_managing_networking/assembly_setting-up-a-wireguard-vpn_configuring-and-managing-networking"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CRY-03",
     "CRY-04",

@@ -1,0 +1,128 @@
+{
+  "cme_id": "CME-1321",
+  "control_name": "Trust Boundary Input Sanitization (Cross-Boundary Data Validation)",
+  "description": "Enforce explicit validation and sanitization at every architectural trust boundary — points where data crosses from a less-trusted context into a more-trusted one. Trust boundaries include: user input entering server-side session state, external API responses being incorporated into internal data structures, deserialized objects from untrusted sources being used as trusted application state, and inter-service communication where the calling service has different privilege levels. At each boundary, apply type validation, range checking, schema enforcement, and contextual sanitization before the data is stored or used in the trusted context. This prevents an attacker from injecting malicious data that propagates through the application as if it were trusted — for example, poisoning session attributes via crafted input, or injecting control-plane directives via a deserialized object that bypasses authorization checks. Framework-level enforcement (validation middleware, schema-validated DTOs, explicit trust-zone annotations) is preferred over ad-hoc per-field checks because it provides systematic coverage and fails closed on unannotated boundaries.",
+  "tactic": "Harden",
+  "category": "Application Input Validation",
+  "category_id": "application-input-validation",
+  "function_id": "input-validation",
+  "control_layer": "Application",
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "attenuation_type": "deterministic",
+  "confidence": "High",
+  "platforms": [
+    "Any"
+  ],
+  "efficacy": {
+    "conditions": [
+      "Requires explicit identification and documentation of trust boundaries in application architecture",
+      "Framework-level validation middleware must be configured to reject unvalidated data at boundary crossings — without systematic enforcement, individual boundaries are easily missed",
+      "Deserialization paths must use type-safe, schema-validated deserializers rather than generic object deserialization"
+    ]
+  },
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "The attacker must find a trust boundary crossing that lacks validation — systematic boundary enforcement via framework middleware and schema-validated DTOs eliminates the most common paths, requiring the attacker to discover an unannotated or misconfigured boundary"
+    },
+    {
+      "metric": "I",
+      "from": "H",
+      "to": "L",
+      "rationale": "Untrusted data cannot propagate into trusted application state (session objects, internal data structures, deserialized configuration) because validation and sanitization at the boundary strips or rejects malicious content before it enters the trusted context"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-501",
+    "CWE-502",
+    "CWE-20"
+  ],
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-501",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "Directly prevents trust boundary violations by enforcing validation at every point where data crosses from less-trusted to more-trusted contexts",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-502",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "rationale": "Complements CME-1319 (Deserialization Type Allowlisting) — this entry addresses the architectural trust boundary where deserialized data enters trusted application state, while CME-1319 addresses the deserialization mechanism itself",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-20",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/I",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "WEB-09",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "IAC-15",
+      "relationship_type": "maps_to"
+    }
+  ],
+  "scf_identifiers": [
+    "WEB-09",
+    "IAC-15"
+  ],
+  "verification": {
+    "method": "Review application architecture documentation for explicit trust boundary identification. Verify that validation middleware or schema enforcement is configured at each identified boundary. Check deserialization paths for type-safe, allowlist-based deserializers.",
+    "commands": [
+      {
+        "command": "grep -rn '@Valid\\|@Validated\\|ValidationPipe\\|validate_on_submit\\|Schema.parse\\|pydantic.BaseModel' <source>/ --include='*.java' --include='*.py' --include='*.ts' | head -20",
+        "expected": "Trust boundary entry points use framework validation annotations or schema enforcement",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'ObjectInputStream\\|pickle.load\\|yaml.load\\|eval(\\|unserialize(' <source>/ --include='*.java' --include='*.py' --include='*.php' | head -10",
+        "expected": "No unsafe deserialization — use type-safe alternatives (ObjectInputFilter, pickle with allowlist, yaml.safe_load)",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rn 'session\\[.*request\\|session.setAttribute.*getParameter\\|req.session.*req.body' <source>/ | head -10",
+        "expected": "No direct assignment of user input to session state without validation",
+        "platform": "any"
+      }
+    ]
+  },
+  "references": [
+    {
+      "source": "CWE-501: Trust Boundary Violation",
+      "url": "https://cwe.mitre.org/data/definitions/501.html"
+    },
+    {
+      "source": "OWASP Input Validation Cheat Sheet",
+      "url": "https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html"
+    }
+  ]
+}

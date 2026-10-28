@@ -115,6 +115,22 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">rhel</span>
+          <span class="remediation-name">RHEL kpatch live kernel patching</span>
+        </div>
+        <pre class="remediation-commands"><code>
+dnf install -y kpatch kpatch-dnf
+dnf install -y kpatch-patch-$(uname -r | sed &#39;s/\.[^.]*$//&#39;)
+systemctl enable kpatch</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -194,7 +210,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

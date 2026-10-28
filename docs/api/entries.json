@@ -771,17 +771,17 @@
   },
   {
     "cme_id": "CME-1012",
-    "control_name": "USBGuard \u2014 USB Device Access Control",
-    "tactic": "Detect",
-    "category": "Runtime Detection",
-    "control_layer": ""
-  },
-  {
-    "cme_id": "CME-1012",
     "control_name": "Pre-commit Secrets Detection (gitleaks/trufflehog)",
     "tactic": "Detect",
     "category": "Integrity Detection",
     "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-1013",
+    "control_name": "USBGuard \u2014 USB Device Access Control",
+    "tactic": "Detect",
+    "category": "Runtime Detection",
+    "control_layer": ""
   },
   {
     "cme_id": "CME-1101",
@@ -954,6 +954,20 @@
   {
     "cme_id": "CME-1319",
     "control_name": "Deserialization Type Allowlisting",
+    "tactic": "Harden",
+    "category": "Application Input Validation",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-1320",
+    "control_name": "Format-String-Safe API Enforcement (Compile-Time and Runtime Format Validation)",
+    "tactic": "Harden",
+    "category": "Application Input Validation",
+    "control_layer": "Application"
+  },
+  {
+    "cme_id": "CME-1321",
+    "control_name": "Trust Boundary Input Sanitization (Cross-Boundary Data Validation)",
     "tactic": "Harden",
     "category": "Application Input Validation",
     "control_layer": "Application"

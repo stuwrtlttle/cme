@@ -1132,16 +1132,6 @@
     <div class="sr-desc">Configures the Kubernetes API server audit policy to log security-relevant events including authentication failures, RBAC denials, sensitive resource ...</div>
   </li>
   
-  <li data-search="cme-1012 usbguard — usb device access control kernel-level usb device authorization framework that enforces allow/deny/block policies for usb peripheral attachment. prevents badusb attacks (malicious usb devices that emulate keyboards/network adapters), dma-based attacks via thunderbolt/usb-c, and unauthorized data exfiltration via usb storage. integrates with udev and auditd for usb event logging and policy enforcement. policies can be defined per device class, vendor id, product id, or serial number. runtime detection detect cwe-1299 cwe-1188 m1034 limit hardware installation">
-    <div>
-      <a href="entries/CME-1012.html" class="sr-id">CME-1012</a>
-      <a href="entries/CME-1012.html">USBGuard — USB Device Access Control</a>
-      <span class="badge badge-tactic-detect">Detect</span>
-      <span class="badge badge-layer-"></span>
-    </div>
-    <div class="sr-desc">Kernel-level USB device authorization framework that enforces allow/deny/block policies for USB peripheral attachment. Prevents BadUSB attacks (malici...</div>
-  </li>
-  
   <li data-search="cme-1012 pre-commit secrets detection (gitleaks/trufflehog) automated scanning of code commits for embedded secrets (api keys, passwords, private keys, tokens, connection strings) using pattern-based and entropy-based detection. runs as a git pre-commit hook or ci pipeline gate to prevent hard-coded credentials from reaching repositories where they can be harvested by attackers or leaked in public forks. tools include gitleaks, trufflehog, and git-secrets. complements credential rotation and vault-based secret management by catching secrets that bypass those controls at the source code layer. integrity detection detect application cwe-798 cwe-312 cwe-316">
     <div>
       <a href="entries/CME-1012.html" class="sr-id">CME-1012</a>
@@ -1150,6 +1140,16 @@
       <span class="badge badge-layer-application">Application</span>
     </div>
     <div class="sr-desc">Automated scanning of code commits for embedded secrets (API keys, passwords, private keys, tokens, connection strings) using pattern-based and entrop...</div>
+  </li>
+  
+  <li data-search="cme-1013 usbguard — usb device access control kernel-level usb device authorization framework that enforces allow/deny/block policies for usb peripheral attachment. prevents badusb attacks (malicious usb devices that emulate keyboards/network adapters), dma-based attacks via thunderbolt/usb-c, and unauthorized data exfiltration via usb storage. integrates with udev and auditd for usb event logging and policy enforcement. policies can be defined per device class, vendor id, product id, or serial number. runtime detection detect cwe-1299 cwe-1188 m1034 limit hardware installation">
+    <div>
+      <a href="entries/CME-1013.html" class="sr-id">CME-1013</a>
+      <a href="entries/CME-1013.html">USBGuard — USB Device Access Control</a>
+      <span class="badge badge-tactic-detect">Detect</span>
+      <span class="badge badge-layer-"></span>
+    </div>
+    <div class="sr-desc">Kernel-level USB device authorization framework that enforces allow/deny/block policies for USB peripheral attachment. Prevents BadUSB attacks (malici...</div>
   </li>
   
   <li data-search="cme-1101 automated patch management (dnf-automatic) automatically downloads and applies security updates on schedule. reduces the window between vulnerability disclosure and patch application from days/weeks to hours. patch management evict os/kernel">
@@ -1402,6 +1402,26 @@
     <div class="sr-desc">Prevention of deserialization attacks through type allowlisting, signature verification of serialized data, and use of safe deserialization libraries....</div>
   </li>
   
+  <li data-search="cme-1320 format-string-safe api enforcement (compile-time and runtime format validation) prevent exploitation of format string vulnerabilities by enforcing format-string-safe api usage across compiled and interpreted codebases. in c/c++, enable compiler diagnostics that reject non-literal format arguments (-wformat-security, -werror=format-security, /analyze on msvc) and replace printf-family calls that accept user-controlled format specifiers with fixed-format alternatives (snprintf with literal format, or positional/typed formatting apis). in managed languages, use parameterized logging (slf4j {}, python %s with logging module, .net structured logging) instead of string interpolation with user input in format position. at the build system level, enforce these checks as ci gate failures so that format-string-unsafe patterns cannot merge. this control directly blocks the attacker&#39;s ability to use format specifiers (%n, %x, %s) to read or write arbitrary memory, leak stack contents, or achieve code execution via controlled writes. application input validation harden application cwe-134 cwe-20">
+    <div>
+      <a href="entries/CME-1320.html" class="sr-id">CME-1320</a>
+      <a href="entries/CME-1320.html">Format-String-Safe API Enforcement (Compile-Time and Runtime Format Validation)</a>
+      <span class="badge badge-tactic-harden">Harden</span>
+      <span class="badge badge-layer-application">Application</span>
+    </div>
+    <div class="sr-desc">Prevent exploitation of format string vulnerabilities by enforcing format-string-safe API usage across compiled and interpreted codebases. In C/C++, e...</div>
+  </li>
+  
+  <li data-search="cme-1321 trust boundary input sanitization (cross-boundary data validation) enforce explicit validation and sanitization at every architectural trust boundary — points where data crosses from a less-trusted context into a more-trusted one. trust boundaries include: user input entering server-side session state, external api responses being incorporated into internal data structures, deserialized objects from untrusted sources being used as trusted application state, and inter-service communication where the calling service has different privilege levels. at each boundary, apply type validation, range checking, schema enforcement, and contextual sanitization before the data is stored or used in the trusted context. this prevents an attacker from injecting malicious data that propagates through the application as if it were trusted — for example, poisoning session attributes via crafted input, or injecting control-plane directives via a deserialized object that bypasses authorization checks. framework-level enforcement (validation middleware, schema-validated dtos, explicit trust-zone annotations) is preferred over ad-hoc per-field checks because it provides systematic coverage and fails closed on unannotated boundaries. application input validation harden application cwe-501 cwe-502 cwe-20">
+    <div>
+      <a href="entries/CME-1321.html" class="sr-id">CME-1321</a>
+      <a href="entries/CME-1321.html">Trust Boundary Input Sanitization (Cross-Boundary Data Validation)</a>
+      <span class="badge badge-tactic-harden">Harden</span>
+      <span class="badge badge-layer-application">Application</span>
+    </div>
+    <div class="sr-desc">Enforce explicit validation and sanitization at every architectural trust boundary — points where data crosses from a less-trusted context into a more...</div>
+  </li>
+  
 </ul>
 
 <script>
@@ -1428,7 +1448,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

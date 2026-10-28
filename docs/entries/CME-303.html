@@ -101,9 +101,56 @@
       <div class="cmd-platform">Platform: rhel</div>
       
       
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> getsebool -a | grep -E &#39;httpd_can_network_connect|httpd_execmem|allow_user_exec_content|selinuxuser_execmod&#39; | grep -c &#39; off$&#39;
+        
+        <br><span class="cmd-expected"># Expected: &gt;=3</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: rhel</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> getsebool virt_sandbox_use_all_caps
+        
+        <br><span class="cmd-expected"># Expected: virt_sandbox_use_all_caps --&gt; off</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: rhel</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> semanage boolean -l | grep httpd_can_network_connect
+        
+        <br><span class="cmd-expected"># Expected: (off , off)</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: rhel</div>
+      
+      
     </section>
     
 
+    
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">rhel</span>
+          <span class="remediation-name">Set security-relevant SELinux booleans to restrictive (off) values</span>
+        </div>
+        <pre class="remediation-commands"><code>
+setsebool -P httpd_can_network_connect off
+setsebool -P httpd_execmem off
+setsebool -P allow_user_exec_content off
+setsebool -P virt_sandbox_use_all_caps off</code></pre>
+      </div>
+      
+    </section>
     
 
     
@@ -184,7 +231,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

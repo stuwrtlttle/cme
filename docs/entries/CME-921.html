@@ -164,6 +164,34 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Nginx path canonicalization and traversal rejection via drop-in config</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;# CME-921: URL path canonicalization before authorization\nmerge_slashes on;\n\nmap $request_uri $cme921_block {\n    default 0;\n    &#34;~*\\.\\.&#34;          1;\n    &#34;~*%%2[eE]&#34;        1;\n    &#34;~*%%2[fF]&#34;        1;\n    &#34;~*%%5[cC]&#34;        1;\n    &#34;~*;[^/]*=&#34;        1;\n}\n&#39; &gt; /etc/nginx/conf.d/cme-921-canonicalization.conf
+printf &#39;# Include inside server {} blocks:\n# if ($cme921_block) { return 400; }\n&#39; &gt;&gt; /etc/nginx/conf.d/cme-921-canonicalization.conf
+nginx -t
+systemctl reload nginx</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Apache HTTPD path canonicalization via AllowEncodedSlashes and mod_rewrite</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;# CME-921: URL path canonicalization before authorization\nAllowEncodedSlashes NoDecode\n\nRewriteEngine On\n# Reject dot-segment traversal sequences\nRewriteCond %%{REQUEST_URI} (\\.\\.) [OR]\nRewriteCond %%{REQUEST_URI} (%%2[eE]\\.) [OR]\nRewriteCond %%{REQUEST_URI} (\\.%%2[eE]) [OR]\n# Reject matrix parameters that could bypass path matching\nRewriteCond %%{REQUEST_URI} (;[^/]*=)\nRewriteRule .* - [F]\n&#39; &gt; /etc/httpd/conf.d/cme-921-canonicalization.conf
+httpd -t 2&gt;&amp;1 || apachectl configtest 2&gt;&amp;1
+systemctl reload httpd</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -241,7 +269,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

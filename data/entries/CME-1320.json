@@ -1,0 +1,114 @@
+{
+  "cme_id": "CME-1320",
+  "control_name": "Format-String-Safe API Enforcement (Compile-Time and Runtime Format Validation)",
+  "description": "Prevent exploitation of format string vulnerabilities by enforcing format-string-safe API usage across compiled and interpreted codebases. In C/C++, enable compiler diagnostics that reject non-literal format arguments (-Wformat-security, -Werror=format-security, /analyze on MSVC) and replace printf-family calls that accept user-controlled format specifiers with fixed-format alternatives (snprintf with literal format, or positional/typed formatting APIs). In managed languages, use parameterized logging (SLF4J {}, Python %s with logging module, .NET structured logging) instead of string interpolation with user input in format position. At the build system level, enforce these checks as CI gate failures so that format-string-unsafe patterns cannot merge. This control directly blocks the attacker's ability to use format specifiers (%n, %x, %s) to read or write arbitrary memory, leak stack contents, or achieve code execution via controlled writes.",
+  "tactic": "Harden",
+  "category": "Application Input Validation",
+  "category_id": "application-input-validation",
+  "function_id": "input-validation",
+  "control_layer": "Application",
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "attenuation_type": "deterministic",
+  "confidence": "High",
+  "platforms": [
+    "Any"
+  ],
+  "efficacy": {
+    "conditions": [
+      "Requires all source compiled with format-security warnings promoted to errors",
+      "Managed-language codebases must use parameterized logging APIs rather than string concatenation in format position",
+      "CI enforcement prevents regression — without gating, developers can introduce new format-string-unsafe patterns"
+    ]
+  },
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "The attacker must find a code path where a user-controlled string reaches a format-specifier-interpreting function without compile-time or runtime neutralization — format-security compiler flags and parameterized APIs eliminate the most common paths, forcing the attacker to find an uncovered edge case or bypass the CI gate"
+    },
+    {
+      "metric": "C",
+      "from": "H",
+      "to": "L",
+      "rationale": "Format string read primitives (%x, %s for stack/heap disclosure) are blocked because user input cannot inject format specifiers into printf-family calls — information disclosure is limited to what the application explicitly outputs"
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-134",
+    "CWE-20"
+  ],
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-134",
+      "relationship_type": "mitigates",
+      "method": "structural",
+      "rationale": "Directly prevents use of externally-controlled format strings by enforcing literal-only format arguments at compile time and parameterized APIs at runtime",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-20",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/C",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "WEB-09",
+      "relationship_type": "maps_to"
+    }
+  ],
+  "scf_identifiers": [
+    "WEB-09"
+  ],
+  "verification": {
+    "method": "Verify that C/C++ build configurations enable format-string-security compiler warnings as errors, and that CI pipelines gate on these warnings. For managed languages, review logging configuration to confirm parameterized formatting is enforced.",
+    "commands": [
+      {
+        "command": "grep -rE '(-Wformat-security|-Werror=format-security|/analyze)' Makefile CMakeLists.txt meson.build *.spec 2>/dev/null | head -10",
+        "expected": "Build files contain -Wformat-security and -Werror=format-security (or MSVC /analyze equivalent)",
+        "platform": "any"
+      },
+      {
+        "command": "gcc -Wformat-security -Werror=format-security -fsyntax-only -xc - <<< 'int main(){char *s=\"%x\"; printf(s);}' 2>&1",
+        "expected": "error: format not a string literal and no format arguments [-Werror=format-security]",
+        "platform": "linux"
+      },
+      {
+        "command": "grep -rn 'printf\\|fprintf\\|sprintf\\|snprintf' --include='*.c' --include='*.cpp' <source>/ | grep -v '\"[^\"]*\"' | head -10",
+        "expected": "No hits — all printf-family calls use literal format strings",
+        "platform": "any"
+      }
+    ]
+  },
+  "references": [
+    {
+      "source": "CWE-134: Use of Externally-Controlled Format String",
+      "url": "https://cwe.mitre.org/data/definitions/134.html"
+    },
+    {
+      "source": "GCC Warning Options — -Wformat-security",
+      "url": "https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html",
+      "section": "-Wformat-security"
+    }
+  ]
+}

@@ -115,6 +115,26 @@
       <div class="cmd-platform">Platform: linux</div>
       
       
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> cat /sys/kernel/security/lsm | grep -c landlock
+        
+        <br><span class="cmd-expected"># Expected: 1</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> test -d /sys/kernel/security/landlock &amp;&amp; echo &#39;available&#39;
+        
+        <br><span class="cmd-expected"># Expected: available</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
     </section>
     
 
@@ -200,7 +220,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

@@ -131,6 +131,33 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">LUKS2 full-disk encryption via cryptsetup</span>
+        </div>
+        <pre class="remediation-commands"><code>
+dnf install -y cryptsetup
+cryptsetup luksFormat --type luks2 --cipher aes-xts-plain64 --key-size 512 --hash sha256 &lt;device&gt;
+cryptsetup luksOpen &lt;device&gt; &lt;name&gt;
+mkfs.xfs /dev/mapper/&lt;name&gt;
+echo &#39;&lt;name&gt; &lt;device&gt; none discard&#39; &gt;&gt; /etc/crypttab</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">windows</span>
+          <span class="remediation-name">BitLocker volume encryption with XTS-AES-256</span>
+        </div>
+        <pre class="remediation-commands"><code>
+Enable-BitLocker -MountPoint &#39;C:&#39; -EncryptionMethod XtsAes256 -UsedSpaceOnly -RecoveryPasswordProtector</code></pre>
+      </div>
+      
+    </section>
+    
 
     
     <section>
@@ -253,7 +280,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

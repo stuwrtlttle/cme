@@ -41,6 +41,92 @@
     "Fedora CoreOS",
     "Container-optimized OS"
   ],
+  "remediation": [
+    {
+      "id": "systemd-protect-system",
+      "name": "systemd ProtectSystem=strict drop-in for per-service read-only root",
+      "platform": "linux",
+      "precondition": "systemctl --version >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create a systemd drop-in directory for the target service",
+          "command": "mkdir -p /etc/systemd/system/<service>.service.d",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rmdir /etc/systemd/system/<service>.service.d 2>/dev/null"
+        },
+        {
+          "description": "Write a drop-in that makes the root filesystem read-only for the service and grants write access only to explicitly listed paths",
+          "command": "printf '[Service]\\nProtectSystem=strict\\nReadWritePaths=<writable_paths>\\n' > /etc/systemd/system/<service>.service.d/readonly-root.conf",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f /etc/systemd/system/<service>.service.d/readonly-root.conf"
+        },
+        {
+          "description": "Reload systemd manager configuration to pick up the drop-in",
+          "command": "systemctl daemon-reload",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Restart the service to apply ProtectSystem=strict",
+          "command": "systemctl restart <service>",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "systemctl show <service> -p ProtectSystem",
+      "references": [
+        {
+          "source": "systemd.exec(5) — ProtectSystem",
+          "url": "https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html#ProtectSystem="
+        },
+        {
+          "source": "RHEL 9 — Configuring systemd unit files",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/using_systemd_unit_files_to_customize_and_optimize_your_system/assembly_working-with-systemd-unit-files_working-with-systemd"
+        }
+      ]
+    },
+    {
+      "id": "container-readonly-root",
+      "name": "Kubernetes readOnlyRootFilesystem securityContext",
+      "platform": "kubernetes",
+      "precondition": "kubectl version --client >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Patch the deployment to set readOnlyRootFilesystem=true on the first container, preventing writes to the container root filesystem",
+          "command": "kubectl patch deployment <deployment> -n <namespace> --type=json -p '[{\"op\":\"add\",\"path\":\"/spec/template/spec/containers/0/securityContext/readOnlyRootFilesystem\",\"value\":true}]'",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "kubectl patch deployment <deployment> -n <namespace> --type=json -p '[{\"op\":\"replace\",\"path\":\"/spec/template/spec/containers/0/securityContext/readOnlyRootFilesystem\",\"value\":false}]'"
+        },
+        {
+          "description": "Add emptyDir volume mounts for paths the container needs to write to (e.g. /tmp, /var/run); adjust paths to match the application's requirements",
+          "command": "kubectl patch deployment <deployment> -n <namespace> --type=json -p '[{\"op\":\"add\",\"path\":\"/spec/template/spec/volumes/-\",\"value\":{\"name\":\"tmp\",\"emptyDir\":{}}},{\"op\":\"add\",\"path\":\"/spec/template/spec/containers/0/volumeMounts/-\",\"value\":{\"name\":\"tmp\",\"mountPath\":\"/tmp\"}}]'",
+          "idempotent": false,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "kubectl patch deployment <deployment> -n <namespace> --type=json -p '[{\"op\":\"remove\",\"path\":\"/spec/template/spec/containers/0/volumeMounts/-\"},{\"op\":\"remove\",\"path\":\"/spec/template/spec/volumes/-\"}]'"
+        }
+      ],
+      "verify": "kubectl get deployment <deployment> -n <namespace> -o jsonpath='{.spec.template.spec.containers[0].securityContext.readOnlyRootFilesystem}'",
+      "references": [
+        {
+          "source": "Kubernetes — Configure a Security Context for a Pod",
+          "url": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/"
+        },
+        {
+          "source": "Kubernetes — Pod Security Standards (Restricted)",
+          "url": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "CFG-02",
     "SEA-16"

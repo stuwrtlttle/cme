@@ -88,12 +88,59 @@
     <section>
       <h2>Verification</h2>
       
-      <p class="verification-method">Verify backup schedule and last successful restore test</p>
+      <p class="verification-method">Verify backup schedule is active, recent backups exist, and integrity verification is configured</p>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> systemctl list-timers --all 2&gt;/dev/null | grep -c -i backup
+        
+        <br><span class="cmd-expected"># Expected: &gt;=1 (backup timer active)</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> find &lt;backup_path&gt; -maxdepth 1 -name &#39;*.tar*&#39; -o -name &#39;*.sql*&#39; -o -name &#39;*.dump&#39; | xargs ls -lt 2&gt;/dev/null | head -1
+        
+        <br><span class="cmd-expected"># Expected: Most recent backup less than 24 hours old</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -rl &#39;sha256sum\|checksum\|integrity&#39; /etc/cron.d/ /etc/systemd/system/ 2&gt;/dev/null | wc -l
+        
+        <br><span class="cmd-expected"># Expected: &gt;=1 (integrity verification configured in backup jobs)</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
       
       
     </section>
     
 
+    
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Daily systemd backup timer with SHA-256 integrity verification</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;#!/bin/bash\nset -euo pipefail\nBACKUP_SRC=&#34;&lt;backup_source&gt;&#34;\nBACKUP_DEST=&#34;&lt;backup_dest&gt;&#34;\nTIMESTAMP=$(date +%%Y%%m%%d-%%H%%M%%S)\nARCHIVE=&#34;${BACKUP_DEST}/backup-${TIMESTAMP}.tar.gz&#34;\nmkdir -p &#34;${BACKUP_DEST}&#34;\ntar czf &#34;${ARCHIVE}&#34; -C &#34;$(dirname &#34;${BACKUP_SRC}&#34;)&#34; &#34;$(basename &#34;${BACKUP_SRC}&#34;)&#34;\nsha256sum &#34;${ARCHIVE}&#34; &gt; &#34;${ARCHIVE}.sha256&#34;\nfind &#34;${BACKUP_DEST}&#34; -name &#34;backup-*.tar.gz&#34; -mtime +30 -delete\nfind &#34;${BACKUP_DEST}&#34; -name &#34;backup-*.tar.gz.sha256&#34; -mtime +30 -delete\n&#39; &gt; /usr/local/bin/cme-1202-backup.sh &amp;&amp; chmod 755 /usr/local/bin/cme-1202-backup.sh
+printf &#39;[Unit]\nDescription=CME-1202 Automated Backup with Integrity Verification\n\n[Service]\nType=oneshot\nExecStart=/usr/local/bin/cme-1202-backup.sh\n&#39; &gt; /etc/systemd/system/cme-backup.service
+printf &#39;[Unit]\nDescription=Daily backup timer for CME-1202\n\n[Timer]\nOnCalendar=*-*-* 02:00:00\nPersistent=true\n\n[Install]\nWantedBy=timers.target\n&#39; &gt; /etc/systemd/system/cme-backup.timer
+systemctl daemon-reload &amp;&amp; systemctl enable --now cme-backup.timer</code></pre>
+      </div>
+      
+    </section>
     
 
     
@@ -172,7 +219,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

@@ -66,6 +66,43 @@
     "Kubernetes with CNI plugin (Calico, Cilium, Weave, Antrea)",
     "OpenShift 4.x"
   ],
+  "remediation": [
+    {
+      "id": "k8s-default-deny-networkpolicy",
+      "name": "Kubernetes default-deny NetworkPolicy with explicit allow rules",
+      "platform": "kubernetes",
+      "precondition": "kubectl version --client >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Apply a default-deny NetworkPolicy that blocks all ingress and egress traffic for every pod in the target namespace. Uses an empty podSelector to match all pods.",
+          "command": "kubectl apply -n <namespace> -f - <<'EOF'\napiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nmetadata:\n  name: default-deny-all\nspec:\n  podSelector: {}\n  policyTypes:\n    - Ingress\n    - Egress\nEOF",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "kubectl delete networkpolicy default-deny-all -n <namespace>"
+        },
+        {
+          "description": "Apply an explicit allow NetworkPolicy permitting required ingress and egress traffic for selected pods. Adjust podSelector, namespaceSelector, ports, and IP blocks to match the application's communication requirements.",
+          "command": "kubectl apply -n <namespace> -f - <<'EOF'\napiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nmetadata:\n  name: allow-app-traffic\nspec:\n  podSelector:\n    matchLabels:\n      app: <app-label>\n  policyTypes:\n    - Ingress\n    - Egress\n  ingress:\n    - from:\n        - namespaceSelector:\n            matchLabels:\n              name: <allowed-namespace>\n      ports:\n        - protocol: TCP\n          port: <port>\n  egress:\n    - to:\n        - namespaceSelector:\n            matchLabels:\n              name: <allowed-namespace>\n      ports:\n        - protocol: TCP\n          port: <port>\nEOF",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "kubectl delete networkpolicy allow-app-traffic -n <namespace>"
+        }
+      ],
+      "verify": "kubectl get networkpolicy -n <namespace>",
+      "references": [
+        {
+          "source": "Kubernetes — Network Policies",
+          "url": "https://kubernetes.io/docs/concepts/services-networking/network-policies/"
+        },
+        {
+          "source": "Kubernetes Network Policy Recipes",
+          "url": "https://github.com/ahmetb/kubernetes-network-policy-recipes"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "NET-04",
     "NET-04.1",

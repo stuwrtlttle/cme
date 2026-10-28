@@ -40,6 +40,84 @@
       }
     ]
   },
+  "remediation": [
+    {
+      "id": "systemd-resource-limits",
+      "name": "systemd drop-in with LimitCPU, LimitAS, LimitNOFILE, LimitNPROC",
+      "platform": "linux",
+      "precondition": "systemctl --version >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create a systemd drop-in directory for the target service",
+          "command": "mkdir -p /etc/systemd/system/<service>.service.d",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rmdir /etc/systemd/system/<service>.service.d 2>/dev/null"
+        },
+        {
+          "description": "Write a drop-in that sets CPU time limit (300s), address space limit (2G), max open files (65536), and max processes (4096); adjust values to match service requirements",
+          "command": "printf '[Service]\\nLimitCPU=300\\nLimitAS=2147483648\\nLimitNOFILE=65536\\nLimitNPROC=4096\\n' > /etc/systemd/system/<service>.service.d/resource-limits.conf",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f /etc/systemd/system/<service>.service.d/resource-limits.conf"
+        },
+        {
+          "description": "Reload systemd manager configuration to pick up the drop-in",
+          "command": "systemctl daemon-reload",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Restart the service to apply resource limits",
+          "command": "systemctl restart <service>",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "systemctl show <service> -p LimitCPU -p LimitNOFILE -p LimitNPROC -p LimitAS",
+      "references": [
+        {
+          "source": "systemd.exec(5) — Resource Limits",
+          "url": "https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html#Process%20Properties"
+        },
+        {
+          "source": "RHEL 9 — Configuring systemd unit files",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/using_systemd_unit_files_to_customize_and_optimize_your_system/assembly_working-with-systemd-unit-files_working-with-systemd"
+        }
+      ]
+    },
+    {
+      "id": "pam-limits-conf",
+      "name": "PAM resource limits via /etc/security/limits.d drop-in",
+      "platform": "linux",
+      "precondition": "test -d /etc/security/limits.d",
+      "steps": [
+        {
+          "description": "Create a limits.d drop-in that sets hard limits for the target user or service account; adjust <user> and values to match service requirements",
+          "command": "printf '<user>  hard  nproc   4096\\n<user>  hard  nofile  65536\\n<user>  hard  cpu     300\\n' > /etc/security/limits.d/99-cme-114.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/security/limits.d/99-cme-114.conf"
+        }
+      ],
+      "verify": "su - <user> -c 'ulimit -t; ulimit -u; ulimit -n'",
+      "references": [
+        {
+          "source": "limits.conf(5) man page",
+          "url": "https://man7.org/linux/man-pages/man5/limits.conf.5.html"
+        },
+        {
+          "source": "RHEL 9 Security Hardening — Setting limits",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/index"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "NET-02.1",
     "SEA-07.2"

@@ -115,9 +115,53 @@
       <div class="cmd-platform">Platform: kubernetes</div>
       
       
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> kubectl get namespace &lt;ns&gt; -o jsonpath=&#39;{.metadata.labels.pod-security\.kubernetes\.io/enforce-version}&#39;
+        
+        <br><span class="cmd-expected"># Expected: latest (or a specific version such as v1.28)</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: kubernetes</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> kubectl run cme-pss-test --image=busybox --restart=Never --dry-run=server --overrides=&#39;{&#34;spec&#34;:{&#34;containers&#34;:[{&#34;name&#34;:&#34;test&#34;,&#34;image&#34;:&#34;busybox&#34;,&#34;securityContext&#34;:{&#34;runAsNonRoot&#34;:false,&#34;allowPrivilegeEscalation&#34;:true}}]}}&#39; -n &lt;ns&gt; 2&gt;&amp;1 | grep -c -i &#39;forbidden\|violated&#39;
+        
+        <br><span class="cmd-expected"># Expected: &gt;=1 (restricted PSS rejects non-compliant workloads)</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: kubernetes</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> kubectl get namespace &lt;ns&gt; -o jsonpath=&#39;{.metadata.labels.pod-security\.kubernetes\.io/warn}&#39;
+        
+        <br><span class="cmd-expected"># Expected: restricted</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: kubernetes</div>
+      
+      
     </section>
     
 
+    
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">kubernetes</span>
+          <span class="remediation-name">Kubernetes Pod Security Standards restricted enforcement via namespace labels</span>
+        </div>
+        <pre class="remediation-commands"><code>
+kubectl label namespace &lt;namespace&gt; pod-security.kubernetes.io/enforce=restricted pod-security.kubernetes.io/enforce-version=latest pod-security.kubernetes.io/warn=restricted pod-security.kubernetes.io/audit=restricted --overwrite</code></pre>
+      </div>
+      
+    </section>
     
 
     
@@ -198,7 +242,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

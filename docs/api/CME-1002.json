@@ -50,6 +50,50 @@
     "RHEL 8",
     "Ubuntu 24.04"
   ],
+  "remediation": [
+    {
+      "id": "auditd-base-rules",
+      "name": "Enable auditd with base security audit rules",
+      "platform": "linux",
+      "precondition": "command -v auditctl >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Enable and start the auditd service so audit events are captured immediately and on every boot",
+          "command": "systemctl enable --now auditd",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "systemctl disable --now auditd"
+        },
+        {
+          "description": "Write base audit rules covering sensitive file access, privileged command execution, and kernel module loading to a drop-in rules file",
+          "command": "cat > /etc/audit/rules.d/99-cme-1002.rules <<'EOF'\n## Sensitive file access\n-w /etc/shadow -p wa -k shadow_access\n-w /etc/passwd -p wa -k passwd_access\n-w /etc/sudoers -p wa -k sudoers_access\n-w /etc/sudoers.d/ -p wa -k sudoers_access\n\n## Privileged command execution\n-a always,exit -F arch=b64 -S execve -F euid=0 -F auid>=1000 -F auid!=unset -k priv_exec\n-a always,exit -F arch=b32 -S execve -F euid=0 -F auid>=1000 -F auid!=unset -k priv_exec\n\n## Kernel module loading\n-w /sbin/insmod -p x -k module_load\n-w /sbin/modprobe -p x -k module_load\n-w /sbin/rmmod -p x -k module_load\n-a always,exit -F arch=b64 -S init_module,finit_module,delete_module -k module_load\nEOF",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/audit/rules.d/99-cme-1002.rules"
+        },
+        {
+          "description": "Load the new audit rules into the running kernel audit subsystem",
+          "command": "augenrules --load",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "auditctl -l | wc -l && systemctl is-active auditd",
+      "references": [
+        {
+          "source": "RHEL 9 Security Hardening — System Auditing",
+          "url": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/auditing-the-system_security-hardening"
+        },
+        {
+          "source": "auditd.conf(5) and audit.rules(7) man pages",
+          "url": "https://man7.org/linux/man-pages/man8/auditd.8.html"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "IAC-21.4",
     "MON-02",

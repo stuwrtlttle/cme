@@ -112,6 +112,36 @@
       <div class="cmd-platform">Platform: linux</div>
       
       
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> lsns -t pid -t net -t mnt -t user --no-headings | wc -l
+        
+        <br><span class="cmd-expected"># Expected: &gt;1 (multiple namespaces in use beyond init)</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> test &#34;$(readlink /proc/&lt;pid&gt;/ns/user)&#34; != &#34;$(readlink /proc/1/ns/user)&#34; &amp;&amp; echo &#39;PASS: separate user namespace&#39;
+        
+        <br><span class="cmd-expected"># Expected: PASS: separate user namespace</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> cat /proc/sys/user/max_user_namespaces
+        
+        <br><span class="cmd-expected"># Expected: &gt;0 (user namespaces enabled)</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: linux</div>
+      
+      
     </section>
     
 
@@ -199,7 +229,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

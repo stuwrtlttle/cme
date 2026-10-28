@@ -108,6 +108,21 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Configure service listen address to localhost only</span>
+        </div>
+        <pre class="remediation-commands"><code>
+sed -i &#39;s/^\(\s*bind_address\s*=\s*\)0\.0\.0\.0/\1127.0.0.1/&#39; &lt;config_file&gt;
+systemctl restart &lt;service&gt;</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -183,7 +198,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

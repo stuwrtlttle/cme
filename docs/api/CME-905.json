@@ -50,6 +50,90 @@
   "platforms": [
     "Any"
   ],
+  "remediation": [
+    {
+      "id": "nginx-csp-header",
+      "name": "Content Security Policy header via nginx drop-in configuration",
+      "platform": "linux",
+      "precondition": "nginx -v >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create an nginx drop-in configuration that adds a strict Content-Security-Policy header to all responses; adjust allowed sources per application requirements",
+          "command": "printf 'add_header Content-Security-Policy \"default-src '\\''self'\\''; script-src '\\''self'\\''; style-src '\\''self'\\''; img-src '\\''self'\\'' data:; font-src '\\''self'\\''; frame-ancestors '\\''self'\\''; base-uri '\\''self'\\''; form-action '\\''self'\\''\" always;\\n' > /etc/nginx/conf.d/cme-905-csp.conf",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f /etc/nginx/conf.d/cme-905-csp.conf"
+        },
+        {
+          "description": "Validate nginx configuration syntax before reloading",
+          "command": "nginx -t",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Reload nginx to apply the new CSP header without dropping active connections",
+          "command": "systemctl reload nginx",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "curl -sI http://<target>/ | grep -i content-security-policy",
+      "references": [
+        {
+          "source": "MDN — Content-Security-Policy",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy"
+        },
+        {
+          "source": "nginx — ngx_http_headers_module",
+          "url": "https://nginx.org/en/docs/http/ngx_http_headers_module.html#add_header"
+        }
+      ]
+    },
+    {
+      "id": "apache-csp-header",
+      "name": "Content Security Policy header via Apache httpd drop-in configuration",
+      "platform": "linux",
+      "precondition": "httpd -v >/dev/null 2>&1 || apachectl -v >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Create an Apache drop-in configuration that sets a strict Content-Security-Policy header on all responses via mod_headers; adjust allowed sources per application requirements",
+          "command": "printf '<IfModule mod_headers.c>\\n  Header always set Content-Security-Policy \"default-src '\\''self'\\''; script-src '\\''self'\\''; style-src '\\''self'\\''; img-src '\\''self'\\'' data:; font-src '\\''self'\\''; frame-ancestors '\\''self'\\''; base-uri '\\''self'\\''; form-action '\\''self'\\''\"\\n</IfModule>\\n' > /etc/httpd/conf.d/cme-905-csp.conf",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "rm -f /etc/httpd/conf.d/cme-905-csp.conf"
+        },
+        {
+          "description": "Validate Apache configuration syntax before reloading",
+          "command": "httpd -t || apachectl configtest",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        },
+        {
+          "description": "Reload Apache to apply the new CSP header without dropping active connections",
+          "command": "systemctl reload httpd",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": false
+        }
+      ],
+      "verify": "curl -sI http://<target>/ | grep -i content-security-policy",
+      "references": [
+        {
+          "source": "MDN — Content-Security-Policy",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy"
+        },
+        {
+          "source": "Apache — mod_headers",
+          "url": "https://httpd.apache.org/docs/2.4/mod/mod_headers.html"
+        }
+      ]
+    }
+  ],
   "scf_identifiers": [
     "WEB-01.1",
     "WEB-12"

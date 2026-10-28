@@ -120,6 +120,32 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">systemd drop-in with LimitCPU, LimitAS, LimitNOFILE, LimitNPROC</span>
+        </div>
+        <pre class="remediation-commands"><code>
+mkdir -p /etc/systemd/system/&lt;service&gt;.service.d
+printf &#39;[Service]\nLimitCPU=300\nLimitAS=2147483648\nLimitNOFILE=65536\nLimitNPROC=4096\n&#39; &gt; /etc/systemd/system/&lt;service&gt;.service.d/resource-limits.conf
+systemctl daemon-reload
+systemctl restart &lt;service&gt;</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">PAM resource limits via /etc/security/limits.d drop-in</span>
+        </div>
+        <pre class="remediation-commands"><code>
+printf &#39;&lt;user&gt;  hard  nproc   4096\n&lt;user&gt;  hard  nofile  65536\n&lt;user&gt;  hard  cpu     300\n&#39; &gt; /etc/security/limits.d/99-cme-114.conf</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -199,7 +225,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

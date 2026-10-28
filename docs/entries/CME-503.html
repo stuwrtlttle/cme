@@ -115,6 +115,25 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Mount /home, /var, and /tmp with nosuid to block SUID privilege escalation</span>
+        </div>
+        <pre class="remediation-commands"><code>
+mount -o remount,nosuid /home
+mount -o remount,nosuid /var
+mount -o remount,nosuid /tmp
+grep -q &#39;[[:space:]]/home[[:space:]]&#39; /etc/fstab &amp;&amp; sed -i &#39;/[[:space:]]/home[[:space:]]/ s/defaults/defaults,nosuid/&#39; /etc/fstab || echo &#39;# CME-503: nosuid on /home — add nosuid to existing /home mount entry manually&#39;
+grep -q &#39;[[:space:]]/var[[:space:]]&#39; /etc/fstab &amp;&amp; sed -i &#39;/[[:space:]]/var[[:space:]]/ s/defaults/defaults,nosuid/&#39; /etc/fstab || echo &#39;# CME-503: nosuid on /var — add nosuid to existing /var mount entry manually&#39;
+grep -q &#39;[[:space:]]/tmp[[:space:]]&#39; /etc/fstab &amp;&amp; sed -i &#39;/[[:space:]]/tmp[[:space:]]/ s/defaults/defaults,nosuid/&#39; /etc/fstab || echo &#39;tmpfs /tmp tmpfs defaults,nosuid 0 0&#39; &gt;&gt; /etc/fstab</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -194,7 +213,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

@@ -131,6 +131,32 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Linux password aging via /etc/login.defs and chage</span>
+        </div>
+        <pre class="remediation-commands"><code>
+sed -i &#39;s/^PASS_MAX_DAYS.*/PASS_MAX_DAYS	90/&#39; /etc/login.defs
+sed -i &#39;s/^PASS_MIN_DAYS.*/PASS_MIN_DAYS	1/&#39; /etc/login.defs
+sed -i &#39;s/^PASS_WARN_AGE.*/PASS_WARN_AGE	14/&#39; /etc/login.defs
+chage --maxdays 90 --mindays 1 --warndays 14 &lt;username&gt;</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">windows</span>
+          <span class="remediation-name">Windows password aging via net accounts</span>
+        </div>
+        <pre class="remediation-commands"><code>
+net accounts /maxpwage:90 /minpwage:1</code></pre>
+      </div>
+      
+    </section>
+    
 
     
     <section>
@@ -273,7 +299,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

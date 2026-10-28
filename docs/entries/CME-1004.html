@@ -105,6 +105,22 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">AIDE file integrity monitoring with systemd timer</span>
+        </div>
+        <pre class="remediation-commands"><code>
+dnf install -y aide
+aide --init &amp;&amp; mv /var/lib/aide/aide.db.new.gz /var/lib/aide/aide.db.gz
+printf &#39;[Unit]\nDescription=AIDE integrity check\n\n[Service]\nType=oneshot\nExecStart=/usr/sbin/aide --check\n&#39; &gt; /etc/systemd/system/aide-check.service &amp;&amp; printf &#39;[Unit]\nDescription=Daily AIDE integrity check\n\n[Timer]\nOnCalendar=daily\nPersistent=true\n\n[Install]\nWantedBy=timers.target\n&#39; &gt; /etc/systemd/system/aide-check.timer &amp;&amp; systemctl daemon-reload &amp;&amp; systemctl enable --now aide-check.timer</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -198,7 +214,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

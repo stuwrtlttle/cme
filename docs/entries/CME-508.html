@@ -139,6 +139,22 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">windows</span>
+          <span class="remediation-name">Quote unquoted Windows service executable paths via registry</span>
+        </div>
+        <pre class="remediation-commands"><code>
+Get-WmiObject win32_service | Where-Object { $_.PathName -notlike &#39;&#34;*&#39; -and $_.PathName -match &#39;\s&#39; } | Select-Object Name, PathName | Format-Table -AutoSize
+Set-ItemProperty -Path &#39;HKLM:\SYSTEM\CurrentControlSet\Services\&lt;service_name&gt;&#39; -Name ImagePath -Value &#39;&#34;&lt;path_to_exe&gt;&#34; &lt;arguments&gt;&#39;
+Get-WmiObject win32_service | Where-Object { $_.PathName -notlike &#39;&#34;*&#39; -and $_.PathName -match &#39;\s&#39; } | Measure-Object | Select-Object -ExpandProperty Count</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -220,7 +236,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

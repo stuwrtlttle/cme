@@ -145,6 +145,67 @@
     
 
     
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">nginx CORS origin allowlist via map and conditional headers</span>
+        </div>
+        <pre class="remediation-commands"><code>
+cat &gt; /etc/nginx/conf.d/cme-914-cors.conf &lt;&lt;&#39;EOF&#39;
+map $http_origin $cors_origin {
+    default &#34;&#34;;
+    &#34;https://&lt;allowed_origin_1&gt;&#34; $http_origin;
+    &#34;https://&lt;allowed_origin_2&gt;&#34; $http_origin;
+}
+
+map $cors_origin $cors_credentials {
+    default &#34;&#34;;
+    &#34;~.+&#34; &#34;true&#34;;
+}
+
+# Apply in server or location blocks:
+# add_header Access-Control-Allow-Origin $cors_origin always;
+# add_header Access-Control-Allow-Credentials $cors_credentials always;
+# add_header Access-Control-Allow-Methods &#34;GET, POST, OPTIONS&#34; always;
+# add_header Access-Control-Allow-Headers &#34;Authorization, Content-Type&#34; always;
+# if ($request_method = OPTIONS) { return 204; }
+EOF
+nginx -t
+systemctl reload nginx</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Apache CORS origin allowlist via mod_headers and SetEnvIf</span>
+        </div>
+        <pre class="remediation-commands"><code>
+cat &gt; /etc/httpd/conf.d/cme-914-cors.conf &lt;&lt;&#39;EOF&#39;
+&lt;IfModule mod_headers.c&gt;
+    SetEnvIfNoCase Origin &#34;^https://&lt;allowed_origin_1&gt;$&#34; CORS_ORIGIN=$0
+    SetEnvIfNoCase Origin &#34;^https://&lt;allowed_origin_2&gt;$&#34; CORS_ORIGIN=$0
+
+    Header always set Access-Control-Allow-Origin %{CORS_ORIGIN}e env=CORS_ORIGIN
+    Header always set Access-Control-Allow-Credentials &#34;true&#34; env=CORS_ORIGIN
+    Header always set Access-Control-Allow-Methods &#34;GET, POST, OPTIONS&#34; env=CORS_ORIGIN
+    Header always set Access-Control-Allow-Headers &#34;Authorization, Content-Type&#34; env=CORS_ORIGIN
+
+    # Handle preflight
+    RewriteEngine On
+    RewriteCond %{REQUEST_METHOD} OPTIONS
+    RewriteCond %{ENV:CORS_ORIGIN} .+
+    RewriteRule ^(.*)$ $1 [R=204,L]
+&lt;/IfModule&gt;
+EOF
+httpd -t 2&gt;&amp;1 || apachectl configtest 2&gt;&amp;1
+systemctl reload httpd</code></pre>
+      </div>
+      
+    </section>
+    
 
     
 
@@ -222,7 +283,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-02 23:01 UTC &middot; 137 entries &middot;
+    Generated 2026-10-28 18:30 UTC &middot; 139 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>
