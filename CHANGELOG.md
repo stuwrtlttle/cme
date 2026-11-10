@@ -13,6 +13,11 @@ All notable changes to the CME (Common Mitigation Enumeration) project are docum
 
 - `c699521` ci: serialize main auto-commits to fix push races
 
+
+### Auto-generated changelog
+
+- `3130a1d` Update build_site.py,docs/by-tactic.html,docs/index.html
+
 ## 2026-10-28
 
 ### Auto-generated changelog
