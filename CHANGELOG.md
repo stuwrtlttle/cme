@@ -8,6 +8,11 @@ All notable changes to the CME (Common Mitigation Enumeration) project are docum
 
 - `4c605a8` Add 1 CME entries (CME-922);Update 2 CME entries (CME-1311,CME-1316);Update docs/api/CME-1311.json,docs/api/CME-1316.json,docs/api/entries.json
 
+
+### Auto-generated changelog
+
+- `c699521` ci: serialize main auto-commits to fix push races
+
 ## 2026-10-28
 
 ### Auto-generated changelog
