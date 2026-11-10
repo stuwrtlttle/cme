@@ -1,6 +1,7 @@
 """Build static HTML site from CME JSON entry files."""
 
 import json
+import re
 import shutil
 from datetime import datetime, timezone
 from pathlib import Path
@@ -10,6 +11,7 @@ from jinja2 import Environment, FileSystemLoader
 PROJECT_ROOT = Path(__file__).parent
 ENTRIES_DIR = PROJECT_ROOT / "data" / "entries"
 CATEGORIES_PATH = PROJECT_ROOT / "data" / "categories.json"
+README_PATH = PROJECT_ROOT / "README.md"
 TEMPLATES_DIR = PROJECT_ROOT / "templates"
 OUTPUT_DIR = PROJECT_ROOT / "docs"
 
@@ -25,6 +27,32 @@ METRIC_NAMES = {
     "I": "Integrity",
     "A": "Availability",
 }
+
+
+def load_overview_copy():
+    """Share the overview and evidence definitions with the README."""
+    readme = README_PATH.read_text(encoding="utf-8")
+    overview_match = re.search(r"^## Overview\s*\n(.*?)(?=^## )", readme, re.M | re.S)
+    evidence_match = re.search(
+        r"^### Evidence-State Scoring Model\s*\n(.*?)(?=^### |^## )",
+        readme, re.M | re.S,
+    )
+    if not overview_match or not evidence_match:
+        raise ValueError("README is missing the Overview or Evidence-State Scoring Model section")
+    paragraphs = overview_match.group(1).strip().split("\n\n")
+    if len(paragraphs) < 2:
+        raise ValueError("README Overview must begin with two introductory paragraphs")
+
+    def plain_text(text):
+        return re.sub(r"\*\*|`", "", " ".join(text.split()))
+
+    evidence = {}
+    for state in ("Deterministic", "Quantified", "Unquantified"):
+        match = re.search(rf"^\*\*{state}\*\* — (.+)$", evidence_match.group(1), re.M)
+        if not match:
+            raise ValueError(f"README is missing the {state} evidence definition")
+        evidence[state.lower()] = plain_text(match.group(1))
+    return {"intro": [plain_text(p) for p in paragraphs[:2]], "evidence": evidence}
 
 
 def cme_sort_key(entry):
@@ -113,6 +141,7 @@ def main():
         "taxonomy": taxonomy,
         "category_registry": category_registry,
         "metric_names": METRIC_NAMES,
+        "overview_copy": load_overview_copy(),
     }
 
     if OUTPUT_DIR.exists():

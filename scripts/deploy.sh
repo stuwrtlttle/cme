@@ -45,6 +45,14 @@ done
 # ── preflight ─────────────────────────────────────────────────
 step "Preflight checks"
 
+# The VPS deploys origin/main. Never silently push a different local branch.
+if [ "$VPS_ONLY" = false ]; then
+  CURRENT_BRANCH=$(git branch --show-current)
+  if [ "$CURRENT_BRANCH" != "main" ]; then
+    fail "Deploy requires the local main branch (currently ${CURRENT_BRANCH:-detached HEAD}). Merge the desired changes into main first."
+  fi
+fi
+
 if ! ssh -o ConnectTimeout=5 -o BatchMode=yes "$VPS_HOST" "echo ok" &>/dev/null; then
   fail "Cannot SSH to $VPS_HOST. Run: ssh-add ~/.ssh/id_ed25519"
 fi
@@ -76,7 +84,7 @@ if [ "$VPS_ONLY" = false ]; then
   OTHER_NEW=$(git ls-files --others --exclude-standard -- ':!data/entries/*.json' ':!.DS_Store')
 
   if [ -z "$NEW_ENTRIES" ] && [ -z "$CHANGED_ENTRIES" ] && [ -z "$OTHER" ] && [ -z "$OTHER_NEW" ]; then
-    warn "No local changes — skipping git push"
+    warn "No local changes to commit"
   else
     # Build commit message if not provided
     if [ -z "$COMMIT_MSG" ]; then
@@ -103,16 +111,17 @@ if [ "$VPS_ONLY" = false ]; then
     git commit -m "$COMMIT_MSG"
     ok "Committed"
 
-    step "Pushing to GitHub"
-    # Pull first in case remote is ahead
-    if ! git pull --rebase origin main; then
-      fail "git pull --rebase failed. Resolve conflicts and retry."
-    fi
-    if ! git push origin main; then
-      fail "git push failed. Check authentication and remote state."
-    fi
-    ok "Pushed"
   fi
+
+  # A clean worktree can still contain commits that have not been pushed.
+  step "Pushing to GitHub"
+  if ! git pull --rebase origin main; then
+    fail "git pull --rebase failed. Resolve conflicts and retry."
+  fi
+  if ! git push origin main; then
+    fail "git push failed. Check authentication and remote state."
+  fi
+  ok "Pushed"
 fi
 
 # ── VPS: pull, rebuild, seed, docs ────────────────────────────

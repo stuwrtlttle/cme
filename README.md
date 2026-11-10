@@ -438,7 +438,9 @@ CME distinguishes three evidence states. Only the first two can affect an automa
 
 **Deterministic** — A verified preventive control whose conditions hold and whose CVSS-compatible effect is guaranteed. Examples include a correctly enforced noexec mount or a complete protocol disablement.
 
-**Quantified** — Evidence-based, conditional effectiveness with a measured probability. These controls carry:
+**Quantified** — Evidence-based, conditional effectiveness with a measured probability, supporting evidence, and operating conditions.
+
+These controls carry:
 
 | Field | Type | Description |
 |---|---|---|
@@ -935,13 +937,13 @@ uv run python build_site.py
 ```
 
 This reads all `data/entries/*.json` files and produces HTML pages in `docs/`:
-- `docs/index.html` — searchable index of all entries
+- `docs/index.html` — overview, usage guide, and entry terminology
 - `docs/entries/CME-XXX.html` — individual entry detail pages
 - `docs/by-tactic.html` — entries organized by tactic/category
 - `docs/by-cwe.html` — CWE-to-CME cross-reference
 - `docs/search.html` — full-text search
 
-Templates are in `templates/` using Jinja2. To update the public site after adding entries:
+Templates are in `templates/` using Jinja2. The landing page pulls its introductory paragraphs and evidence-state definitions from the Overview and Evidence-State Scoring Model sections of this README. Keep those sections in sync with the entry schema. To update the public site after adding entries:
 
 ```bash
 uv run python build_site.py   # regenerate HTML

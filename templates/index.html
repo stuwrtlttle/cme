@@ -1,51 +1,83 @@
 {% extends "base.html" %}
-{% block title %}Home{% endblock %}
+{% block title %}Overview{% endblock %}
 
 {% block content %}
-<h1 class="page-title">Common Mitigation Enumeration</h1>
-<p class="page-subtitle">
-  A taxonomy of defensive security controls mapped to CWE weaknesses and CVSS vector attenuation.
-  Each CME entry describes a verifiable control that modifies CVSS environmental scoring, either
-  deterministically (guaranteed) or probabilistically (evidence-based).
-</p>
-<p class="page-subtitle"><a href="mcp-reference.html">Read the MCP server reference</a></p>
-
-<div class="stats-bar">
-  <div class="stat-card">
-    <div class="stat-value">{{ total_entries }}</div>
-    <div class="stat-label">Total Entries</div>
-  </div>
-  {% for tactic in tactic_order %}
-  <div class="stat-card">
-    <div class="stat-value">{{ tactic_counts.get(tactic, 0) }}</div>
-    <div class="stat-label">{{ tactic }}</div>
-  </div>
-  {% endfor %}
-</div>
-
-{% for tactic in tactic_order %}
-{% if tactic in taxonomy %}
-<div class="taxonomy-group">
-  <div class="tactic-header" style="background: var(--bg-alt);">
-    <span class="badge badge-tactic-{{ tactic|lower }}">{{ tactic }}</span>
-    <span>{{ tactic }}</span>
-    <span style="margin-left: auto; font-size: 14px; color: var(--text-muted);">{{ tactic_counts.get(tactic, 0) }} entries</span>
-  </div>
-  {% for category in taxonomy[tactic] | sort %}
-  <div class="category-section">
-    <div class="category-header">{{ category }}</div>
-    <ul class="entry-list">
-      {% for entry in taxonomy[tactic][category] | sort(attribute='cme_num') %}
-      <li>
-        <a href="entries/{{ entry.cme_id }}.html" class="cme-id">{{ entry.cme_id }}</a>
-        <a href="entries/{{ entry.cme_id }}.html" class="entry-name">{{ entry.control_name }}</a>
-        <span class="badge badge-layer-{{ entry.control_layer | lower | replace('/', '-') | replace(' ', '') }}">{{ entry.control_layer }}</span>
-      </li>
+<div class="overview">
+  <section class="overview-intro" aria-labelledby="overview-title">
+    <div>
+      <p class="overview-kicker">A common language for defensive controls</p>
+      <h1 id="overview-title">Common Mitigation Enumeration</h1>
+      {% for paragraph in overview_copy.intro %}
+      <p>{{ paragraph }}</p>
       {% endfor %}
-    </ul>
-  </div>
-  {% endfor %}
-</div>
-{% endif %}
+      <div class="overview-actions">
+        <a class="overview-button" href="by-tactic.html">Browse the taxonomy</a>
+        <a href="search.html">Search entries</a>
+      </div>
+    </div>
+    <aside class="overview-paths" aria-label="Explore CME">
+      <p class="overview-count"><strong>{{ total_entries }}</strong> controls in the taxonomy</p>
+      <a href="by-cwe.html"><strong>Start with a weakness</strong><span>Find controls associated with a CWE.</span></a>
+      <a href="mcp-reference.html"><strong>Connect an agent or tool</strong><span>Explore the MCP server and its queries.</span></a>
+      <a href="#entry-guide"><strong>Understand an entry</strong><span>Read the field and evidence guide.</span></a>
+    </aside>
+  </section>
+
+  <section class="overview-section" aria-labelledby="how-to-use">
+    <h2 id="how-to-use">How to use CME</h2>
+    <p class="overview-lead">Use CME to find candidate controls, then establish whether they apply and are actually active in your environment.</p>
+    <ol class="overview-steps">
+      <li><strong>Find a control</strong><span>Browse by tactic, search by name or ID, or start with a CWE. A relationship is a starting point, not proof that a control mitigates a specific vulnerability.</span></li>
+      <li><strong>Check applicability</strong><span>Review the product, platform, operating conditions, and control scope against the affected asset and vulnerability.</span></li>
+      <li><strong>Verify and assess</strong><span>Confirm the control is active and its conditions hold. Use the evidence state and any applicable framework binding to inform your assessment.</span></li>
+    </ol>
+    <p class="overview-note"><strong>For scoring:</strong> CVSS impacts are optional and apply only when relevant to the vulnerability, the asset, and the control's documented conditions. A CME entry or product match alone does not establish a score reduction. Validate the result against the applicable CVSS version and assessment context.</p>
+  </section>
+
+  <section class="overview-section" aria-labelledby="entry-guide">
+    <h2 id="entry-guide">How to read a CME entry</h2>
+    <p class="overview-lead">Entries describe the control, what it does, and the evidence and artifacts available to evaluate it. Not every entry contains every field.</p>
+    <div class="overview-guide">
+      <div class="overview-guide-block">
+        <h3>Identity and organization</h3>
+        <dl>
+          <div><dt>CME ID and description</dt><dd>A stable identifier, control name, and explanation of the defensive mechanism.</dd></div>
+          <div><dt>Tactic and category</dt><dd>The defensive objective and a more specific grouping. Tactics are D3FEND-aligned: Harden, Isolate, Detect, Evict, and Restore. CME adds Restore and currently excludes Deceive.</dd></div>
+          <div><dt>Function and layer</dt><dd>An optional function groups related controls, such as SELinux or seccomp. The layer identifies where the control operates: Network, OS/Kernel, Application, Data, or Identity.</dd></div>
+        </dl>
+      </div>
+      <div class="overview-guide-block" id="effects">
+        <h3>Effect</h3>
+        <p>The primary kind of outcome the control is intended to produce; this is distinct from how strong the evidence is.</p>
+        <dl>
+          <div><dt>Preventive</dt><dd>Blocks an attack or limits its ability to succeed or cause harm.</dd></div>
+          <div><dt>Detective</dt><dd>Identifies or signals an attack, suspicious activity, or a security-relevant condition.</dd></div>
+          <div><dt>Corrective</dt><dd>Removes a threat or repairs or restores systems after an incident.</dd></div>
+        </dl>
+      </div>
+      <div class="overview-guide-block" id="evidence">
+        <h3>Evidence state</h3>
+        <p>Evidence describes how the control's effect can be credited, not whether it is enabled on your asset.</p>
+        <dl>
+{% for state in ['deterministic', 'quantified', 'unquantified'] %}
+          <div><dt>{{ state | title }}</dt><dd>{{ overview_copy.evidence[state] }}</dd></div>
 {% endfor %}
+        </dl>
+        <p>For quantified effects, probability is conditional on the stated evidence and prerequisites; it is not a guarantee. Unquantified does not mean ineffective—it means the effect has not been measured well enough for automatic scoring credit.</p>
+      </div>
+      <div class="overview-guide-block">
+        <h3>Mappings and artifacts</h3>
+        <dl>
+          <div><dt>CVSS vector impacts</dt><dd>Optional metric transitions and rationales for an applicable control. They describe potential environmental changes, not a new CVE base score. Evidence and conditions govern whether a transition may be credited.</dd></div>
+          <div><dt>CWE and framework relationships</dt><dd>Links to weakness classes and frameworks such as ATT&amp;CK, D3FEND, and SCF. Typed relationships and rationales describe how the objects relate; a mapping is not proof of coverage in a particular deployment.</dd></div>
+          <div><dt>Verification</dt><dd>Methods and, where available, commands and expected results for checking whether the control is active on a particular platform. Review commands before running them.</dd></div>
+          <div><dt>Remediation</dt><dd>Optional platform-specific steps for enabling the control. Review preconditions, placeholders, restart requirements, reversibility, and operational impact before applying changes; the full JSON may contain safety details not shown on the entry page.</dd></div>
+          <div><dt>Applicability and platforms</dt><dd>Product and platform information, optionally using CVE-format product identifiers such as CPEs or package URLs. Applicability means the control can apply to a product—not that it is enabled or mitigates every vulnerability in it.</dd></div>
+          <div><dt>References</dt><dd>Sources and documentation supporting the control, its implementation, or its mappings. Consult the underlying evidence and conditions before relying on an effect.</dd></div>
+        </dl>
+      </div>
+    </div>
+    <p class="overview-source">The introduction and evidence definitions on this page are drawn from the <a href="https://github.com/stuwrtlttle/cme">project README</a>. The <a href="https://github.com/stuwrtlttle/cme/blob/main/schema/cme-entry.schema.json">entry schema</a> defines the complete machine-readable record. For the full data behind an entry, use its JSON API path (for example, <a href="api/CME-101.json">CME-101.json</a>).</p>
+  </section>
+</div>
 {% endblock %}

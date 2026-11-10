@@ -22,2434 +22,1079 @@
   <main class="container">
     
 <h1 class="page-title">Browse by Tactic</h1>
-<p class="page-subtitle">All CME entries organized by their D3FEND-aligned tactic.</p>
+<p class="page-subtitle">All CME entries organized by their D3FEND-aligned tactic and category.</p>
+
+<div class="stats-bar" aria-label="Entry counts by tactic">
+  <div class="stat-card">
+    <div class="stat-value">140</div>
+    <div class="stat-label">Total Entries</div>
+  </div>
+
+  <a class="stat-card stat-card-link" href="#tactic-harden">
+    <div class="stat-value">97</div>
+    <div class="stat-label">Harden</div>
+  </a>
+
+  <a class="stat-card stat-card-link" href="#tactic-isolate">
+    <div class="stat-value">23</div>
+    <div class="stat-label">Isolate</div>
+  </a>
+
+  <a class="stat-card stat-card-link" href="#tactic-detect">
+    <div class="stat-value">13</div>
+    <div class="stat-label">Detect</div>
+  </a>
+
+  <a class="stat-card stat-card-link" href="#tactic-evict">
+    <div class="stat-value">3</div>
+    <div class="stat-label">Evict</div>
+  </a>
+
+  <a class="stat-card stat-card-link" href="#tactic-restore">
+    <div class="stat-value">4</div>
+    <div class="stat-label">Restore</div>
+  </a>
+
+</div>
 
 
-
-<div class="tactic-section">
-  <h2>
+<section class="taxonomy-group" id="tactic-harden" aria-labelledby="heading-harden">
+  <h2 class="tactic-header" id="heading-harden" style="background: var(--bg-alt);">
     <span class="badge badge-tactic-harden">Harden</span>
-    Harden (97)
+    <span>Harden</span>
+    <span class="tactic-entry-count">97 entries</span>
   </h2>
-  <table class="data-table">
-    <thead>
-      <tr>
-        <th>CME ID</th>
-        <th>Control Name</th>
-        <th>Category</th>
-        <th>Function</th>
-        <th>Layer</th>
-        <th>Effect / Evidence</th>
-        <th>CVSS Modifications</th>
-        <th>CWEs</th>
-      </tr>
-    </thead>
-    <tbody>
-      
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-904.html">CME-904</a></td>
-        <td><a href="entries/CME-904.html">WAF (Web Application Firewall)</a></td>
-        <td>Application Controls</td>
-        <td class="function-cell">request-filtering</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>5</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-905.html">CME-905</a></td>
-        <td><a href="entries/CME-905.html">Content Security Policy (CSP) Headers</a></td>
-        <td>Application Controls</td>
-        <td class="function-cell">runtime-hardening</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-906.html">CME-906</a></td>
-        <td><a href="entries/CME-906.html">Rate Limiting / Connection Throttling</a></td>
-        <td>Application Controls</td>
-        <td class="function-cell">request-filtering</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">A:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>, 
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-907.html">CME-907</a></td>
-        <td><a href="entries/CME-907.html">Application-Layer RBAC Enforcement</a></td>
-        <td>Application Controls</td>
-        <td class="function-cell">authorization-controls</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">PR:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>5</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-908.html">CME-908</a></td>
-        <td><a href="entries/CME-908.html">Object-Level Authorization Checks (IDOR Prevention)</a></td>
-        <td>Application Controls</td>
-        <td class="function-cell">authorization-controls</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-909.html">CME-909</a></td>
-        <td><a href="entries/CME-909.html">Default-Deny API Authorization Policy</a></td>
-        <td>Application Controls</td>
-        <td class="function-cell">authorization-controls</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">PR:N</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>, 
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>4</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-912.html">CME-912</a></td>
-        <td><a href="entries/CME-912.html">HTTP Header Normalization and Request Smuggling Prevention</a></td>
-        <td>Application Controls</td>
-        <td class="function-cell">request-filtering</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-913.html">CME-913</a></td>
-        <td><a href="entries/CME-913.html">CSRF Protection (Anti-CSRF Token &amp; SameSite Cookie Enforcement)</a></td>
-        <td>Application Controls</td>
-        <td class="function-cell">origin-cors</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-914.html">CME-914</a></td>
-        <td><a href="entries/CME-914.html">Strict CORS Origin Allowlist Enforcement</a></td>
-        <td>Application Controls</td>
-        <td class="function-cell">origin-cors</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>4</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-915.html">CME-915</a></td>
-        <td><a href="entries/CME-915.html">Cross-Origin Request Restriction (Reverse Proxy Origin Enforcement)</a></td>
-        <td>Application Controls</td>
-        <td class="function-cell">origin-cors</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>4</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-916.html">CME-916</a></td>
-        <td><a href="entries/CME-916.html">SameSite Cookie Attribute Enforcement</a></td>
-        <td>Application Controls</td>
-        <td class="function-cell">origin-cors</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-917.html">CME-917</a></td>
-        <td><a href="entries/CME-917.html">Worker Process Recycling (MaxConnectionsPerChild / max_requests)</a></td>
-        <td>Application Controls</td>
-        <td class="function-cell">runtime-hardening</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">A:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-918.html">CME-918</a></td>
-        <td><a href="entries/CME-918.html">URL Path Authorization Enforcement (Forced Browsing Prevention)</a></td>
-        <td>Application Controls</td>
-        <td class="function-cell">authorization-controls</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">PR:N</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>, 
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>4</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-919.html">CME-919</a></td>
-        <td><a href="entries/CME-919.html">JIT Compiler Hardening (JIT Restriction / V8 Sandbox)</a></td>
-        <td>Application Controls</td>
-        <td class="function-cell">runtime-hardening</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">S:C</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">U</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-920.html">CME-920</a></td>
-        <td><a href="entries/CME-920.html">Database Least-Privilege Access Control</a></td>
-        <td>Application Controls</td>
-        <td class="function-cell">authorization-controls</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>, 
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>4</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-921.html">CME-921</a></td>
-        <td><a href="entries/CME-921.html">URL Request Path Canonicalization Before Authorization</a></td>
-        <td>Application Controls</td>
-        <td class="function-cell">request-filtering</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>4</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-922.html">CME-922</a></td>
-        <td><a href="entries/CME-922.html">Trusted Source Validation for Security Decisions (Anti-Spoofing)</a></td>
-        <td>Application Controls</td>
-        <td class="function-cell">authorization-controls</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>, 
-          
-          <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>4</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-923.html">CME-923</a></td>
-        <td><a href="entries/CME-923.html">Mass-Assignment Prevention Through Explicit Request Schemas</a></td>
-        <td>Application Controls</td>
-        <td class="function-cell">request-filtering</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>1</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-924.html">CME-924</a></td>
-        <td><a href="entries/CME-924.html">Arbitrary Code Guard (ACG)</a></td>
-        <td>Application Controls</td>
-        <td class="function-cell">runtime-hardening</td>
-        <td><span class="badge badge-layer-"></span></td>
-        <td>Preventive / Deterministic</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>4</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-925.html">CME-925</a></td>
-        <td><a href="entries/CME-925.html">Windows Defender Application Control (WDAC)</a></td>
-        <td>Application Controls</td>
-        <td class="function-cell">runtime-hardening</td>
-        <td><span class="badge badge-layer-"></span></td>
-        <td>Preventive / Deterministic</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1301.html">CME-1301</a></td>
-        <td><a href="entries/CME-1301.html">Path Traversal Prevention (Canonicalization)</a></td>
-        <td>Application Input Validation</td>
-        <td class="function-cell">input-validation</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>, 
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>5</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1302.html">CME-1302</a></td>
-        <td><a href="entries/CME-1302.html">Deserialization Allowlist (Safe Loading)</a></td>
-        <td>Application Input Validation</td>
-        <td class="function-cell">input-validation</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>, 
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1304.html">CME-1304</a></td>
-        <td><a href="entries/CME-1304.html">SSRF Prevention (Outbound Request Allowlist)</a></td>
-        <td>Application Input Validation</td>
-        <td class="function-cell">input-validation</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>1</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1305.html">CME-1305</a></td>
-        <td><a href="entries/CME-1305.html">SQL Injection Prevention (Parameterized Queries)</a></td>
-        <td>Application Input Validation</td>
-        <td class="function-cell">injection-prevention</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>, 
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>1</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1306.html">CME-1306</a></td>
-        <td><a href="entries/CME-1306.html">XSS Prevention (Context-Aware Output Encoding)</a></td>
-        <td>Application Input Validation</td>
-        <td class="function-cell">injection-prevention</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1307.html">CME-1307</a></td>
-        <td><a href="entries/CME-1307.html">Command Injection Prevention (No Shell Invocation)</a></td>
-        <td>Application Input Validation</td>
-        <td class="function-cell">injection-prevention</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>, 
-          
-          <span class="cvss-from">S:C</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">U</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1309.html">CME-1309</a></td>
-        <td><a href="entries/CME-1309.html">Script Engine Restriction (Sandbox / Disable)</a></td>
-        <td>Application Input Validation</td>
-        <td class="function-cell">injection-prevention</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>, 
-          
-          <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>5</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1310.html">CME-1310</a></td>
-        <td><a href="entries/CME-1310.html">File Upload Validation (Content Inspection and Extension Allowlist)</a></td>
-        <td>Application Input Validation</td>
-        <td class="function-cell">input-validation</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>5</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1311.html">CME-1311</a></td>
-        <td><a href="entries/CME-1311.html">Input Size and Quantity Bounds Enforcement</a></td>
-        <td>Application Input Validation</td>
-        <td class="function-cell">input-validation</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">A:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>9</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1312.html">CME-1312</a></td>
-        <td><a href="entries/CME-1312.html">Argument Injection Prevention (Downstream Input Delimiter Sanitization)</a></td>
-        <td>Application Input Validation</td>
-        <td class="function-cell">injection-prevention</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>, 
-          
-          <span class="cvss-from">S:C</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">U</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1313.html">CME-1313</a></td>
-        <td><a href="entries/CME-1313.html">CRLF / Line Injection Prevention (Newline Sanitization for Structured Formats)</a></td>
-        <td>Application Input Validation</td>
-        <td class="function-cell">injection-prevention</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1314.html">CME-1314</a></td>
-        <td><a href="entries/CME-1314.html">Input Canonicalization Before Security Decision</a></td>
-        <td>Application Input Validation</td>
-        <td class="function-cell">input-validation</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>6</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1315.html">CME-1315</a></td>
-        <td><a href="entries/CME-1315.html">Allowlist-Preferred Input Validation (Deny-by-Default Filtering)</a></td>
-        <td>Application Input Validation</td>
-        <td class="function-cell">input-validation</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>7</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1316.html">CME-1316</a></td>
-        <td><a href="entries/CME-1316.html">Algorithmic Complexity Safeguards (Pattern/Regex Execution Limits)</a></td>
-        <td>Application Input Validation</td>
-        <td class="function-cell">input-validation</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">A:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>6</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1317.html">CME-1317</a></td>
-        <td><a href="entries/CME-1317.html">XML External Entity Prevention (Secure XML Parser Configuration)</a></td>
-        <td>Application Input Validation</td>
-        <td class="function-cell">injection-prevention</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">N</span>, 
-          
-          <span class="cvss-from">A:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">N</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1318.html">CME-1318</a></td>
-        <td><a href="entries/CME-1318.html">LDAP Injection Prevention</a></td>
-        <td>Application Input Validation</td>
-        <td class="function-cell">injection-prevention</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>, 
-          
-          <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1319.html">CME-1319</a></td>
-        <td><a href="entries/CME-1319.html">Deserialization Type Allowlisting</a></td>
-        <td>Application Input Validation</td>
-        <td class="function-cell">injection-prevention</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>, 
-          
-          <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1320.html">CME-1320</a></td>
-        <td><a href="entries/CME-1320.html">Format-String-Safe API Enforcement (Compile-Time and Runtime Format Validation)</a></td>
-        <td>Application Input Validation</td>
-        <td class="function-cell">input-validation</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1321.html">CME-1321</a></td>
-        <td><a href="entries/CME-1321.html">Trust Boundary Input Sanitization (Cross-Boundary Data Validation)</a></td>
-        <td>Application Input Validation</td>
-        <td class="function-cell">input-validation</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-711.html">CME-711</a></td>
-        <td><a href="entries/CME-711.html">Admission Controller Policy Enforcement (OPA/Gatekeeper/Kyverno)</a></td>
-        <td>Container Isolation</td>
-        <td class="function-cell">pod-security</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-712.html">CME-712</a></td>
-        <td><a href="entries/CME-712.html">Container Image Signing and Provenance Verification (Cosign/Sigstore)</a></td>
-        <td>Container Isolation</td>
-        <td class="function-cell">pod-security</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-713.html">CME-713</a></td>
-        <td><a href="entries/CME-713.html">Read-Only Root Filesystem Enforcement</a></td>
-        <td>Container Isolation</td>
-        <td class="function-cell">container-runtime</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>, 
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-801.html">CME-801</a></td>
-        <td><a href="entries/CME-801.html">Multi-Factor Authentication (MFA)</a></td>
-        <td>Credential Hardening</td>
-        <td class="function-cell">authentication-methods</td>
-        <td><span class="badge badge-layer-identity">Identity</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>5</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-802.html">CME-802</a></td>
-        <td><a href="entries/CME-802.html">Password Quality Enforcement (pwquality)</a></td>
-        <td>Credential Hardening</td>
-        <td class="function-cell">password-policy</td>
-        <td><span class="badge badge-layer-identity">Identity</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>1</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-803.html">CME-803</a></td>
-        <td><a href="entries/CME-803.html">Account Lockout Policy (pam_faillock)</a></td>
-        <td>Credential Hardening</td>
-        <td class="function-cell">password-policy</td>
-        <td><span class="badge badge-layer-identity">Identity</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>1</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-804.html">CME-804</a></td>
-        <td><a href="entries/CME-804.html">SSH Key-Only Authentication</a></td>
-        <td>Credential Hardening</td>
-        <td class="function-cell">authentication-methods</td>
-        <td><span class="badge badge-layer-identity">Identity</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-805.html">CME-805</a></td>
-        <td><a href="entries/CME-805.html">Credential Rotation Policy</a></td>
-        <td>Credential Hardening</td>
-        <td class="function-cell">password-policy</td>
-        <td><span class="badge badge-layer-identity">Identity</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-806.html">CME-806</a></td>
-        <td><a href="entries/CME-806.html">Kerberos Authentication (GSSAPI)</a></td>
-        <td>Credential Hardening</td>
-        <td class="function-cell">authentication-methods</td>
-        <td><span class="badge badge-layer-identity">Identity</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>4</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-807.html">CME-807</a></td>
-        <td><a href="entries/CME-807.html">Session Lifetime and Idle Timeout Enforcement</a></td>
-        <td>Credential Hardening</td>
-        <td class="function-cell">session-management</td>
-        <td><span class="badge badge-layer-identity">Identity</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-808.html">CME-808</a></td>
-        <td><a href="entries/CME-808.html">Local Administrator Password Solution (LAPS)</a></td>
-        <td>Credential Hardening</td>
-        <td class="function-cell">password-policy</td>
-        <td><span class="badge badge-layer-identity">Identity</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>, 
-          
-          <span class="cvss-from">S:C</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">U</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-401.html">CME-401</a></td>
-        <td><a href="entries/CME-401.html">System-wide Crypto Policy (FUTURE)</a></td>
-        <td>Cryptographic Controls</td>
-        <td class="function-cell">crypto-policy</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-402.html">CME-402</a></td>
-        <td><a href="entries/CME-402.html">FIPS 140-3 Mode</a></td>
-        <td>Cryptographic Controls</td>
-        <td class="function-cell">crypto-policy</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>4</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-403.html">CME-403</a></td>
-        <td><a href="entries/CME-403.html">TLS 1.3 Enforcement</a></td>
-        <td>Cryptographic Controls</td>
-        <td class="function-cell">transport-crypto</td>
-        <td><span class="badge badge-layer-network">Network</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-404.html">CME-404</a></td>
-        <td><a href="entries/CME-404.html">Certificate Pinning</a></td>
-        <td>Cryptographic Controls</td>
-        <td class="function-cell">transport-crypto</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>1</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-405.html">CME-405</a></td>
-        <td><a href="entries/CME-405.html">DNSSEC Validation</a></td>
-        <td>Cryptographic Controls</td>
-        <td class="function-cell">data-integrity-crypto</td>
-        <td><span class="badge badge-layer-network">Network</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-406.html">CME-406</a></td>
-        <td><a href="entries/CME-406.html">Signed Package Enforcement (GPG)</a></td>
-        <td>Cryptographic Controls</td>
-        <td class="function-cell">data-integrity-crypto</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-407.html">CME-407</a></td>
-        <td><a href="entries/CME-407.html">Data-at-Rest Encryption (LUKS/dm-crypt / BitLocker)</a></td>
-        <td>Cryptographic Controls</td>
-        <td class="function-cell">data-integrity-crypto</td>
-        <td><span class="badge badge-layer-data">Data</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-408.html">CME-408</a></td>
-        <td><a href="entries/CME-408.html">System-wide TLS/Crypto Policy Enforcement</a></td>
-        <td>Cryptographic Controls</td>
-        <td class="function-cell">crypto-policy</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>4</td>
-      </tr>
-      
-      
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-502.html">CME-502</a></td>
-        <td><a href="entries/CME-502.html">noexec on /tmp and /dev/shm</a></td>
-        <td>Filesystem Hardening</td>
-        <td class="function-cell">mount-options</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-503.html">CME-503</a></td>
-        <td><a href="entries/CME-503.html">nosuid on Non-Root Partitions</a></td>
-        <td>Filesystem Hardening</td>
-        <td class="function-cell">mount-options</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">PR:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>1</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-504.html">CME-504</a></td>
-        <td><a href="entries/CME-504.html">dm-verity (Verified Boot)</a></td>
-        <td>Filesystem Hardening</td>
-        <td class="function-cell">verified-integrity</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">N</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-505.html">CME-505</a></td>
-        <td><a href="entries/CME-505.html">IMA/EVM (Integrity Measurement Architecture)</a></td>
-        <td>Filesystem Hardening</td>
-        <td class="function-cell">verified-integrity</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-507.html">CME-507</a></td>
-        <td><a href="entries/CME-507.html">Secure Dynamic Linker Configuration (LD_PRELOAD/PATH Hardening)</a></td>
-        <td>Filesystem Hardening</td>
-        <td class="function-cell">filesystem-access-control</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-508.html">CME-508</a></td>
-        <td><a href="entries/CME-508.html">Quoted Service Path Enforcement (Windows)</a></td>
-        <td>Filesystem Hardening</td>
-        <td class="function-cell">filesystem-access-control</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">PR:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-101.html">CME-101</a></td>
-        <td><a href="entries/CME-101.html">ASLR (Address Space Layout Randomization)</a></td>
-        <td>Kernel Hardening</td>
-        <td class="function-cell">memory-safety</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>9</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-102.html">CME-102</a></td>
-        <td><a href="entries/CME-102.html">NX/XD Bit (Non-Executable Memory)</a></td>
-        <td>Kernel Hardening</td>
-        <td class="function-cell">memory-safety</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-103.html">CME-103</a></td>
-        <td><a href="entries/CME-103.html">Stack Canaries (Stack Protector)</a></td>
-        <td>Kernel Hardening</td>
-        <td class="function-cell">memory-safety</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-104.html">CME-104</a></td>
-        <td><a href="entries/CME-104.html">KASLR (Kernel Address Space Layout Randomization)</a></td>
-        <td>Kernel Hardening</td>
-        <td class="function-cell">kernel-attack-surface</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-105.html">CME-105</a></td>
-        <td><a href="entries/CME-105.html">SMEP (Supervisor Mode Execution Prevention)</a></td>
-        <td>Kernel Hardening</td>
-        <td class="function-cell">kernel-attack-surface</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">S:C</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">U</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-106.html">CME-106</a></td>
-        <td><a href="entries/CME-106.html">SMAP (Supervisor Mode Access Prevention)</a></td>
-        <td>Kernel Hardening</td>
-        <td class="function-cell">kernel-attack-surface</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-107.html">CME-107</a></td>
-        <td><a href="entries/CME-107.html">Kernel Module Loading Restriction</a></td>
-        <td>Kernel Hardening</td>
-        <td class="function-cell">kernel-attack-surface</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-108.html">CME-108</a></td>
-        <td><a href="entries/CME-108.html">kptr_restrict (Kernel Pointer Restriction)</a></td>
-        <td>Kernel Hardening</td>
-        <td class="function-cell">kernel-attack-surface</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-109.html">CME-109</a></td>
-        <td><a href="entries/CME-109.html">Kernel Lockdown Mode</a></td>
-        <td>Kernel Hardening</td>
-        <td class="function-cell">kernel-attack-surface</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">PR:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-110.html">CME-110</a></td>
-        <td><a href="entries/CME-110.html">KEXEC Restriction</a></td>
-        <td>Kernel Hardening</td>
-        <td class="function-cell">kernel-attack-surface</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>1</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-111.html">CME-111</a></td>
-        <td><a href="entries/CME-111.html">Secure Boot (UEFI)</a></td>
-        <td>Kernel Hardening</td>
-        <td class="function-cell">kernel-attack-surface</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>, 
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>4</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-112.html">CME-112</a></td>
-        <td><a href="entries/CME-112.html">RELRO and PIE (Full)</a></td>
-        <td>Kernel Hardening</td>
-        <td class="function-cell">memory-safety</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>4</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-113.html">CME-113</a></td>
-        <td><a href="entries/CME-113.html">Control Flow Integrity (CFI / Shadow Call Stack)</a></td>
-        <td>Kernel Hardening</td>
-        <td class="function-cell">memory-safety</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>5</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-114.html">CME-114</a></td>
-        <td><a href="entries/CME-114.html">Process Resource Limits (ulimit/prlimit)</a></td>
-        <td>Kernel Hardening</td>
-        <td class="function-cell">kernel-attack-surface</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">A:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>6</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-116.html">CME-116</a></td>
-        <td><a href="entries/CME-116.html">FORTIFY_SOURCE (Buffer Overflow Detection)</a></td>
-        <td>Kernel Hardening</td>
-        <td class="function-cell">memory-safety</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>7</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-117.html">CME-117</a></td>
-        <td><a href="entries/CME-117.html">Heap Allocator Hardening (glibc Safe-Linking and Metadata Protection)</a></td>
-        <td>Kernel Hardening</td>
-        <td class="function-cell">memory-safety</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>4</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-118.html">CME-118</a></td>
-        <td><a href="entries/CME-118.html">Protected File Links (Kernel Symlink/Hardlink Protection)</a></td>
-        <td>Kernel Hardening</td>
-        <td class="function-cell">kernel-attack-surface</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>4</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-119.html">CME-119</a></td>
-        <td><a href="entries/CME-119.html">Compiler Integer Overflow and Conversion Safety (-ftrapv / UBSan Integer)</a></td>
-        <td>Kernel Hardening</td>
-        <td class="function-cell">memory-safety</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>8</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-120.html">CME-120</a></td>
-        <td><a href="entries/CME-120.html">Kernel Memory Initialization Enforcement (init_on_alloc / INIT_STACK_ALL_ZERO)</a></td>
-        <td>Kernel Hardening</td>
-        <td class="function-cell">memory-safety</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>5</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-121.html">CME-121</a></td>
-        <td><a href="entries/CME-121.html">SLAB Freelist Hardening (Freelist Randomization and Integrity)</a></td>
-        <td>Kernel Hardening</td>
-        <td class="function-cell">memory-safety</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>4</td>
-      </tr>
-      
-      
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-301.html">CME-301</a></td>
-        <td><a href="entries/CME-301.html">SELinux (Enforcing Mode)</a></td>
-        <td>Mandatory Access Control</td>
-        <td class="function-cell">selinux</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">S:C</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">U</span>, 
-          
-          <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>, 
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>4</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-302.html">CME-302</a></td>
-        <td><a href="entries/CME-302.html">SELinux Confined User Mapping</a></td>
-        <td>Mandatory Access Control</td>
-        <td class="function-cell">selinux</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">PR:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-303.html">CME-303</a></td>
-        <td><a href="entries/CME-303.html">SELinux Booleans (Restrictive)</a></td>
-        <td>Mandatory Access Control</td>
-        <td class="function-cell">selinux</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">S:C</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">U</span>
-          
-        </td>
-        <td>1</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-304.html">CME-304</a></td>
-        <td><a href="entries/CME-304.html">AppArmor (Enforcing Profile)</a></td>
-        <td>Mandatory Access Control</td>
-        <td class="function-cell">apparmor</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">S:C</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">U</span>, 
-          
-          <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-305.html">CME-305</a></td>
-        <td><a href="entries/CME-305.html">macOS System Integrity Protection (SIP)</a></td>
-        <td>Mandatory Access Control</td>
-        <td class="function-cell">kernel-attack-surface</td>
-        <td><span class="badge badge-layer-"></span></td>
-        <td>Preventive / Deterministic</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">N</span>, 
-          
-          <span class="cvss-from">PR:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-207.html">CME-207</a></td>
-        <td><a href="entries/CME-207.html">DNS Rebinding Protection</a></td>
-        <td>Network Isolation</td>
-        <td class="function-cell">network-access-control</td>
-        <td><span class="badge badge-layer-network">Network</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AV:N</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-901.html">CME-901</a></td>
-        <td><a href="entries/CME-901.html">SSH Hardening (Comprehensive)</a></td>
-        <td>Protocol Hardening</td>
-        <td class="function-cell">protocol-config</td>
-        <td><span class="badge badge-layer-network">Network</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">PR:N</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-902.html">CME-902</a></td>
-        <td><a href="entries/CME-902.html">Disable Unused Network Services</a></td>
-        <td>Protocol Hardening</td>
-        <td class="function-cell">protocol-config</td>
-        <td><span class="badge badge-layer-network">Network</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AV:N</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-903.html">CME-903</a></td>
-        <td><a href="entries/CME-903.html">Kernel Network Hardening (sysctl)</a></td>
-        <td>Protocol Hardening</td>
-        <td class="function-cell">protocol-config</td>
-        <td><span class="badge badge-layer-network">Network</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-601.html">CME-601</a></td>
-        <td><a href="entries/CME-601.html">Kernel-Level Syscall Filtering (seccomp)</a></td>
-        <td>Syscall &amp; BPF Controls</td>
-        <td class="function-cell">seccomp</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">S:C</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">U</span>, 
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-602.html">CME-602</a></td>
-        <td><a href="entries/CME-602.html">seccomp-bpf Profile (Container Default)</a></td>
-        <td>Syscall &amp; BPF Controls</td>
-        <td class="function-cell">seccomp</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">S:C</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">U</span>, 
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-603.html">CME-603</a></td>
-        <td><a href="entries/CME-603.html">Unprivileged BPF Disabled</a></td>
-        <td>Syscall &amp; BPF Controls</td>
-        <td class="function-cell">seccomp</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">PR:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-604.html">CME-604</a></td>
-        <td><a href="entries/CME-604.html">Unprivileged User Namespaces Disabled</a></td>
-        <td>Syscall &amp; BPF Controls</td>
-        <td class="function-cell">seccomp</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">PR:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      
-    </tbody>
-  </table>
-</div>
 
+  <div class="category-section">
+    <h3 class="category-header">Application Controls</h3>
+    <ul class="entry-list">
 
+      <li>
+        <a href="entries/CME-904.html" class="cme-id">CME-904</a>
+        <a href="entries/CME-904.html" class="entry-name">WAF (Web Application Firewall)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
 
-<div class="tactic-section">
-  <h2>
+      <li>
+        <a href="entries/CME-905.html" class="cme-id">CME-905</a>
+        <a href="entries/CME-905.html" class="entry-name">Content Security Policy (CSP) Headers</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-906.html" class="cme-id">CME-906</a>
+        <a href="entries/CME-906.html" class="entry-name">Rate Limiting / Connection Throttling</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-907.html" class="cme-id">CME-907</a>
+        <a href="entries/CME-907.html" class="entry-name">Application-Layer RBAC Enforcement</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-908.html" class="cme-id">CME-908</a>
+        <a href="entries/CME-908.html" class="entry-name">Object-Level Authorization Checks (IDOR Prevention)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-909.html" class="cme-id">CME-909</a>
+        <a href="entries/CME-909.html" class="entry-name">Default-Deny API Authorization Policy</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-912.html" class="cme-id">CME-912</a>
+        <a href="entries/CME-912.html" class="entry-name">HTTP Header Normalization and Request Smuggling Prevention</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-913.html" class="cme-id">CME-913</a>
+        <a href="entries/CME-913.html" class="entry-name">CSRF Protection (Anti-CSRF Token &amp; SameSite Cookie Enforcement)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-914.html" class="cme-id">CME-914</a>
+        <a href="entries/CME-914.html" class="entry-name">Strict CORS Origin Allowlist Enforcement</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-915.html" class="cme-id">CME-915</a>
+        <a href="entries/CME-915.html" class="entry-name">Cross-Origin Request Restriction (Reverse Proxy Origin Enforcement)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-916.html" class="cme-id">CME-916</a>
+        <a href="entries/CME-916.html" class="entry-name">SameSite Cookie Attribute Enforcement</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-917.html" class="cme-id">CME-917</a>
+        <a href="entries/CME-917.html" class="entry-name">Worker Process Recycling (MaxConnectionsPerChild / max_requests)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-918.html" class="cme-id">CME-918</a>
+        <a href="entries/CME-918.html" class="entry-name">URL Path Authorization Enforcement (Forced Browsing Prevention)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-919.html" class="cme-id">CME-919</a>
+        <a href="entries/CME-919.html" class="entry-name">JIT Compiler Hardening (JIT Restriction / V8 Sandbox)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-920.html" class="cme-id">CME-920</a>
+        <a href="entries/CME-920.html" class="entry-name">Database Least-Privilege Access Control</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-921.html" class="cme-id">CME-921</a>
+        <a href="entries/CME-921.html" class="entry-name">URL Request Path Canonicalization Before Authorization</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-922.html" class="cme-id">CME-922</a>
+        <a href="entries/CME-922.html" class="entry-name">Trusted Source Validation for Security Decisions (Anti-Spoofing)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-923.html" class="cme-id">CME-923</a>
+        <a href="entries/CME-923.html" class="entry-name">Mass-Assignment Prevention Through Explicit Request Schemas</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-924.html" class="cme-id">CME-924</a>
+        <a href="entries/CME-924.html" class="entry-name">Arbitrary Code Guard (ACG)</a>
+        <span class="badge badge-layer-"></span>
+      </li>
+
+      <li>
+        <a href="entries/CME-925.html" class="cme-id">CME-925</a>
+        <a href="entries/CME-925.html" class="entry-name">Windows Defender Application Control (WDAC)</a>
+        <span class="badge badge-layer-"></span>
+      </li>
+
+    </ul>
+  </div>
+
+  <div class="category-section">
+    <h3 class="category-header">Application Input Validation</h3>
+    <ul class="entry-list">
+
+      <li>
+        <a href="entries/CME-1301.html" class="cme-id">CME-1301</a>
+        <a href="entries/CME-1301.html" class="entry-name">Path Traversal Prevention (Canonicalization)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-1302.html" class="cme-id">CME-1302</a>
+        <a href="entries/CME-1302.html" class="entry-name">Deserialization Allowlist (Safe Loading)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-1304.html" class="cme-id">CME-1304</a>
+        <a href="entries/CME-1304.html" class="entry-name">SSRF Prevention (Outbound Request Allowlist)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-1305.html" class="cme-id">CME-1305</a>
+        <a href="entries/CME-1305.html" class="entry-name">SQL Injection Prevention (Parameterized Queries)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-1306.html" class="cme-id">CME-1306</a>
+        <a href="entries/CME-1306.html" class="entry-name">XSS Prevention (Context-Aware Output Encoding)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-1307.html" class="cme-id">CME-1307</a>
+        <a href="entries/CME-1307.html" class="entry-name">Command Injection Prevention (No Shell Invocation)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-1309.html" class="cme-id">CME-1309</a>
+        <a href="entries/CME-1309.html" class="entry-name">Script Engine Restriction (Sandbox / Disable)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-1310.html" class="cme-id">CME-1310</a>
+        <a href="entries/CME-1310.html" class="entry-name">File Upload Validation (Content Inspection and Extension Allowlist)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-1311.html" class="cme-id">CME-1311</a>
+        <a href="entries/CME-1311.html" class="entry-name">Input Size and Quantity Bounds Enforcement</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-1312.html" class="cme-id">CME-1312</a>
+        <a href="entries/CME-1312.html" class="entry-name">Argument Injection Prevention (Downstream Input Delimiter Sanitization)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-1313.html" class="cme-id">CME-1313</a>
+        <a href="entries/CME-1313.html" class="entry-name">CRLF / Line Injection Prevention (Newline Sanitization for Structured Formats)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-1314.html" class="cme-id">CME-1314</a>
+        <a href="entries/CME-1314.html" class="entry-name">Input Canonicalization Before Security Decision</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-1315.html" class="cme-id">CME-1315</a>
+        <a href="entries/CME-1315.html" class="entry-name">Allowlist-Preferred Input Validation (Deny-by-Default Filtering)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-1316.html" class="cme-id">CME-1316</a>
+        <a href="entries/CME-1316.html" class="entry-name">Algorithmic Complexity Safeguards (Pattern/Regex Execution Limits)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-1317.html" class="cme-id">CME-1317</a>
+        <a href="entries/CME-1317.html" class="entry-name">XML External Entity Prevention (Secure XML Parser Configuration)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-1318.html" class="cme-id">CME-1318</a>
+        <a href="entries/CME-1318.html" class="entry-name">LDAP Injection Prevention</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-1319.html" class="cme-id">CME-1319</a>
+        <a href="entries/CME-1319.html" class="entry-name">Deserialization Type Allowlisting</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-1320.html" class="cme-id">CME-1320</a>
+        <a href="entries/CME-1320.html" class="entry-name">Format-String-Safe API Enforcement (Compile-Time and Runtime Format Validation)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-1321.html" class="cme-id">CME-1321</a>
+        <a href="entries/CME-1321.html" class="entry-name">Trust Boundary Input Sanitization (Cross-Boundary Data Validation)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+    </ul>
+  </div>
+
+  <div class="category-section">
+    <h3 class="category-header">Container Isolation</h3>
+    <ul class="entry-list">
+
+      <li>
+        <a href="entries/CME-711.html" class="cme-id">CME-711</a>
+        <a href="entries/CME-711.html" class="entry-name">Admission Controller Policy Enforcement (OPA/Gatekeeper/Kyverno)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-712.html" class="cme-id">CME-712</a>
+        <a href="entries/CME-712.html" class="entry-name">Container Image Signing and Provenance Verification (Cosign/Sigstore)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-713.html" class="cme-id">CME-713</a>
+        <a href="entries/CME-713.html" class="entry-name">Read-Only Root Filesystem Enforcement</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+    </ul>
+  </div>
+
+  <div class="category-section">
+    <h3 class="category-header">Credential Hardening</h3>
+    <ul class="entry-list">
+
+      <li>
+        <a href="entries/CME-801.html" class="cme-id">CME-801</a>
+        <a href="entries/CME-801.html" class="entry-name">Multi-Factor Authentication (MFA)</a>
+        <span class="badge badge-layer-identity">Identity</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-802.html" class="cme-id">CME-802</a>
+        <a href="entries/CME-802.html" class="entry-name">Password Quality Enforcement (pwquality)</a>
+        <span class="badge badge-layer-identity">Identity</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-803.html" class="cme-id">CME-803</a>
+        <a href="entries/CME-803.html" class="entry-name">Account Lockout Policy (pam_faillock)</a>
+        <span class="badge badge-layer-identity">Identity</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-804.html" class="cme-id">CME-804</a>
+        <a href="entries/CME-804.html" class="entry-name">SSH Key-Only Authentication</a>
+        <span class="badge badge-layer-identity">Identity</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-805.html" class="cme-id">CME-805</a>
+        <a href="entries/CME-805.html" class="entry-name">Credential Rotation Policy</a>
+        <span class="badge badge-layer-identity">Identity</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-806.html" class="cme-id">CME-806</a>
+        <a href="entries/CME-806.html" class="entry-name">Kerberos Authentication (GSSAPI)</a>
+        <span class="badge badge-layer-identity">Identity</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-807.html" class="cme-id">CME-807</a>
+        <a href="entries/CME-807.html" class="entry-name">Session Lifetime and Idle Timeout Enforcement</a>
+        <span class="badge badge-layer-identity">Identity</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-808.html" class="cme-id">CME-808</a>
+        <a href="entries/CME-808.html" class="entry-name">Local Administrator Password Solution (LAPS)</a>
+        <span class="badge badge-layer-identity">Identity</span>
+      </li>
+
+    </ul>
+  </div>
+
+  <div class="category-section">
+    <h3 class="category-header">Cryptographic Controls</h3>
+    <ul class="entry-list">
+
+      <li>
+        <a href="entries/CME-401.html" class="cme-id">CME-401</a>
+        <a href="entries/CME-401.html" class="entry-name">System-wide Crypto Policy (FUTURE)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-402.html" class="cme-id">CME-402</a>
+        <a href="entries/CME-402.html" class="entry-name">FIPS 140-3 Mode</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-403.html" class="cme-id">CME-403</a>
+        <a href="entries/CME-403.html" class="entry-name">TLS 1.3 Enforcement</a>
+        <span class="badge badge-layer-network">Network</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-404.html" class="cme-id">CME-404</a>
+        <a href="entries/CME-404.html" class="entry-name">Certificate Pinning</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-405.html" class="cme-id">CME-405</a>
+        <a href="entries/CME-405.html" class="entry-name">DNSSEC Validation</a>
+        <span class="badge badge-layer-network">Network</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-406.html" class="cme-id">CME-406</a>
+        <a href="entries/CME-406.html" class="entry-name">Signed Package Enforcement (GPG)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-407.html" class="cme-id">CME-407</a>
+        <a href="entries/CME-407.html" class="entry-name">Data-at-Rest Encryption (LUKS/dm-crypt / BitLocker)</a>
+        <span class="badge badge-layer-data">Data</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-408.html" class="cme-id">CME-408</a>
+        <a href="entries/CME-408.html" class="entry-name">System-wide TLS/Crypto Policy Enforcement</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+    </ul>
+  </div>
+
+  <div class="category-section">
+    <h3 class="category-header">Filesystem Hardening</h3>
+    <ul class="entry-list">
+
+      <li>
+        <a href="entries/CME-502.html" class="cme-id">CME-502</a>
+        <a href="entries/CME-502.html" class="entry-name">noexec on /tmp and /dev/shm</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-503.html" class="cme-id">CME-503</a>
+        <a href="entries/CME-503.html" class="entry-name">nosuid on Non-Root Partitions</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-504.html" class="cme-id">CME-504</a>
+        <a href="entries/CME-504.html" class="entry-name">dm-verity (Verified Boot)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-505.html" class="cme-id">CME-505</a>
+        <a href="entries/CME-505.html" class="entry-name">IMA/EVM (Integrity Measurement Architecture)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-507.html" class="cme-id">CME-507</a>
+        <a href="entries/CME-507.html" class="entry-name">Secure Dynamic Linker Configuration (LD_PRELOAD/PATH Hardening)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-508.html" class="cme-id">CME-508</a>
+        <a href="entries/CME-508.html" class="entry-name">Quoted Service Path Enforcement (Windows)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+    </ul>
+  </div>
+
+  <div class="category-section">
+    <h3 class="category-header">Kernel Hardening</h3>
+    <ul class="entry-list">
+
+      <li>
+        <a href="entries/CME-101.html" class="cme-id">CME-101</a>
+        <a href="entries/CME-101.html" class="entry-name">ASLR (Address Space Layout Randomization)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-102.html" class="cme-id">CME-102</a>
+        <a href="entries/CME-102.html" class="entry-name">NX/XD Bit (Non-Executable Memory)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-103.html" class="cme-id">CME-103</a>
+        <a href="entries/CME-103.html" class="entry-name">Stack Canaries (Stack Protector)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-104.html" class="cme-id">CME-104</a>
+        <a href="entries/CME-104.html" class="entry-name">KASLR (Kernel Address Space Layout Randomization)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-105.html" class="cme-id">CME-105</a>
+        <a href="entries/CME-105.html" class="entry-name">SMEP (Supervisor Mode Execution Prevention)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-106.html" class="cme-id">CME-106</a>
+        <a href="entries/CME-106.html" class="entry-name">SMAP (Supervisor Mode Access Prevention)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-107.html" class="cme-id">CME-107</a>
+        <a href="entries/CME-107.html" class="entry-name">Kernel Module Loading Restriction</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-108.html" class="cme-id">CME-108</a>
+        <a href="entries/CME-108.html" class="entry-name">kptr_restrict (Kernel Pointer Restriction)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-109.html" class="cme-id">CME-109</a>
+        <a href="entries/CME-109.html" class="entry-name">Kernel Lockdown Mode</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-110.html" class="cme-id">CME-110</a>
+        <a href="entries/CME-110.html" class="entry-name">KEXEC Restriction</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-111.html" class="cme-id">CME-111</a>
+        <a href="entries/CME-111.html" class="entry-name">Secure Boot (UEFI)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-112.html" class="cme-id">CME-112</a>
+        <a href="entries/CME-112.html" class="entry-name">RELRO and PIE (Full)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-113.html" class="cme-id">CME-113</a>
+        <a href="entries/CME-113.html" class="entry-name">Control Flow Integrity (CFI / Shadow Call Stack)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-114.html" class="cme-id">CME-114</a>
+        <a href="entries/CME-114.html" class="entry-name">Process Resource Limits (ulimit/prlimit)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-116.html" class="cme-id">CME-116</a>
+        <a href="entries/CME-116.html" class="entry-name">FORTIFY_SOURCE (Buffer Overflow Detection)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-117.html" class="cme-id">CME-117</a>
+        <a href="entries/CME-117.html" class="entry-name">Heap Allocator Hardening (glibc Safe-Linking and Metadata Protection)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-118.html" class="cme-id">CME-118</a>
+        <a href="entries/CME-118.html" class="entry-name">Protected File Links (Kernel Symlink/Hardlink Protection)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-119.html" class="cme-id">CME-119</a>
+        <a href="entries/CME-119.html" class="entry-name">Compiler Integer Overflow and Conversion Safety (-ftrapv / UBSan Integer)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-120.html" class="cme-id">CME-120</a>
+        <a href="entries/CME-120.html" class="entry-name">Kernel Memory Initialization Enforcement (init_on_alloc / INIT_STACK_ALL_ZERO)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-121.html" class="cme-id">CME-121</a>
+        <a href="entries/CME-121.html" class="entry-name">SLAB Freelist Hardening (Freelist Randomization and Integrity)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+    </ul>
+  </div>
+
+  <div class="category-section">
+    <h3 class="category-header">Mandatory Access Control</h3>
+    <ul class="entry-list">
+
+      <li>
+        <a href="entries/CME-301.html" class="cme-id">CME-301</a>
+        <a href="entries/CME-301.html" class="entry-name">SELinux (Enforcing Mode)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-302.html" class="cme-id">CME-302</a>
+        <a href="entries/CME-302.html" class="entry-name">SELinux Confined User Mapping</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-303.html" class="cme-id">CME-303</a>
+        <a href="entries/CME-303.html" class="entry-name">SELinux Booleans (Restrictive)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-304.html" class="cme-id">CME-304</a>
+        <a href="entries/CME-304.html" class="entry-name">AppArmor (Enforcing Profile)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-305.html" class="cme-id">CME-305</a>
+        <a href="entries/CME-305.html" class="entry-name">macOS System Integrity Protection (SIP)</a>
+        <span class="badge badge-layer-"></span>
+      </li>
+
+    </ul>
+  </div>
+
+  <div class="category-section">
+    <h3 class="category-header">Network Isolation</h3>
+    <ul class="entry-list">
+
+      <li>
+        <a href="entries/CME-207.html" class="cme-id">CME-207</a>
+        <a href="entries/CME-207.html" class="entry-name">DNS Rebinding Protection</a>
+        <span class="badge badge-layer-network">Network</span>
+      </li>
+
+    </ul>
+  </div>
+
+  <div class="category-section">
+    <h3 class="category-header">Protocol Hardening</h3>
+    <ul class="entry-list">
+
+      <li>
+        <a href="entries/CME-901.html" class="cme-id">CME-901</a>
+        <a href="entries/CME-901.html" class="entry-name">SSH Hardening (Comprehensive)</a>
+        <span class="badge badge-layer-network">Network</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-902.html" class="cme-id">CME-902</a>
+        <a href="entries/CME-902.html" class="entry-name">Disable Unused Network Services</a>
+        <span class="badge badge-layer-network">Network</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-903.html" class="cme-id">CME-903</a>
+        <a href="entries/CME-903.html" class="entry-name">Kernel Network Hardening (sysctl)</a>
+        <span class="badge badge-layer-network">Network</span>
+      </li>
+
+    </ul>
+  </div>
+
+  <div class="category-section">
+    <h3 class="category-header">Syscall &amp; BPF Controls</h3>
+    <ul class="entry-list">
+
+      <li>
+        <a href="entries/CME-601.html" class="cme-id">CME-601</a>
+        <a href="entries/CME-601.html" class="entry-name">Kernel-Level Syscall Filtering (seccomp)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-602.html" class="cme-id">CME-602</a>
+        <a href="entries/CME-602.html" class="entry-name">seccomp-bpf Profile (Container Default)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-603.html" class="cme-id">CME-603</a>
+        <a href="entries/CME-603.html" class="entry-name">Unprivileged BPF Disabled</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-604.html" class="cme-id">CME-604</a>
+        <a href="entries/CME-604.html" class="entry-name">Unprivileged User Namespaces Disabled</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+    </ul>
+  </div>
+
+</section>
+
+<section class="taxonomy-group" id="tactic-isolate" aria-labelledby="heading-isolate">
+  <h2 class="tactic-header" id="heading-isolate" style="background: var(--bg-alt);">
     <span class="badge badge-tactic-isolate">Isolate</span>
-    Isolate (23)
+    <span>Isolate</span>
+    <span class="tactic-entry-count">23 entries</span>
   </h2>
-  <table class="data-table">
-    <thead>
-      <tr>
-        <th>CME ID</th>
-        <th>Control Name</th>
-        <th>Category</th>
-        <th>Function</th>
-        <th>Layer</th>
-        <th>Effect / Evidence</th>
-        <th>CVSS Modifications</th>
-        <th>CWEs</th>
-      </tr>
-    </thead>
-    <tbody>
-      
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-910.html">CME-910</a></td>
-        <td><a href="entries/CME-910.html">Role Separation / Duty Segregation</a></td>
-        <td>Application Controls</td>
-        <td class="function-cell">authorization-controls</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">S:C</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">U</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-911.html">CME-911</a></td>
-        <td><a href="entries/CME-911.html">Fine-Grained Administrative Permission Scoping</a></td>
-        <td>Application Controls</td>
-        <td class="function-cell">authorization-controls</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>, 
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>4</td>
-      </tr>
-      
-      
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1303.html">CME-1303</a></td>
-        <td><a href="entries/CME-1303.html">Application-Level Filesystem Access Confinement</a></td>
-        <td>Application Input Validation</td>
-        <td class="function-cell">input-validation</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>, 
-          
-          <span class="cvss-from">S:C</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">U</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-701.html">CME-701</a></td>
-        <td><a href="entries/CME-701.html">Sandboxing / gVisor Runtime</a></td>
-        <td>Container Isolation</td>
-        <td class="function-cell">container-runtime</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">S:C</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">U</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-702.html">CME-702</a></td>
-        <td><a href="entries/CME-702.html">Linux Namespaces (User, PID, Network, Mount)</a></td>
-        <td>Container Isolation</td>
-        <td class="function-cell">container-runtime</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">S:C</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">U</span>, 
-          
-          <span class="cvss-from">PR:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>1</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-703.html">CME-703</a></td>
-        <td><a href="entries/CME-703.html">Rootless Containers</a></td>
-        <td>Container Isolation</td>
-        <td class="function-cell">container-runtime</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">S:C</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">U</span>, 
-          
-          <span class="cvss-from">PR:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-704.html">CME-704</a></td>
-        <td><a href="entries/CME-704.html">cgroups v2 Resource Limits</a></td>
-        <td>Container Isolation</td>
-        <td class="function-cell">container-runtime</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">A:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>4</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-705.html">CME-705</a></td>
-        <td><a href="entries/CME-705.html">Dropped Linux Capabilities</a></td>
-        <td>Container Isolation</td>
-        <td class="function-cell">container-runtime</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">PR:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">S:C</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">U</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-706.html">CME-706</a></td>
-        <td><a href="entries/CME-706.html">Pod Security Standards (Restricted)</a></td>
-        <td>Container Isolation</td>
-        <td class="function-cell">pod-security</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">S:C</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">U</span>, 
-          
-          <span class="cvss-from">PR:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-501.html">CME-501</a></td>
-        <td><a href="entries/CME-501.html">Read-Only Root Filesystem</a></td>
-        <td>Filesystem Hardening</td>
-        <td class="function-cell">mount-options</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>, 
-          
-          <span class="cvss-from">A:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>1</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-506.html">CME-506</a></td>
-        <td><a href="entries/CME-506.html">Landlock LSM (Filesystem Sandboxing)</a></td>
-        <td>Filesystem Hardening</td>
-        <td class="function-cell">filesystem-access-control</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">S:C</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">U</span>, 
-          
-          <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-201.html">CME-201</a></td>
-        <td><a href="entries/CME-201.html">Zero Trust Gateway / Identity-Aware Proxy</a></td>
-        <td>Network Isolation</td>
-        <td class="function-cell">network-access-control</td>
-        <td><span class="badge badge-layer-network">Network</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AV:N</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-202.html">CME-202</a></td>
-        <td><a href="entries/CME-202.html">Host-Based Firewall (firewalld/nftables)</a></td>
-        <td>Network Isolation</td>
-        <td class="function-cell">network-filtering</td>
-        <td><span class="badge badge-layer-network">Network</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AV:N</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">A</span>, 
-          
-          <span class="cvss-from">S:C</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">U</span>
-          
-        </td>
-        <td>1</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-203.html">CME-203</a></td>
-        <td><a href="entries/CME-203.html">Network Segmentation (VLANs/Subnets)</a></td>
-        <td>Network Isolation</td>
-        <td class="function-cell">network-filtering</td>
-        <td><span class="badge badge-layer-network">Network</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AV:N</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">A</span>, 
-          
-          <span class="cvss-from">S:C</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">U</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-204.html">CME-204</a></td>
-        <td><a href="entries/CME-204.html">IPsec / WireGuard (Encrypted Transport)</a></td>
-        <td>Network Isolation</td>
-        <td class="function-cell">network-access-control</td>
-        <td><span class="badge badge-layer-network">Network</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-205.html">CME-205</a></td>
-        <td><a href="entries/CME-205.html">Service Binding to Localhost</a></td>
-        <td>Network Isolation</td>
-        <td class="function-cell">network-filtering</td>
-        <td><span class="badge badge-layer-network">Network</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AV:N</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-206.html">CME-206</a></td>
-        <td><a href="entries/CME-206.html">Network Policy (Kubernetes)</a></td>
-        <td>Network Isolation</td>
-        <td class="function-cell">network-filtering</td>
-        <td><span class="badge badge-layer-network">Network</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AV:N</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">A</span>, 
-          
-          <span class="cvss-from">S:C</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">U</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-208.html">CME-208</a></td>
-        <td><a href="entries/CME-208.html">Outbound Network Egress Restriction (SSRF Blast Radius Containment)</a></td>
-        <td>Network Isolation</td>
-        <td class="function-cell">network-filtering</td>
-        <td><span class="badge badge-layer-network">Network</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>, 
-          
-          <span class="cvss-from">S:C</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">U</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-209.html">CME-209</a></td>
-        <td><a href="entries/CME-209.html">Kubernetes NetworkPolicy Enforcement</a></td>
-        <td>Network Isolation</td>
-        <td class="function-cell">network-filtering</td>
-        <td><span class="badge badge-layer-"></span></td>
-        <td>Preventive / Deterministic</td>
-        <td>
-          
-          <span class="cvss-from">AV:N</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">A</span>, 
-          
-          <span class="cvss-from">S:C</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">U</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-707.html">CME-707</a></td>
-        <td><a href="entries/CME-707.html">NoNewPrivileges</a></td>
-        <td>Privilege Isolation</td>
-        <td class="function-cell">systemd-sandboxing</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">PR:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-708.html">CME-708</a></td>
-        <td><a href="entries/CME-708.html">Least Privilege sudo Configuration</a></td>
-        <td>Privilege Isolation</td>
-        <td class="function-cell">privilege-escalation-control</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">PR:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-709.html">CME-709</a></td>
-        <td><a href="entries/CME-709.html">systemd Service Sandboxing (PrivateDevices, PrivateTmp, ProtectSystem)</a></td>
-        <td>Privilege Isolation</td>
-        <td class="function-cell">systemd-sandboxing</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">S:C</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">U</span>, 
-          
-          <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>, 
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>4</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-710.html">CME-710</a></td>
-        <td><a href="entries/CME-710.html">DynamicUser (systemd)</a></td>
-        <td>Privilege Isolation</td>
-        <td class="function-cell">systemd-sandboxing</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Preventive / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">S:C</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">U</span>
-          
-        </td>
-        <td>1</td>
-      </tr>
-      
-      
-    </tbody>
-  </table>
-</div>
 
+  <div class="category-section">
+    <h3 class="category-header">Application Controls</h3>
+    <ul class="entry-list">
 
+      <li>
+        <a href="entries/CME-910.html" class="cme-id">CME-910</a>
+        <a href="entries/CME-910.html" class="entry-name">Role Separation / Duty Segregation</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
 
-<div class="tactic-section">
-  <h2>
+      <li>
+        <a href="entries/CME-911.html" class="cme-id">CME-911</a>
+        <a href="entries/CME-911.html" class="entry-name">Fine-Grained Administrative Permission Scoping</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+    </ul>
+  </div>
+
+  <div class="category-section">
+    <h3 class="category-header">Application Input Validation</h3>
+    <ul class="entry-list">
+
+      <li>
+        <a href="entries/CME-1303.html" class="cme-id">CME-1303</a>
+        <a href="entries/CME-1303.html" class="entry-name">Application-Level Filesystem Access Confinement</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+    </ul>
+  </div>
+
+  <div class="category-section">
+    <h3 class="category-header">Container Isolation</h3>
+    <ul class="entry-list">
+
+      <li>
+        <a href="entries/CME-701.html" class="cme-id">CME-701</a>
+        <a href="entries/CME-701.html" class="entry-name">Sandboxing / gVisor Runtime</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-702.html" class="cme-id">CME-702</a>
+        <a href="entries/CME-702.html" class="entry-name">Linux Namespaces (User, PID, Network, Mount)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-703.html" class="cme-id">CME-703</a>
+        <a href="entries/CME-703.html" class="entry-name">Rootless Containers</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-704.html" class="cme-id">CME-704</a>
+        <a href="entries/CME-704.html" class="entry-name">cgroups v2 Resource Limits</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-705.html" class="cme-id">CME-705</a>
+        <a href="entries/CME-705.html" class="entry-name">Dropped Linux Capabilities</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-706.html" class="cme-id">CME-706</a>
+        <a href="entries/CME-706.html" class="entry-name">Pod Security Standards (Restricted)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+    </ul>
+  </div>
+
+  <div class="category-section">
+    <h3 class="category-header">Filesystem Hardening</h3>
+    <ul class="entry-list">
+
+      <li>
+        <a href="entries/CME-501.html" class="cme-id">CME-501</a>
+        <a href="entries/CME-501.html" class="entry-name">Read-Only Root Filesystem</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-506.html" class="cme-id">CME-506</a>
+        <a href="entries/CME-506.html" class="entry-name">Landlock LSM (Filesystem Sandboxing)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+    </ul>
+  </div>
+
+  <div class="category-section">
+    <h3 class="category-header">Network Isolation</h3>
+    <ul class="entry-list">
+
+      <li>
+        <a href="entries/CME-201.html" class="cme-id">CME-201</a>
+        <a href="entries/CME-201.html" class="entry-name">Zero Trust Gateway / Identity-Aware Proxy</a>
+        <span class="badge badge-layer-network">Network</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-202.html" class="cme-id">CME-202</a>
+        <a href="entries/CME-202.html" class="entry-name">Host-Based Firewall (firewalld/nftables)</a>
+        <span class="badge badge-layer-network">Network</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-203.html" class="cme-id">CME-203</a>
+        <a href="entries/CME-203.html" class="entry-name">Network Segmentation (VLANs/Subnets)</a>
+        <span class="badge badge-layer-network">Network</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-204.html" class="cme-id">CME-204</a>
+        <a href="entries/CME-204.html" class="entry-name">IPsec / WireGuard (Encrypted Transport)</a>
+        <span class="badge badge-layer-network">Network</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-205.html" class="cme-id">CME-205</a>
+        <a href="entries/CME-205.html" class="entry-name">Service Binding to Localhost</a>
+        <span class="badge badge-layer-network">Network</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-206.html" class="cme-id">CME-206</a>
+        <a href="entries/CME-206.html" class="entry-name">Network Policy (Kubernetes)</a>
+        <span class="badge badge-layer-network">Network</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-208.html" class="cme-id">CME-208</a>
+        <a href="entries/CME-208.html" class="entry-name">Outbound Network Egress Restriction (SSRF Blast Radius Containment)</a>
+        <span class="badge badge-layer-network">Network</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-209.html" class="cme-id">CME-209</a>
+        <a href="entries/CME-209.html" class="entry-name">Kubernetes NetworkPolicy Enforcement</a>
+        <span class="badge badge-layer-"></span>
+      </li>
+
+    </ul>
+  </div>
+
+  <div class="category-section">
+    <h3 class="category-header">Privilege Isolation</h3>
+    <ul class="entry-list">
+
+      <li>
+        <a href="entries/CME-707.html" class="cme-id">CME-707</a>
+        <a href="entries/CME-707.html" class="entry-name">NoNewPrivileges</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-708.html" class="cme-id">CME-708</a>
+        <a href="entries/CME-708.html" class="entry-name">Least Privilege sudo Configuration</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-709.html" class="cme-id">CME-709</a>
+        <a href="entries/CME-709.html" class="entry-name">systemd Service Sandboxing (PrivateDevices, PrivateTmp, ProtectSystem)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-710.html" class="cme-id">CME-710</a>
+        <a href="entries/CME-710.html" class="entry-name">DynamicUser (systemd)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+    </ul>
+  </div>
+
+</section>
+
+<section class="taxonomy-group" id="tactic-detect" aria-labelledby="heading-detect">
+  <h2 class="tactic-header" id="heading-detect" style="background: var(--bg-alt);">
     <span class="badge badge-tactic-detect">Detect</span>
-    Detect (13)
+    <span>Detect</span>
+    <span class="tactic-entry-count">13 entries</span>
   </h2>
-  <table class="data-table">
-    <thead>
-      <tr>
-        <th>CME ID</th>
-        <th>Control Name</th>
-        <th>Category</th>
-        <th>Function</th>
-        <th>Layer</th>
-        <th>Effect / Evidence</th>
-        <th>CVSS Modifications</th>
-        <th>CWEs</th>
-      </tr>
-    </thead>
-    <tbody>
-      
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1004.html">CME-1004</a></td>
-        <td><a href="entries/CME-1004.html">AIDE / File Integrity Monitoring</a></td>
-        <td>Integrity Detection</td>
-        <td class="function-cell">integrity-monitoring</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Detective / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>1</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1007.html">CME-1007</a></td>
-        <td><a href="entries/CME-1007.html">Application Configuration Drift Detection (IaC Enforcement)</a></td>
-        <td>Integrity Detection</td>
-        <td class="function-cell">integrity-monitoring</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Detective / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>4</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1010.html">CME-1010</a></td>
-        <td><a href="entries/CME-1010.html">cgroup Memory Pressure Monitoring (memory.events / PSI)</a></td>
-        <td>Integrity Detection</td>
-        <td class="function-cell">integrity-monitoring</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Detective / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>4</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1012.html">CME-1012</a></td>
-        <td><a href="entries/CME-1012.html">Pre-commit Secrets Detection (gitleaks/trufflehog)</a></td>
-        <td>Integrity Detection</td>
-        <td class="function-cell">integrity-monitoring</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Detective / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1001.html">CME-1001</a></td>
-        <td><a href="entries/CME-1001.html">EDR Agent (Endpoint Detection &amp; Response)</a></td>
-        <td>Runtime Detection</td>
-        <td class="function-cell">host-monitoring</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Detective / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>0</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1002.html">CME-1002</a></td>
-        <td><a href="entries/CME-1002.html">Audit Subsystem (auditd)</a></td>
-        <td>Runtime Detection</td>
-        <td class="function-cell">host-monitoring</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Detective / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>1</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1003.html">CME-1003</a></td>
-        <td><a href="entries/CME-1003.html">Falco / eBPF Runtime Security</a></td>
-        <td>Runtime Detection</td>
-        <td class="function-cell">host-monitoring</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Detective / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>0</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1005.html">CME-1005</a></td>
-        <td><a href="entries/CME-1005.html">Runtime Memory Error Detection (KASAN/HWASan)</a></td>
-        <td>Runtime Detection</td>
-        <td class="function-cell">host-monitoring</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Detective / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>10</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1006.html">CME-1006</a></td>
-        <td><a href="entries/CME-1006.html">Privilege Change Audit Logging</a></td>
-        <td>Runtime Detection</td>
-        <td class="function-cell">application-monitoring</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Detective / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1008.html">CME-1008</a></td>
-        <td><a href="entries/CME-1008.html">Application Admin Event Logging (SIEM Integration)</a></td>
-        <td>Runtime Detection</td>
-        <td class="function-cell">application-monitoring</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Detective / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>4</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1009.html">CME-1009</a></td>
-        <td><a href="entries/CME-1009.html">Privilege Assignment Monitoring (Role Grant Alerting)</a></td>
-        <td>Runtime Detection</td>
-        <td class="function-cell">application-monitoring</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Detective / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>, 
-          
-          <span class="cvss-from">C:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>3</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1011.html">CME-1011</a></td>
-        <td><a href="entries/CME-1011.html">Kubernetes API Server Audit Policy</a></td>
-        <td>Runtime Detection</td>
-        <td class="function-cell">application-monitoring</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Detective / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1013.html">CME-1013</a></td>
-        <td><a href="entries/CME-1013.html">USBGuard — USB Device Access Control</a></td>
-        <td>Runtime Detection</td>
-        <td class="function-cell">host-monitoring</td>
-        <td><span class="badge badge-layer-"></span></td>
-        <td>Preventive / Deterministic</td>
-        <td>
-          
-          <span class="cvss-from">AV:P</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>, 
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>2</td>
-      </tr>
-      
-      
-    </tbody>
-  </table>
-</div>
 
+  <div class="category-section">
+    <h3 class="category-header">Integrity Detection</h3>
+    <ul class="entry-list">
 
+      <li>
+        <a href="entries/CME-1004.html" class="cme-id">CME-1004</a>
+        <a href="entries/CME-1004.html" class="entry-name">AIDE / File Integrity Monitoring</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
 
-<div class="tactic-section">
-  <h2>
+      <li>
+        <a href="entries/CME-1007.html" class="cme-id">CME-1007</a>
+        <a href="entries/CME-1007.html" class="entry-name">Application Configuration Drift Detection (IaC Enforcement)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-1010.html" class="cme-id">CME-1010</a>
+        <a href="entries/CME-1010.html" class="entry-name">cgroup Memory Pressure Monitoring (memory.events / PSI)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-1012.html" class="cme-id">CME-1012</a>
+        <a href="entries/CME-1012.html" class="entry-name">Pre-commit Secrets Detection (gitleaks/trufflehog)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+    </ul>
+  </div>
+
+  <div class="category-section">
+    <h3 class="category-header">Runtime Detection</h3>
+    <ul class="entry-list">
+
+      <li>
+        <a href="entries/CME-1001.html" class="cme-id">CME-1001</a>
+        <a href="entries/CME-1001.html" class="entry-name">EDR Agent (Endpoint Detection &amp; Response)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-1002.html" class="cme-id">CME-1002</a>
+        <a href="entries/CME-1002.html" class="entry-name">Audit Subsystem (auditd)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-1003.html" class="cme-id">CME-1003</a>
+        <a href="entries/CME-1003.html" class="entry-name">Falco / eBPF Runtime Security</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-1005.html" class="cme-id">CME-1005</a>
+        <a href="entries/CME-1005.html" class="entry-name">Runtime Memory Error Detection (KASAN/HWASan)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-1006.html" class="cme-id">CME-1006</a>
+        <a href="entries/CME-1006.html" class="entry-name">Privilege Change Audit Logging</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-1008.html" class="cme-id">CME-1008</a>
+        <a href="entries/CME-1008.html" class="entry-name">Application Admin Event Logging (SIEM Integration)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-1009.html" class="cme-id">CME-1009</a>
+        <a href="entries/CME-1009.html" class="entry-name">Privilege Assignment Monitoring (Role Grant Alerting)</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-1011.html" class="cme-id">CME-1011</a>
+        <a href="entries/CME-1011.html" class="entry-name">Kubernetes API Server Audit Policy</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-1013.html" class="cme-id">CME-1013</a>
+        <a href="entries/CME-1013.html" class="entry-name">USBGuard — USB Device Access Control</a>
+        <span class="badge badge-layer-"></span>
+      </li>
+
+    </ul>
+  </div>
+
+</section>
+
+<section class="taxonomy-group" id="tactic-evict" aria-labelledby="heading-evict">
+  <h2 class="tactic-header" id="heading-evict" style="background: var(--bg-alt);">
     <span class="badge badge-tactic-evict">Evict</span>
-    Evict (3)
+    <span>Evict</span>
+    <span class="tactic-entry-count">3 entries</span>
   </h2>
-  <table class="data-table">
-    <thead>
-      <tr>
-        <th>CME ID</th>
-        <th>Control Name</th>
-        <th>Category</th>
-        <th>Function</th>
-        <th>Layer</th>
-        <th>Effect / Evidence</th>
-        <th>CVSS Modifications</th>
-        <th>CWEs</th>
-      </tr>
-    </thead>
-    <tbody>
-      
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1101.html">CME-1101</a></td>
-        <td><a href="entries/CME-1101.html">Automated Patch Management (dnf-automatic)</a></td>
-        <td>Patch Management</td>
-        <td class="function-cell">automated-updates</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Corrective / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>0</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1102.html">CME-1102</a></td>
-        <td><a href="entries/CME-1102.html">Live Kernel Patching (kpatch/livepatch)</a></td>
-        <td>Patch Management</td>
-        <td class="function-cell">automated-updates</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Corrective / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>1</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1103.html">CME-1103</a></td>
-        <td><a href="entries/CME-1103.html">Automated Container Image Rebuilds</a></td>
-        <td>Patch Management</td>
-        <td class="function-cell">automated-updates</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Corrective / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">AC:L</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">H</span>
-          
-        </td>
-        <td>0</td>
-      </tr>
-      
-      
-    </tbody>
-  </table>
-</div>
 
+  <div class="category-section">
+    <h3 class="category-header">Patch Management</h3>
+    <ul class="entry-list">
 
+      <li>
+        <a href="entries/CME-1101.html" class="cme-id">CME-1101</a>
+        <a href="entries/CME-1101.html" class="entry-name">Automated Patch Management (dnf-automatic)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
 
-<div class="tactic-section">
-  <h2>
+      <li>
+        <a href="entries/CME-1102.html" class="cme-id">CME-1102</a>
+        <a href="entries/CME-1102.html" class="entry-name">Live Kernel Patching (kpatch/livepatch)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-1103.html" class="cme-id">CME-1103</a>
+        <a href="entries/CME-1103.html" class="entry-name">Automated Container Image Rebuilds</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+    </ul>
+  </div>
+
+</section>
+
+<section class="taxonomy-group" id="tactic-restore" aria-labelledby="heading-restore">
+  <h2 class="tactic-header" id="heading-restore" style="background: var(--bg-alt);">
     <span class="badge badge-tactic-restore">Restore</span>
-    Restore (4)
+    <span>Restore</span>
+    <span class="tactic-entry-count">4 entries</span>
   </h2>
-  <table class="data-table">
-    <thead>
-      <tr>
-        <th>CME ID</th>
-        <th>Control Name</th>
-        <th>Category</th>
-        <th>Function</th>
-        <th>Layer</th>
-        <th>Effect / Evidence</th>
-        <th>CVSS Modifications</th>
-        <th>CWEs</th>
-      </tr>
-    </thead>
-    <tbody>
-      
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1201.html">CME-1201</a></td>
-        <td><a href="entries/CME-1201.html">Immutable Infrastructure</a></td>
-        <td>Recovery Controls</td>
-        <td class="function-cell">system-recovery</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Corrective / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">A:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>, 
-          
-          <span class="cvss-from">I:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>0</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1202.html">CME-1202</a></td>
-        <td><a href="entries/CME-1202.html">Automated Backup with Integrity Verification</a></td>
-        <td>Recovery Controls</td>
-        <td class="function-cell">system-recovery</td>
-        <td><span class="badge badge-layer-data">Data</span></td>
-        <td>Corrective / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">A:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>1</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1203.html">CME-1203</a></td>
-        <td><a href="entries/CME-1203.html">Disaster Recovery / Multi-Region Failover</a></td>
-        <td>Recovery Controls</td>
-        <td class="function-cell">system-recovery</td>
-        <td><span class="badge badge-layer-application">Application</span></td>
-        <td>Corrective / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">A:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>0</td>
-      </tr>
-      
-      <tr>
-        <td class="cme-id-cell"><a href="entries/CME-1204.html">CME-1204</a></td>
-        <td><a href="entries/CME-1204.html">Service Watchdog and Automatic Restart (systemd WatchdogSec/Restart)</a></td>
-        <td>Recovery Controls</td>
-        <td class="function-cell">system-recovery</td>
-        <td><span class="badge badge-layer-os-kernel">OS/Kernel</span></td>
-        <td>Corrective / Unquantified</td>
-        <td>
-          
-          <span class="cvss-from">A:H</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">L</span>
-          
-        </td>
-        <td>5</td>
-      </tr>
-      
-      
-    </tbody>
-  </table>
-</div>
 
+  <div class="category-section">
+    <h3 class="category-header">Recovery Controls</h3>
+    <ul class="entry-list">
+
+      <li>
+        <a href="entries/CME-1201.html" class="cme-id">CME-1201</a>
+        <a href="entries/CME-1201.html" class="entry-name">Immutable Infrastructure</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-1202.html" class="cme-id">CME-1202</a>
+        <a href="entries/CME-1202.html" class="entry-name">Automated Backup with Integrity Verification</a>
+        <span class="badge badge-layer-data">Data</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-1203.html" class="cme-id">CME-1203</a>
+        <a href="entries/CME-1203.html" class="entry-name">Disaster Recovery / Multi-Region Failover</a>
+        <span class="badge badge-layer-application">Application</span>
+      </li>
+
+      <li>
+        <a href="entries/CME-1204.html" class="cme-id">CME-1204</a>
+        <a href="entries/CME-1204.html" class="entry-name">Service Watchdog and Automatic Restart (systemd WatchdogSec/Restart)</a>
+        <span class="badge badge-layer-os-kernel">OS/Kernel</span>
+      </li>
+
+    </ul>
+  </div>
+
+</section>
 
 
   </main>
 
   <footer class="site-footer">
-    Generated 2026-11-10 14:02 UTC &middot; 140 entries &middot;
+    Generated 2026-11-10 20:24 UTC &middot; 140 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

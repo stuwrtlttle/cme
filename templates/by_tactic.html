@@ -3,50 +3,44 @@
 
 {% block content %}
 <h1 class="page-title">Browse by Tactic</h1>
-<p class="page-subtitle">All CME entries organized by their D3FEND-aligned tactic.</p>
+<p class="page-subtitle">All CME entries organized by their D3FEND-aligned tactic and category.</p>
+
+<div class="stats-bar" aria-label="Entry counts by tactic">
+  <div class="stat-card">
+    <div class="stat-value">{{ total_entries }}</div>
+    <div class="stat-label">Total Entries</div>
+  </div>
+{% for tactic in tactic_order %}
+  <a class="stat-card stat-card-link" href="#tactic-{{ tactic | lower }}">
+    <div class="stat-value">{{ tactic_counts.get(tactic, 0) }}</div>
+    <div class="stat-label">{{ tactic }}</div>
+  </a>
+{% endfor %}
+</div>
 
 {% for tactic in tactic_order %}
-{% if tactic in taxonomy %}
-<div class="tactic-section">
-  <h2>
-    <span class="badge badge-tactic-{{ tactic|lower }}">{{ tactic }}</span>
-    {{ tactic }} ({{ tactic_counts.get(tactic, 0) }})
+<section class="taxonomy-group" id="tactic-{{ tactic | lower }}" aria-labelledby="heading-{{ tactic | lower }}">
+  <h2 class="tactic-header" id="heading-{{ tactic | lower }}" style="background: var(--bg-alt);">
+    <span class="badge badge-tactic-{{ tactic | lower }}">{{ tactic }}</span>
+    <span>{{ tactic }}</span>
+    <span class="tactic-entry-count">{{ tactic_counts.get(tactic, 0) }} entries</span>
   </h2>
-  <table class="data-table">
-    <thead>
-      <tr>
-        <th>CME ID</th>
-        <th>Control Name</th>
-        <th>Category</th>
-        <th>Function</th>
-        <th>Layer</th>
-        <th>Effect / Evidence</th>
-        <th>CVSS Modifications</th>
-        <th>CWEs</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for category in taxonomy[tactic] | sort %}
-      {% for entry in taxonomy[tactic][category] | sort(attribute='cme_num') %}
-      <tr>
-        <td class="cme-id-cell"><a href="entries/{{ entry.cme_id }}.html">{{ entry.cme_id }}</a></td>
-        <td><a href="entries/{{ entry.cme_id }}.html">{{ entry.control_name }}</a></td>
-        <td>{{ entry.category }}</td>
-        <td class="function-cell">{{ entry.function_id | default('') }}</td>
-        <td><span class="badge badge-layer-{{ entry.control_layer | lower | replace('/', '-') | replace(' ', '') }}">{{ entry.control_layer }}</span></td>
-        <td>{{ entry.effect_mode | title }} / {{ entry.evidence_state | title }}</td>
-        <td>
-          {% for impact in entry.cvss_vector_impacts %}
-          <span class="cvss-from">{{ impact.metric }}:{{ impact['from'] }}</span><span class="cvss-arrow">&rarr;</span><span class="cvss-to">{{ impact.to }}</span>{% if not loop.last %}, {% endif %}
-          {% endfor %}
-        </td>
-        <td>{{ entry.cwe_relationships | default([]) | length }}</td>
-      </tr>
-      {% endfor %}
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
-{% endif %}
+{% for category in taxonomy.get(tactic, {}) | sort %}
+  <div class="category-section">
+    <h3 class="category-header">{{ category }}</h3>
+    <ul class="entry-list">
+{% for entry in taxonomy[tactic][category] | sort(attribute='cme_num') %}
+      <li>
+        <a href="entries/{{ entry.cme_id }}.html" class="cme-id">{{ entry.cme_id }}</a>
+        <a href="entries/{{ entry.cme_id }}.html" class="entry-name">{{ entry.control_name }}</a>
+        <span class="badge badge-layer-{{ entry.control_layer | lower | replace('/', '-') | replace(' ', '') }}">{{ entry.control_layer }}</span>
+      </li>
+{% endfor %}
+    </ul>
+  </div>
+{% else %}
+  <div class="category-section empty-tactic">No entries in this tactic.</div>
+{% endfor %}
+</section>
 {% endfor %}
 {% endblock %}
