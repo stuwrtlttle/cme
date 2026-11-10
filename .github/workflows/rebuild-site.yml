@@ -1,5 +1,9 @@
 name: Rebuild Static Site
 
+concurrency:
+  group: ${{ github.workflow }}-main
+  cancel-in-progress: false
+
 # Manually trigger static site rebuild when entries are modified directly
 # (bypassing the proposal workflow)
 
@@ -20,6 +24,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Install uv
         uses: astral-sh/setup-uv@v8.1.0
@@ -58,4 +64,12 @@ jobs:
 
           git add docs/
           git commit -m "Rebuild static site (${{ env.total_entries }} entries) [skip changelog]"
-          git push
+
+          # Push, rebasing onto any concurrent auto-commit that landed first
+          n=0
+          until git push; do
+            n=$((n+1))
+            if [ "$n" -ge 5 ]; then echo "push failed after $n attempts"; exit 1; fi
+            echo "push rejected; rebasing onto origin/main (attempt $n)"
+            git pull --rebase --autostash origin main
+          done

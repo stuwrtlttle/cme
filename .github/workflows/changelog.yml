@@ -1,5 +1,9 @@
 name: Update Changelog
 
+concurrency:
+  group: ${{ github.workflow }}-main
+  cancel-in-progress: false
+
 on:
   push:
     branches: [main]
@@ -113,4 +117,12 @@ jobs:
           git add CHANGELOG.md
           git diff --cached --quiet && exit 0
           git commit -m "Update CHANGELOG for $(date -u +%Y-%m-%d) [skip ci]"
-          git push
+
+          # Push, rebasing onto any concurrent auto-commit that landed first
+          n=0
+          until git push; do
+            n=$((n+1))
+            if [ "$n" -ge 5 ]; then echo "push failed after $n attempts"; exit 1; fi
+            echo "push rejected; rebasing onto origin/main (attempt $n)"
+            git pull --rebase --autostash origin main
+          done
