@@ -672,6 +672,13 @@
     "control_layer": "Application"
   },
   {
+    "cme_id": "CME-922",
+    "control_name": "Trusted Source Validation for Security Decisions (Anti-Spoofing)",
+    "tactic": "Harden",
+    "category": "Application Controls",
+    "control_layer": "Application"
+  },
+  {
     "cme_id": "CME-923",
     "control_name": "Mass-Assignment Prevention Through Explicit Request Schemas",
     "tactic": "Harden",

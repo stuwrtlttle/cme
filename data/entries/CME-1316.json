@@ -21,7 +21,8 @@
     "CWE-407",
     "CWE-405",
     "CWE-834",
-    "CWE-730"
+    "CWE-730",
+    "CWE-606"
   ],
   "verification": {
     "method": "Verify that the application uses linear-time regex engines or enforces execution budgets on pattern operations. Check for RE2 bindings, regex timeout configuration, recursion depth limits, and that user-controlled input is never compiled directly into regex patterns without escaping.",
@@ -105,6 +106,13 @@
     {
       "target_namespace": "CWE",
       "target_id": "CWE-730",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-606",
       "relationship_type": "mitigates",
       "method": "supportive",
       "evidence_state": "unquantified"

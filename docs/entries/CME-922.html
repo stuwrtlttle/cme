@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CME-922: Trusted Source Validation for Security Decisions (Anti-Spoofing) — Common Mitigation Enumeration</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="../index.html" class="logo">CME <span>Common Mitigation Enumeration</span></a>
+      <nav>
+        <a href="../index.html" >Home</a>
+        <a href="../by-tactic.html" >By Tactic</a>
+        <a href="../by-cwe.html" >By CWE</a>
+        <a href="../search.html" >Search</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    
+<div class="entry-header">
+  <div class="entry-id">CME-922</div>
+  <h1>Trusted Source Validation for Security Decisions (Anti-Spoofing)</h1>
+  <div class="entry-meta">
+    <span class="badge badge-tactic-harden">Harden</span>
+    <span class="badge badge-layer-application">Application</span>
+    <span class="badge badge-attenuation-unquantified">Unquantified evidence</span>
+    <span class="badge badge-layer-preventive">Preventive</span>
+  </div>
+</div>
+
+<div class="entry-body">
+  <div class="entry-main">
+
+    
+    <section>
+      <h2>Description</h2>
+      <p class="entry-description">Security-relevant request attributes — caller identity, authentication state, source address, request origin, and anti-CSRF tokens — are derived from server-side trusted state or cryptographically bound session tokens, never from client-controllable request fields. The application does not make authentication or authorization decisions based on arbitrary request headers (for example X-Forwarded-For or X-Real-IP unless set by a trusted reverse proxy and stripped from client input), client-set cookies validated only by comparison against a matching request parameter (double-submit without a server-bound secret), or hidden form fields. Prevents authentication-bypass-by-spoofing and reliance-on-untrusted-input defects where an attacker forges a security decision by controlling both sides of the check. Distinct from CSRF synchronizer-token controls (CWE-352), from origin enforcement (CME-915), and from cross-boundary data sanitization (CME-1321): this control governs the trustworthiness of the inputs a security decision is made from, not the sanitization of data crossing the boundary.</p>
+    </section>
+
+    <section>
+      <h2>CVSS Vector Impacts</h2>
+      <table class="cvss-table">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Transition</th>
+            
+            <th>Rationale</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td><strong>Attack Complexity</strong> (AC)</td>
+            <td>
+              <span class="cvss-from">L</span>
+              <span class="cvss-arrow">&rarr;</span>
+              <span class="cvss-to">H</span>
+            </td>
+            
+            <td class="cvss-rationale">Exploitation can no longer be achieved by simply setting a request header, supplying a matching client-controlled cookie/parameter pair, or editing a hidden field; the attacker must defeat server-side-derived state or a cryptographically bound token, which is not controllable from the request.</td>
+          </tr>
+          
+          <tr>
+            <td><strong>Integrity</strong> (I)</td>
+            <td>
+              <span class="cvss-from">H</span>
+              <span class="cvss-arrow">&rarr;</span>
+              <span class="cvss-to">L</span>
+            </td>
+            
+            <td class="cvss-rationale">Privileged or state-changing actions (password reset, command execution, privilege assumption) can no longer be forged by spoofing identity or re-supplying attacker-controlled security inputs, because the server authorizes against trusted session state rather than request-supplied values.</td>
+          </tr>
+          
+          <tr>
+            <td><strong>Confidentiality</strong> (C)</td>
+            <td>
+              <span class="cvss-from">H</span>
+              <span class="cvss-arrow">&rarr;</span>
+              <span class="cvss-to">L</span>
+            </td>
+            
+            <td class="cvss-rationale">A spoofed identity or source no longer resolves to another principal&#39;s authorization context, so bulk access to data belonging to the impersonated principal is prevented at the decision point. This attenuation applies only when the exploited security decision gates confidentiality (identity-spoofing to read another principal&#39;s data), such as Dell DDPM (CVE-2026-59914); it does not apply to the integrity/CSRF members of this cluster whose base vector is C:N, and the attenuation engine automatically gates it on C:H being present in the base vector.</td>
+          </tr>
+          
+        </tbody>
+      </table>
+    </section>
+    
+
+    
+    <section>
+      <h2>CWE Relationships</h2>
+      <div class="cwe-list">
+        
+        <a href="https://cwe.mitre.org/data/definitions/290.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-290</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/807.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-807</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/348.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-348</a>
+        
+        <a href="https://cwe.mitre.org/data/definitions/291.html"
+           class="cwe-link" target="_blank" rel="noopener">CWE-291</a>
+        
+      </div>
+    </section>
+    
+
+    
+
+    
+    <section>
+      <h2>Verification</h2>
+      
+      <p class="verification-method">Primarily verified by source review (commands 1-2): confirm authentication and authorization decisions are not keyed off client-controllable request attributes and that anti-CSRF validation is bound to a server-side secret/session. Command 3 is a dynamic probe against a deployed target set via CME922_TARGET_URL.</p>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -rniE &#39;x-forwarded-for|x-real-ip|x-original-url|request\.(headers|cookies)\[[^]]*(role|admin|user|auth|is_)&#39; &lt;app_source&gt;/ | grep -viE &#39;strip|remove|del|sanitiz|trusted_proxy&#39;
+        
+        <br><span class="cmd-expected"># Expected: Empty or review-only — no security decision is made directly from client-controllable headers/cookies without a trusted-proxy guard</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> grep -rniE &#39;csrf&#39; &lt;app_source&gt;/ | grep -iE &#39;secret|hmac|session|synchroniz&#39; | head
+        
+        <br><span class="cmd-expected"># Expected: Anti-CSRF validation bound to a server-side secret/session, not a bare cookie==param comparison</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+      <div class="verification-cmd">
+        <span class="cmd-prompt">$</span> url=&#34;${CME922_TARGET_URL:-http://localhost:8080/admin/}&#34;; curl -s -o /dev/null -w &#39;%{http_code}&#39; -H &#39;X-Forwarded-For: 127.0.0.1&#39; -H &#39;X-Real-IP: 127.0.0.1&#39; &#34;$url&#34;
+        
+        <br><span class="cmd-expected"># Expected: 401 or 403 — spoofed trusted-source headers do not grant access at CME922_TARGET_URL</span>
+        
+      </div>
+      
+      <div class="cmd-platform">Platform: any</div>
+      
+      
+    </section>
+    
+
+    
+    <section>
+      <h2>Remediation</h2>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">linux</span>
+          <span class="remediation-name">Strip/override client-supplied trust headers at the nginx reverse proxy</span>
+        </div>
+        <pre class="remediation-commands"><code>
+install -d /etc/nginx/snippets &amp;&amp; printf &#39;proxy_set_header X-Forwarded-For $remote_addr;\nproxy_set_header X-Real-IP $remote_addr;\nproxy_set_header X-Forwarded-Host $host;\nproxy_set_header X-Original-URL &#34;&#34;;\nproxy_set_header X-Rewrite-URL &#34;&#34;;\n&#39; &gt; /etc/nginx/snippets/cme-922-trusted-headers.conf
+grep -q &#39;cme-922-trusted-headers.conf&#39; &lt;proxy_vhost_conf&gt; || sed -i &#39;/location .* {/a \    include snippets/cme-922-trusted-headers.conf;&#39; &lt;proxy_vhost_conf&gt;
+nginx -t
+systemctl reload nginx</code></pre>
+      </div>
+      
+      <div class="remediation-block">
+        <div class="remediation-header">
+          <span class="remediation-platform">kubernetes</span>
+          <span class="remediation-name">Clear client-supplied trust headers at the Kubernetes/OpenShift ingress</span>
+        </div>
+        <pre class="remediation-commands"><code>
+kubectl annotate ingress &lt;ingress&gt; -n &lt;namespace&gt; --overwrite &#39;nginx.ingress.kubernetes.io/configuration-snippet=more_clear_input_headers &#34;X-Forwarded-For&#34; &#34;X-Real-IP&#34; &#34;X-Original-URL&#34; &#34;X-Rewrite-URL&#34;;&#39;
+kubectl get configmap -n &lt;ingress_ns&gt; &lt;controller_configmap&gt; -o jsonpath=&#39;{.data.allow-snippet-annotations}&#39; | grep -q true || kubectl patch configmap &lt;controller_configmap&gt; -n &lt;ingress_ns&gt; --type merge -p &#39;{&#34;data&#34;:{&#34;allow-snippet-annotations&#34;:&#34;true&#34;}}&#39;</code></pre>
+      </div>
+      
+    </section>
+    
+
+    
+
+    
+    <section>
+      <h2>References</h2>
+      <ul class="sidebar-list">
+        
+        <li>
+          <a href="https://access.redhat.com/security/cve/cve-2026-59914" target="_blank" rel="noopener">CVE-2026-59914</a>
+           &mdash; Dell Display and Peripheral Manager — arbitrary code execution via authentication bypass by spoofing
+        </li>
+        
+        <li>
+          <a href="https://access.redhat.com/security/cve/cve-2026-48551" target="_blank" rel="noopener">CVE-2026-48551</a>
+           &mdash; Nagios Core/XI — CSRF protection bypass via matching cookie and request parameter
+        </li>
+        
+        <li>
+          <a href="https://access.redhat.com/security/cve/cve-2026-47228" target="_blank" rel="noopener">CVE-2026-47228</a>
+           &mdash; Admidio — arbitrary user password reset via CSRF (missing server-bound token)
+        </li>
+        
+      </ul>
+    </section>
+    
+
+    <div class="entry-nav">
+      
+      <a href="CME-921.html">&larr; CME-921: URL Request Path Canonicalization Before Authorization</a>
+      
+      
+      <a href="CME-923.html">CME-923: Mass-Assignment Prevention Through Explicit Request Schemas &rarr;</a>
+      
+    </div>
+  </div>
+
+  <aside class="entry-sidebar">
+    <section>
+      <h3>Category</h3>
+      <p>Application Controls</p>
+    </section>
+
+    
+    <section>
+      <h3>Function</h3>
+      <p class="function-id">authorization-controls</p>
+    </section>
+    
+
+    
+    <section>
+      <h3>SCF Controls</h3>
+      <div class="cwe-list">
+        
+        <span class="cwe-link">WEB-09</span>
+        
+        <span class="cwe-link">IAC-20</span>
+        
+      </div>
+    </section>
+    
+
+    
+
+    
+
+    
+    <section>
+      <h3>Platforms</h3>
+      <ul class="sidebar-list">
+        
+        <li>Any</li>
+        
+      </ul>
+    </section>
+    
+
+    <section>
+      <h3>Quick Reference</h3>
+      <ul class="sidebar-list">
+        <li><strong>ID:</strong> CME-922</li>
+        <li><strong>Tactic:</strong> Harden</li>
+        <li><strong>Layer:</strong> Application</li>
+        <li><strong>Effect:</strong> preventive</li>
+        <li><strong>Evidence:</strong> unquantified</li>
+        <li><strong>CWEs:</strong> 4</li>
+        <li><strong>ATT&amp;CK Mappings:</strong> 0</li>
+        <li><strong>CVSS Mods:</strong> 3</li>
+      </ul>
+    </section>
+  </aside>
+</div>
+
+  </main>
+
+  <footer class="site-footer">
+    Generated 2026-11-10 14:02 UTC &middot; 140 entries &middot;
+    Common Mitigation Enumeration (CME)
+  </footer>
+</body>
+</html>

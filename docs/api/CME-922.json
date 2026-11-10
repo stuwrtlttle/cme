@@ -1,0 +1,245 @@
+{
+  "cme_id": "CME-922",
+  "control_name": "Trusted Source Validation for Security Decisions (Anti-Spoofing)",
+  "description": "Security-relevant request attributes \u2014 caller identity, authentication state, source address, request origin, and anti-CSRF tokens \u2014 are derived from server-side trusted state or cryptographically bound session tokens, never from client-controllable request fields. The application does not make authentication or authorization decisions based on arbitrary request headers (for example X-Forwarded-For or X-Real-IP unless set by a trusted reverse proxy and stripped from client input), client-set cookies validated only by comparison against a matching request parameter (double-submit without a server-bound secret), or hidden form fields. Prevents authentication-bypass-by-spoofing and reliance-on-untrusted-input defects where an attacker forges a security decision by controlling both sides of the check. Distinct from CSRF synchronizer-token controls (CWE-352), from origin enforcement (CME-915), and from cross-boundary data sanitization (CME-1321): this control governs the trustworthiness of the inputs a security decision is made from, not the sanitization of data crossing the boundary.",
+  "tactic": "Harden",
+  "category": "Application Controls",
+  "category_id": "application-controls",
+  "function_id": "authorization-controls",
+  "control_layer": "Application",
+  "attenuation_type": "deterministic",
+  "cvss_vector_impacts": [
+    {
+      "metric": "AC",
+      "from": "L",
+      "to": "H",
+      "rationale": "Exploitation can no longer be achieved by simply setting a request header, supplying a matching client-controlled cookie/parameter pair, or editing a hidden field; the attacker must defeat server-side-derived state or a cryptographically bound token, which is not controllable from the request."
+    },
+    {
+      "metric": "I",
+      "from": "H",
+      "to": "L",
+      "rationale": "Privileged or state-changing actions (password reset, command execution, privilege assumption) can no longer be forged by spoofing identity or re-supplying attacker-controlled security inputs, because the server authorizes against trusted session state rather than request-supplied values."
+    },
+    {
+      "metric": "C",
+      "from": "H",
+      "to": "L",
+      "rationale": "A spoofed identity or source no longer resolves to another principal's authorization context, so bulk access to data belonging to the impersonated principal is prevented at the decision point. This attenuation applies only when the exploited security decision gates confidentiality (identity-spoofing to read another principal's data), such as Dell DDPM (CVE-2026-59914); it does not apply to the integrity/CSRF members of this cluster whose base vector is C:N, and the attenuation engine automatically gates it on C:H being present in the base vector."
+    }
+  ],
+  "cwe_relationships": [
+    "CWE-290",
+    "CWE-807",
+    "CWE-348",
+    "CWE-291"
+  ],
+  "confidence": "Medium",
+  "platforms": [
+    "Any"
+  ],
+  "verification": {
+    "method": "Primarily verified by source review (commands 1-2): confirm authentication and authorization decisions are not keyed off client-controllable request attributes and that anti-CSRF validation is bound to a server-side secret/session. Command 3 is a dynamic probe against a deployed target set via CME922_TARGET_URL.",
+    "commands": [
+      {
+        "command": "grep -rniE 'x-forwarded-for|x-real-ip|x-original-url|request\\.(headers|cookies)\\[[^]]*(role|admin|user|auth|is_)' <app_source>/ | grep -viE 'strip|remove|del|sanitiz|trusted_proxy'",
+        "expected": "Empty or review-only \u2014 no security decision is made directly from client-controllable headers/cookies without a trusted-proxy guard",
+        "platform": "any"
+      },
+      {
+        "command": "grep -rniE 'csrf' <app_source>/ | grep -iE 'secret|hmac|session|synchroniz' | head",
+        "expected": "Anti-CSRF validation bound to a server-side secret/session, not a bare cookie==param comparison",
+        "platform": "any"
+      },
+      {
+        "command": "url=\"${CME922_TARGET_URL:-http://localhost:8080/admin/}\"; curl -s -o /dev/null -w '%{http_code}' -H 'X-Forwarded-For: 127.0.0.1' -H 'X-Real-IP: 127.0.0.1' \"$url\"",
+        "expected": "401 or 403 \u2014 spoofed trusted-source headers do not grant access at CME922_TARGET_URL",
+        "platform": "any"
+      }
+    ]
+  },
+  "remediation": [
+    {
+      "id": "reverse-proxy-header-sanitization",
+      "name": "Strip/override client-supplied trust headers at the nginx reverse proxy",
+      "platform": "linux",
+      "precondition": "command -v nginx >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Write an nginx snippet that overrides client-controllable trust headers with server-derived values and clears headers the backend must never receive from clients (X-Forwarded-For/X-Real-IP set to the real peer; X-Forwarded-Host set to the server-validated host; X-Original-URL/X-Rewrite-URL cleared). Apache httpd equivalent: 'RequestHeader unset X-Forwarded-For' (etc.) plus mod_remoteip for trusted XFF.",
+          "command": "install -d /etc/nginx/snippets && printf 'proxy_set_header X-Forwarded-For $remote_addr;\\nproxy_set_header X-Real-IP $remote_addr;\\nproxy_set_header X-Forwarded-Host $host;\\nproxy_set_header X-Original-URL \"\";\\nproxy_set_header X-Rewrite-URL \"\";\\n' > /etc/nginx/snippets/cme-922-trusted-headers.conf",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "rm -f /etc/nginx/snippets/cme-922-trusted-headers.conf"
+        },
+        {
+          "description": "Include the snippet inside the proxy location of the application vhost so the overrides apply (nginx drops inherited proxy_set_header directives for any location that sets its own, so it must be included in the location that proxies to the app). Replace <proxy_vhost_conf> with the server/location config file.",
+          "command": "grep -q 'cme-922-trusted-headers.conf' <proxy_vhost_conf> || sed -i '/location .* {/a \\    include snippets/cme-922-trusted-headers.conf;' <proxy_vhost_conf>",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "sed -i '/include snippets\\/cme-922-trusted-headers.conf;/d' <proxy_vhost_conf>"
+        },
+        {
+          "description": "Validate the nginx configuration before reloading so a syntax error cannot take the proxy down.",
+          "command": "nginx -t",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "true"
+        },
+        {
+          "description": "Reload nginx to apply the header overrides with no dropped connections.",
+          "command": "systemctl reload nginx",
+          "idempotent": true,
+          "requires_restart": "service",
+          "reversible": true,
+          "undo": "systemctl reload nginx"
+        }
+      ],
+      "verify": "curl -s -o /dev/null -w '%{http_code}' -H 'X-Forwarded-For: 127.0.0.1' -H 'X-Real-IP: 127.0.0.1' http://localhost/admin/ | grep -qE '401|403' && echo PASS",
+      "references": [
+        {
+          "source": "nginx",
+          "url": "https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_set_header",
+          "section": "proxy_set_header"
+        },
+        {
+          "source": "Apache httpd",
+          "url": "https://httpd.apache.org/docs/current/mod/mod_remoteip.html",
+          "section": "mod_remoteip / RequestHeader unset (equivalent on httpd)"
+        }
+      ]
+    },
+    {
+      "id": "ingress-header-sanitization",
+      "name": "Clear client-supplied trust headers at the Kubernetes/OpenShift ingress",
+      "platform": "kubernetes",
+      "precondition": "kubectl version --client >/dev/null 2>&1",
+      "steps": [
+        {
+          "description": "Annotate the application Ingress so ingress-nginx clears client-supplied trust headers before proxying to the backend (headers-more module, bundled). OpenShift HAProxy route equivalent: haproxy.router.openshift.io/set-forwarded-headers=replace. Replace <ingress> and <namespace>.",
+          "command": "kubectl annotate ingress <ingress> -n <namespace> --overwrite 'nginx.ingress.kubernetes.io/configuration-snippet=more_clear_input_headers \"X-Forwarded-For\" \"X-Real-IP\" \"X-Original-URL\" \"X-Rewrite-URL\";'",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "kubectl annotate ingress <ingress> -n <namespace> nginx.ingress.kubernetes.io/configuration-snippet-"
+        },
+        {
+          "description": "Ensure the ingress-nginx controller permits snippet annotations (disabled by default in controller v1.9+ for security). Only enable if your controller is trusted and snippet use is reviewed; otherwise move this logic into the controller's global server-snippet ConfigMap instead.",
+          "command": "kubectl get configmap -n <ingress_ns> <controller_configmap> -o jsonpath='{.data.allow-snippet-annotations}' | grep -q true || kubectl patch configmap <controller_configmap> -n <ingress_ns> --type merge -p '{\"data\":{\"allow-snippet-annotations\":\"true\"}}'",
+          "idempotent": true,
+          "requires_restart": "none",
+          "reversible": true,
+          "undo": "kubectl patch configmap <controller_configmap> -n <ingress_ns> --type merge -p '{\"data\":{\"allow-snippet-annotations\":\"false\"}}'"
+        }
+      ],
+      "verify": "kubectl get ingress <ingress> -n <namespace> -o jsonpath='{.metadata.annotations.nginx\\.ingress\\.kubernetes\\.io/configuration-snippet}' | grep -q more_clear_input_headers && echo PASS",
+      "references": [
+        {
+          "source": "Kubernetes ingress-nginx",
+          "url": "https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/#configuration-snippet",
+          "section": "configuration-snippet / allow-snippet-annotations"
+        },
+        {
+          "source": "OpenShift",
+          "url": "https://docs.openshift.com/container-platform/latest/networking/routes/route-configuration.html",
+          "section": "haproxy.router.openshift.io/set-forwarded-headers"
+        }
+      ]
+    }
+  ],
+  "scf_identifiers": [
+    "WEB-09",
+    "IAC-20"
+  ],
+  "effect_mode": "preventive",
+  "evidence_state": "unquantified",
+  "efficacy": {
+    "conditions": [
+      "Applies only to security decisions reachable from client-controllable inputs; does not address spoofing at network or transport layers.",
+      "Reverse-proxy-set headers are trustworthy only if the proxy strips the corresponding client-supplied header before forwarding."
+    ]
+  },
+  "relationships": [
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-290",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-807",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-348",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-291",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    }
+  ],
+  "framework_bindings": [
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/AC",
+      "value": "L->H",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/I",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "CVSS",
+      "version": "4.0",
+      "identifier": "Environmental/C",
+      "value": "H->L",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "WEB-09",
+      "relationship_type": "maps_to"
+    },
+    {
+      "namespace": "SCF",
+      "identifier": "IAC-20",
+      "relationship_type": "maps_to"
+    }
+  ],
+  "references": [
+    {
+      "source": "CVE-2026-59914",
+      "url": "https://access.redhat.com/security/cve/cve-2026-59914",
+      "section": "Dell Display and Peripheral Manager \u2014 arbitrary code execution via authentication bypass by spoofing"
+    },
+    {
+      "source": "CVE-2026-48551",
+      "url": "https://access.redhat.com/security/cve/cve-2026-48551",
+      "section": "Nagios Core/XI \u2014 CSRF protection bypass via matching cookie and request parameter"
+    },
+    {
+      "source": "CVE-2026-47228",
+      "url": "https://access.redhat.com/security/cve/cve-2026-47228",
+      "section": "Admidio \u2014 arbitrary user password reset via CSRF (missing server-bound token)"
+    }
+  ]
+}

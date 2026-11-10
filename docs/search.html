@@ -992,6 +992,16 @@
     <div class="sr-desc">Ensure the web server, reverse proxy, or application framework canonicalizes request URIs — resolving path equivalences (., ..), stripping matrix para...</div>
   </li>
   
+  <li data-search="cme-922 trusted source validation for security decisions (anti-spoofing) security-relevant request attributes — caller identity, authentication state, source address, request origin, and anti-csrf tokens — are derived from server-side trusted state or cryptographically bound session tokens, never from client-controllable request fields. the application does not make authentication or authorization decisions based on arbitrary request headers (for example x-forwarded-for or x-real-ip unless set by a trusted reverse proxy and stripped from client input), client-set cookies validated only by comparison against a matching request parameter (double-submit without a server-bound secret), or hidden form fields. prevents authentication-bypass-by-spoofing and reliance-on-untrusted-input defects where an attacker forges a security decision by controlling both sides of the check. distinct from csrf synchronizer-token controls (cwe-352), from origin enforcement (cme-915), and from cross-boundary data sanitization (cme-1321): this control governs the trustworthiness of the inputs a security decision is made from, not the sanitization of data crossing the boundary. application controls harden application cwe-290 cwe-807 cwe-348 cwe-291">
+    <div>
+      <a href="entries/CME-922.html" class="sr-id">CME-922</a>
+      <a href="entries/CME-922.html">Trusted Source Validation for Security Decisions (Anti-Spoofing)</a>
+      <span class="badge badge-tactic-harden">Harden</span>
+      <span class="badge badge-layer-application">Application</span>
+    </div>
+    <div class="sr-desc">Security-relevant request attributes — caller identity, authentication state, source address, request origin, and anti-CSRF tokens — are derived from ...</div>
+  </li>
+  
   <li data-search="cme-923 mass-assignment prevention through explicit request schemas application create and update handlers use explicit, per-operation request schemas that accept only client-controlled fields and reject or ignore server-managed attributes such as tenant, workspace, owner, role, visibility, and deployment state. the allowed fields are maintained independently for each endpoint, preventing automatic model binding or generic object merging from persisting attacker-supplied privileged attributes. this control addresses mass-assignment weaknesses; object-level authorization remains a separate complementary control under cme-908. application controls harden application cwe-915">
     <div>
       <a href="entries/CME-923.html" class="sr-id">CME-923</a>
@@ -1312,7 +1322,7 @@
     <div class="sr-desc">Server-side validation of uploaded files using content inspection (magic byte verification), extension allowlisting, and size limits before the file i...</div>
   </li>
   
-  <li data-search="cme-1311 input size and quantity bounds enforcement validation that user-supplied quantities — sizes, counts, lengths, offsets, indices, and repetition factors — fall within expected bounds before they are used in memory allocation, loop iteration, or buffer operations. rejects values that are negative, zero when unexpected, or exceed a configured maximum. applied at the protocol parsing layer before data reaches processing logic. this prevents integer overflow chains (where an oversized count wraps to a small value and bypasses bounds checks) and resource exhaustion attacks (where an unbounded count causes excessive allocation or iteration). the root cause control for vulnerabilities where the attacker controls a size or count field in a binary protocol, serialized format, or api parameter. application input validation harden application cwe-1284 cwe-20 cwe-1285 cwe-190 cwe-131 cwe-130 cwe-681 cwe-789">
+  <li data-search="cme-1311 input size and quantity bounds enforcement validation that user-supplied quantities — sizes, counts, lengths, offsets, indices, and repetition factors — fall within expected bounds before they are used in memory allocation, loop iteration, or buffer operations. rejects values that are negative, zero when unexpected, or exceed a configured maximum. applied at the protocol parsing layer before data reaches processing logic. this prevents integer overflow chains (where an oversized count wraps to a small value and bypasses bounds checks) and resource exhaustion attacks (where an unbounded count causes excessive allocation or iteration). the root cause control for vulnerabilities where the attacker controls a size or count field in a binary protocol, serialized format, or api parameter. application input validation harden application cwe-1284 cwe-20 cwe-1285 cwe-190 cwe-131 cwe-130 cwe-681 cwe-789 cwe-606">
     <div>
       <a href="entries/CME-1311.html" class="sr-id">CME-1311</a>
       <a href="entries/CME-1311.html">Input Size and Quantity Bounds Enforcement</a>
@@ -1362,7 +1372,7 @@
     <div class="sr-desc">Structure all security-sensitive input validation as allowlists (explicit permit lists with default-deny) rather than denylists (explicit block lists ...</div>
   </li>
   
-  <li data-search="cme-1316 algorithmic complexity safeguards (pattern/regex execution limits) enforces computational budgets on pattern matching, regular expression evaluation, and recursive parsing operations to prevent algorithmic complexity denial-of-service attacks. encompasses three complementary techniques: (1) execution limits — regex step counts, match timeouts, and recursion depth caps that terminate runaway computations before they exhaust cpu or block event loops; (2) safe engine selection — mandating linear-time regex engines (re2, rust regex crate, .net nonbacktracking mode) or equivalent guaranteed-polynomial parsers instead of backtracking nfa engines susceptible to catastrophic backtracking; (3) pattern compilation guards — never compiling user-controlled input directly into regex or pattern language without escaping metacharacters or using literal-match apis, and pre-screening pattern structure for known dangerous constructs (nested quantifiers, overlapping alternations, unbounded repetition groups). complements cme-114 (os-level process resource limits) by providing application-level, per-operation granularity — a regex timeout kills the match attempt while keeping the service alive, whereas ulimit kills the entire process. application input validation harden application cwe-1333 cwe-407 cwe-405 cwe-834 cwe-730">
+  <li data-search="cme-1316 algorithmic complexity safeguards (pattern/regex execution limits) enforces computational budgets on pattern matching, regular expression evaluation, and recursive parsing operations to prevent algorithmic complexity denial-of-service attacks. encompasses three complementary techniques: (1) execution limits — regex step counts, match timeouts, and recursion depth caps that terminate runaway computations before they exhaust cpu or block event loops; (2) safe engine selection — mandating linear-time regex engines (re2, rust regex crate, .net nonbacktracking mode) or equivalent guaranteed-polynomial parsers instead of backtracking nfa engines susceptible to catastrophic backtracking; (3) pattern compilation guards — never compiling user-controlled input directly into regex or pattern language without escaping metacharacters or using literal-match apis, and pre-screening pattern structure for known dangerous constructs (nested quantifiers, overlapping alternations, unbounded repetition groups). complements cme-114 (os-level process resource limits) by providing application-level, per-operation granularity — a regex timeout kills the match attempt while keeping the service alive, whereas ulimit kills the entire process. application input validation harden application cwe-1333 cwe-407 cwe-405 cwe-834 cwe-730 cwe-606">
     <div>
       <a href="entries/CME-1316.html" class="sr-id">CME-1316</a>
       <a href="entries/CME-1316.html">Algorithmic Complexity Safeguards (Pattern/Regex Execution Limits)</a>
@@ -1448,7 +1458,7 @@
   </main>
 
   <footer class="site-footer">
-    Generated 2026-10-28 18:49 UTC &middot; 139 entries &middot;
+    Generated 2026-11-10 14:02 UTC &middot; 140 entries &middot;
     Common Mitigation Enumeration (CME)
   </footer>
 </body>

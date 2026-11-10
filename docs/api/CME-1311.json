@@ -30,7 +30,8 @@
     "CWE-131",
     "CWE-130",
     "CWE-681",
-    "CWE-789"
+    "CWE-789",
+    "CWE-606"
   ],
   "confidence": "High",
   "platforms": [
@@ -120,6 +121,13 @@
     {
       "target_namespace": "CWE",
       "target_id": "CWE-789",
+      "relationship_type": "mitigates",
+      "method": "supportive",
+      "evidence_state": "unquantified"
+    },
+    {
+      "target_namespace": "CWE",
+      "target_id": "CWE-606",
       "relationship_type": "mitigates",
       "method": "supportive",
       "evidence_state": "unquantified"
